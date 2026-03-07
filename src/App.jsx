@@ -51,7 +51,12 @@ function FolioObsInner() {
   const [page, setPage] = useState("dashboard");
   const [selectedInvestor, setSelectedInvestor] = useState(null);
   const [theme, setTheme] = useState("dark");
-  const [locale, setLocale] = useState(() => safeGetItem("folioobs_lang", "ko"));
+  const [locale, setLocale] = useState(() => {
+    const saved = safeGetItem("folioobs_lang", null);
+    if (saved) return saved;
+    const browserLang = navigator.language || navigator.userLanguage || "ko";
+    return browserLang.startsWith("ko") ? "ko" : "en";
+  });
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const watchlist = useWatchlist();
