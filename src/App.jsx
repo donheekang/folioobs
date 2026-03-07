@@ -384,29 +384,28 @@ function FolioObsInner() {
           )}
         </main>
 
-        <footer className="mt-16 py-6 text-center" style={{ borderTop: `1px solid ${T.glassBorder}` }}>
-          <p className="text-xs" style={{ color: T.textMuted }}>{L.t('footer')}</p>
-          <div className="flex items-center justify-center gap-3 mt-2">
+        <footer className="mt-16 py-8 text-center" style={{ borderTop: `1px solid ${T.glassBorder}` }}>
+          <div className="flex items-center justify-center gap-4 mb-3">
             <button
               onClick={() => navigate("privacy")}
-              className="text-xs hover:underline transition-opacity opacity-60 hover:opacity-100"
-              style={{ color: T.textMuted }}
+              className="text-sm font-semibold hover:underline transition-opacity opacity-80 hover:opacity-100"
+              style={{ color: T.textSecondary }}
             >
               {L.t('legal.privacy')}
             </button>
-            <span className="text-xs opacity-30" style={{ color: T.textMuted }}>|</span>
+            <span className="text-sm opacity-30" style={{ color: T.textMuted }}>|</span>
             <button
               onClick={() => navigate("terms")}
-              className="text-xs hover:underline transition-opacity opacity-60 hover:opacity-100"
-              style={{ color: T.textMuted }}
+              className="text-sm font-semibold hover:underline transition-opacity opacity-80 hover:opacity-100"
+              style={{ color: T.textSecondary }}
             >
               {L.t('legal.terms')}
             </button>
-            <span className="text-xs opacity-30" style={{ color: T.textMuted }}>|</span>
-            <span className="text-xs opacity-40" style={{ color: T.textMuted }}>
-              © 2026 PLUSLAB KOREA Co., Ltd.
-            </span>
           </div>
+          <p className="text-xs" style={{ color: T.textMuted }}>{L.t('footer')}</p>
+          <p className="text-xs mt-1 opacity-50" style={{ color: T.textMuted }}>
+            © 2026 PLUSLAB KOREA Co., Ltd.
+          </p>
         </footer>
       </div>
     </ThemeContext.Provider>
