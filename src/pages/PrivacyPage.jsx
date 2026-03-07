@@ -8,7 +8,7 @@ import { ArrowLeft, Shield } from "lucide-react";
 // ──────────────────────────────────────────
 const PRIVACY_KO = {
   title: "개인정보처리방침",
-  effectiveDate: "시행일: 2026년 3월 7일",
+  effectiveDate: "시행일: 2026년 3월 8일",
   sections: [
     {
       heading: "1. 개인정보의 처리 목적",
@@ -38,8 +38,12 @@ const PRIVACY_KO = {
 
 • Supabase Inc.: 데이터베이스 호스팅 및 인증 서비스
 • Netlify Inc.: 웹 호스팅 서비스
+• Google LLC: 웹 분석(Google Analytics 4) 서비스
 
-위탁계약 시 개인정보보호 관련 법규 준수, 개인정보 비밀유지, 제3자 제공 금지, 사고 시 손해배상 책임 등을 명확히 규정하고 있습니다.`,
+위탁계약 시 개인정보보호 관련 법규 준수, 개인정보 비밀유지, 제3자 제공 금지, 사고 시 손해배상 책임 등을 명확히 규정하고 있습니다.
+
+※ 국외 이전 안내
+위 수탁업체들의 서버가 해외(미국 등)에 소재하고 있어, 이용자의 개인정보가 국외로 이전될 수 있습니다. 회사는 해당 업체와의 계약을 통해 개인정보가 안전하게 처리되도록 보호 조치를 취하고 있습니다.`,
     },
     {
       heading: "5. 정보주체의 권리·의무 및 행사 방법",
@@ -60,8 +64,25 @@ const PRIVACY_KO = {
 • 그 외 기록물: 파쇄 또는 소각`,
     },
     {
-      heading: "7. 쿠키의 사용",
-      body: `서비스는 이용자의 언어 설정, 테마 설정 등 사용자 환경 설정을 위해 쿠키(Cookie) 및 로컬 스토리지(Local Storage)를 사용합니다. 이용자는 브라우저 설정을 통해 쿠키 저장을 거부할 수 있으나, 일부 서비스 이용에 제한이 있을 수 있습니다.`,
+      heading: "7. 쿠키·행태정보·통계도구의 사용",
+      body: `① 쿠키 및 로컬 스토리지
+서비스는 이용자의 언어 설정, 테마 설정 등 사용자 환경 설정을 위해 쿠키(Cookie) 및 로컬 스토리지(Local Storage)를 사용합니다.
+
+② 행태정보 수집·이용
+회사는 서비스 이용 과정에서 이용자의 방문 빈도, 페이지 조회 수, 체류 시간, 유입 경로, 기기 정보(기기 유형, 운영체제, 브라우저 종류), 국가/지역 정보 등 행태정보를 자동으로 수집합니다. 수집된 행태정보는 서비스 품질 개선, 이용 통계 분석, 사용자 경험 최적화 목적으로만 사용되며, 개인을 직접 식별하는 데 사용되지 않습니다.
+
+③ 웹 분석 도구(Google Analytics 4)
+회사는 서비스 이용 통계 분석을 위해 Google LLC가 제공하는 Google Analytics 4(GA4)를 사용합니다.
+• 수집 항목: 페이지 조회, 이벤트(클릭, 스크롤 등), 세션 정보, 대략적 위치 정보(도시 단위), 기기·브라우저 정보
+• 수집 목적: 서비스 이용 통계 분석, UX 개선, 콘텐츠 최적화
+• 처리 위탁: Google LLC (미국)
+• Google의 데이터 처리 방침: https://policies.google.com/privacy
+
+④ 수집 거부 방법
+이용자는 다음 방법으로 쿠키 및 행태정보 수집을 거부할 수 있습니다.
+• 브라우저 설정에서 쿠키 차단 (설정 → 개인정보 → 쿠키 차단)
+• Google Analytics Opt-out 브라우저 확장 프로그램 설치 (https://tools.google.com/dlpage/gaoptout)
+• 다만, 수집을 거부할 경우 일부 서비스 이용에 제한이 있을 수 있습니다.`,
     },
     {
       heading: "8. 개인정보 보호책임자",
@@ -74,7 +95,11 @@ const PRIVACY_KO = {
     },
     {
       heading: "9. 개인정보 처리방침의 변경",
-      body: `이 개인정보 처리방침은 2026년 3월 7일부터 적용됩니다. 변경 사항이 있을 경우 서비스 내 공지사항을 통하여 고지할 것입니다.`,
+      body: `이 개인정보 처리방침은 2026년 3월 8일부터 적용됩니다. 변경 사항이 있을 경우 서비스 내 공지사항을 통하여 고지할 것입니다.
+
+[변경 이력]
+• 2026.03.08: 쿠키·행태정보·통계도구(GA4) 조항 신설, 국외이전 안내 추가, Google LLC 수탁업체 추가, 호스팅 Netlify로 변경
+• 2026.03.07: 최초 제정`,
     },
   ],
 };
@@ -84,7 +109,7 @@ const PRIVACY_KO = {
 // ──────────────────────────────────────────
 const PRIVACY_EN = {
   title: "Privacy Policy",
-  effectiveDate: "Effective Date: March 7, 2026",
+  effectiveDate: "Effective Date: March 8, 2026",
   sections: [
     {
       heading: "1. Information We Collect",
@@ -111,6 +136,7 @@ We collect this information to provide the Service, manage user accounts, and pr
 
 • Supabase Inc.: Database hosting and authentication services
 • Netlify Inc.: Web hosting services
+• Google LLC: Web analytics (Google Analytics 4)
 
 These providers are contractually obligated to protect your data and use it only for the purposes specified.`,
     },
@@ -131,8 +157,25 @@ These providers are contractually obligated to protect your data and use it only
 To exercise any of these rights, please contact us at support@pluslabkorea.com.`,
     },
     {
-      heading: "6. Cookies and Local Storage",
-      body: `We use cookies and local storage to save your preferences (language, theme settings). You may configure your browser to reject cookies, but this may limit some features of the Service.`,
+      heading: "6. Cookies, Behavioral Data, and Analytics",
+      body: `a) Cookies and Local Storage
+We use cookies and local storage to save your preferences (language, theme settings).
+
+b) Behavioral Data Collection
+We automatically collect behavioral data during your use of the Service, including visit frequency, page views, session duration, referral sources, device information (device type, OS, browser), and approximate location (city-level). This data is used solely for improving service quality, analyzing usage patterns, and optimizing user experience. It is not used to directly identify individuals.
+
+c) Web Analytics (Google Analytics 4)
+We use Google Analytics 4 (GA4), provided by Google LLC, for usage analytics.
+• Data collected: Page views, events (clicks, scrolls), session data, approximate location (city-level), device/browser information
+• Purpose: Usage analytics, UX improvement, content optimization
+• Data processor: Google LLC (United States)
+• Google's privacy policy: https://policies.google.com/privacy
+
+d) How to Opt Out
+You can refuse cookie and behavioral data collection by:
+• Blocking cookies in your browser settings (Settings → Privacy → Block Cookies)
+• Installing the Google Analytics Opt-out Browser Add-on (https://tools.google.com/dlpage/gaoptout)
+• Please note that opting out may limit some features of the Service.`,
     },
     {
       heading: "7. International Data Transfers",
@@ -153,7 +196,11 @@ To exercise any of these rights, please contact us at support@pluslabkorea.com.`
     },
     {
       heading: "10. Changes to This Policy",
-      body: `This Privacy Policy is effective as of March 7, 2026. We may update this policy from time to time. Changes will be notified through the Service.`,
+      body: `This Privacy Policy is effective as of March 8, 2026. We may update this policy from time to time. Changes will be notified through the Service.
+
+[Change History]
+• 2026.03.08: Added cookies/behavioral data/analytics (GA4) section, international data transfer notice, Google LLC as data processor, updated hosting to Netlify
+• 2026.03.07: Initial publication`,
     },
   ],
 };

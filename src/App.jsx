@@ -406,6 +406,11 @@ function FolioObsInner() {
           <p className="text-xs mt-1 opacity-50" style={{ color: T.textMuted }}>
             © 2026 PLUSLAB KOREA Co., Ltd.
           </p>
+          <p className="text-xs mt-3 opacity-40 leading-relaxed" style={{ color: T.textMuted }}>
+            {L.locale === 'ko'
+              ? '주식회사 플러스랩코리아 | 대표이사: 강돈희 | 사업자등록번호: 143-87-03402 | 이메일: support@pluslabkorea.com'
+              : 'PLUSLAB KOREA Co., Ltd. | CEO: Donhee Kang | Business Reg. No.: 143-87-03402 | Email: support@pluslabkorea.com'}
+          </p>
         </footer>
       </div>
     </ThemeContext.Provider>
