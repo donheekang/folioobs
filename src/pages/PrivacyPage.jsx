@@ -37,7 +37,7 @@ const PRIVACY_KO = {
       body: `회사는 서비스 운영을 위해 다음과 같이 개인정보 처리를 위탁하고 있습니다.
 
 • Supabase Inc.: 데이터베이스 호스팅 및 인증 서비스
-• Vercel Inc.: 웹 호스팅 서비스
+• Netlify Inc.: 웹 호스팅 서비스
 
 위탁계약 시 개인정보보호 관련 법규 준수, 개인정보 비밀유지, 제3자 제공 금지, 사고 시 손해배상 책임 등을 명확히 규정하고 있습니다.`,
     },
@@ -110,7 +110,7 @@ We collect this information to provide the Service, manage user accounts, and pr
       body: `We do not sell your personal information to third parties. We may share your information with the following service providers who assist in operating our Service:
 
 • Supabase Inc.: Database hosting and authentication services
-• Vercel Inc.: Web hosting services
+• Netlify Inc.: Web hosting services
 
 These providers are contractually obligated to protect your data and use it only for the purposes specified.`,
     },
