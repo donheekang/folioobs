@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  transition-property: background-color, border-color, box-shadow;
+  transition-duration: 0.4s;
+  transition-timing-function: ease;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Noto Sans KR', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+::selection {
+  background: rgba(0, 113, 227, 0.2);
+  color: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.recharts-legend-item-text {
+  font-size: 12px !important;
+}
+
+select option {
+  padding: 8px;
+}
+
+/* ========== HERO — MINIMAL PREMIUM ========== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.hero-enter { animation: fadeIn 0.5s ease-out both; }
+.hero-enter-1 { animation-delay: 0.05s; }
+.hero-enter-2 { animation-delay: 0.1s; }
+.hero-enter-3 { animation-delay: 0.15s; }
+.hero-enter-4 { animation-delay: 0.2s; }
+.hero-enter-5 { animation-delay: 0.25s; }
+
+.live-dot { animation: livePulse 2.5s ease-in-out infinite; }
+
+.stat-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
+/* ========== SKELETON LOADING ========== */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(128,128,128,0.08) 25%,
+    rgba(128,128,128,0.15) 50%,
+    rgba(128,128,128,0.08) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ========== PAGE TRANSITIONS ========== */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes pageOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-8px) scale(0.99); }
+}
+
+.page-enter {
+  animation: pageIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.page-exit {
+  animation: pageOut 0.15s ease-in both;
+}
+
+/* ========== THEME TRANSITION ========== */
+/* Exclude fast-changing elements from slow transitions */
+button, a, input, select, [role="option"], [role="tab"], .recharts-surface,
+svg rect, svg text, svg path {
+  transition-duration: 0.15s;
+}
+
+/* ========== REDUCED MOTION ========== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ========== MOBILE TABLE ========== */
+@media (max-width: 640px) {
+  .mobile-table-wrap {
+    position: relative;
+  }
+  .mobile-table-wrap table {
+    min-width: 600px;
+  }
+  /* Sticky first two columns (watch + ticker) */
+  .mobile-table-wrap th:nth-child(1),
+  .mobile-table-wrap td:nth-child(1) {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+  }
+  .mobile-table-wrap th:nth-child(2),
+  .mobile-table-wrap td:nth-child(2) {
+    position: sticky;
+    left: 32px;
+    z-index: 2;
+  }
+  /* Hide less important columns on mobile */
+  .mobile-hide-sm {
+    display: none !important;
+  }
+}

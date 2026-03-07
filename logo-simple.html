@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FolioObs — Simple Logo + Color Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #0A0A0B; color: #E4E4E7; padding: 48px; }
+
+  .header { margin-bottom: 56px; }
+  .header h1 { font-size: 28px; font-weight: 800; color: #FAFAFA; margin-bottom: 6px; }
+  .header p { font-size: 13px; color: #52525B; letter-spacing: 0.5px; }
+
+  .section { margin-bottom: 64px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #52525B; margin-bottom: 24px; }
+
+  .color-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+
+  .color-option {
+    border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.3s; cursor: default;
+  }
+  .color-option:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
+
+  .co-dark { padding: 32px; background: #09090B; }
+  .co-light { padding: 32px; background: #FAFAFA; }
+
+  .co-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 20px; }
+
+  .logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .logo-mark { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .logo-name { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo-tagline { font-size: 11px; font-weight: 500; }
+
+  .palette { display: flex; gap: 6px; margin-top: 16px; }
+  .swatch { width: 32px; height: 32px; border-radius: 8px; }
+
+  .nav-mock { display: flex; gap: 4px; margin-top: 16px; }
+  .nav-pill { font-size: 11px; font-weight: 600; padding: 5px 14px; border-radius: 8px; }
+
+  .divider { border: none; border-top: 1px solid rgba(255,255,255,0.04); margin: 48px 0; }
+
+  /* App icon grid */
+  .icon-grid { display: flex; gap: 24px; flex-wrap: wrap; }
+  .icon-item { text-align: center; }
+  .icon-box { width: 72px; height: 72px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+  .icon-label { font-size: 10px; font-weight: 600; color: #52525B; }
+
+  .rec-badge {
+    display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 1px;
+    padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>FolioObs — Logo & Color</h1>
+  <p>심플 로고 × 6가지 컬러 옵션</p>
+</div>
+
+<!-- ==================== LOGO CONCEPT: MINIMAL EYE ==================== -->
+<div class="section">
+  <div class="section-label">심플 로고 — 미니멀 눈</div>
+  <p style="font-size:13px;color:#71717A;margin-bottom:28px;line-height:1.7;">
+    깔끔한 선 하나로 눈을 표현. 군더더기 없이 "관찰"이라는 핵심 메시지만 전달합니다.<br>
+    어떤 색이든 잘 어울리는 구조라 컬러 자유도가 높아요.
+  </p>
+
+  <div class="color-grid">
+
+    <!-- 1. ELECTRIC INDIGO -->
+    <div class="color-option">
+      <div class="co-dark">
+        <div class="co-label" style="color:#818CF8;">01 · Electric Indigo <span class="rec-badge" style="background:#818CF820;color:#818CF8;">추천</span></div>
+        <div class="logo-row">
+          <div class="logo-mark" style="background:rgba(99,102,241,0.12);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#818CF8" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="3" stroke="#818CF8" stroke-width="1.5" fill="none"/>
+              <circle cx="12" cy="12" r="1" fill="#6366F1"/>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name" style="color:#FAFAFA;">FolioObs</div>
+            <div class="logo-tagline" style="color:#6366F1;">월가의 눈</div>
+          </div>
+        </div>
+        <div class="palette">
+          <div class="swatch" style="background:#6366F1;"></div>
+          <div class="swatch" style="background:#818CF8;"></div>
+          <div class="swatch" style="background:#A5B4FC;"></div>
+          <div class="swatch" style="background:#10B981;"></div>
+          <div class="swatch" style="background:#EF4444;"></div>
+        </div>
+        <div class="nav-mock">
+          <div class="nav-pill" style="background:rgba(99,102,241,0.12);color:#818CF8;">대시보드</div>
+          <div class="nav-pill" style="color:#52525B;">비교</div>
+          <div class="nav-pill" style="color:#52525B;">인사이트</div>
+        </div>
+      </div>
+      <div class="co-light">
+        <div class="logo-row">
+          <div class="logo-mark" style="background:rgba(79,70,229,0.08);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#4F46E5" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="3" stroke="#4F46E5" stroke-width="1.5" fill="none"/>
+              <circle cx="12" cy="12" r="1" fill="#4338CA"/>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name" style="color:#18181B;">FolioObs</div>
+            <div class="logo-tagline" style="color:#4F46E5;">월가의 눈</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. EMERALD GREEN -->
+    <div class="color-option">
+      <div class="co-dark">
+        <div class="co-label" style="color:#34D399;">02 · Emerald Green</div>
+        <div class="logo-row">
+          <div class="logo-mark" style="background:rgba(16,185,129,0.12);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#34D399" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="3" stroke="#34D399" stroke-width="1.5" fill="none"/>
+              <circle cx="12" cy="12" r="1" fill="#10B981"/>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name" style="color:#FAFAFA;">FolioObs</div>
+            <div class="logo-tagline" style="color:#10B981;">월가의 눈</div>
+          </div>
+        </div>
+        <div class="palette">
+          <div class="swatch" style="background:#10B981;"></div>
+          <div class="swatch" style="background:#34D399;"></div>
+          <div class="swatch" style="background:#6EE7B7;"></div>
+          <div class="swatch" style="background:#3B82F6;"></div>
+          <div class="swatch" style="background:#EF4444;"></div>
+        </div>
+        <div class="nav-mock">
+          <div class="nav-pill" style="background:rgba(16,185,129,0.12);color:#34D399;">대시보드</div>
+          <div class="nav-pill" style="color:#52525B;">비교</div>
+          <div class="nav-pill" style="color:#52525B;">인사이트</div>
+        </div>
+      </div>
+      <div class="co-light">
+        <div class="logo-row">
+          <div class="logo-mark" style="background:rgba(5,150,105,0.08);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#059669" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="3" stroke="#059669" stroke-width="1.5" fill="none"/>
+              <circle cx="12" cy="12" r="1" fill="#047857"/>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name" style="color:#18181B;">FolioObs</div>
+            <div class="logo-tagline" style="color:#059669;">월가의 눈</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. PURE WHITE / MONO -->
+    <div class="color-option">
+      <div class="co-dark">
+        <div class="co-label" style="color:#A1A1AA;">03 · Monochrome <span class="rec-badge" style="background:rgba(255,255,255,0.06);color:#A1A1AA;">미니멀</span></div>
+        <div class="logo-row">
+          <div class="logo-mark" style="background:rgba(255,255,255,0.06);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#D4D4D8" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="3" stroke="#D4D4D8" stroke-width="1.5" fill="none"/>
+              <circle cx="12" cy="12" r="1" fill="#A1A1AA"/>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name" style="color:#FAFAFA;">FolioObs</div>
+            <div class="logo-tagline" style="color:#71717A;">월가의 눈</div>
+          </div>
+        </div>
+        <div class="palette">
+          <div class="swatch" style="background:#FAFAFA;"></div>
+          <div class="swatch" style="background:#A1A1AA;"></div>
+          <div class="swatch" style="background:#52525B;"></div>
+          <div class="swatch" style="background:#10B981;"></div>
+          <div class="swatch" style="background:#EF4444;"></div>
+        </div>
+        <div class="nav-mock">
+          <div class="nav-pill" style="background:rgba(255,255,255,0.08);color:#FAFAFA;">대시보드</div>
+          <div class="nav-pill" style="color:#52525B;">비교</div>
+          <div class="nav-pill" style="color:#52525B;">인사이트</div>
+        </div>
+      </div>
+      <div class="co-light">
+        <div class="logo-row">
+          <div class="logo-mark" style="background:rgba(0,0,0,0.04);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#27272A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="3" stroke="#27272A" stroke-width="1.5" fill="none"/>
+              <circle cx="12" cy="12" r="1" fill="#18181B"/>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name" style="color:#18181B;">FolioObs</div>
+            <div class="logo-tagline" style="color:#71717A;">월가의 눈</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. OCEAN BLUE -->
+    <div class="color-option">
+      <div class="co-dark">
+        <div class="co-label" style="color:#60A5FA;">04 · Ocean Blue</div>
+        <div class="logo-row">
+          <div class="logo-mark" style="background:rgba(59,130,246,0.12);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#60A5FA" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="3" stroke="#60A5FA" stroke-width="1.5" fill="none"/>
+              <circle cx="12" cy="12" r="1" fill="#3B82F6"/>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name" style="color:#FAFAFA;">FolioObs</div>
+            <div class="logo-tagline" style="color:#3B82F6;">월가의 눈</div>
+          </div>
+        </div>
+        <div class="palette">
+          <div class="swatch" style="background:#3B82F6;"></div>
+          <div class="swatch" style="background:#60A5FA;"></div>
+          <div class="swatch" style="background:#93C5FD;"></div>
+          <div class="swatch" style="background:#10B981;"></div>
+          <div class="swatch" style="background:#EF4444;"></div>
+        </div>
+        <div class="nav-mock">
+          <div class="nav-pill" style="background:rgba(59,130,246,0.12);color:#60A5FA;">대시보드</div>
+          <div class="nav-pill" style="color:#52525B;">비교</div>
+          <div class="nav-pill" style="color:#52525B;">인사이트</div>
+        </div>
+      </div>
+      <div class="co-light">
+        <div class="logo-row">
+          <div class="logo-mark" style="background:rgba(37,99,235,0.08);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#2563EB" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="3" stroke="#2563EB" stroke-width="1.5" fill="none"/>
+              <circle cx="12" cy="12" r="1" fill="#1D4ED8"/>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name" style="color:#18181B;">FolioObs</div>
+            <div class="logo-tagline" style="color:#2563EB;">월가의 눈</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. CORAL ORANGE -->
+    <div class="color-option">
+      <div class="co-dark">
+        <div class="co-label" style="color:#FB923C;">05 · Warm Coral</div>
+        <div class="logo-row">
+          <div class="logo-mark" style="background:rgba(249,115,22,0.12);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#FB923C" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="3" stroke="#FB923C" stroke-width="1.5" fill="none"/>
+              <circle cx="12" cy="12" r="1" fill="#F97316"/>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name" style="color:#FAFAFA;">FolioObs</div>
+            <div class="logo-tagline" style="color:#F97316;">월가의 눈</div>
+          </div>
+        </div>
+        <div class="palette">
+          <div class="swatch" style="background:#F97316;"></div>
+          <div class="swatch" style="background:#FB923C;"></div>
+          <div class="swatch" style="background:#FDBA74;"></div>
+          <div class="swatch" style="background:#10B981;"></div>
+          <div class="swatch" style="background:#EF4444;"></div>
+        </div>
+        <div class="nav-mock">
+          <div class="nav-pill" style="background:rgba(249,115,22,0.12);color:#FB923C;">대시보드</div>
+          <div class="nav-pill" style="color:#52525B;">비교</div>
+          <div class="nav-pill" style="color:#52525B;">인사이트</div>
+        </div>
+      </div>
+      <div class="co-light">
+        <div class="logo-row">
+          <div class="logo-mark" style="background:rgba(234,88,12,0.08);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#EA580C" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="3" stroke="#EA580C" stroke-width="1.5" fill="none"/>
+              <circle cx="12" cy="12" r="1" fill="#C2410C"/>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name" style="color:#18181B;">FolioObs</div>
+            <div class="logo-tagline" style="color:#EA580C;">월가의 눈</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. OBSIDIAN GOLD (current) -->
+    <div class="color-option">
+      <div class="co-dark">
+        <div class="co-label" style="color:#E8D48B;">06 · Obsidian Gold <span class="rec-badge" style="background:rgba(201,164,78,0.15);color:#E8D48B;">현재</span></div>
+        <div class="logo-row">
+          <div class="logo-mark" style="background:rgba(201,164,78,0.12);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#E8D48B" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="3" stroke="#E8D48B" stroke-width="1.5" fill="none"/>
+              <circle cx="12" cy="12" r="1" fill="#C9A44E"/>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name" style="color:#FAFAFA;">FolioObs</div>
+            <div class="logo-tagline" style="color:#C9A44E;">월가의 눈</div>
+          </div>
+        </div>
+        <div class="palette">
+          <div class="swatch" style="background:#C9A44E;"></div>
+          <div class="swatch" style="background:#E8D48B;"></div>
+          <div class="swatch" style="background:#A68B3C;"></div>
+          <div class="swatch" style="background:#10B981;"></div>
+          <div class="swatch" style="background:#EF4444;"></div>
+        </div>
+        <div class="nav-mock">
+          <div class="nav-pill" style="background:rgba(201,164,78,0.12);color:#E8D48B;">대시보드</div>
+          <div class="nav-pill" style="color:#52525B;">비교</div>
+          <div class="nav-pill" style="color:#52525B;">인사이트</div>
+        </div>
+      </div>
+      <div class="co-light">
+        <div class="logo-row">
+          <div class="logo-mark" style="background:rgba(139,105,20,0.08);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#8B6914" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="3" stroke="#8B6914" stroke-width="1.5" fill="none"/>
+              <circle cx="12" cy="12" r="1" fill="#7A5C0E"/>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name" style="color:#18181B;">FolioObs</div>
+            <div class="logo-tagline" style="color:#8B6914;">월가의 눈</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ==================== APP ICON COMPARISON ==================== -->
+<div class="section">
+  <div class="section-label">앱 아이콘 비교</div>
+  <div class="icon-grid">
+    <div class="icon-item">
+      <div class="icon-box" style="background:#09090B;border:1px solid rgba(99,102,241,0.15);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#818CF8" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="3" stroke="#818CF8" stroke-width="1.8" fill="none"/>
+          <circle cx="12" cy="12" r="1.2" fill="#6366F1"/>
+        </svg>
+      </div>
+      <div class="icon-label" style="color:#818CF8;">Indigo</div>
+    </div>
+    <div class="icon-item">
+      <div class="icon-box" style="background:#09090B;border:1px solid rgba(16,185,129,0.15);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#34D399" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="3" stroke="#34D399" stroke-width="1.8" fill="none"/>
+          <circle cx="12" cy="12" r="1.2" fill="#10B981"/>
+        </svg>
+      </div>
+      <div class="icon-label" style="color:#34D399;">Emerald</div>
+    </div>
+    <div class="icon-item">
+      <div class="icon-box" style="background:#09090B;border:1px solid rgba(255,255,255,0.08);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#D4D4D8" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="3" stroke="#D4D4D8" stroke-width="1.8" fill="none"/>
+          <circle cx="12" cy="12" r="1.2" fill="#A1A1AA"/>
+        </svg>
+      </div>
+      <div class="icon-label">Mono</div>
+    </div>
+    <div class="icon-item">
+      <div class="icon-box" style="background:#09090B;border:1px solid rgba(59,130,246,0.15);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#60A5FA" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="3" stroke="#60A5FA" stroke-width="1.8" fill="none"/>
+          <circle cx="12" cy="12" r="1.2" fill="#3B82F6"/>
+        </svg>
+      </div>
+      <div class="icon-label" style="color:#60A5FA;">Ocean</div>
+    </div>
+    <div class="icon-item">
+      <div class="icon-box" style="background:#09090B;border:1px solid rgba(249,115,22,0.15);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#FB923C" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="3" stroke="#FB923C" stroke-width="1.8" fill="none"/>
+          <circle cx="12" cy="12" r="1.2" fill="#F97316"/>
+        </svg>
+      </div>
+      <div class="icon-label" style="color:#FB923C;">Coral</div>
+    </div>
+    <div class="icon-item">
+      <div class="icon-box" style="background:#09090B;border:1px solid rgba(201,164,78,0.15);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M2 12C2 12 5.5 7 12 7C18.5 7 22 12 22 12C22 12 18.5 17 12 17C5.5 17 2 12 2 12Z" stroke="#E8D48B" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="3" stroke="#E8D48B" stroke-width="1.8" fill="none"/>
+          <circle cx="12" cy="12" r="1.2" fill="#C9A44E"/>
+        </svg>
+      </div>
+      <div class="icon-label" style="color:#E8D48B;">Gold</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ==================== MY RECOMMENDATION ==================== -->
+<div class="section">
+  <div class="section-label">💡 추천 의견</div>
+  <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:28px;line-height:1.8;font-size:14px;color:#A1A1AA;">
+    <strong style="color:#FAFAFA;">글로벌 금융 플랫폼</strong>으로 갈 거라면:<br><br>
+
+    <strong style="color:#818CF8;">① Electric Indigo</strong> — 가장 안정적인 선택. Bloomberg, Trading View 등 글로벌 금융 서비스가 블루/인디고 계열을 많이 씀. 신뢰감 + 모던함.<br><br>
+
+    <strong style="color:#D4D4D8;">③ Monochrome</strong> — 가장 심플. 컬러 없이 구조로 승부. 다크 모드에서 고급스럽고, 차트 데이터의 색상이 더 돋보임.<br><br>
+
+    <strong style="color:#3B82F6;">④ Ocean Blue</strong> — 인디고보다 밝고 친근한 느낌. 핀테크 스타트업에서 많이 쓰는 톤. Robinhood, Webull 느낌.<br><br>
+
+    골드는 프리미엄 느낌은 강하지만, 라이트 모드에서 가독성 이슈가 계속 생겨요. 위 3개가 다크/라이트 양쪽에서 안정적입니다.
+  </div>
+</div>
+
+</body>
+</html>

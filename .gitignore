@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+.env.local
+scripts/.cusip-cache.json
+.DS_Store
+.DS_Store
+.DS_Store

@@ -1,0 +1,3311 @@
+{
+  "warren_buffett": {
+    "name": "Warren Buffett",
+    "name_ko": "워렌 버핏",
+    "quarter": "2025Q4",
+    "holdings": [
+      {
+        "shares": 149061045,
+        "value": 55145133598,
+        "pct_of_portfolio": 20.11,
+        "option_type": null,
+        "securities": {
+          "name": "AMERICAN EXPRESS CO",
+          "ticker": "AXP",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 80664820,
+        "value": 21929537965,
+        "pct_of_portfolio": 8,
+        "option_type": null,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 282722729,
+        "value": 19765145984,
+        "pct_of_portfolio": 7.21,
+        "option_type": null,
+        "securities": {
+          "name": "COCA COLA CO",
+          "ticker": "KO",
+          "sector_ko": "필수소비재"
+        }
+      },
+      {
+        "shares": 310800000,
+        "value": 17094000000,
+        "pct_of_portfolio": 6.24,
+        "option_type": null,
+        "securities": {
+          "name": "BANK AMERICA CORP",
+          "ticker": "BAC",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 61542988,
+        "value": 16731076718,
+        "pct_of_portfolio": 6.1,
+        "option_type": null,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 264941431,
+        "value": 10894391643,
+        "pct_of_portfolio": 3.97,
+        "option_type": null,
+        "securities": {
+          "name": "OCCIDENTAL PETE CORP",
+          "ticker": "OXY",
+          "sector_ko": "에너지"
+        }
+      },
+      {
+        "shares": 34249183,
+        "value": 10689854998,
+        "pct_of_portfolio": 3.9,
+        "option_type": null,
+        "securities": {
+          "name": "CHUBB LIMITED",
+          "ticker": "CL",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 34724000,
+        "value": 9440066640,
+        "pct_of_portfolio": 3.44,
+        "option_type": null,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 61579525,
+        "value": 9385335405,
+        "pct_of_portfolio": 3.42,
+        "option_type": null,
+        "securities": {
+          "name": "CHEVRON CORP NEW",
+          "ticker": "CHV",
+          "sector_ko": "에너지"
+        }
+      },
+      {
+        "shares": 325634818,
+        "value": 7896644337,
+        "pct_of_portfolio": 2.88,
+        "option_type": null,
+        "securities": {
+          "name": "KRAFT HEINZ CO",
+          "ticker": "KHC",
+          "sector_ko": "필수소비재"
+        }
+      },
+      {
+        "shares": 125720000,
+        "value": 6914600000,
+        "pct_of_portfolio": 2.52,
+        "option_type": null,
+        "securities": {
+          "name": "BANK AMERICA CORP",
+          "ticker": "BAC",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 12623750,
+        "value": 6448842688,
+        "pct_of_portfolio": 2.35,
+        "option_type": null,
+        "securities": {
+          "name": "MOODYS CORP",
+          "ticker": "MOOD",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 11973928,
+        "value": 6116881119,
+        "pct_of_portfolio": 2.23,
+        "option_type": null,
+        "securities": {
+          "name": "MOODYS CORP",
+          "ticker": "MOOD",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 80283200,
+        "value": 5612598512,
+        "pct_of_portfolio": 2.05,
+        "option_type": null,
+        "securities": {
+          "name": "COCA COLA CO",
+          "ticker": "KO",
+          "sector_ko": "필수소비재"
+        }
+      },
+      {
+        "shares": 17846142,
+        "value": 5585842446,
+        "pct_of_portfolio": 2.04,
+        "option_type": null,
+        "securities": {
+          "name": "ALPHABET INC",
+          "ticker": "GOOGL",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 32517208,
+        "value": 4955947671,
+        "pct_of_portfolio": 1.81,
+        "option_type": null,
+        "securities": {
+          "name": "CHEVRON CORP NEW",
+          "ticker": "CHV",
+          "sector_ko": "에너지"
+        }
+      },
+      {
+        "shares": 15532000,
+        "value": 4222529520,
+        "pct_of_portfolio": 1.54,
+        "option_type": null,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 14472000,
+        "value": 3934357920,
+        "pct_of_portfolio": 1.44,
+        "option_type": null,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 8297460,
+        "value": 2910002197,
+        "pct_of_portfolio": 1.06,
+        "option_type": null,
+        "securities": {
+          "name": "VISA INC",
+          "ticker": "VI",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 17564001,
+        "value": 2676929392,
+        "pct_of_portfolio": 0.98,
+        "option_type": null,
+        "securities": {
+          "name": "CHEVRON CORP NEW",
+          "ticker": "CHV",
+          "sector_ko": "에너지"
+        }
+      },
+      {
+        "shares": 3986648,
+        "value": 2275897610,
+        "pct_of_portfolio": 0.83,
+        "option_type": null,
+        "securities": {
+          "name": "MASTERCARD INCORPORATED",
+          "ticker": "MA",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 108822227,
+        "value": 2175900429,
+        "pct_of_portfolio": 0.79,
+        "option_type": null,
+        "securities": {
+          "name": "SIRIUSXM HOLDINGS INC",
+          "ticker": "SX",
+          "sector_ko": "통신"
+        }
+      },
+      {
+        "shares": 7204000,
+        "value": 1958479440,
+        "pct_of_portfolio": 0.71,
+        "option_type": null,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 8016933,
+        "value": 1947713872,
+        "pct_of_portfolio": 0.71,
+        "option_type": null,
+        "securities": {
+          "name": "VERISIGN INC",
+          "ticker": "VERI",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 16632088,
+        "value": 1889571518,
+        "pct_of_portfolio": 0.69,
+        "option_type": null,
+        "securities": {
+          "name": "DAVITA INC",
+          "ticker": "TRL",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 13000000,
+        "value": 1793480000,
+        "pct_of_portfolio": 0.65,
+        "option_type": null,
+        "securities": {
+          "name": "CONSTELLATION BRANDS INC",
+          "ticker": "CB1A",
+          "sector_ko": "필수소비재"
+        }
+      },
+      {
+        "shares": 11545828,
+        "value": 1759699645,
+        "pct_of_portfolio": 0.64,
+        "option_type": null,
+        "securities": {
+          "name": "CHEVRON CORP NEW",
+          "ticker": "CHV",
+          "sector_ko": "에너지"
+        }
+      },
+      {
+        "shares": 31910434,
+        "value": 1755073870,
+        "pct_of_portfolio": 0.64,
+        "option_type": null,
+        "securities": {
+          "name": "BANK AMERICA CORP",
+          "ticker": "BAC",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 15126977,
+        "value": 1718575857,
+        "pct_of_portfolio": 0.63,
+        "option_type": null,
+        "securities": {
+          "name": "DAVITA INC",
+          "ticker": "TRL",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 27257260,
+        "value": 1703033605,
+        "pct_of_portfolio": 0.62,
+        "option_type": null,
+        "securities": {
+          "name": "KROGER CO",
+          "ticker": "KR",
+          "sector_ko": "필수소비재"
+        }
+      }
+    ],
+    "changes": [
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 149061045,
+        "value_current": 55145133598,
+        "value_prev": 0,
+        "securities": {
+          "name": "AMERICAN EXPRESS CO",
+          "ticker": "AXP"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 80664820,
+        "value_current": 21929537965,
+        "value_prev": 0,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 282722729,
+        "value_current": 19765145984,
+        "value_prev": 0,
+        "securities": {
+          "name": "COCA COLA CO",
+          "ticker": "KO"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 310800000,
+        "value_current": 17094000000,
+        "value_prev": 0,
+        "securities": {
+          "name": "BANK AMERICA CORP",
+          "ticker": "BAC"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 61542988,
+        "value_current": 16731076718,
+        "value_prev": 0,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 9.3,
+        "shares_change": 2916288,
+        "value_current": 10689854998,
+        "value_prev": 8843709614,
+        "securities": {
+          "name": "CHUBB LIMITED",
+          "ticker": "CL"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 34724000,
+        "value_current": 9440066640,
+        "value_prev": 0,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 61579525,
+        "value_current": 9385335405,
+        "value_prev": 0,
+        "securities": {
+          "name": "CHEVRON CORP NEW",
+          "ticker": "CHV"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 125720000,
+        "value_current": 6914600000,
+        "value_prev": 0,
+        "securities": {
+          "name": "BANK AMERICA CORP",
+          "ticker": "BAC"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 12623750,
+        "value_current": 6448842688,
+        "value_prev": 0,
+        "securities": {
+          "name": "MOODYS CORP",
+          "ticker": "MOOD"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 11973928,
+        "value_current": 6116881119,
+        "value_prev": 0,
+        "securities": {
+          "name": "MOODYS CORP",
+          "ticker": "MOOD"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 80283200,
+        "value_current": 5612598512,
+        "value_prev": 0,
+        "securities": {
+          "name": "COCA COLA CO",
+          "ticker": "KO"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 32517208,
+        "value_current": 4955947671,
+        "value_prev": 0,
+        "securities": {
+          "name": "CHEVRON CORP NEW",
+          "ticker": "CHV"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 15532000,
+        "value_current": 4222529520,
+        "value_prev": 0,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 14472000,
+        "value_current": 3934357920,
+        "value_prev": 0,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 17564001,
+        "value_current": 2676929392,
+        "value_prev": 0,
+        "securities": {
+          "name": "CHEVRON CORP NEW",
+          "ticker": "CHV"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 108822227,
+        "value_current": 2175900429,
+        "value_prev": 0,
+        "securities": {
+          "name": "SIRIUSXM HOLDINGS INC",
+          "ticker": "SX"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 7204000,
+        "value_current": 1958479440,
+        "value_prev": 0,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 8016933,
+        "value_current": 1947713872,
+        "value_prev": 0,
+        "securities": {
+          "name": "VERISIGN INC",
+          "ticker": "VERI"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 7.1,
+        "shares_change": 1103597,
+        "value_current": 1889571518,
+        "value_prev": 2063270599,
+        "securities": {
+          "name": "DAVITA INC",
+          "ticker": "TRL"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 495.8,
+        "shares_change": 9607828,
+        "value_current": 1759699645,
+        "value_prev": 300952020,
+        "securities": {
+          "name": "CHEVRON CORP NEW",
+          "ticker": "CHV"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 31910434,
+        "value_current": 1755073870,
+        "value_prev": 0,
+        "securities": {
+          "name": "BANK AMERICA CORP",
+          "ticker": "BAC"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 15126977,
+        "value_current": 1718575857,
+        "value_prev": 0,
+        "securities": {
+          "name": "DAVITA INC",
+          "ticker": "TRL"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 27257260,
+        "value_current": 1703033605,
+        "value_prev": 0,
+        "securities": {
+          "name": "KROGER CO",
+          "ticker": "KR"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 12.3,
+        "shares_change": 368055,
+        "value_current": 1396347000,
+        "value_prev": 1287335476,
+        "securities": {
+          "name": "DOMINOS PIZZA INC",
+          "ticker": "DPZ"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 21000000,
+        "value_current": 1155000000,
+        "value_prev": 0,
+        "securities": {
+          "name": "BANK AMERICA CORP",
+          "ticker": "BAC"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 14990400,
+        "value_current": 1047978864,
+        "value_prev": 0,
+        "securities": {
+          "name": "COCA COLA CO",
+          "ticker": "KO"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 3840000,
+        "value_current": 1043942400,
+        "value_prev": 0,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -39.1,
+        "shares_change": -10650170,
+        "value_current": 1037610983,
+        "value_prev": 1837411897,
+        "securities": {
+          "name": "KROGER CO",
+          "ticker": "KR"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 3776000,
+        "value_current": 1026543360,
+        "value_prev": 0,
+        "securities": {
+          "name": "APPLE INC",
+          "ticker": "AAPL"
+        }
+      }
+    ],
+    "metrics": [
+      {
+        "id": 3,
+        "investor_id": 1,
+        "quarter": "2025Q4",
+        "total_aum": 274160086701,
+        "holding_count": 110,
+        "sector_count": 7,
+        "concentration": 0.653,
+        "top_holding_pct": 20.11,
+        "qoq_change": 2.6,
+        "created_at": "2026-03-05T04:28:39.417209+00:00"
+      },
+      {
+        "id": 24,
+        "investor_id": 1,
+        "quarter": "2025Q3",
+        "total_aum": 267334501955,
+        "holding_count": 115,
+        "sector_count": 7,
+        "concentration": 0.641,
+        "top_holding_pct": 18.52,
+        "qoq_change": 3.8,
+        "created_at": "2026-03-06T00:12:48.598532+00:00"
+      },
+      {
+        "id": 22,
+        "investor_id": 1,
+        "quarter": "2025Q2",
+        "total_aum": 257521776925,
+        "holding_count": 114,
+        "sector_count": 7,
+        "concentration": 0.642,
+        "top_holding_pct": 18.46,
+        "qoq_change": 0,
+        "created_at": "2026-03-06T00:12:30.862602+00:00"
+      },
+      {
+        "id": 97,
+        "investor_id": 1,
+        "quarter": "2025Q1",
+        "total_aum": 1106550356,
+        "holding_count": 4,
+        "sector_count": 2,
+        "concentration": 1,
+        "top_holding_pct": 62.6,
+        "qoq_change": -99.6,
+        "created_at": "2026-03-06T12:46:34.89796+00:00"
+      }
+    ]
+  },
+  "stanley_druckenmiller": {
+    "name": "Stanley Druckenmiller",
+    "name_ko": "스탠리 드러켄밀러",
+    "quarter": "2025Q4",
+    "holdings": [
+      {
+        "shares": 2511357,
+        "value": 575327,
+        "pct_of_portfolio": 12.8,
+        "option_type": null,
+        "securities": {
+          "name": "NATERA INC",
+          "ticker": "NTRA",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 5495600,
+        "value": 300994,
+        "pct_of_portfolio": 6.7,
+        "option_type": null,
+        "securities": {
+          "name": "Select Sector Spdr Tr",
+          "ticker": "SSST",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 1481752,
+        "value": 257884,
+        "pct_of_portfolio": 5.74,
+        "option_type": null,
+        "securities": {
+          "name": "Insmed Inc",
+          "ticker": "INSM",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 1173925,
+        "value": 224877,
+        "pct_of_portfolio": 5,
+        "option_type": null,
+        "securities": {
+          "name": "Invesco Exchange Traded Fd T",
+          "ticker": "IEETF",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 5874870,
+        "value": 183355,
+        "pct_of_portfolio": 4.08,
+        "option_type": null,
+        "securities": {
+          "name": "TEVA PHARMACEUTICAL INDS LTD",
+          "ticker": "TPI",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 590930,
+        "value": 178650,
+        "pct_of_portfolio": 3.97,
+        "option_type": null,
+        "securities": {
+          "name": "WOODWARD INC",
+          "ticker": "WOOD",
+          "sector_ko": "산업"
+        }
+      },
+      {
+        "shares": 737940,
+        "value": 170331,
+        "pct_of_portfolio": 3.79,
+        "option_type": null,
+        "securities": {
+          "name": "AMAZON.COM INC",
+          "ticker": "AMZN",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 543085,
+        "value": 165038,
+        "pct_of_portfolio": 3.67,
+        "option_type": null,
+        "securities": {
+          "name": "TAIWAN SEMICONDUCTOR-SP ADR",
+          "ticker": "TSM",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 6772909,
+        "value": 159773,
+        "pct_of_portfolio": 3.55,
+        "option_type": null,
+        "securities": {
+          "name": "COUPANG INC",
+          "ticker": "CPNG",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 4228000,
+        "value": 134324,
+        "pct_of_portfolio": 2.99,
+        "option_type": "Call",
+        "securities": {
+          "name": "ISHARES INC",
+          "ticker": "ISHA",
+          "sector_ko": "지수"
+        }
+      },
+      {
+        "shares": 385000,
+        "value": 120505,
+        "pct_of_portfolio": 2.68,
+        "option_type": null,
+        "securities": {
+          "name": "ALPHABET INC",
+          "ticker": "GOOGL",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 944120,
+        "value": 120441,
+        "pct_of_portfolio": 2.68,
+        "option_type": null,
+        "securities": {
+          "name": "SEA LTD-ADR",
+          "ticker": "SE",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 3552575,
+        "value": 112865,
+        "pct_of_portfolio": 2.51,
+        "option_type": null,
+        "securities": {
+          "name": "ISHARES INC",
+          "ticker": "ISHA",
+          "sector_ko": "지수"
+        }
+      },
+      {
+        "shares": 3070146,
+        "value": 107701,
+        "pct_of_portfolio": 2.4,
+        "option_type": null,
+        "securities": {
+          "name": "Newamsterdam Pharma Company",
+          "ticker": "APM",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 47149,
+        "value": 94970,
+        "pct_of_portfolio": 2.11,
+        "option_type": null,
+        "securities": {
+          "name": "MERCADOLIBRE INC",
+          "ticker": "MELI",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 2675152,
+        "value": 89323,
+        "pct_of_portfolio": 1.99,
+        "option_type": null,
+        "securities": {
+          "name": "Bbb Foods Inc",
+          "ticker": "TBBB",
+          "sector_ko": "경기소비재"
+        }
+      },
+      {
+        "shares": 1209000,
+        "value": 82490,
+        "pct_of_portfolio": 1.84,
+        "option_type": null,
+        "securities": {
+          "name": "RESTAURANT BRANDS INTL INC",
+          "ticker": "QSR",
+          "sector_ko": "경기소비재"
+        }
+      },
+      {
+        "shares": 2214470,
+        "value": 78658,
+        "pct_of_portfolio": 1.75,
+        "option_type": null,
+        "securities": {
+          "name": "Cogent Biosciences Inc",
+          "ticker": "19240Q",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 1376050,
+        "value": 73123,
+        "pct_of_portfolio": 1.63,
+        "option_type": null,
+        "securities": {
+          "name": "ALCOA CORP",
+          "ticker": "AA",
+          "sector_ko": "원자재"
+        }
+      },
+      {
+        "shares": 844160,
+        "value": 71120,
+        "pct_of_portfolio": 1.58,
+        "option_type": null,
+        "securities": {
+          "name": "Entegris Inc",
+          "ticker": "ENTE",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 1019085,
+        "value": 69705,
+        "pct_of_portfolio": 1.55,
+        "option_type": null,
+        "securities": {
+          "name": "DOCUSIGN INC",
+          "ticker": "DOCU",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 925970,
+        "value": 68133,
+        "pct_of_portfolio": 1.52,
+        "option_type": null,
+        "securities": {
+          "name": "LATTICE SEMICONDUCTOR CORP",
+          "ticker": "LSN",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 740545,
+        "value": 64346,
+        "pct_of_portfolio": 1.43,
+        "option_type": null,
+        "securities": {
+          "name": "BLOOM ENERGY CORP",
+          "ticker": "BE",
+          "sector_ko": "에너지"
+        }
+      },
+      {
+        "shares": 300110,
+        "value": 64058,
+        "pct_of_portfolio": 1.43,
+        "option_type": null,
+        "securities": {
+          "name": "WABTEC",
+          "ticker": "WABT",
+          "sector_ko": "산업"
+        }
+      },
+      {
+        "shares": 582980,
+        "value": 63248,
+        "pct_of_portfolio": 1.41,
+        "option_type": null,
+        "securities": {
+          "name": "ROKU INC",
+          "ticker": "ROKU",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 1539785,
+        "value": 62885,
+        "pct_of_portfolio": 1.4,
+        "option_type": null,
+        "securities": {
+          "name": "Figure Technology Solutio",
+          "ticker": "FTS",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 90000,
+        "value": 61373,
+        "pct_of_portfolio": 1.37,
+        "option_type": "Call",
+        "securities": {
+          "name": "SPDR S&amp;P 500 ETF TR",
+          "ticker": "78462F",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 474955,
+        "value": 59274,
+        "pct_of_portfolio": 1.32,
+        "option_type": null,
+        "securities": {
+          "name": "CRH PLC",
+          "ticker": "CRH",
+          "sector_ko": "경기소비재"
+        }
+      },
+      {
+        "shares": 226000,
+        "value": 55632,
+        "pct_of_portfolio": 1.24,
+        "option_type": "Call",
+        "securities": {
+          "name": "Ishares Tr",
+          "ticker": "IT",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 1745950,
+        "value": 55626,
+        "pct_of_portfolio": 1.24,
+        "option_type": null,
+        "securities": {
+          "name": "OPTION CARE HEALTH INC",
+          "ticker": "OCH",
+          "sector_ko": "헬스케어"
+        }
+      }
+    ],
+    "changes": [
+      {
+        "change_type": "buy",
+        "pct_change": 2411.4,
+        "shares_change": 2411357,
+        "value_current": 575327,
+        "value_prev": 16097,
+        "securities": {
+          "name": "NATERA INC",
+          "ticker": "NTRA"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 5495600,
+        "value_current": 300994,
+        "value_prev": 0,
+        "securities": {
+          "name": "Select Sector Spdr Tr",
+          "ticker": "SSST"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -38.9,
+        "shares_change": -941683,
+        "value_current": 257884,
+        "value_prev": 348999,
+        "securities": {
+          "name": "Insmed Inc",
+          "ticker": "INSM"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 1173925,
+        "value_current": 224877,
+        "value_prev": 0,
+        "securities": {
+          "name": "Invesco Exchange Traded Fd T",
+          "ticker": "IEETF"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -64.6,
+        "shares_change": -10719065,
+        "value_current": 183355,
+        "value_prev": 335197,
+        "securities": {
+          "name": "TEVA PHARMACEUTICAL INDS LTD",
+          "ticker": "TPI"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -6.6,
+        "shares_change": -42085,
+        "value_current": 178650,
+        "value_prev": 159969,
+        "securities": {
+          "name": "WOODWARD INC",
+          "ticker": "WOOD"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 68.8,
+        "shares_change": 300870,
+        "value_current": 170331,
+        "value_prev": 95967,
+        "securities": {
+          "name": "AMAZON.COM INC",
+          "ticker": "AMZN"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -29,
+        "shares_change": -222000,
+        "value_current": 165038,
+        "value_prev": 213681,
+        "securities": {
+          "name": "TAIWAN SEMICONDUCTOR-SP ADR",
+          "ticker": "TSM"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 46.2,
+        "shares_change": 2139785,
+        "value_current": 159773,
+        "value_prev": 149187,
+        "securities": {
+          "name": "COUPANG INC",
+          "ticker": "CPNG"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 4228000,
+        "value_current": 134324,
+        "value_prev": 0,
+        "securities": {
+          "name": "ISHARES INC",
+          "ticker": "ISHA"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 276.7,
+        "shares_change": 282800,
+        "value_current": 120505,
+        "value_prev": 24845,
+        "securities": {
+          "name": "ALPHABET INC",
+          "ticker": "GOOGL"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 244.3,
+        "shares_change": 669920,
+        "value_current": 120441,
+        "value_prev": 49008,
+        "securities": {
+          "name": "SEA LTD-ADR",
+          "ticker": "SE"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 3552575,
+        "value_current": 112865,
+        "value_prev": 0,
+        "securities": {
+          "name": "ISHARES INC",
+          "ticker": "ISHA"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 59.6,
+        "shares_change": 1146446,
+        "value_current": 107701,
+        "value_prev": 54710,
+        "securities": {
+          "name": "Newamsterdam Pharma Company",
+          "ticker": "APM"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -19.2,
+        "shares_change": -11195,
+        "value_current": 94970,
+        "value_prev": 136346,
+        "securities": {
+          "name": "MERCADOLIBRE INC",
+          "ticker": "MELI"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 126.1,
+        "shares_change": 1492027,
+        "value_current": 89323,
+        "value_prev": 31897,
+        "securities": {
+          "name": "Bbb Foods Inc",
+          "ticker": "TBBB"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 6.9,
+        "shares_change": 77635,
+        "value_current": 82490,
+        "value_prev": 72566,
+        "securities": {
+          "name": "RESTAURANT BRANDS INTL INC",
+          "ticker": "QSR"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 109,
+        "shares_change": 1154890,
+        "value_current": 78658,
+        "value_prev": 15216,
+        "securities": {
+          "name": "Cogent Biosciences Inc",
+          "ticker": "19240Q"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 1376050,
+        "value_current": 73123,
+        "value_prev": 0,
+        "securities": {
+          "name": "ALCOA CORP",
+          "ticker": "AA"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 844160,
+        "value_current": 71120,
+        "value_prev": 0,
+        "securities": {
+          "name": "Entegris Inc",
+          "ticker": "ENTE"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -39.6,
+        "shares_change": -666865,
+        "value_current": 69705,
+        "value_prev": 121540,
+        "securities": {
+          "name": "DOCUSIGN INC",
+          "ticker": "DOCU"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 925970,
+        "value_current": 68133,
+        "value_prev": 0,
+        "securities": {
+          "name": "LATTICE SEMICONDUCTOR CORP",
+          "ticker": "LSN"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 740545,
+        "value_current": 64346,
+        "value_prev": 0,
+        "securities": {
+          "name": "BLOOM ENERGY CORP",
+          "ticker": "BE"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -29.1,
+        "shares_change": -239455,
+        "value_current": 63248,
+        "value_prev": 82350,
+        "securities": {
+          "name": "ROKU INC",
+          "ticker": "ROKU"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -27.3,
+        "shares_change": -577040,
+        "value_current": 62885,
+        "value_prev": 76989,
+        "securities": {
+          "name": "Figure Technology Solutio",
+          "ticker": "FTS"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 20.6,
+        "shares_change": 81135,
+        "value_current": 59274,
+        "value_prev": 47219,
+        "securities": {
+          "name": "CRH PLC",
+          "ticker": "CRH"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 78.6,
+        "shares_change": 768265,
+        "value_current": 55626,
+        "value_prev": 27141,
+        "securities": {
+          "name": "OPTION CARE HEALTH INC",
+          "ticker": "OCH"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -52.5,
+        "shares_change": -997500,
+        "value_current": 49376,
+        "value_prev": 101460,
+        "securities": {
+          "name": "ISHARES TR",
+          "ticker": "IT"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 650910,
+        "value_current": 45173,
+        "value_prev": 0,
+        "securities": {
+          "name": "DELTA AIR LINES INC DEL",
+          "ticker": "TAL"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 348400,
+        "value_current": 38958,
+        "value_prev": 0,
+        "securities": {
+          "name": "UNITED AIRLS HLDGS INC",
+          "ticker": "UAH"
+        }
+      }
+    ],
+    "metrics": [
+      {
+        "id": 4,
+        "investor_id": 3,
+        "quarter": "2025Q4",
+        "total_aum": 4494450,
+        "holding_count": 62,
+        "sector_count": 4,
+        "concentration": 0.523,
+        "top_holding_pct": 12.8,
+        "qoq_change": 10.6,
+        "created_at": "2026-03-05T04:29:09.39426+00:00"
+      },
+      {
+        "id": 35,
+        "investor_id": 3,
+        "quarter": "2025Q3",
+        "total_aum": 4062003,
+        "holding_count": 65,
+        "sector_count": 4,
+        "concentration": 0.539,
+        "top_holding_pct": 12.74,
+        "qoq_change": -0.2,
+        "created_at": "2026-03-06T00:15:18.393827+00:00"
+      },
+      {
+        "id": 34,
+        "investor_id": 3,
+        "quarter": "2025Q2",
+        "total_aum": 4071255,
+        "holding_count": 69,
+        "sector_count": 6,
+        "concentration": 0.505,
+        "top_holding_pct": 12.8,
+        "qoq_change": 33,
+        "created_at": "2026-03-06T00:15:06.220523+00:00"
+      },
+      {
+        "id": 33,
+        "investor_id": 3,
+        "quarter": "2025Q1",
+        "total_aum": 3060048,
+        "holding_count": 52,
+        "sector_count": 5,
+        "concentration": 0.598,
+        "top_holding_pct": 15.72,
+        "qoq_change": -17.8,
+        "created_at": "2026-03-06T00:14:54.534325+00:00"
+      }
+    ]
+  },
+  "ray_dalio": {
+    "name": "Ray Dalio",
+    "name_ko": "레이 달리오",
+    "quarter": "2025Q4",
+    "holdings": [
+      {
+        "shares": 4455413,
+        "value": 3038235233,
+        "pct_of_portfolio": 11.08,
+        "option_type": null,
+        "securities": {
+          "name": "SPDR S&amp;P 500 ETF TR",
+          "ticker": "78462F",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 4185589,
+        "value": 2866877329,
+        "pct_of_portfolio": 10.45,
+        "option_type": null,
+        "securities": {
+          "name": "ISHARES TR",
+          "ticker": "IT",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 3865205,
+        "value": 720860733,
+        "pct_of_portfolio": 2.63,
+        "option_type": null,
+        "securities": {
+          "name": "NVIDIA CORP",
+          "ticker": "NVDA",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 3041661,
+        "value": 520671530,
+        "pct_of_portfolio": 1.9,
+        "option_type": null,
+        "securities": {
+          "name": "LAM RESEARCH CORP",
+          "ticker": "LR",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 1932066,
+        "value": 511823604,
+        "pct_of_portfolio": 1.87,
+        "option_type": null,
+        "securities": {
+          "name": "SALESFORCE INC",
+          "ticker": "LESF",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 1590826,
+        "value": 497928538,
+        "pct_of_portfolio": 1.82,
+        "option_type": null,
+        "securities": {
+          "name": "ALPHABET INC",
+          "ticker": "GOOGL",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 984091,
+        "value": 475926089,
+        "pct_of_portfolio": 1.74,
+        "option_type": null,
+        "securities": {
+          "name": "MICROSOFT CORP",
+          "ticker": "MSFT",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 1948254,
+        "value": 449695988,
+        "pct_of_portfolio": 1.64,
+        "option_type": null,
+        "securities": {
+          "name": "AMAZON.COM INC",
+          "ticker": "AMZN",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 1275055,
+        "value": 446256499,
+        "pct_of_portfolio": 1.63,
+        "option_type": null,
+        "securities": {
+          "name": "ADOBE INC",
+          "ticker": "ADBE",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 665997,
+        "value": 435275659,
+        "pct_of_portfolio": 1.59,
+        "option_type": null,
+        "securities": {
+          "name": "GE VERNOVA INC",
+          "ticker": "GV",
+          "sector_ko": "에너지"
+        }
+      },
+      {
+        "shares": 80528,
+        "value": 431254014,
+        "pct_of_portfolio": 1.57,
+        "option_type": null,
+        "securities": {
+          "name": "BOOKING HOLDINGS INC",
+          "ticker": "09857L",
+          "sector_ko": "경기소비재"
+        }
+      },
+      {
+        "shares": 1165740,
+        "value": 403462614,
+        "pct_of_portfolio": 1.47,
+        "option_type": null,
+        "securities": {
+          "name": "BROADCOM INC",
+          "ticker": "AVGO",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 1873481,
+        "value": 365160182,
+        "pct_of_portfolio": 1.33,
+        "option_type": null,
+        "securities": {
+          "name": "ORACLE CORP",
+          "ticker": "ORA",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 1656527,
+        "value": 354761822,
+        "pct_of_portfolio": 1.29,
+        "option_type": null,
+        "securities": {
+          "name": "ADVANCED MICRO DEVICES",
+          "ticker": "AMD",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 1313958,
+        "value": 271923608,
+        "pct_of_portfolio": 0.99,
+        "option_type": null,
+        "securities": {
+          "name": "JOHNSON &amp; JOHNSON",
+          "ticker": "J&J",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 889640,
+        "value": 253912152,
+        "pct_of_portfolio": 0.93,
+        "option_type": null,
+        "securities": {
+          "name": "MICRON TECHNOLOGY INC",
+          "ticker": "MU",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 409207,
+        "value": 233608092,
+        "pct_of_portfolio": 0.85,
+        "option_type": null,
+        "securities": {
+          "name": "MASTERCARD INCORPORATED",
+          "ticker": "MA",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 2308909,
+        "value": 230544564,
+        "pct_of_portfolio": 0.84,
+        "option_type": null,
+        "securities": {
+          "name": "NEWMONT CORP",
+          "ticker": "MONT",
+          "sector_ko": "원자재"
+        }
+      },
+      {
+        "shares": 965117,
+        "value": 207287829,
+        "pct_of_portfolio": 0.76,
+        "option_type": null,
+        "securities": {
+          "name": "WORKDAY INC",
+          "ticker": "WORK",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 1338885,
+        "value": 205103793,
+        "pct_of_portfolio": 0.75,
+        "option_type": null,
+        "securities": {
+          "name": "SERVICENOW INC",
+          "ticker": "SERV",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 2072358,
+        "value": 201474645,
+        "pct_of_portfolio": 0.73,
+        "option_type": null,
+        "securities": {
+          "name": "ISHARES INC",
+          "ticker": "ISHA",
+          "sector_ko": "지수"
+        }
+      },
+      {
+        "shares": 1533269,
+        "value": 195599126,
+        "pct_of_portfolio": 0.71,
+        "option_type": null,
+        "securities": {
+          "name": "SEA LTD-ADR",
+          "ticker": "SE",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 3329311,
+        "value": 194365176,
+        "pct_of_portfolio": 0.71,
+        "option_type": null,
+        "securities": {
+          "name": "PAYPAL HOLDINGS INC",
+          "ticker": "PYPL",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 3276751,
+        "value": 188937463,
+        "pct_of_portfolio": 0.69,
+        "option_type": null,
+        "securities": {
+          "name": "ALTRIA GROUP INC",
+          "ticker": "ALTR",
+          "sector_ko": "필수소비재"
+        }
+      },
+      {
+        "shares": 536497,
+        "value": 188154863,
+        "pct_of_portfolio": 0.69,
+        "option_type": null,
+        "securities": {
+          "name": "VISA INC",
+          "ticker": "VI",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 767816,
+        "value": 176497864,
+        "pct_of_portfolio": 0.64,
+        "option_type": null,
+        "securities": {
+          "name": "REDDIT INC",
+          "ticker": "REDD",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 622783,
+        "value": 176440652,
+        "pct_of_portfolio": 0.64,
+        "option_type": null,
+        "securities": {
+          "name": "EXPEDIA GROUP INC",
+          "ticker": "EXPE",
+          "sector_ko": "경기소비재"
+        }
+      },
+      {
+        "shares": 1329442,
+        "value": 174196785,
+        "pct_of_portfolio": 0.64,
+        "option_type": null,
+        "securities": {
+          "name": "ARISTA NETWORKS INC",
+          "ticker": "AN",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 2952078,
+        "value": 167146656,
+        "pct_of_portfolio": 0.61,
+        "option_type": null,
+        "securities": {
+          "name": "BRITISH AMERN TOB PLC",
+          "ticker": "BMTA",
+          "sector_ko": "필수소비재"
+        }
+      },
+      {
+        "shares": 329307,
+        "value": 153740266,
+        "pct_of_portfolio": 0.56,
+        "option_type": null,
+        "securities": {
+          "name": "HCA HEALTHCARE INC",
+          "ticker": "HH",
+          "sector_ko": "헬스케어"
+        }
+      }
+    ],
+    "changes": [
+      {
+        "change_type": "buy",
+        "pct_change": 73.7,
+        "shares_change": 1890325,
+        "value_current": 3038235233,
+        "value_prev": 1708810324,
+        "securities": {
+          "name": "SPDR S&amp;P 500 ETF TR",
+          "ticker": "78462F"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 3.4,
+        "shares_change": 136289,
+        "value_current": 2866877329,
+        "value_prev": 2710196490,
+        "securities": {
+          "name": "ISHARES TR",
+          "ticker": "IT"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 54,
+        "shares_change": 1355454,
+        "value_current": 720860733,
+        "value_prev": 468269342,
+        "securities": {
+          "name": "NVIDIA CORP",
+          "ticker": "NVDA"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -12.2,
+        "shares_change": -422319,
+        "value_current": 520671530,
+        "value_prev": 463826922,
+        "securities": {
+          "name": "LAM RESEARCH CORP",
+          "ticker": "LR"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -3.7,
+        "shares_change": -74961,
+        "value_current": 511823604,
+        "value_prev": 475665399,
+        "securities": {
+          "name": "SALESFORCE INC",
+          "ticker": "LESF"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -40.1,
+        "shares_change": -1063070,
+        "value_current": 497928538,
+        "value_prev": 645162118,
+        "securities": {
+          "name": "ALPHABET INC",
+          "ticker": "GOOGL"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -10.3,
+        "shares_change": -113078,
+        "value_current": 475926089,
+        "value_prev": 568278684,
+        "securities": {
+          "name": "MICROSOFT CORP",
+          "ticker": "MSFT"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 73.2,
+        "shares_change": 823277,
+        "value_current": 449695988,
+        "value_prev": 247011200,
+        "securities": {
+          "name": "AMAZON.COM INC",
+          "ticker": "AMZN"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 2.3,
+        "shares_change": 14905,
+        "value_current": 435275659,
+        "value_prev": 400356471,
+        "securities": {
+          "name": "GE VERNOVA INC",
+          "ticker": "GV"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 3.6,
+        "shares_change": 2797,
+        "value_current": 431254014,
+        "value_prev": 419690656,
+        "securities": {
+          "name": "BOOKING HOLDINGS INC",
+          "ticker": "09857L"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 37.9,
+        "shares_change": 320349,
+        "value_current": 403462614,
+        "value_prev": 278902945,
+        "securities": {
+          "name": "BROADCOM INC",
+          "ticker": "AVGO"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 361.1,
+        "shares_change": 1467202,
+        "value_current": 365160182,
+        "value_prev": 114261906,
+        "securities": {
+          "name": "ORACLE CORP",
+          "ticker": "ORA"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -7.7,
+        "shares_change": -138274,
+        "value_current": 354761822,
+        "value_prev": 290380854,
+        "securities": {
+          "name": "ADVANCED MICRO DEVICES",
+          "ticker": "AMD"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -23.4,
+        "shares_change": -401819,
+        "value_current": 271923608,
+        "value_prev": 318139371,
+        "securities": {
+          "name": "JOHNSON &amp; JOHNSON",
+          "ticker": "J&J"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 52355.2,
+        "shares_change": 887944,
+        "value_current": 253912152,
+        "value_prev": 283775,
+        "securities": {
+          "name": "MICRON TECHNOLOGY INC",
+          "ticker": "MU"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 11.7,
+        "shares_change": 42951,
+        "value_current": 233608092,
+        "value_prev": 208330075,
+        "securities": {
+          "name": "MASTERCARD INCORPORATED",
+          "ticker": "MA"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 496.1,
+        "shares_change": 1921592,
+        "value_current": 230544564,
+        "value_prev": 32654696,
+        "securities": {
+          "name": "NEWMONT CORP",
+          "ticker": "MONT"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 343.3,
+        "shares_change": 1036892,
+        "value_current": 205103793,
+        "value_prev": 277918118,
+        "securities": {
+          "name": "SERVICENOW INC",
+          "ticker": "SERV"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 1.8,
+        "shares_change": 37242,
+        "value_current": 201474645,
+        "value_prev": 163012792,
+        "securities": {
+          "name": "ISHARES INC",
+          "ticker": "ISHA"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -4.5,
+        "shares_change": -72355,
+        "value_current": 195599126,
+        "value_prev": 286973178,
+        "securities": {
+          "name": "SEA LTD-ADR",
+          "ticker": "SE"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 18,
+        "shares_change": 506980,
+        "value_current": 194365176,
+        "value_prev": 189265517,
+        "securities": {
+          "name": "PAYPAL HOLDINGS INC",
+          "ticker": "PYPL"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -11.3,
+        "shares_change": -418855,
+        "value_current": 188937463,
+        "value_prev": 244131732,
+        "securities": {
+          "name": "ALTRIA GROUP INC",
+          "ticker": "ALTR"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -20.6,
+        "shares_change": -139457,
+        "value_current": 188154863,
+        "value_prev": 230757177,
+        "securities": {
+          "name": "VISA INC",
+          "ticker": "VI"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 24.4,
+        "shares_change": 150608,
+        "value_current": 176497864,
+        "value_prev": 141951668,
+        "securities": {
+          "name": "REDDIT INC",
+          "ticker": "REDD"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -14.9,
+        "shares_change": -109033,
+        "value_current": 176440652,
+        "value_prev": 156425670,
+        "securities": {
+          "name": "EXPEDIA GROUP INC",
+          "ticker": "EXPE"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 95.4,
+        "shares_change": 649076,
+        "value_current": 174196785,
+        "value_prev": 99136130,
+        "securities": {
+          "name": "ARISTA NETWORKS INC",
+          "ticker": "AN"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -21.1,
+        "shares_change": -790642,
+        "value_current": 167146656,
+        "value_prev": 198663578,
+        "securities": {
+          "name": "BRITISH AMERN TOB PLC",
+          "ticker": "BMTA"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -3.3,
+        "shares_change": -11250,
+        "value_current": 153740266,
+        "value_prev": 145145393,
+        "securities": {
+          "name": "HCA HEALTHCARE INC",
+          "ticker": "HH"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -46.3,
+        "shares_change": -193218,
+        "value_current": 147662793,
+        "value_prev": 306176975,
+        "securities": {
+          "name": "META PLATFORMS INC-CLASS A",
+          "ticker": "META"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 5.2,
+        "shares_change": 129527,
+        "value_current": 140052111,
+        "value_prev": 134128496,
+        "securities": {
+          "name": "VANGUARD INTL EQUITY INDEX F",
+          "ticker": "VIEIF"
+        }
+      }
+    ],
+    "metrics": [
+      {
+        "id": 8,
+        "investor_id": 4,
+        "quarter": "2025Q4",
+        "total_aum": 27421613830,
+        "holding_count": 1040,
+        "sector_count": 10,
+        "concentration": 0.363,
+        "top_holding_pct": 11.08,
+        "qoq_change": 7.4,
+        "created_at": "2026-03-05T04:57:50.459208+00:00"
+      },
+      {
+        "id": 46,
+        "investor_id": 4,
+        "quarter": "2025Q3",
+        "total_aum": 25527677108,
+        "holding_count": 1014,
+        "sector_count": 10,
+        "concentration": 0.325,
+        "top_holding_pct": 10.62,
+        "qoq_change": 3,
+        "created_at": "2026-03-06T00:30:14.643128+00:00"
+      },
+      {
+        "id": 45,
+        "investor_id": 4,
+        "quarter": "2025Q2",
+        "total_aum": 24791713463,
+        "holding_count": 585,
+        "sector_count": 10,
+        "concentration": 0.361,
+        "top_holding_pct": 6.51,
+        "qoq_change": 15,
+        "created_at": "2026-03-06T00:28:24.386638+00:00"
+      },
+      {
+        "id": 44,
+        "investor_id": 4,
+        "quarter": "2025Q1",
+        "total_aum": 21554169616,
+        "holding_count": 664,
+        "sector_count": 10,
+        "concentration": 0.318,
+        "top_holding_pct": 8.67,
+        "qoq_change": -1.2,
+        "created_at": "2026-03-06T00:27:33.141873+00:00"
+      }
+    ]
+  },
+  "bill_ackman": {
+    "name": "Bill Ackman",
+    "name_ko": "빌 애크먼",
+    "quarter": "2025Q4",
+    "holdings": [
+      {
+        "shares": 61403089,
+        "value": 2817787754,
+        "pct_of_portfolio": 18.15,
+        "option_type": null,
+        "securities": {
+          "name": "BROOKFIELD CORP",
+          "ticker": "BN",
+          "sector_ko": "부동산"
+        }
+      },
+      {
+        "shares": 30207734,
+        "value": 2468273945,
+        "pct_of_portfolio": 15.9,
+        "option_type": null,
+        "securities": {
+          "name": "UBER TECHNOLOGIES INC",
+          "ticker": "UBER",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 9607824,
+        "value": 2217677936,
+        "pct_of_portfolio": 14.28,
+        "option_type": null,
+        "securities": {
+          "name": "AMAZON.COM INC",
+          "ticker": "AMZN",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 6163871,
+        "value": 1934222720,
+        "pct_of_portfolio": 12.46,
+        "option_type": null,
+        "securities": {
+          "name": "ALPHABET INC-CL C",
+          "ticker": "GOOG",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 2673569,
+        "value": 1764796161,
+        "pct_of_portfolio": 11.37,
+        "option_type": null,
+        "securities": {
+          "name": "META PLATFORMS INC-CLASS A",
+          "ticker": "META",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 22866773,
+        "value": 1560199922,
+        "pct_of_portfolio": 10.05,
+        "option_type": null,
+        "securities": {
+          "name": "RESTAURANT BRANDS INTL INC",
+          "ticker": "QSR",
+          "sector_ko": "경기소비재"
+        }
+      },
+      {
+        "shares": 18852064,
+        "value": 1503829145,
+        "pct_of_portfolio": 9.69,
+        "option_type": null,
+        "securities": {
+          "name": "HOWARD HUGHES HOLDINGS INC",
+          "ticker": "HHH",
+          "sector_ko": "부동산"
+        }
+      },
+      {
+        "shares": 3028664,
+        "value": 869983734,
+        "pct_of_portfolio": 5.6,
+        "option_type": null,
+        "securities": {
+          "name": "HILTON WORLDWIDE HLDGS INC",
+          "ticker": "HLT",
+          "sector_ko": "경기소비재"
+        }
+      },
+      {
+        "shares": 678297,
+        "value": 212306961,
+        "pct_of_portfolio": 1.37,
+        "option_type": null,
+        "securities": {
+          "name": "ALPHABET INC",
+          "ticker": "GOOGL",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 5023780,
+        "value": 99320131,
+        "pct_of_portfolio": 0.64,
+        "option_type": null,
+        "securities": {
+          "name": "SEAPORT ENTMT GROUP INC",
+          "ticker": "SEG",
+          "sector_ko": "경기소비재"
+        }
+      },
+      {
+        "shares": 15241127,
+        "value": 78339393,
+        "pct_of_portfolio": 0.5,
+        "option_type": null,
+        "securities": {
+          "name": "HERTZ GLOBAL HLDGS INC",
+          "ticker": "HTZ",
+          "sector_ko": "경기소비재"
+        }
+      }
+    ],
+    "changes": [
+      {
+        "change_type": "buy",
+        "pct_change": 49.7,
+        "shares_change": 20382858,
+        "value_current": 2817787754,
+        "value_prev": 2813167442,
+        "securities": {
+          "name": "BROOKFIELD CORP",
+          "ticker": "BN"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 65,
+        "shares_change": 3784508,
+        "value_current": 2217677936,
+        "value_prev": 1278625494,
+        "securities": {
+          "name": "AMAZON.COM INC",
+          "ticker": "AMZN"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -2.5,
+        "shares_change": -160160,
+        "value_current": 1934222720,
+        "value_prev": 1540217750,
+        "securities": {
+          "name": "ALPHABET INC-CL C",
+          "ticker": "GOOG"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 2673569,
+        "value_current": 1764796161,
+        "value_prev": 0,
+        "securities": {
+          "name": "META PLATFORMS INC-CLASS A",
+          "ticker": "META"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -86,
+        "shares_change": -4165676,
+        "value_current": 212306961,
+        "value_prev": 1177569836,
+        "securities": {
+          "name": "ALPHABET INC",
+          "ticker": "GOOGL"
+        }
+      },
+      {
+        "change_type": "exit",
+        "pct_change": -100,
+        "shares_change": -21541177,
+        "value_current": 0,
+        "value_prev": 844198727,
+        "securities": {
+          "name": "CHIPOTLE MEXICAN GRILL INC",
+          "ticker": "CMG"
+        }
+      }
+    ],
+    "metrics": [
+      {
+        "id": 2,
+        "investor_id": 5,
+        "quarter": "2025Q4",
+        "total_aum": 15526737802,
+        "holding_count": 11,
+        "sector_count": 3,
+        "concentration": 0.995,
+        "top_holding_pct": 18.15,
+        "qoq_change": 6,
+        "created_at": "2026-03-05T04:25:42.398355+00:00"
+      },
+      {
+        "id": 57,
+        "investor_id": 5,
+        "quarter": "2025Q3",
+        "total_aum": 14643293767,
+        "holding_count": 11,
+        "sector_count": 3,
+        "concentration": 0.993,
+        "top_holding_pct": 20.25,
+        "qoq_change": 6.7,
+        "created_at": "2026-03-06T00:30:44.480358+00:00"
+      },
+      {
+        "id": 56,
+        "investor_id": 5,
+        "quarter": "2025Q2",
+        "total_aum": 13729120533,
+        "holding_count": 11,
+        "sector_count": 3,
+        "concentration": 0.993,
+        "top_holding_pct": 20.59,
+        "qoq_change": 15.1,
+        "created_at": "2026-03-06T00:30:42.872075+00:00"
+      },
+      {
+        "id": 55,
+        "investor_id": 5,
+        "quarter": "2025Q1",
+        "total_aum": 11930893008,
+        "holding_count": 11,
+        "sector_count": 3,
+        "concentration": 0.995,
+        "top_holding_pct": 18.5,
+        "qoq_change": 0,
+        "created_at": "2026-03-06T00:30:41.289926+00:00"
+      }
+    ]
+  },
+  "george_soros": {
+    "name": "George Soros",
+    "name_ko": "조지 소로스",
+    "quarter": "2025Q4",
+    "holdings": [
+      {
+        "shares": 8080112,
+        "value": 551325,
+        "pct_of_portfolio": 10.44,
+        "option_type": null,
+        "securities": {
+          "name": "RESTAURANT BRANDS INTL INC",
+          "ticker": "QSR",
+          "sector_ko": "경기소비재"
+        }
+      },
+      {
+        "shares": 2121391,
+        "value": 489659,
+        "pct_of_portfolio": 9.28,
+        "option_type": null,
+        "securities": {
+          "name": "AMAZON.COM INC",
+          "ticker": "AMZN",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 1357601,
+        "value": 446108,
+        "pct_of_portfolio": 8.45,
+        "option_type": null,
+        "securities": {
+          "name": "WILLIS TOWERS WATSON PLC LTD",
+          "ticker": "WTW",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 1269302,
+        "value": 444954,
+        "pct_of_portfolio": 8.43,
+        "option_type": null,
+        "securities": {
+          "name": "ELEVANCE HEALTH INC FORMERLY",
+          "ticker": "ELV",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 1627254,
+        "value": 376416,
+        "pct_of_portfolio": 7.13,
+        "option_type": null,
+        "securities": {
+          "name": "UNION PAC CORP",
+          "ticker": "UNP",
+          "sector_ko": "경기소비재"
+        }
+      },
+      {
+        "shares": 1418831,
+        "value": 347103,
+        "pct_of_portfolio": 6.58,
+        "option_type": null,
+        "securities": {
+          "name": "WESCO INTL INC",
+          "ticker": "WCC",
+          "sector_ko": "산업"
+        }
+      },
+      {
+        "shares": 1087181,
+        "value": 341157,
+        "pct_of_portfolio": 6.46,
+        "option_type": null,
+        "securities": {
+          "name": "ALPHABET INC-CL C",
+          "ticker": "GOOG",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 4503801,
+        "value": 299323,
+        "pct_of_portfolio": 5.67,
+        "option_type": null,
+        "securities": {
+          "name": "FIDELITY NATL INFORMATION SV",
+          "ticker": "FIS",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 2062821,
+        "value": 273881,
+        "pct_of_portfolio": 5.19,
+        "option_type": null,
+        "securities": {
+          "name": "DOLLAR GEN CORP NEW",
+          "ticker": "DG",
+          "sector_ko": "필수소비재"
+        }
+      },
+      {
+        "shares": 1137035,
+        "value": 253138,
+        "pct_of_portfolio": 4.8,
+        "option_type": null,
+        "securities": {
+          "name": "FERGUSON ENTERPRISES INC",
+          "ticker": "31488V",
+          "sector_ko": "산업"
+        }
+      },
+      {
+        "shares": 1185248,
+        "value": 244967,
+        "pct_of_portfolio": 4.64,
+        "option_type": null,
+        "securities": {
+          "name": "EAGLE MATLS INC",
+          "ticker": "EXP",
+          "sector_ko": "산업"
+        }
+      },
+      {
+        "shares": 20884781,
+        "value": 230568,
+        "pct_of_portfolio": 4.37,
+        "option_type": null,
+        "securities": {
+          "name": "LIBERTY GLOBAL LTD",
+          "ticker": "LBTYK",
+          "sector_ko": "통신"
+        }
+      },
+      {
+        "shares": 1486088,
+        "value": 182729,
+        "pct_of_portfolio": 3.46,
+        "option_type": null,
+        "securities": {
+          "name": "GENUINE PARTS CO",
+          "ticker": "GPC",
+          "sector_ko": "경기소비재"
+        }
+      },
+      {
+        "shares": 2200000,
+        "value": 147774,
+        "pct_of_portfolio": 2.8,
+        "option_type": null,
+        "securities": {
+          "name": "FISERV INC",
+          "ticker": "FISV",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 1072957,
+        "value": 133905,
+        "pct_of_portfolio": 2.54,
+        "option_type": null,
+        "securities": {
+          "name": "CRH PLC",
+          "ticker": "CRH",
+          "sector_ko": "경기소비재"
+        }
+      },
+      {
+        "shares": 9259844,
+        "value": 119359,
+        "pct_of_portfolio": 2.26,
+        "option_type": null,
+        "securities": {
+          "name": "HERBALIFE LTD",
+          "ticker": "HLF",
+          "sector_ko": "필수소비재"
+        }
+      },
+      {
+        "shares": 625000,
+        "value": 108463,
+        "pct_of_portfolio": 2.05,
+        "option_type": null,
+        "securities": {
+          "name": "MOLINA HEALTHCARE INC",
+          "ticker": "MOH",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 4855180,
+        "value": 106620,
+        "pct_of_portfolio": 2.02,
+        "option_type": null,
+        "securities": {
+          "name": "GRUPO AEROMEXICO SAB DE CV",
+          "ticker": "AERO",
+          "sector_ko": "산업"
+        }
+      },
+      {
+        "shares": 3044818,
+        "value": 106264,
+        "pct_of_portfolio": 2.01,
+        "option_type": null,
+        "securities": {
+          "name": "GDS HLDGS LTD",
+          "ticker": "GDS",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 3475685,
+        "value": 44697,
+        "pct_of_portfolio": 0.85,
+        "option_type": null,
+        "securities": {
+          "name": "AMERICOLD REALTY TRUST INC",
+          "ticker": "COLD",
+          "sector_ko": "금융"
+        }
+      },
+      {
+        "shares": 2080456,
+        "value": 23176,
+        "pct_of_portfolio": 0.44,
+        "option_type": null,
+        "securities": {
+          "name": "LIBERTY GLOBAL LTD",
+          "ticker": "LBTYA",
+          "sector_ko": "통신"
+        }
+      },
+      {
+        "shares": 257226,
+        "value": 7004,
+        "pct_of_portfolio": 0.13,
+        "option_type": null,
+        "securities": {
+          "name": "TAMBORAN RES CORP",
+          "ticker": "TBN",
+          "sector_ko": "에너지"
+        }
+      }
+    ],
+    "changes": [
+      {
+        "change_type": "sell",
+        "pct_change": -2.1,
+        "shares_change": -172750,
+        "value_current": 551325,
+        "value_prev": 529337,
+        "securities": {
+          "name": "RESTAURANT BRANDS INTL INC",
+          "ticker": "QSR"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 2121391,
+        "value_current": 489659,
+        "value_prev": 0,
+        "securities": {
+          "name": "AMAZON.COM INC",
+          "ticker": "AMZN"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 24.7,
+        "shares_change": 268536,
+        "value_current": 446108,
+        "value_prev": 376218,
+        "securities": {
+          "name": "WILLIS TOWERS WATSON PLC LTD",
+          "ticker": "WTW"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -3.8,
+        "shares_change": -49698,
+        "value_current": 444954,
+        "value_prev": 426195,
+        "securities": {
+          "name": "ELEVANCE HEALTH INC FORMERLY",
+          "ticker": "ELV"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 8.8,
+        "shares_change": 131050,
+        "value_current": 376416,
+        "value_prev": 353658,
+        "securities": {
+          "name": "UNION PAC CORP",
+          "ticker": "UNP"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -5.6,
+        "shares_change": -84349,
+        "value_current": 347103,
+        "value_prev": 317923,
+        "securities": {
+          "name": "WESCO INTL INC",
+          "ticker": "WCC"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -41.5,
+        "shares_change": -770957,
+        "value_current": 341157,
+        "value_prev": 452550,
+        "securities": {
+          "name": "ALPHABET INC-CL C",
+          "ticker": "GOOG"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 18.8,
+        "shares_change": 714090,
+        "value_current": 299323,
+        "value_prev": 249894,
+        "securities": {
+          "name": "FIDELITY NATL INFORMATION SV",
+          "ticker": "FIS"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -22.7,
+        "shares_change": -604055,
+        "value_current": 273881,
+        "value_prev": 275622,
+        "securities": {
+          "name": "DOLLAR GEN CORP NEW",
+          "ticker": "DG"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -1.6,
+        "shares_change": -18465,
+        "value_current": 253138,
+        "value_prev": 259502,
+        "securities": {
+          "name": "FERGUSON ENTERPRISES INC",
+          "ticker": "31488V"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 26.1,
+        "shares_change": 245588,
+        "value_current": 244967,
+        "value_prev": 218978,
+        "securities": {
+          "name": "EAGLE MATLS INC",
+          "ticker": "EXP"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -3.6,
+        "shares_change": -773022,
+        "value_current": 230568,
+        "value_prev": 254479,
+        "securities": {
+          "name": "LIBERTY GLOBAL LTD",
+          "ticker": "LBTYK"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 6.5,
+        "shares_change": 91088,
+        "value_current": 182729,
+        "value_prev": 193347,
+        "securities": {
+          "name": "GENUINE PARTS CO",
+          "ticker": "GPC"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 145.8,
+        "shares_change": 1305000,
+        "value_current": 147774,
+        "value_prev": 115392,
+        "securities": {
+          "name": "FISERV INC",
+          "ticker": "FISV"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -68.3,
+        "shares_change": -2310438,
+        "value_current": 133905,
+        "value_prev": 405669,
+        "securities": {
+          "name": "CRH PLC",
+          "ticker": "CRH"
+        }
+      },
+      {
+        "change_type": "buy",
+        "pct_change": 19.3,
+        "shares_change": 1500000,
+        "value_current": 119359,
+        "value_prev": 65493,
+        "securities": {
+          "name": "HERBALIFE LTD",
+          "ticker": "HLF"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 625000,
+        "value_current": 108463,
+        "value_prev": 0,
+        "securities": {
+          "name": "MOLINA HEALTHCARE INC",
+          "ticker": "MOH"
+        }
+      },
+      {
+        "change_type": "new",
+        "pct_change": 100,
+        "shares_change": 4855180,
+        "value_current": 106620,
+        "value_prev": 0,
+        "securities": {
+          "name": "GRUPO AEROMEXICO SAB DE CV",
+          "ticker": "AERO"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -6.3,
+        "shares_change": -205134,
+        "value_current": 106264,
+        "value_prev": 125773,
+        "securities": {
+          "name": "GDS HLDGS LTD",
+          "ticker": "GDS"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -3.5,
+        "shares_change": -124315,
+        "value_current": 44697,
+        "value_prev": 44064,
+        "securities": {
+          "name": "AMERICOLD REALTY TRUST INC",
+          "ticker": "COLD"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -59,
+        "shares_change": -2996306,
+        "value_current": 23176,
+        "value_prev": 58180,
+        "securities": {
+          "name": "LIBERTY GLOBAL LTD",
+          "ticker": "LBTYA"
+        }
+      },
+      {
+        "change_type": "sell",
+        "pct_change": -54.9,
+        "shares_change": -313607,
+        "value_current": 7004,
+        "value_prev": 15629,
+        "securities": {
+          "name": "TAMBORAN RES CORP",
+          "ticker": "TBN"
+        }
+      },
+      {
+        "change_type": "exit",
+        "pct_change": -100,
+        "shares_change": -2500000,
+        "value_current": 0,
+        "value_prev": 25000,
+        "securities": {
+          "name": "PAGSEGURO DIGITAL LTD",
+          "ticker": "PAGS"
+        }
+      }
+    ],
+    "metrics": [
+      {
+        "id": 9,
+        "investor_id": 6,
+        "quarter": "2025Q4",
+        "total_aum": 5278590,
+        "holding_count": 22,
+        "sector_count": 2,
+        "concentration": 0.724,
+        "top_holding_pct": 10.44,
+        "qoq_change": 10.2,
+        "created_at": "2026-03-05T04:58:01.878652+00:00"
+      },
+      {
+        "id": 68,
+        "investor_id": 6,
+        "quarter": "2025Q3",
+        "total_aum": 4790804,
+        "holding_count": 22,
+        "sector_count": 2,
+        "concentration": 0.762,
+        "top_holding_pct": 11.05,
+        "qoq_change": 16,
+        "created_at": "2026-03-06T00:32:00.241539+00:00"
+      },
+      {
+        "id": 67,
+        "investor_id": 6,
+        "quarter": "2025Q2",
+        "total_aum": 4130042,
+        "holding_count": 23,
+        "sector_count": 2,
+        "concentration": 0.787,
+        "top_holding_pct": 11.31,
+        "qoq_change": 18.1,
+        "created_at": "2026-03-06T00:31:53.564141+00:00"
+      },
+      {
+        "id": 66,
+        "investor_id": 6,
+        "quarter": "2025Q1",
+        "total_aum": 3496062,
+        "holding_count": 23,
+        "sector_count": 2,
+        "concentration": 0.793,
+        "top_holding_pct": 14.75,
+        "qoq_change": 1.8,
+        "created_at": "2026-03-06T00:31:46.631469+00:00"
+      }
+    ]
+  },
+  "cathie_wood": {
+    "name": "Cathie Wood",
+    "name_ko": "캐시 우드",
+    "quarter": "2026Q1",
+    "holdings": [
+      {
+        "shares": 2609907,
+        "value": 1059466,
+        "pct_of_portfolio": 8.51,
+        "option_type": null,
+        "securities": {
+          "name": "TESLA INC",
+          "ticker": "TSLA",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 2605177,
+        "value": 1056529,
+        "pct_of_portfolio": 8.59,
+        "option_type": null,
+        "securities": {
+          "name": "TESLA INC",
+          "ticker": "TSLA",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 2587203,
+        "value": 1015296,
+        "pct_of_portfolio": 8.44,
+        "option_type": null,
+        "securities": {
+          "name": "TESLA INC",
+          "ticker": "TSLA",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 9588331,
+        "value": 575300,
+        "pct_of_portfolio": 4.62,
+        "option_type": null,
+        "securities": {
+          "name": "CRISPR THERAPEUTICS AG",
+          "ticker": "CRSP",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 9487483,
+        "value": 550843,
+        "pct_of_portfolio": 4.58,
+        "option_type": null,
+        "securities": {
+          "name": "CRISPR THERAPEUTICS AG",
+          "ticker": "CRSP",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 9550010,
+        "value": 547502,
+        "pct_of_portfolio": 4.45,
+        "option_type": null,
+        "securities": {
+          "name": "CRISPR THERAPEUTICS AG",
+          "ticker": "CRSP",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 3779718,
+        "value": 526801,
+        "pct_of_portfolio": 4.29,
+        "option_type": null,
+        "securities": {
+          "name": "SHOPIFY INC - CLASS A",
+          "ticker": "SHOP",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 3786553,
+        "value": 511663,
+        "pct_of_portfolio": 4.11,
+        "option_type": null,
+        "securities": {
+          "name": "SHOPIFY INC - CLASS A",
+          "ticker": "SHOP",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 3722150,
+        "value": 479505,
+        "pct_of_portfolio": 3.99,
+        "option_type": null,
+        "securities": {
+          "name": "SHOPIFY INC - CLASS A",
+          "ticker": "SHOP",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 2349249,
+        "value": 476184,
+        "pct_of_portfolio": 3.82,
+        "option_type": null,
+        "securities": {
+          "name": "ADVANCED MICRO DEVICES",
+          "ticker": "AMD",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 2345834,
+        "value": 469666,
+        "pct_of_portfolio": 3.82,
+        "option_type": null,
+        "securities": {
+          "name": "ADVANCED MICRO DEVICES",
+          "ticker": "AMD",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 2168031,
+        "value": 457733,
+        "pct_of_portfolio": 3.67,
+        "option_type": null,
+        "securities": {
+          "name": "COINBASE GLOBAL INC -CLASS A",
+          "ticker": "COIN",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 2163766,
+        "value": 450767,
+        "pct_of_portfolio": 3.67,
+        "option_type": null,
+        "securities": {
+          "name": "COINBASE GLOBAL INC -CLASS A",
+          "ticker": "COIN",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 2332857,
+        "value": 448283,
+        "pct_of_portfolio": 3.73,
+        "option_type": null,
+        "securities": {
+          "name": "ADVANCED MICRO DEVICES",
+          "ticker": "AMD",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 8420631,
+        "value": 446715,
+        "pct_of_portfolio": 3.63,
+        "option_type": null,
+        "securities": {
+          "name": "TEMPUS AI INC-CL A",
+          "ticker": "TEM",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 5254470,
+        "value": 439330,
+        "pct_of_portfolio": 3.57,
+        "option_type": null,
+        "securities": {
+          "name": "ROBINHOOD MARKETS INC - A",
+          "ticker": "HOOD",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 8455750,
+        "value": 433695,
+        "pct_of_portfolio": 3.48,
+        "option_type": null,
+        "securities": {
+          "name": "TEMPUS AI INC-CL A",
+          "ticker": "TEM",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 5085729,
+        "value": 433315,
+        "pct_of_portfolio": 3.48,
+        "option_type": null,
+        "securities": {
+          "name": "ROBINHOOD MARKETS INC - A",
+          "ticker": "HOOD",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 8369734,
+        "value": 430205,
+        "pct_of_portfolio": 3.58,
+        "option_type": null,
+        "securities": {
+          "name": "TEMPUS AI INC-CL A",
+          "ticker": "TEM",
+          "sector_ko": "헬스케어"
+        }
+      },
+      {
+        "shares": 2679662,
+        "value": 417403,
+        "pct_of_portfolio": 3.35,
+        "option_type": null,
+        "securities": {
+          "name": "PALANTIR TECHNOLOGIES INC-A",
+          "ticker": "PLTR",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 2675537,
+        "value": 415526,
+        "pct_of_portfolio": 3.38,
+        "option_type": null,
+        "securities": {
+          "name": "PALANTIR TECHNOLOGIES INC-A",
+          "ticker": "PLTR",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 4030945,
+        "value": 413869,
+        "pct_of_portfolio": 3.37,
+        "option_type": null,
+        "securities": {
+          "name": "CIRCLE INTERNET GROUP INC",
+          "ticker": "CRCL",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 4038760,
+        "value": 413016,
+        "pct_of_portfolio": 3.32,
+        "option_type": null,
+        "securities": {
+          "name": "CIRCLE INTERNET GROUP INC",
+          "ticker": "CRCL",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 4266124,
+        "value": 406370,
+        "pct_of_portfolio": 3.38,
+        "option_type": null,
+        "securities": {
+          "name": "ROKU INC",
+          "ticker": "ROKU",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 2147559,
+        "value": 403754,
+        "pct_of_portfolio": 3.36,
+        "option_type": null,
+        "securities": {
+          "name": "COINBASE GLOBAL INC -CLASS A",
+          "ticker": "COIN",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 5038089,
+        "value": 401490,
+        "pct_of_portfolio": 3.34,
+        "option_type": null,
+        "securities": {
+          "name": "ROBINHOOD MARKETS INC - A",
+          "ticker": "HOOD",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 2659862,
+        "value": 400169,
+        "pct_of_portfolio": 3.33,
+        "option_type": null,
+        "securities": {
+          "name": "PALANTIR TECHNOLOGIES INC-A",
+          "ticker": "PLTR",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 4001248,
+        "value": 389138,
+        "pct_of_portfolio": 3.24,
+        "option_type": null,
+        "securities": {
+          "name": "CIRCLE INTERNET GROUP INC",
+          "ticker": "CRCL",
+          "sector_ko": "기타"
+        }
+      },
+      {
+        "shares": 3913678,
+        "value": 385472,
+        "pct_of_portfolio": 3.09,
+        "option_type": null,
+        "securities": {
+          "name": "ROKU INC",
+          "ticker": "ROKU",
+          "sector_ko": "기술"
+        }
+      },
+      {
+        "shares": 3841699,
+        "value": 380549,
+        "pct_of_portfolio": 3.1,
+        "option_type": null,
+        "securities": {
+          "name": "ROKU INC",
+          "ticker": "ROKU",
+          "sector_ko": "기술"
+        }
+      }
+    ],
+    "changes": [],
+    "metrics": [
+      {
+        "id": 101,
+        "investor_id": 2,
+        "quarter": "2026Q1",
+        "total_aum": 12292532,
+        "holding_count": 117,
+        "sector_count": 6,
+        "concentration": 0.419,
+        "top_holding_pct": 8.59,
+        "qoq_change": 0,
+        "created_at": "2026-03-07T04:44:43.924956+00:00"
+      }
+    ]
+  }
+}

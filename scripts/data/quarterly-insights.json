@@ -1,0 +1,212 @@
+{
+  "buffett": [
+    {
+      "title": "AXP 최대 비중 20% 유지",
+      "title_en": "AXP Holds #1 at 20% Weight",
+      "desc": "아메리칸 익스프레스(AXP)가 포트폴리오의 20.1%를 차지하며 부동의 1위. 고소득층 결제 시장의 독점적 지위와 연회비 기반 반복 수익 모델에 대한 버핏의 확신이 그대로 반영됩니다. AAPL을 넘어서며 금융주 중심 재편이 완성된 모습입니다.",
+      "desc_en": "American Express (AXP) commands 20.1% of the portfolio as the undisputed #1 holding. Surpassing AAPL, this reflects Buffett's unwavering conviction in AXP's monopolistic position in premium payments and its recurring fee-based revenue model, completing a financials-led portfolio restructuring.",
+      "tag": "전략",
+      "confidence": 92
+    },
+    {
+      "title": "AAPL 분산 보유 총 20%대",
+      "title_en": "AAPL ~20% via Multi-Account",
+      "desc": "애플을 여러 계좌로 분산 보유하여 총 비중 약 20%를 유지. 2024년 대규모 매도 후 안정화된 수준으로, 여전히 버크셔 2대 핵심 포지션입니다. '소비자 생태계의 독점적 모트'라는 투자 논리는 건재한 것으로 보입니다.",
+      "desc_en": "Apple is held across multiple accounts totaling ~20%, stabilized after the massive 2024 sell-off. It remains Berkshire's #2 core position, and the investment thesis — Apple's monopolistic consumer ecosystem moat — appears fully intact.",
+      "tag": "비중확대",
+      "confidence": 88
+    },
+    {
+      "title": "Chubb +9.3% 보험 확대",
+      "title_en": "Chubb +9.3% Insurance Bet",
+      "desc": "Chubb Limited(CL)를 +9.3%(291만주) 추가 매수해 비중 3.9%로 확대. 버크셔 자체가 보험 사업의 본산인 만큼, 글로벌 손해보험 선두주자인 Chubb의 언더라이팅 역량과 보험료 인상 사이클 수혜에 주목하는 것으로 해석됩니다.",
+      "desc_en": "Added 2.91M shares of Chubb Limited (+9.3%), raising weight to 3.9%. Given Berkshire's own insurance DNA, this move signals appreciation for Chubb's global P&C underwriting excellence and its positioning to benefit from the hard insurance pricing cycle.",
+      "tag": "비중확대",
+      "confidence": 85
+    },
+    {
+      "title": "에너지 3중주 CHV 집중매수",
+      "title_en": "Energy Trio: Massive CHV Buy",
+      "desc": "Chevron(CHV)을 다수 계좌에서 총 비중 약 8%로 보유하며 OXY(3.97%)와 함께 에너지 섹터 비중이 12%에 달합니다. 특히 CHV를 +495.8% 대규모 추가 매수한 점은 유가 안정 속 에너지 메이저의 잉여현금흐름과 주주환원에 대한 강한 베팅입니다.",
+      "desc_en": "Chevron (CHV) held at ~8% across multiple accounts, combined with OXY (3.97%) brings energy sector to 12%. The massive +495.8% CHV addition is a strong bet on energy majors' free cash flow generation and shareholder returns amid stable oil prices.",
+      "tag": "섹터",
+      "confidence": 87
+    },
+    {
+      "title": "AUM $274B 집중도 65%",
+      "title_en": "AUM $274B, Top-10 at 65%",
+      "desc": "총 AUM $274.2B에 상위 10종목 집중도 65.3%로 전분기(64.1%) 대비 소폭 상승. QoQ +2.6% 성장하며 방어적이면서도 금융·에너지·필수소비재 3대 핵심 섹터에 집중하는 버핏 특유의 '확신 투자' 철학이 더욱 뚜렷해졌습니다.",
+      "desc_en": "Total AUM at $274.2B with top-10 concentration rising to 65.3% (from 64.1% QoQ). Growing +2.6% QoQ while concentrating on financials, energy, and consumer staples, Buffett's signature high-conviction investing philosophy is more pronounced than ever.",
+      "tag": "트렌드",
+      "confidence": 90
+    }
+  ],
+  "druckenmiller": [
+    {
+      "title": "NTRA 2411% 폭발적 매수",
+      "title_en": "NTRA +2411% Explosive Buy",
+      "desc": "Natera(NTRA)를 +2411%(241만주) 폭발적으로 매수하여 포트폴리오 1위(12.8%)로 격상. 비침습 산전검사(NIPT)와 장기이식 모니터링 분야의 선두 기업으로, 정밀의료 테마에 대한 드러켄밀러의 초고확신 집중 베팅입니다.",
+      "desc_en": "Explosively added 2.41M shares of Natera (+2411%), catapulting it to the #1 position at 12.8%. As a leader in non-invasive prenatal testing (NIPT) and organ transplant monitoring, this represents Druckenmiller's ultra-high conviction concentrated bet on precision medicine.",
+      "tag": "비중확대",
+      "confidence": 92
+    },
+    {
+      "title": "아시아 플랫폼 SE·CPNG 확대",
+      "title_en": "Asia Platforms: SE & CPNG Up",
+      "desc": "Sea Ltd(SE) +244%, 쿠팡(CPNG) +46%로 아시아 이커머스·핀테크 플랫폼 두 곳을 동시에 대폭 확대. 동남아와 한국 시장의 디지털 전환 가속에 배팅하며, 매크로 트레이더답게 이머징 시장 성장에 방향성 베팅하는 전형적 패턴입니다.",
+      "desc_en": "Massively expanded Sea Ltd (SE, +244%) and Coupang (CPNG, +46%), doubling down on Asian e-commerce/fintech platforms. Betting on accelerating digital transformation in Southeast Asia and Korea, this is a classic macro-trader directional play on emerging market growth.",
+      "tag": "트렌드",
+      "confidence": 85
+    },
+    {
+      "title": "TSM·TEVA 매도 포지션 축소",
+      "title_en": "TSM & TEVA Position Trim",
+      "desc": "TSMC(TSM) -29%, Teva(TPI) -64.6%로 반도체·제약 포지션을 대폭 축소. 반도체 사이클 피크 우려와 제네릭 제약 경쟁 심화를 반영한 것으로, 수익 실현과 리스크 관리를 동시에 진행하는 것으로 시사됩니다.",
+      "desc_en": "Significantly trimmed TSMC (TSM, -29%) and Teva (TPI, -64.6%), reducing semiconductor and pharma exposure. This reflects concerns about peak semiconductor cycle and intensifying generic pharma competition, executing profit-taking and risk management simultaneously.",
+      "tag": "리스크",
+      "confidence": 82
+    },
+    {
+      "title": "헬스케어 4종목 신규·확대",
+      "title_en": "Healthcare ~23% of Portfolio",
+      "desc": "NTRA(12.8%), INSM(5.74%), APM(2.4%), Cogent(1.75%) 등 헬스케어 비중이 포트폴리오의 약 23%를 차지. INSM은 매도(-38.9%)했지만 여전히 3위 유지. 바이오테크·정밀의료가 드러켄밀러의 최대 테마 베팅임이 확인됩니다.",
+      "desc_en": "Healthcare names — NTRA (12.8%), INSM (5.74%), APM (2.4%), Cogent (1.75%) — now comprise ~23% of the portfolio. Despite selling INSM (-38.9%), it remains #3. Biotech and precision medicine are confirmed as Druckenmiller's largest thematic bet.",
+      "tag": "섹터",
+      "confidence": 88
+    },
+    {
+      "title": "AMZN·GOOGL 빅테크 재진입",
+      "title_en": "AMZN & GOOGL Big Tech Re-Entry",
+      "desc": "Amazon +68.8%, Alphabet +276.7%로 빅테크에 적극 재진입. AI 인프라 투자의 수혜가 실적으로 이어지는 구간에서 매크로 방향성을 빅테크로 잡은 것으로, 성장주 랠리 지속에 대한 확신을 보여줍니다.",
+      "desc_en": "Aggressively re-entered big tech with Amazon (+68.8%) and Alphabet (+276.7%). As AI infrastructure investments translate into earnings, this macro directional bet on big tech signals strong conviction in the continued growth stock rally.",
+      "tag": "전략",
+      "confidence": 86
+    }
+  ],
+  "dalio": [
+    {
+      "title": "S&P500 ETF 11% 최대 포지션",
+      "title_en": "S&P500 ETF 11% Top Position",
+      "desc": "SPDR S&P500 ETF(SPY)가 11.08%로 포트폴리오 최대 비중. iShares 계열 ETF(10.45%)와 합산하면 지수 ETF만 21.5%를 차지합니다. '올웨더' 전략의 핵심인 분산투자와 시장 베타 확보가 그대로 드러나는 구성입니다.",
+      "desc_en": "SPDR S&P 500 ETF (SPY) leads the portfolio at 11.08%. Combined with iShares ETFs (10.45%), index ETFs alone account for 21.5%. This composition perfectly reflects the All Weather strategy's core principles: diversification and market beta capture.",
+      "tag": "전략",
+      "confidence": 90
+    },
+    {
+      "title": "NVDA 2.63% 개별주 최대",
+      "title_en": "NVDA 2.63% — Top Single Stock",
+      "desc": "Nvidia(NVDA)가 개별주 중 최대 비중(2.63%)을 차지. ETF 중심의 달리오가 개별 기술주를 이 수준으로 보유한다는 것은 AI 인프라 투자 테마를 '메가트렌드'로 인식하고 있음을 시사합니다.",
+      "desc_en": "Nvidia (NVDA) is the largest individual stock at 2.63%. For an ETF-centric investor like Dalio to hold a single tech stock at this level suggests he views the AI infrastructure investment theme as a genuine megatrend.",
+      "tag": "트렌드",
+      "confidence": 85
+    },
+    {
+      "title": "매수17 vs 매도13 균형 조정",
+      "title_en": "17 Buys vs 13 Sells — Balanced",
+      "desc": "매수 17건, 매도 13건으로 리밸런싱 성격의 포지션 조정이 활발. 신규 편입 없이 기존 포지션 내에서 비중만 조절하는 전형적인 리스크 패리티 운용 방식입니다. QoQ +7.4% 성장하며 AUM $27.4B을 기록했습니다.",
+      "desc_en": "An active rebalancing quarter with 17 buys and 13 sells. No new positions — only weight adjustments within existing holdings, a textbook risk parity management approach. AUM grew +7.4% QoQ to reach $27.4B.",
+      "tag": "리스크",
+      "confidence": 83
+    },
+    {
+      "title": "집중도 36.3% 극도로 분산",
+      "title_en": "36.3% Concentration — Ultra-Diversified",
+      "desc": "상위 10종목 집중도 36.3%로 6명 투자자 중 가장 낮은 분산도. ETF를 통한 초분산 전략은 달리오의 '성배(Holy Grail of Investing)' 원칙—상관관계 낮은 15개 이상 자산 보유—을 충실히 반영합니다.",
+      "desc_en": "Top-10 concentration at just 36.3% — the lowest among all six investors. This ultra-diversification through ETFs faithfully follows Dalio's 'Holy Grail of Investing' principle: holding 15+ uncorrelated asset streams.",
+      "tag": "밸류에이션",
+      "confidence": 88
+    },
+    {
+      "title": "이머징·글로벌 ETF 배분 유지",
+      "title_en": "Emerging & Global ETF Allocation",
+      "desc": "iShares 이머징마켓(ISHA), 글로벌 지수 ETF 등을 꾸준히 보유하며 지리적 분산을 유지. 미국 집중 리스크를 회피하면서 글로벌 성장에 고르게 노출되는 올웨더 포트폴리오의 교과서적 구성입니다.",
+      "desc_en": "Maintains steady holdings in iShares Emerging Markets (ISHA) and global index ETFs for geographic diversification. This textbook All Weather construction avoids US concentration risk while maintaining balanced exposure to global growth.",
+      "tag": "매크로",
+      "confidence": 82
+    }
+  ],
+  "ackman": [
+    {
+      "title": "META 신규 편입 11.4%",
+      "title_en": "META New Position at 11.4%",
+      "desc": "Meta Platforms(META)를 11.37% 비중으로 신규 편입. 애크먼의 집중 투자 스타일(8-12종목)에 부합하는 대형 포지션으로, Instagram·WhatsApp의 광고 수익화와 AI 투자 효율성에 대한 높은 확신을 반영합니다.",
+      "desc_en": "Initiated a new 11.37% position in Meta Platforms (META). Consistent with Ackman's concentrated style (8-12 names), this large position reflects high conviction in Instagram/WhatsApp ad monetization and Meta's AI investment efficiency.",
+      "tag": "신규매수",
+      "confidence": 92
+    },
+    {
+      "title": "CMG 완전 청산 포지션 종료",
+      "title_en": "CMG Fully Exited",
+      "desc": "Chipotle Mexican Grill(CMG)을 완전 청산. 2020년부터 장기 보유했던 핵심 포지션으로, 밸류에이션 목표 달성 또는 경영 참여 종료에 따른 엑싯으로 보입니다. 매각 자금이 META 신규 편입에 활용된 것으로 추정됩니다.",
+      "desc_en": "Fully exited Chipotle Mexican Grill (CMG), a core holding since 2020. This appears to be a valuation-target or activism-completion exit. Proceeds are estimated to have funded the new META position.",
+      "tag": "비중축소",
+      "confidence": 88
+    },
+    {
+      "title": "집중도 99.5% 극한의 확신",
+      "title_en": "99.5% Concentration — All-In",
+      "desc": "상위 10종목 집중도 99.5%로 사실상 11종목에 올인. BN(18.15%), UBER(15.9%), AMZN(14.28%), GOOG(12.46%), META(11.37%)로 상위 5개가 72%를 차지. 행동주의 투자자 특유의 초고집중 포트폴리오입니다.",
+      "desc_en": "Top-10 concentration at 99.5% — effectively all-in on 11 names. BN (18.15%), UBER (15.9%), AMZN (14.28%), GOOG (12.46%), META (11.37%) make up 72% of the top 5. A quintessential activist investor's ultra-concentrated portfolio.",
+      "tag": "전략",
+      "confidence": 93
+    },
+    {
+      "title": "플랫폼 빅테크 5종목 핵심",
+      "title_en": "5 Platform Giants = 72%",
+      "desc": "AMZN, GOOG, META, UBER, BN 등 플랫폼 비즈니스 모델 기업이 포트폴리오의 72%를 구성. 네트워크 효과와 규모의 경제를 가진 독점적 플랫폼에만 투자하는 애크먼의 '경쟁우위 모트' 철학이 명확히 드러납니다.",
+      "desc_en": "Platform business models — AMZN, GOOG, META, UBER, BN — constitute 72% of the portfolio. Ackman's 'competitive moat' philosophy is crystal clear: invest only in monopolistic platforms with network effects and economies of scale.",
+      "tag": "섹터",
+      "confidence": 90
+    },
+    {
+      "title": "AUM $15.5B QoQ +6% 성장",
+      "title_en": "AUM $15.5B, +6% QoQ Growth",
+      "desc": "AUM $15.5B으로 QoQ +6% 성장하며 빅테크 중심 포트폴리오가 시장 대비 아웃퍼폼 중. 11개 종목만으로 이 수익률을 달성한 것은 집중 투자 전략의 효과가 입증되는 구간입니다.",
+      "desc_en": "AUM reached $15.5B with +6% QoQ growth, outperforming the market with a big tech-centric portfolio. Achieving these returns with just 11 names validates the effectiveness of the concentrated investment strategy.",
+      "tag": "트렌드",
+      "confidence": 85
+    }
+  ],
+  "soros": [
+    {
+      "title": "QSR 10.4% 최대 포지션",
+      "title_en": "QSR 10.4% — Top Position",
+      "desc": "Restaurant Brands Intl(QSR, 버거킹·팀홀튼 모회사)이 10.44%로 최대 비중. 글로벌 매크로 투자자가 QSR 프랜차이즈를 최대 보유한다는 것은 경기 둔화 국면에서도 방어적 소비주의 안정적 현금흐름에 주목한 것으로 해석됩니다.",
+      "desc_en": "Restaurant Brands Intl (QSR, parent of Burger King & Tim Hortons) leads at 10.44%. A global macro investor holding a QSR franchise as the top position signals focus on defensive consumer stocks' stable cash flows even during economic slowdowns.",
+      "tag": "전략",
+      "confidence": 85
+    },
+    {
+      "title": "AMZN 신규 9.3% 대형 베팅",
+      "title_en": "AMZN New 9.3% Major Bet",
+      "desc": "Amazon(AMZN)을 9.28%로 신규 편입하며 2위 포지션 구축. AWS 클라우드와 AI 인프라 성장에 대한 매크로적 베팅으로, 소로스 펀드가 빅테크 성장 스토리에 다시 적극적으로 참여하고 있음을 시사합니다.",
+      "desc_en": "Initiated Amazon (AMZN) at 9.28% as the #2 position. This macro-level bet on AWS cloud and AI infrastructure growth indicates the Soros Fund is actively re-engaging with the big tech growth narrative.",
+      "tag": "신규매수",
+      "confidence": 88
+    },
+    {
+      "title": "보험·헬스케어 방어적 배분",
+      "title_en": "Insurance & Healthcare Defensive",
+      "desc": "WTW(8.45%), ELV(8.43%) 등 보험·헬스케어가 상위 포지션의 약 17%를 차지. 거시경제 불확실성 속에서 필수 서비스 기반 방어주를 핵심에 배치하며 다운사이드 리스크를 관리하는 전형적인 매크로 전략입니다.",
+      "desc_en": "Insurance and healthcare names — WTW (8.45%), ELV (8.43%) — account for ~17% of top positions. Placing essential-service defensives at the core amid macro uncertainty is a classic macro strategy for managing downside risk.",
+      "tag": "리스크",
+      "confidence": 83
+    },
+    {
+      "title": "PAGS 청산 이머징 축소",
+      "title_en": "PAGS Exit — EM Reduction",
+      "desc": "PagSeguro(PAGS, 브라질 핀테크)를 완전 청산하고 이머징 마켓 노출을 줄이는 방향. 브라질 금리 인상과 핀테크 경쟁 심화가 배경으로 보이며, 전반적으로 12건의 매도 대비 7건 매수로 포지션 축소 기조입니다.",
+      "desc_en": "Fully exited PagSeguro (PAGS, Brazilian fintech), reducing emerging market exposure. Driven by Brazil's rate hikes and intensifying fintech competition, the overall pattern of 12 sells vs 7 buys confirms a position reduction posture.",
+      "tag": "비중축소",
+      "confidence": 80
+    },
+    {
+      "title": "UNP·운송 인프라 7% 배분",
+      "title_en": "UNP & Transport Infra at 7%",
+      "desc": "Union Pacific(UNP) 7.13%와 AERO(신규) 등 운송·항공 인프라에 적극 배분. 미국 리쇼어링(제조업 회귀)과 물류 수요 구조적 증가 테마에 거시적 관점에서 베팅하는 것으로 시사됩니다.",
+      "desc_en": "Active allocation to Union Pacific (UNP, 7.13%) and AERO (new). From a macro perspective, this bets on the US reshoring (manufacturing return) theme and the structural increase in logistics demand.",
+      "tag": "매크로",
+      "confidence": 82
+    }
+  ]
+}
