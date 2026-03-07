@@ -52,7 +52,7 @@ export default {
   dashboard: {
     subtitle: "SEC 13F 공시 기반",
     title: "월가의 눈",
-    description: "세계 최고 투자자들의 포트폴리오를 한눈에.",
+    description: "월가 전설들이 무엇을 사고팔았는지, SEC 공시로 직접 확인하세요.",
     dataUpdate: "데이터 업데이트",
     trackedInvestors: "추적 투자자",
     totalAum: "총 운용자산",

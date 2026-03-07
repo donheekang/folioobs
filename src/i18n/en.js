@@ -52,7 +52,7 @@ export default {
   dashboard: {
     subtitle: "Based on SEC 13F Filings",
     title: "Wall Street's Eye",
-    description: "Top investors' portfolios at a glance.",
+    description: "See what Wall Street legends are buying and selling — straight from SEC filings.",
     dataUpdate: "Data Updated",
     trackedInvestors: "Tracked Investors",
     totalAum: "Total AUM",
