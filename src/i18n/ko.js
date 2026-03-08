@@ -72,6 +72,10 @@ export default {
     sharesChange: "보유량 변동",
     noInvestorData: "투자자 데이터가 없습니다.",
     runPipeline: "데이터 파이프라인을 실행해주세요.",
+    arkDailyTitle: "캐시 우드 실시간 매매",
+    arkDailyBadge: "매일 업데이트",
+    arkMore: "건 더보기",
+    arkViewAll: "전체 매매 내역 보기 →",
   },
 
   // ===== 투자자 상세 =====

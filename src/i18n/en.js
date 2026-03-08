@@ -72,6 +72,10 @@ export default {
     sharesChange: "Share Changes",
     noInvestorData: "No investor data available.",
     runPipeline: "Please run the data pipeline.",
+    arkDailyTitle: "Cathie Wood Daily Trades",
+    arkDailyBadge: "Daily Updates",
+    arkMore: "more",
+    arkViewAll: "View All Trades →",
   },
 
   // ===== Investor Detail =====

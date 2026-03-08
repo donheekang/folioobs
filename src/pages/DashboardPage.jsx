@@ -1,6 +1,6 @@
 import { useMemo, memo, useState, useEffect, useRef } from "react";
 import {
-  ArrowUpRight, ArrowDownRight, Briefcase, Plus, Layers, BarChart3, ChevronDown
+  ArrowUpRight, ArrowDownRight, Briefcase, Plus, Layers, BarChart3, ChevronDown, Calendar, Zap
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -38,7 +38,7 @@ const SkeletonCard = () => (
 const DashboardPage = memo(({ onNavigate, watchlist }) => {
   const t = useTheme();
   const L = useLocale();
-  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyHistory: QUARTERLY_HISTORY, quarterlyActivity: QUARTERLY_ACTIVITY, latestQuarter, lastUpdatedAt, loading: dataLoading } = useData();
+  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyHistory: QUARTERLY_HISTORY, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades, latestQuarter, lastUpdatedAt, loading: dataLoading } = useData();
   const { toggleInvestor, isWatchedInv } = watchlist;
   const totalAUM = useMemo(() => INVESTORS.reduce((s,i) => s+i.aum, 0), [INVESTORS]);
   const avgH = useMemo(() => {
@@ -207,6 +207,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   <div className="flex items-center gap-2 mb-4">
                     <Badge color={inv.color}><SI size={11}/> {L.style(inv.style)}</Badge>
                     <span title={L.locale==='ko'?'전분기 대비 AUM 변동':'QoQ AUM Change'}><Badge color={inv.metrics.qoqChange>=0?t.green:t.red}>{inv.metrics.qoqChange>=0?<ArrowUpRight size={11}/>:<ArrowDownRight size={11}/>}{inv.metrics.qoqChange>=0?'+':''}{inv.metrics.qoqChange}%</Badge></span>
+                    {inv.id === 'cathie' && <Badge color="#f59e0b"><Zap size={11}/> {L.t('dashboard.arkDailyBadge')}</Badge>}
                   </div>
                   <div className="flex items-end justify-between">
                     <div className="grid grid-cols-3 gap-3 flex-1">
@@ -222,6 +223,102 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           })}
         </div>
       </section>
+
+      {/* ARK Daily Trades — Cathie Wood 실시간 매매 */}
+      {!ready ? null : arkDailyTrades.length > 0 && (() => {
+        const latestDay = arkDailyTrades[0];
+        const dateStr = (() => {
+          const d = new Date(latestDay.date + 'T00:00:00');
+          return L.locale === 'ko'
+            ? `${d.getMonth()+1}월 ${d.getDate()}일`
+            : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        })();
+        const buys = latestDay.trades.filter(t => t.direction === 'Buy');
+        const sells = latestDay.trades.filter(t => t.direction === 'Sell');
+        const cathieInv = INVESTORS.find(i => i.id === 'cathie');
+        return (
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Zap size={18} style={{color:'#f59e0b'}} />
+                <h2 className="text-lg font-bold" style={{color:t.text}}>{L.t('dashboard.arkDailyTitle')}</h2>
+                <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:'rgba(245,158,11,0.15)',color:'#f59e0b'}}>{L.t('dashboard.arkDailyBadge')}</span>
+              </div>
+              <span className="text-xs" style={{color:t.textMuted}}>{dateStr}</span>
+            </div>
+            <GlassCard hover={false}>
+              <div className="p-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Buy */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{background:`${t.green}15`}}>
+                        <ArrowUpRight size={12} style={{color:t.green}} />
+                      </div>
+                      <span className="text-sm font-semibold" style={{color:t.text}}>{L.t('common.buy')}</span>
+                      <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{background:`${t.green}15`,color:t.green}}>{buys.length}</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {buys.slice(0, 5).map((tr, i) => (
+                        <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors"
+                          style={{background:t.name==='dark'?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.02)'}}
+                          onClick={()=>cathieInv && onNavigate("investor","cathie")}>
+                          <div>
+                            <span className="text-sm font-semibold" style={{color:t.text}}>{tr.ticker}</span>
+                            <span className="text-xs ml-1.5" style={{color:t.textMuted}}>{tr.company?.slice(0,20)}</span>
+                          </div>
+                          <div className="text-right">
+                            {tr.isNew && <span className="text-xs font-medium mr-1" style={{color:t.accent}}>{L.t('common.new')}</span>}
+                            <span className="text-xs" style={{color:t.textMuted}}>{tr.funds}</span>
+                          </div>
+                        </div>
+                      ))}
+                      {buys.length > 5 && <div className="text-xs text-center py-1" style={{color:t.textMuted}}>+{buys.length - 5} {L.t('dashboard.arkMore')}</div>}
+                      {buys.length === 0 && <div className="text-xs text-center py-3" style={{color:t.textMuted}}>{L.t('common.none')}</div>}
+                    </div>
+                  </div>
+                  {/* Sell */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{background:`${t.red}15`}}>
+                        <ArrowDownRight size={12} style={{color:t.red}} />
+                      </div>
+                      <span className="text-sm font-semibold" style={{color:t.text}}>{L.t('common.sell')}</span>
+                      <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{background:`${t.red}15`,color:t.red}}>{sells.length}</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {sells.slice(0, 5).map((tr, i) => (
+                        <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors"
+                          style={{background:t.name==='dark'?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.02)'}}
+                          onClick={()=>cathieInv && onNavigate("investor","cathie")}>
+                          <div>
+                            <span className="text-sm font-semibold" style={{color:t.text}}>{tr.ticker}</span>
+                            <span className="text-xs ml-1.5" style={{color:t.textMuted}}>{tr.company?.slice(0,20)}</span>
+                          </div>
+                          <div className="text-right">
+                            {tr.isExit && <span className="text-xs font-medium mr-1" style={{color:t.red}}>{L.t('common.exit')}</span>}
+                            <span className="text-xs" style={{color:t.textMuted}}>{tr.funds}</span>
+                          </div>
+                        </div>
+                      ))}
+                      {sells.length > 5 && <div className="text-xs text-center py-1" style={{color:t.textMuted}}>+{sells.length - 5} {L.t('dashboard.arkMore')}</div>}
+                      {sells.length === 0 && <div className="text-xs text-center py-3" style={{color:t.textMuted}}>{L.t('common.none')}</div>}
+                    </div>
+                  </div>
+                </div>
+                {/* View all link */}
+                <div className="mt-4 text-center">
+                  <button className="text-xs font-medium px-4 py-1.5 rounded-full transition-colors hover:opacity-80"
+                    style={{color:t.accent, background:`${t.accent}12`, border:`1px solid ${t.accent}25`}}
+                    onClick={()=>onNavigate("investor","cathie")}>
+                    {L.t('dashboard.arkViewAll')}
+                  </button>
+                </div>
+              </div>
+            </GlassCard>
+          </section>
+        );
+      })()}
 
       {!ready ? null : <>
       {/* Visualization: Sector Treemap + Overlap Heatmap */}
