@@ -138,19 +138,28 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           ))}
         </div>
 
-        {/* Trade Highlights */}
+        {/* Trade Highlights — Card Style */}
         {heroHighlights.length > 0 && (
-          <div className="hero-enter hero-enter-6 flex flex-wrap items-center justify-center gap-2 mb-6">
-            {heroHighlights.map((h, i) => (
-              <button key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-opacity hover:opacity-80"
-                style={{background:`${h.color}12`, color:h.color, border:`1px solid ${h.color}25`}}
-                onClick={()=>onNavigate("investor",h.investor.id)}>
-                <span className="w-4 h-4 rounded flex items-center justify-center text-white text-[9px] font-bold" style={{background:h.investor.gradient}}>{h.investor.avatar}</span>
-                <span>{L.investorName(h.investor)}</span>
-                <span className="font-bold">{h.ticker}</span>
-                <span>{h.pct}</span>
-              </button>
-            ))}
+          <div className="hero-enter hero-enter-6 mb-6">
+            <p className="text-xs font-medium mb-3" style={{color:t.textMuted}}>{L.t('dashboard.recentMoves') || (L.locale === 'ko' ? '최근 주요 변동' : 'Recent Key Moves')}</p>
+            <div className="flex flex-wrap items-stretch justify-center gap-3">
+              {heroHighlights.map((h, i) => {
+                const cardBg = t.name==='dark'?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.02)';
+                const cardBorder = t.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';
+                const typeLabel = h.type==='buy'? (L.locale==='ko'?'비중 확대':'Increased') : h.type==='sell'? (L.locale==='ko'?'비중 축소':'Decreased') : (L.locale==='ko'?'신규 매수':'New Position');
+                return (
+                  <button key={i} className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    style={{background:cardBg, border:`1px solid ${cardBorder}`}}
+                    onClick={()=>onNavigate("investor",h.investor.id)}>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{background:h.investor.gradient}}>{h.investor.avatar}</div>
+                    <div className="text-left">
+                      <div className="text-sm font-bold" style={{color:t.text}}>{h.ticker} <span className="font-semibold" style={{color:h.color}}>{h.pct}</span></div>
+                      <div className="text-xs" style={{color:t.textMuted}}>{L.investorName(h.investor)} · {typeLabel}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
