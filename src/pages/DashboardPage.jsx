@@ -45,6 +45,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     if (!INVESTORS.length) return 0;
     return Math.round(INVESTORS.reduce((s,i)=>s+i.metrics.holdingCount,0)/INVESTORS.length);
   }, [INVESTORS]);
+  const totalStocks = useMemo(() => {
+    const tickers = new Set();
+    Object.values(HOLDINGS).forEach(arr => arr.forEach(h => tickers.add(h.ticker)));
+    return tickers.size;
+  }, [HOLDINGS]);
 
   const investorGridRef = useRef(null);
 
@@ -126,9 +131,9 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         )}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto mb-6">
           {[
-            { l: L.t('dashboard.trackedInvestors'), v: `${INVESTORS.length}`, unit: L.t('common.people') },
             { l: L.t('dashboard.totalAum'), v: formatUSD(totalAUM), unit: "" },
-            { l: L.t('dashboard.avgHoldings'), v: `${avgH}`, unit: L.t('common.items') },
+            { l: L.t('dashboard.trackedStocks'), v: `${totalStocks}`, unit: L.t('common.stocks_count') },
+            { l: L.t('dashboard.trackedInvestors'), v: `${INVESTORS.length}`, unit: L.t('common.people') },
             { l: L.t('dashboard.latestData'), v: latestQuarter ? L.quarter(latestQuarter) : "-", unit: "" },
           ].map((s, i) => (
             <div key={i} className={`hero-enter hero-enter-${i+2}`}>
@@ -243,7 +248,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 <h2 className="text-lg font-bold" style={{color:t.text}}>{L.t('dashboard.arkDailyTitle')}</h2>
                 <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:'rgba(245,158,11,0.15)',color:'#f59e0b'}}>{L.t('dashboard.arkDailyBadge')}</span>
               </div>
-              <span className="text-xs" style={{color:t.textMuted}}>{dateStr}</span>
+              <span className="text-xs" style={{color:t.textMuted}}>{L.t('dashboard.arkDateContext')} · {dateStr}</span>
             </div>
             <GlassCard hover={false}>
               <div className="p-5">
