@@ -1,6 +1,6 @@
-import { useMemo, memo, useState, useEffect } from "react";
+import { useMemo, memo, useState, useEffect, useRef } from "react";
 import {
-  ArrowUpRight, ArrowDownRight, Briefcase, Plus, Layers, BarChart3
+  ArrowUpRight, ArrowDownRight, Briefcase, Plus, Layers, BarChart3, ChevronDown
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -46,6 +46,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     return Math.round(INVESTORS.reduce((s,i)=>s+i.metrics.holdingCount,0)/INVESTORS.length);
   }, [INVESTORS]);
 
+  const investorGridRef = useRef(null);
+
   // Brief skeleton on first mount (smooth entry feel)
   const [ready, setReady] = useState(false);
   useEffect(() => { const id = setTimeout(() => setReady(true), 350); return () => clearTimeout(id); }, []);
@@ -65,6 +67,24 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       sellActions: all.filter(a => a.type === 'sell').sort((a,b) => a.pctChange - b.pctChange),
     };
   }, [INVESTORS, QUARTERLY_ACTIVITY]);
+
+  // Hero trade highlights: pick top buy + top sell for the marquee
+  const heroHighlights = useMemo(() => {
+    const picks = [];
+    if (buyActions.length > 0) {
+      const a = buyActions[0];
+      picks.push({ investor: a.investor, ticker: a.ticker, pct: Math.round(a.pctChange) > 999 ? '+999%' : `+${Math.round(a.pctChange)}%`, color: t.green, type: 'buy' });
+    }
+    if (sellActions.length > 0) {
+      const a = sellActions[0];
+      picks.push({ investor: a.investor, ticker: a.ticker, pct: `${Math.round(a.pctChange)}%`, color: t.red, type: 'sell' });
+    }
+    if (newPositions.length > 0) {
+      const a = newPositions[0];
+      picks.push({ investor: a.investor, ticker: a.ticker, pct: L.t('common.new'), color: t.accent, type: 'new' });
+    }
+    return picks.slice(0, 3);
+  }, [buyActions, sellActions, newPositions, t, L]);
 
   const handleActivityClick = (investorId) => onNavigate("investor", investorId);
   const ActivityItem = ({ act, label, color }) => {
@@ -90,21 +110,21 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
   return (
     <div className="space-y-6">
-      {/* Hero — Apple Clean */}
+      {/* Hero */}
       <div className="hero-enter hero-enter-1 text-center py-8 sm:py-12" role="banner">
-        <p className="text-sm font-medium mb-3" style={{color:t.accent}}>{L.t('dashboard.subtitle')}</p>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-3" style={{color:t.text, letterSpacing:'-0.025em'}}>
+        <p className="text-sm sm:text-base font-semibold mb-3 tracking-wide" style={{color:t.accent}}>{L.t('dashboard.subtitle')}</p>
+        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-3" style={{color:t.text, letterSpacing:'-0.025em'}}>
           {L.t('dashboard.title')}
         </h1>
-        <p className="text-lg sm:text-xl mb-6" style={{color:t.textSecondary}}>
+        <p className="text-base sm:text-lg mb-4" style={{color:t.textSecondary}}>
           {L.t('dashboard.description')}
         </p>
         {lastUpdatedAt && (
-          <p className="text-xs mb-8" style={{color:t.textMuted}}>
+          <p className="text-xs mb-6" style={{color:t.textMuted}}>
             {L.t('dashboard.dataUpdate')}: {new Date(lastUpdatedAt).toLocaleDateString(L.locale === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}
           </p>
         )}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto mb-6">
           {[
             { l: L.t('dashboard.trackedInvestors'), v: `${INVESTORS.length}`, unit: L.t('common.people') },
             { l: L.t('dashboard.totalAum'), v: formatUSD(totalAUM), unit: "" },
@@ -117,10 +137,37 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             </div>
           ))}
         </div>
+
+        {/* Trade Highlights */}
+        {heroHighlights.length > 0 && (
+          <div className="hero-enter hero-enter-6 flex flex-wrap items-center justify-center gap-2 mb-6">
+            {heroHighlights.map((h, i) => (
+              <button key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-opacity hover:opacity-80"
+                style={{background:`${h.color}12`, color:h.color, border:`1px solid ${h.color}25`}}
+                onClick={()=>onNavigate("investor",h.investor.id)}>
+                <span className="w-4 h-4 rounded flex items-center justify-center text-white text-[9px] font-bold" style={{background:h.investor.gradient}}>{h.investor.avatar}</span>
+                <span>{L.investorName(h.investor)}</span>
+                <span className="font-bold">{h.ticker}</span>
+                <span>{h.pct}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* CTA Button */}
+        <div className="hero-enter hero-enter-7">
+          <button
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:shadow-lg active:scale-95"
+            style={{background:t.accent}}
+            onClick={()=>investorGridRef.current?.scrollIntoView({behavior:'smooth',block:'start'})}>
+            {L.t('dashboard.ctaButton')}
+            <ChevronDown size={16} />
+          </button>
+        </div>
       </div>
 
       {/* Investor Grid */}
-      <section aria-label={L.t('dashboard.investorStatus')}>
+      <section ref={investorGridRef} aria-label={L.t('dashboard.investorStatus')}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold" style={{ color: t.text }}>{L.t('dashboard.investorStatus')}</h2>
           <span className="text-xs" style={{ color: t.textMuted }}>{L.t('dashboard.sec13fBased')}</span>

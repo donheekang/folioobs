@@ -50,9 +50,10 @@ export default {
 
   // ===== 대시보드 =====
   dashboard: {
-    subtitle: "SEC 13F 공시 기반",
-    title: "월가의 눈",
-    description: "월가 전설들이 무엇을 사고팔았는지, SEC 공시로 직접 확인하세요.",
+    subtitle: "워렌 버핏 · 레이 달리오 · 캐시 우드 · 조지 소로스",
+    title: "지금 무엇을 사고팔고 있을까?",
+    description: "SEC 13F 공시 데이터로 월가 전설들의 실제 포트폴리오를 추적합니다.",
+    ctaButton: "포트폴리오 바로 보기",
     dataUpdate: "데이터 업데이트",
     trackedInvestors: "추적 투자자",
     totalAum: "총 운용자산",

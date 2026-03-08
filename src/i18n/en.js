@@ -50,9 +50,10 @@ export default {
 
   // ===== Dashboard =====
   dashboard: {
-    subtitle: "Based on SEC 13F Filings",
-    title: "Wall Street's Eye",
-    description: "See what Wall Street legends are buying and selling — straight from SEC filings.",
+    subtitle: "Warren Buffett · Ray Dalio · Cathie Wood · George Soros",
+    title: "What are they buying and selling right now?",
+    description: "Track legendary investors' actual portfolios through SEC 13F filing data.",
+    ctaButton: "View Portfolios",
     dataUpdate: "Data Updated",
     trackedInvestors: "Tracked Investors",
     totalAum: "Total AUM",
