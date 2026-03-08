@@ -1376,8 +1376,10 @@ async function main() {
       }
 
       // ---- Step 2c: 전 분기 간 holding_changes 일괄 계산 ----
+      // ⚠️ ticker 기반 비교: security_id는 같은 종목이라도 분기마다 달라질 수 있음
+      //    (CUSIP 매핑 차이, share class 등). ticker로 비교해야 AAPL 매도 등이 정확히 잡힘.
       if (processedQuarters.length >= 2) {
-        console.log(`\n  📊 분기 간 변동 계산 (${processedQuarters.length}분기)...`);
+        console.log(`\n  📊 분기 간 변동 계산 (${processedQuarters.length}분기) — ticker 기반 비교...`);
 
         // 기존 holding_changes 삭제 (이 투자자)
         await supabase.from('holding_changes').delete().eq('investor_id', investorId);
@@ -1389,38 +1391,61 @@ async function main() {
           const prevQ = processedQuarters[qi - 1].quarter;
           const currQ = processedQuarters[qi].quarter;
 
+          // ticker 정보를 함께 조회 (securities 테이블 조인)
           const { data: prevHoldings } = await supabase
             .from('holdings')
-            .select('security_id, shares, value')
+            .select('security_id, shares, value, securities (ticker)')
             .eq('investor_id', investorId)
             .eq('quarter', prevQ);
 
           const { data: currHoldings } = await supabase
             .from('holdings')
-            .select('security_id, shares, value')
+            .select('security_id, shares, value, securities (ticker)')
             .eq('investor_id', investorId)
             .eq('quarter', currQ);
 
           if (!prevHoldings?.length || !currHoldings?.length) continue;
 
-          const prevMap = new Map(prevHoldings.map(h => [h.security_id, h]));
+          // ticker 기반으로 같은 종목 합산 (share class 통합)
+          const aggregateByTicker = (holdings) => {
+            const map = new Map();
+            for (const h of holdings) {
+              const ticker = h.securities?.ticker || '';
+              if (!ticker || /^\d{5,}/.test(ticker)) continue; // CUSIP만 있는 경우 스킵
+              if (map.has(ticker)) {
+                const existing = map.get(ticker);
+                existing.shares += h.shares;
+                existing.value += h.value;
+              } else {
+                map.set(ticker, { security_id: h.security_id, shares: h.shares, value: h.value, ticker });
+              }
+            }
+            return map;
+          };
+
+          const prevMap = aggregateByTicker(prevHoldings);
+          const currMap = aggregateByTicker(currHoldings);
           const changes = [];
 
-          for (const curr of currHoldings) {
-            const prev = prevMap.get(curr.security_id);
+          // 현재 분기 종목 순회 → 이전 분기와 비교
+          for (const [ticker, curr] of currMap) {
+            const prev = prevMap.get(ticker);
             if (!prev) {
+              // 신규 진입
               changes.push({ investor_id: investorId, security_id: curr.security_id, quarter: currQ, prev_quarter: prevQ, change_type: 'new', shares_change: curr.shares, pct_change: 100, value_current: curr.value, value_prev: 0 });
             } else {
+              // 기존 보유 → 변동률 계산
               const pct = prev.shares > 0 ? ((curr.shares - prev.shares) / prev.shares * 100) : 0;
               if (Math.abs(pct) > 1) {
                 changes.push({ investor_id: investorId, security_id: curr.security_id, quarter: currQ, prev_quarter: prevQ, change_type: pct > 0 ? 'buy' : 'sell', shares_change: curr.shares - prev.shares, pct_change: Math.round(pct * 10) / 10, value_current: curr.value, value_prev: prev.value });
               }
-              prevMap.delete(curr.security_id);
+              prevMap.delete(ticker);
             }
           }
 
-          for (const [secId, prev] of prevMap) {
-            changes.push({ investor_id: investorId, security_id: secId, quarter: currQ, prev_quarter: prevQ, change_type: 'exit', shares_change: -prev.shares, pct_change: -100, value_current: 0, value_prev: prev.value });
+          // 이전 분기에만 있고 현재 분기에 없는 종목 → 청산 (exit)
+          for (const [ticker, prev] of prevMap) {
+            changes.push({ investor_id: investorId, security_id: prev.security_id, quarter: currQ, prev_quarter: prevQ, change_type: 'exit', shares_change: -prev.shares, pct_change: -100, value_current: 0, value_prev: prev.value });
           }
 
           if (changes.length > 0) {

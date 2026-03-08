@@ -384,26 +384,44 @@ async function main() {
       const prevFil = uniqueFilings[qi - 1];
       const currFil = uniqueFilings[qi];
 
-      // filing_id 기준 조회: 같은 분기에 여러 filing이 있어도 최신 것만 사용
+      // ⚠️ ticker 기반 비교: security_id는 같은 종목이라도 분기마다 달라질 수 있음
       const { data: prevHoldings } = await supabase
         .from('holdings')
-        .select('security_id, shares, value')
+        .select('security_id, shares, value, securities (ticker)')
         .eq('filing_id', prevFil.id)
         .limit(2000);
 
       const { data: currHoldings } = await supabase
         .from('holdings')
-        .select('security_id, shares, value')
+        .select('security_id, shares, value, securities (ticker)')
         .eq('filing_id', currFil.id)
         .limit(2000);
 
       if (!prevHoldings?.length || !currHoldings?.length) continue;
 
-      const prevMap = new Map(prevHoldings.map(h => [h.security_id, h]));
+      // ticker 기반으로 같은 종목 합산 (share class 통합)
+      const aggregateByTicker = (holdings) => {
+        const map = new Map();
+        for (const h of holdings) {
+          const ticker = h.securities?.ticker || '';
+          if (!ticker || /^\d{5,}/.test(ticker)) continue;
+          if (map.has(ticker)) {
+            const existing = map.get(ticker);
+            existing.shares += h.shares;
+            existing.value += h.value;
+          } else {
+            map.set(ticker, { security_id: h.security_id, shares: h.shares, value: h.value, ticker });
+          }
+        }
+        return map;
+      };
+
+      const prevMap = aggregateByTicker(prevHoldings);
+      const currMap = aggregateByTicker(currHoldings);
       const changes = [];
 
-      for (const curr of currHoldings) {
-        const prev = prevMap.get(curr.security_id);
+      for (const [ticker, curr] of currMap) {
+        const prev = prevMap.get(ticker);
         if (!prev) {
           // 신규 매수
           changes.push({ investor_id: investorId, security_id: curr.security_id, quarter: currQ, prev_quarter: prevQ, change_type: 'new', shares_change: curr.shares, pct_change: 100, value_current: curr.value, value_prev: 0 });
@@ -412,13 +430,13 @@ async function main() {
           if (Math.abs(pct) > 1) {
             changes.push({ investor_id: investorId, security_id: curr.security_id, quarter: currQ, prev_quarter: prevQ, change_type: pct > 0 ? 'buy' : 'sell', shares_change: curr.shares - prev.shares, pct_change: Math.round(pct * 10) / 10, value_current: curr.value, value_prev: prev.value });
           }
-          prevMap.delete(curr.security_id);
+          prevMap.delete(ticker);
         }
       }
 
-      // 완전 청산
-      for (const [secId, prev] of prevMap) {
-        changes.push({ investor_id: investorId, security_id: secId, quarter: currQ, prev_quarter: prevQ, change_type: 'exit', shares_change: -prev.shares, pct_change: -100, value_current: 0, value_prev: prev.value });
+      // 완전 청산 (이전 분기에만 있고 현재에 없는 종목)
+      for (const [ticker, prev] of prevMap) {
+        changes.push({ investor_id: investorId, security_id: prev.security_id, quarter: currQ, prev_quarter: prevQ, change_type: 'exit', shares_change: -prev.shares, pct_change: -100, value_current: 0, value_prev: prev.value });
       }
 
       if (changes.length > 0) {

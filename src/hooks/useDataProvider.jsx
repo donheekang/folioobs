@@ -391,6 +391,44 @@ export function DataProvider({ children }) {
             }));
         });
 
+        // 7-1. 보유 종목의 change 필드 채우기 (최신 분기 holding_changes 데이터 활용)
+        // holding_changes에서 각 투자자의 최신 분기 변동률을 holdings에 매핑
+        const latestChangeByInvestor = {};  // { slug: { ticker: pctChange } }
+        (dbChanges || []).forEach(c => {
+          const slug = idToSlug[c.investor_id];
+          if (!slug) return;
+          const sec = c.securities || {};
+          let ticker = sec.ticker || '';
+          if (!ticker || /^\d{5,}/.test(ticker)) return;
+          const qLabel = formatQuarterLabel(c.quarter);
+
+          if (!latestChangeByInvestor[slug]) latestChangeByInvestor[slug] = { q: '', changes: {} };
+          const inv = latestChangeByInvestor[slug];
+          // 최신 분기만 유지
+          if (qLabel > inv.q) {
+            inv.q = qLabel;
+            inv.changes = {};
+          }
+          if (qLabel === inv.q) {
+            // 같은 ticker 중 더 큰 변동 유지
+            if (!inv.changes[ticker] || Math.abs(c.pct_change || 0) > Math.abs(inv.changes[ticker])) {
+              inv.changes[ticker] = c.pct_change || 0;
+            }
+          }
+        });
+
+        // mappedHoldings에 change 값 주입
+        Object.entries(mappedHoldings).forEach(([invId, holdings]) => {
+          const inv = mappedInvestors.find(i => i.id === invId);
+          const slug = inv?.id;
+          const changeMap = latestChangeByInvestor[slug]?.changes || {};
+          holdings.forEach(h => {
+            if (changeMap[h.ticker] !== undefined) {
+              h.change = changeMap[h.ticker];
+            }
+          });
+        });
+
         // 8. ARK 일별 매매 내역 로드 (최근 90일)
         let arkTrades = [];
         try {
