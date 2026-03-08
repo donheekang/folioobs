@@ -37,6 +37,47 @@ function formatQuarterLabel(q) {
 const MOCK_BIO_EN = {};
 MOCK_INVESTORS.forEach(inv => { if (inv.bioEn) MOCK_BIO_EN[inv.id] = inv.bioEn; });
 
+// DB에 섹터 정보가 없는 종목을 위한 fallback 섹터 매핑
+const SECTOR_FALLBACK = {
+  // 헬스케어
+  NTRA: '헬스케어', TEM: '헬스케어', EXAS: '헬스케어', TDOC: '헬스케어', VEEV: '헬스케어',
+  ISRG: '헬스케어', DXCM: '헬스케어', ILMN: '헬스케어', NVTA: '헬스케어', BEAM: '헬스케어',
+  CRSP: '헬스케어', TWST: '헬스케어', FATE: '헬스케어', PACB: '헬스케어', RPTX: '헬스케어',
+  LLY: '헬스케어', UNH: '헬스케어', JNJ: '헬스케어', PFE: '헬스케어', ABBV: '헬스케어',
+  TMO: '헬스케어', ABT: '헬스케어', MRK: '헬스케어', AMGN: '헬스케어', BMY: '헬스케어',
+  // 기술
+  AAPL: '기술', MSFT: '기술', GOOGL: '기술', GOOG: '기술', META: '기술',
+  AMZN: '기술', NVDA: '기술', TSM: '기술', TSLA: '기술', AVGO: '기술',
+  ORCL: '기술', CRM: '기술', AMD: '기술', ADBE: '기술', INTC: '기술',
+  QCOM: '기술', NOW: '기술', SHOP: '기술', SQ: '기술', ROKU: '기술',
+  SNOW: '기술', PLTR: '기술', PATH: '기술', U: '기술', TWLO: '기술',
+  COIN: '기술', HOOD: '기술', NET: '기술', DDOG: '기술', ZS: '기술',
+  // 금융
+  BRK: '금융', JPM: '금융', V: '금융', MA: '금융', BAC: '금융',
+  WFC: '금융', GS: '금융', MS: '금융', AXP: '금융', BLK: '금융',
+  SCHW: '금융', C: '금융', USB: '금융', PNC: '금융', COF: '금융',
+  // 경기소비재
+  NKE: '경기소비재', MCD: '경기소비재', SBUX: '경기소비재', HD: '경기소비재', LOW: '경기소비재',
+  TJX: '경기소비재', BKNG: '경기소비재', CMG: '경기소비재', ABNB: '경기소비재', LULU: '경기소비재',
+  // 필수소비재
+  KO: '필수소비재', PG: '필수소비재', PEP: '필수소비재', WMT: '필수소비재', COST: '필수소비재',
+  PM: '필수소비재', MO: '필수소비재', KHC: '필수소비재', CL: '필수소비재',
+  // 산업
+  CAT: '산업', DE: '산업', UPS: '산업', RTX: '산업', HON: '산업',
+  BA: '산업', LMT: '산업', GE: '산업', MMM: '산업', UNP: '산업',
+  // 에너지
+  XOM: '에너지', CVX: '에너지', COP: '에너지', SLB: '에너지', EOG: '에너지',
+  OXY: '에너지', PSX: '에너지', MPC: '에너지', VLO: '에너지',
+  // 통신
+  DIS: '통신', NFLX: '통신', CMCSA: '통신', T: '통신', VZ: '통신', TMUS: '통신',
+  // 유틸리티
+  NEE: '유틸리티', DUK: '유틸리티', SO: '유틸리티', D: '유틸리티',
+  // 부동산
+  AMT: '부동산', PLD: '부동산', CCI: '부동산', EQIX: '부동산', SPG: '부동산',
+  // 원자재
+  LIN: '원자재', APD: '원자재', FCX: '원자재', NEM: '원자재',
+};
+
 // DB investor → 프론트엔드 형식
 function mapInvestor(dbInv, metrics, holdingsAum) {
   const slug = investorSlug(dbInv.name);
@@ -109,7 +150,7 @@ function mapHolding(dbHolding, isActualDollars) {
     shares: dbHolding.shares || 0,
     value: dbHolding.value ? dbHolding.value / divisor : 0, // → $B 단위
     pct: dbHolding.pct_of_portfolio || 0,
-    sector: sec.sector_ko || sec.sector || '기타',
+    sector: sec.sector_ko || sec.sector || SECTOR_FALLBACK[ticker] || '기타',
     change: 0, // 변동은 별도 쿼리 필요
   };
 }
