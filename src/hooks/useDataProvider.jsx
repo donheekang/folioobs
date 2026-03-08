@@ -150,7 +150,14 @@ function mapHolding(dbHolding, isActualDollars) {
     shares: dbHolding.shares || 0,
     value: dbHolding.value ? dbHolding.value / divisor : 0, // → $B 단위
     pct: dbHolding.pct_of_portfolio || 0,
-    sector: sec.sector_ko || sec.sector || SECTOR_FALLBACK[ticker] || '기타',
+    sector: (() => {
+      const dbSector = (sec.sector_ko && sec.sector_ko.trim()) || (sec.sector && sec.sector.trim()) || '';
+      // DB에 "기타"/"Other"로 들어있거나 비어있으면 fallback 사용
+      if (!dbSector || dbSector === '기타' || dbSector === 'Other') {
+        return SECTOR_FALLBACK[ticker] || dbSector || '기타';
+      }
+      return dbSector;
+    })(),
     change: 0, // 변동은 별도 쿼리 필요
   };
 }
