@@ -50,9 +50,9 @@ export default {
 
   // ===== Dashboard =====
   dashboard: {
-    subtitle: "Warren Buffett · Ray Dalio · Cathie Wood · George Soros",
-    title: "What are they buying and selling right now?",
-    description: "Track legendary investors' actual portfolios through SEC 13F filing data.",
+    subtitle: "Warren Buffett · Cathie Wood · Druckenmiller · Ray Dalio",
+    title: "Portfolio Changes at a Glance",
+    description: "Quickly track new buys, increased positions, and sell-offs based on SEC 13F filings.",
     ctaButton: "View Portfolios",
     dataUpdate: "Data Updated",
     trackedInvestors: "Tracked Investors",
