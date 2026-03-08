@@ -141,7 +141,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         {/* Trade Highlights — Card Style */}
         {heroHighlights.length > 0 && (
           <div className="hero-enter hero-enter-6 mb-6">
-            <p className="text-xs font-medium mb-3" style={{color:t.textMuted}}>{L.t('dashboard.recentMoves') || (L.locale === 'ko' ? '최근 주요 변동' : 'Recent Key Moves')}</p>
+            <p className="text-xs font-medium mb-3" style={{color:t.textMuted}}>{L.t('dashboard.recentMoves')}</p>
             <div className="flex flex-wrap items-stretch justify-center gap-3">
               {heroHighlights.map((h, i) => {
                 const cardBg = t.name==='dark'?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.02)';
