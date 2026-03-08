@@ -16,6 +16,7 @@ export default {
     retry: "Try Again",
     none: "None",
     new: "New",
+    significantIncrease: "Significant ↑",
     buy: "Buy",
     sell: "Sell",
     exit: "Exit",

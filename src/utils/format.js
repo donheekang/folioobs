@@ -30,7 +30,7 @@ export const formatChange = (change) => {
   if (change === 100) return '신규';
   if (change === 0) return null; // 변동 없음
   const rounded = Math.round(change);
-  if (rounded > 999) return '+999%↑';
+  if (rounded > 999) return '대폭 확대';
   if (rounded < -99) return '-99%↓';
   return `${change > 0 ? '+' : ''}${rounded}%`;
 };

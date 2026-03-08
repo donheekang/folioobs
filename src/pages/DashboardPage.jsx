@@ -73,7 +73,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     const picks = [];
     if (buyActions.length > 0) {
       const a = buyActions[0];
-      picks.push({ investor: a.investor, ticker: a.ticker, pct: Math.round(a.pctChange) > 999 ? '+999%' : `+${Math.round(a.pctChange)}%`, color: t.green, type: 'buy' });
+      picks.push({ investor: a.investor, ticker: a.ticker, pct: Math.round(a.pctChange) > 999 ? L.t('common.significantIncrease') : `+${Math.round(a.pctChange)}%`, color: t.green, type: 'buy' });
     }
     if (sellActions.length > 0) {
       const a = sellActions[0];
@@ -206,7 +206,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   </div>
                   <div className="flex items-center gap-2 mb-4">
                     <Badge color={inv.color}><SI size={11}/> {L.style(inv.style)}</Badge>
-                    <Badge color={inv.metrics.qoqChange>=0?t.green:t.red}>{inv.metrics.qoqChange>=0?<ArrowUpRight size={11}/>:<ArrowDownRight size={11}/>}{inv.metrics.qoqChange>=0?'+':''}{inv.metrics.qoqChange}%</Badge>
+                    <span title={L.locale==='ko'?'전분기 대비 AUM 변동':'QoQ AUM Change'}><Badge color={inv.metrics.qoqChange>=0?t.green:t.red}>{inv.metrics.qoqChange>=0?<ArrowUpRight size={11}/>:<ArrowDownRight size={11}/>}{inv.metrics.qoqChange>=0?'+':''}{inv.metrics.qoqChange}%</Badge></span>
                   </div>
                   <div className="flex items-end justify-between">
                     <div className="grid grid-cols-3 gap-3 flex-1">
@@ -283,7 +283,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{background:`${t.green}15`,color:t.green}}>{buyActions.length}</span>
             </div>
             <div className="space-y-1.5">
-              {buyActions.map((act, i) => <ActivityItem key={i} act={act} label={Math.round(act.pctChange) > 999 ? '+999%↑' : `+${Math.round(act.pctChange)}%`} color={t.green} />)}
+              {buyActions.map((act, i) => <ActivityItem key={i} act={act} label={Math.round(act.pctChange) > 999 ? L.t('common.significantIncrease') : `+${Math.round(act.pctChange)}%`} color={t.green} />)}
               {buyActions.length === 0 && <div className="text-xs text-center py-4" style={{color:t.textMuted}}>{L.t('common.none')}</div>}
             </div>
           </div>

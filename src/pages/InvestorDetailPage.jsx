@@ -309,7 +309,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
                       <span className="text-xs ml-1.5" style={{color:t.textMuted}}>{h.name}</span>
                     </div>
                   </div>
-                  {(() => { const ch = formatChange(h.change); const displayCh = ch === '신규' ? L.t('common.new') : ch; return ch === '신규' ? <Badge color={t.green}><ArrowUpRight size={10}/> {displayCh}</Badge> : ch === null ? <span className="text-xs" style={{color:t.textMuted}}>—</span> : <span className="flex items-center gap-0.5 font-medium text-xs" style={{color:h.change>0?t.green:t.red}}>{h.change>0?<ArrowUpRight size={12}/>:<ArrowDownRight size={12}/>}{displayCh}</span>; })()}
+                  {(() => { const ch = formatChange(h.change); const displayCh = ch === '신규' ? L.t('common.new') : ch === '대폭 확대' ? L.t('common.significantIncrease') : ch; return ch === '신규' ? <Badge color={t.green}><ArrowUpRight size={10}/> {displayCh}</Badge> : ch === null ? <span className="text-xs" style={{color:t.textMuted}}>—</span> : <span className="flex items-center gap-0.5 font-medium text-xs" style={{color:h.change>0?t.green:t.red}}>{h.change>0?<ArrowUpRight size={12}/>:<ArrowDownRight size={12}/>}{displayCh}</span>; })()}
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -347,7 +347,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
                   <td className="py-3 px-3" style={{color:t.textSecondary}}>{formatShares(h.shares)}</td>
                   <td className="py-3 px-3"><Badge color={SECTOR_COLORS[h.sector]||"#64748B"}>{L.sector(h.sector)}</Badge></td>
                   <td className="py-3 px-3">
-                    {(() => { const ch = formatChange(h.change); const displayCh = ch === '신규' ? L.t('common.new') : ch; return ch === '신규' ? <Badge color={t.green}><ArrowUpRight size={10}/> {displayCh}</Badge> : ch === null ? <span style={{color:t.textMuted}}>—</span> : <span className="flex items-center gap-0.5 font-medium text-sm" style={{color:h.change>0?t.green:t.red}}>{h.change>0?<ArrowUpRight size={14}/>:<ArrowDownRight size={14}/>}{displayCh}</span>; })()}
+                    {(() => { const ch = formatChange(h.change); const displayCh = ch === '신규' ? L.t('common.new') : ch === '대폭 확대' ? L.t('common.significantIncrease') : ch; return ch === '신규' ? <Badge color={t.green}><ArrowUpRight size={10}/> {displayCh}</Badge> : ch === null ? <span style={{color:t.textMuted}}>—</span> : <span className="flex items-center gap-0.5 font-medium text-sm" style={{color:h.change>0?t.green:t.red}}>{h.change>0?<ArrowUpRight size={14}/>:<ArrowDownRight size={14}/>}{displayCh}</span>; })()}
                   </td>
                 </tr>
               ))}</tbody>

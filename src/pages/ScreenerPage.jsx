@@ -368,7 +368,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                           </span>
                         ) : formatChange(h.change) && (
                           <span className="text-xs font-medium" style={{ color: h.change > 0 ? t.green : t.red }}>
-                            {formatChange(h.change)}
+                            {(() => { const v = formatChange(h.change); return v === '대폭 확대' ? L.t('common.significantIncrease') : v; })()}
                           </span>
                         )}
                       </div>

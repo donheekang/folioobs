@@ -16,6 +16,7 @@ export default {
     retry: "다시 시도",
     none: "없음",
     new: "신규",
+    significantIncrease: "대폭 확대",
     buy: "매수",
     sell: "매도",
     exit: "청산",

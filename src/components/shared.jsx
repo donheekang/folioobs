@@ -137,7 +137,7 @@ export const QuarterlyTimeline = ({ investorId }) => {
                     <span className="text-xs ml-1.5" style={{ color: t.textMuted }}>{action.name}</span>
                   </div>
                   <span className="text-xs font-medium" style={{ color: cfg.color }}>
-                    {action.type === 'new' ? L.t('common.new') : action.type === 'hold' ? L.t('common.hold') : (formatChange(action.pctChange) || '—')}
+                    {action.type === 'new' ? L.t('common.new') : action.type === 'hold' ? L.t('common.hold') : (() => { const v = formatChange(action.pctChange); return v === '대폭 확대' ? L.t('common.significantIncrease') : (v || '—'); })()}
                   </span>
                 </div>
               );
