@@ -124,9 +124,9 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         <p className="text-base sm:text-lg mb-4" style={{color:t.textSecondary}}>
           {L.t('dashboard.description')}
         </p>
-        {lastUpdatedAt && (
+        {latestQuarter && (
           <p className="text-xs mb-6" style={{color:t.textMuted}}>
-            {L.t('dashboard.dataUpdate')}: {new Date(lastUpdatedAt).toLocaleDateString(L.locale === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+            {L.t('dashboard.dataSourceLabel').replace('{quarter}', L.quarter(latestQuarter))}
           </p>
         )}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto mb-6">
@@ -168,8 +168,29 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           </div>
         )}
 
+        {/* ARK Today Preview — 히어로에서 살아있는 데이터 체감 */}
+        {arkDailyTrades.length > 0 && (() => {
+          const latest = arkDailyTrades[0];
+          const topBuys = latest.trades.filter(tr => tr.direction?.toLowerCase() === 'buy').slice(0, 2).map(tr => tr.ticker);
+          const topSells = latest.trades.filter(tr => tr.direction?.toLowerCase() === 'sell').slice(0, 2).map(tr => tr.ticker);
+          const parts = [];
+          if (topBuys.length > 0) parts.push(`${L.t('common.buy')} ${topBuys.join(', ')}`);
+          if (topSells.length > 0) parts.push(`${L.t('common.sell')} ${topSells.join(', ')}`);
+          if (parts.length === 0) return null;
+          return (
+            <div className="hero-enter hero-enter-7 mb-4">
+              <button className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all hover:scale-[1.02] cursor-pointer"
+                style={{background:t.name==='dark'?'rgba(245,158,11,0.1)':'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.2)', color:'#f59e0b'}}
+                onClick={()=>onNavigate("investor","cathie")}>
+                <span style={{color:t.textSecondary}}>{L.t('dashboard.arkTodayLabel')}</span>
+                <span>{parts.join(' · ')}</span>
+              </button>
+            </div>
+          );
+        })()}
+
         {/* CTA Button */}
-        <div className="hero-enter hero-enter-7">
+        <div className="hero-enter hero-enter-8">
           <button
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:shadow-lg active:scale-95"
             style={{background:t.accent}}

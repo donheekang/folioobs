@@ -51,9 +51,11 @@ export default {
 
   // ===== Dashboard =====
   dashboard: {
-    subtitle: "Warren Buffett · Cathie Wood · Druckenmiller · Ray Dalio",
+    subtitle: "Warren Buffett · Cathie Wood · Druckenmiller + 3 more",
     title: "Portfolio Changes at a Glance",
-    description: "SEC 13F quarterly filings + Cathie Wood daily trades — track legendary investors' portfolio moves.",
+    description: "Track legendary investors' trades — updated daily.",
+    arkTodayLabel: "Cathie Wood today",
+    dataSourceLabel: "13F: {quarter} | ARK: Daily Updates",
     ctaButton: "View Portfolios",
     recentMoves: "Recent Key Moves",
     dataUpdate: "Data as of",
