@@ -1,6 +1,6 @@
 import { useMemo, memo, useState, useEffect, useRef } from "react";
 import {
-  ArrowUpRight, ArrowDownRight, Briefcase, Plus, Layers, BarChart3, ChevronDown, Calendar, Zap
+  ArrowUpRight, ArrowDownRight, Briefcase, Plus, Layers, BarChart3, ChevronDown
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -207,7 +207,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   <div className="flex items-center gap-2 mb-4">
                     <Badge color={inv.color}><SI size={11}/> {L.style(inv.style)}</Badge>
                     <span title={L.locale==='ko'?'전분기 대비 AUM 변동':'QoQ AUM Change'}><Badge color={inv.metrics.qoqChange>=0?t.green:t.red}>{inv.metrics.qoqChange>=0?<ArrowUpRight size={11}/>:<ArrowDownRight size={11}/>}{inv.metrics.qoqChange>=0?'+':''}{inv.metrics.qoqChange}%</Badge></span>
-                    {inv.id === 'cathie' && <Badge color="#f59e0b"><Zap size={11}/> {L.t('dashboard.arkDailyBadge')}</Badge>}
+                    {inv.id === 'cathie' && <Badge color="#f59e0b">{L.t('dashboard.arkDailyBadge')}</Badge>}
                   </div>
                   <div className="flex items-end justify-between">
                     <div className="grid grid-cols-3 gap-3 flex-1">
@@ -233,14 +233,13 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             ? `${d.getMonth()+1}월 ${d.getDate()}일`
             : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         })();
-        const buys = latestDay.trades.filter(t => t.direction === 'Buy');
-        const sells = latestDay.trades.filter(t => t.direction === 'Sell');
+        const buys = latestDay.trades.filter(tr => tr.direction?.toLowerCase() === 'buy');
+        const sells = latestDay.trades.filter(tr => tr.direction?.toLowerCase() === 'sell');
         const cathieInv = INVESTORS.find(i => i.id === 'cathie');
         return (
           <section>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Zap size={18} style={{color:'#f59e0b'}} />
                 <h2 className="text-lg font-bold" style={{color:t.text}}>{L.t('dashboard.arkDailyTitle')}</h2>
                 <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:'rgba(245,158,11,0.15)',color:'#f59e0b'}}>{L.t('dashboard.arkDailyBadge')}</span>
               </div>
