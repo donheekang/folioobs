@@ -113,7 +113,16 @@ function FolioObsInner() {
       }
     };
     window.addEventListener("popstate", onPop);
-    window.history.replaceState({ page: "dashboard", param: null }, "", "#dashboard");
+    // Parse initial hash for deep linking (e.g. #investor/druckenmiller)
+    const initHash = window.location.hash.replace('#', '');
+    if (initHash && initHash !== 'dashboard') {
+      const [initPage, ...rest] = initHash.split('/');
+      const initParam = rest.join('/') || null;
+      doNavigate(initPage, initParam, false);
+      window.history.replaceState({ page: initPage, param: initParam }, "", `#${initHash}`);
+    } else {
+      window.history.replaceState({ page: "dashboard", param: null }, "", "#dashboard");
+    }
     return () => window.removeEventListener("popstate", onPop);
   }, [doNavigate]);
 
