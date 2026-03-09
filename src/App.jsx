@@ -10,6 +10,7 @@ import { LocaleContext, createLocaleValue } from "./hooks/useLocale";
 
 // Data
 import { formatUSD } from "./utils/format";
+import { trackInvestorClick, trackDetailView, trackPageView } from "./utils/analytics";
 
 // Shared Components
 import { ThemeToggle } from "./components/shared";
@@ -86,9 +87,14 @@ function FolioObsInner() {
   const doNavigate = useCallback((target, param, pushState) => {
     setTransitioning(true);
     setTimeout(() => {
-      if (target === "investor") { setSelectedInvestor(param); setPage("investor"); }
+      if (target === "investor") {
+        setSelectedInvestor(param); setPage("investor");
+        trackInvestorClick(param, pushState === false ? 'deeplink' : 'click');
+        trackDetailView(param);
+      }
       else if (target === "screener") { setScreenerSector(param || null); setPage("screener"); }
       else { setSelectedInvestor(null); setPage(target); }
+      trackPageView(target, param);
       if (pushState !== false) {
         window.history.pushState({ page: target, param }, "", `#${target}${param ? '/' + param : ''}`);
       }

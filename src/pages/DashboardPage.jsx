@@ -7,6 +7,7 @@ import { useLocale } from "../hooks/useLocale";
 import { useData } from "../hooks/useDataProvider";
 import { STYLE_ICONS } from "../data";
 import { formatUSD } from "../utils/format";
+import { trackCtaClick } from "../utils/analytics";
 import { GlassCard, Badge, MiniChart, WatchButton } from "../components/shared";
 import SectorTreemap from "../components/SectorTreemap";
 import OverlapHeatmap from "../components/OverlapHeatmap";
@@ -181,7 +182,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             <div className="hero-enter hero-enter-7 mb-4">
               <button className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all hover:scale-[1.02] cursor-pointer"
                 style={{background:t.name==='dark'?'rgba(245,158,11,0.1)':'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.2)', color:'#f59e0b'}}
-                onClick={()=>onNavigate("investor","cathie")}>
+                onClick={()=>{trackCtaClick('ark_today_preview','hero');onNavigate("investor","cathie");}}>
                 <span style={{color:t.textSecondary}}>{L.t('dashboard.arkTodayLabel')}</span>
                 <span>{parts.join(' · ')}</span>
               </button>
@@ -194,7 +195,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           <button
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:shadow-lg active:scale-95"
             style={{background:t.accent}}
-            onClick={()=>investorGridRef.current?.scrollIntoView({behavior:'smooth',block:'start'})}>
+            onClick={()=>{trackCtaClick('portfolio_view','hero');investorGridRef.current?.scrollIntoView({behavior:'smooth',block:'start'});}}>
             {L.t('dashboard.ctaButton')}
             <ChevronDown size={16} />
           </button>
@@ -335,7 +336,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 <div className="mt-4 text-center">
                   <button className="text-xs font-medium px-4 py-1.5 rounded-full transition-colors hover:opacity-80"
                     style={{color:t.accent, background:`${t.accent}12`, border:`1px solid ${t.accent}25`}}
-                    onClick={()=>onNavigate("investor","cathie")}>
+                    onClick={()=>{trackCtaClick('ark_view_all','ark_section');onNavigate("investor","cathie");}}>
                     {L.t('dashboard.arkViewAll')}
                   </button>
                 </div>
