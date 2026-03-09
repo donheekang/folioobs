@@ -264,8 +264,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         const cathieInv = INVESTORS.find(i => i.id === 'cathie');
         return (
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-4">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-lg font-bold" style={{color:t.text}}>{L.t('dashboard.arkDailyTitle')}</h2>
                 <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:'rgba(245,158,11,0.15)',color:'#f59e0b'}}>{L.t('dashboard.arkDailyBadge')}</span>
               </div>
