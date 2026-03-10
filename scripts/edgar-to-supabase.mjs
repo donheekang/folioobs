@@ -1344,9 +1344,9 @@ async function main() {
         const rd = new Date(reportDate);
         const quarter = `${rd.getFullYear()}Q${Math.ceil((rd.getMonth() + 1) / 3)}`;
 
-        // 이미 DB에 있고 완전한 데이터면 스킵
+        // 이미 DB에 있고 완전한 데이터면 스킵 (investor_id도 체크)
         const { data: existingFiling } = await supabase
-          .from('filings').select('id, holding_count, total_value').eq('accession_no', accession).maybeSingle();
+          .from('filings').select('id, holding_count, total_value').eq('accession_no', accession).eq('investor_id', investorId).maybeSingle();
 
         if (existingFiling && existingFiling.holding_count >= 5) {
           console.log(`  ⏭️  ${quarter} 이미 등록 (${existingFiling.holding_count}종목)`);
