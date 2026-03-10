@@ -173,6 +173,7 @@ const InsightsPage = ({ onBack, onNavigate }) => {
 
     return (
       <GlassCard onClick={() => onNavigate("investor", ins.investor.id)}
+        className="min-w-0 overflow-hidden"
         glow={`radial-gradient(circle at top left, ${c}08, transparent)`}>
         <div className="p-4">
           <div className="flex items-start gap-3">
@@ -199,8 +200,8 @@ const InsightsPage = ({ onBack, onNavigate }) => {
                   </div>
                 )}
               </div>
-              <h4 className="font-bold text-sm mb-1" style={{ color: t.text, overflowWrap: 'break-word', wordBreak: 'break-word' }}>{ins.title}</h4>
-              <p className="text-xs leading-relaxed" style={{ color: t.textSecondary, overflowWrap: 'break-word' }}>{ins.desc}</p>
+              <h4 className="font-bold text-sm mb-1 break-words" style={{ color: t.text }}>{ins.title}</h4>
+              <p className="text-xs leading-relaxed break-words" style={{ color: t.textSecondary }}>{ins.desc}</p>
             </div>
             <ChevronRight size={16} style={{ color: t.textMuted }} className="mt-1 flex-shrink-0 opacity-40" />
           </div>

@@ -446,16 +446,16 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
                 const title = (isEn && ins.title_en) ? ins.title_en : ins.title;
                 const desc = (isEn && ins.desc_en) ? ins.desc_en : ins.desc;
                 return (
-                  <GlassCard key={i} glow={`radial-gradient(circle at top left, ${c}08, transparent)`}>
+                  <GlassCard key={i} className="min-w-0 overflow-hidden" glow={`radial-gradient(circle at top left, ${c}08, transparent)`}>
                     <div className="p-4"><div className="flex items-start gap-3">
-                      <div className="p-2 rounded-xl mt-0.5" style={{background:`${c}15`,border:`1px solid ${c}20`}}><I size={16} style={{color:c}}/></div>
+                      <div className="p-2 rounded-xl mt-0.5 flex-shrink-0" style={{background:`${c}15`,border:`1px solid ${c}20`}}><I size={16} style={{color:c}}/></div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                           <Badge color={c}>{L.tag ? L.tag(ins.tag) : ins.tag}</Badge>
                           {ins.confidence && <span className="text-xs" style={{color:t.textMuted}}>{L.t('investor.confidence')} {ins.confidence}%</span>}
                         </div>
-                        <h4 className="font-bold text-sm mb-1" style={{color:t.text, overflowWrap:'break-word', wordBreak:'break-word'}}>{title}</h4>
-                        <p className="text-xs leading-relaxed" style={{color:t.textSecondary, overflowWrap:'break-word'}}>{desc}</p>
+                        <h4 className="font-bold text-sm mb-1 break-words" style={{color:t.text}}>{title}</h4>
+                        <p className="text-xs leading-relaxed break-words" style={{color:t.textSecondary}}>{desc}</p>
                       </div>
                     </div></div>
                   </GlassCard>
@@ -464,13 +464,13 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
                 const I = ins.icon;
                 const c = tagColors[ins.tag] || t.textMuted;
                 return (
-                  <GlassCard key={i} glow={`radial-gradient(circle at top left, ${c}08, transparent)`}>
+                  <GlassCard key={i} className="min-w-0 overflow-hidden" glow={`radial-gradient(circle at top left, ${c}08, transparent)`}>
                     <div className="p-4"><div className="flex items-start gap-3">
-                      <div className="p-2 rounded-xl mt-0.5" style={{background:`${c}15`,border:`1px solid ${c}20`}}><I size={16} style={{color:c}}/></div>
+                      <div className="p-2 rounded-xl mt-0.5 flex-shrink-0" style={{background:`${c}15`,border:`1px solid ${c}20`}}><I size={16} style={{color:c}}/></div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap"><Badge color={c}>{ins.tag}</Badge></div>
-                        <h4 className="font-bold text-sm mb-1" style={{color:t.text}}>{ins.title}</h4>
-                        <p className="text-xs leading-relaxed" style={{color:t.textSecondary}}>{ins.desc}</p>
+                        <h4 className="font-bold text-sm mb-1 break-words" style={{color:t.text}}>{ins.title}</h4>
+                        <p className="text-xs leading-relaxed break-words" style={{color:t.textSecondary}}>{ins.desc}</p>
                       </div>
                     </div></div>
                   </GlassCard>
