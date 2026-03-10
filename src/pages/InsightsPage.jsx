@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, Lightbulb, Filter, ChevronRight, Brain, AlertTriangle, TrendingUp, TrendingDown, Star, Activity, DollarSign, PieChart as PieIcon, Sparkles, ChevronDown, ChevronUp, LayoutGrid, List } from "lucide-react";
+import { ArrowLeft, Lightbulb, Filter, ChevronRight, Brain, AlertTriangle, TrendingUp, TrendingDown, Star, Activity, DollarSign, PieChart as PieIcon, Sparkles, ChevronDown, ChevronUp, LayoutGrid, List, Calendar } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
 import { useData } from "../hooks/useDataProvider";
@@ -33,14 +33,65 @@ const InsightsPage = ({ onBack, onNavigate }) => {
   const [sortBy, setSortBy] = useState("investor");
   const [viewMode, setViewMode] = useState("grouped");
   const [expandedInv, setExpandedInv] = useState(null); // null = 모두 열림
+  const [selectedPeriod, setSelectedPeriod] = useState({}); // { investorId: quarterKey }
   const tagColors = TAG_COLORS_MAP(t);
+
+  // 투자자별 사용 가능한 날짜/분기 목록
+  const periodsByInvestor = useMemo(() => {
+    const result = {};
+    INVESTORS.forEach(inv => {
+      const invInsights = aiInsights?.[inv.id];
+      if (!invInsights) return;
+      const periods = Object.keys(invInsights)
+        .filter(k => k !== '_latest')
+        .sort((a, b) => b.localeCompare(a)); // 최신순
+      if (periods.length > 0) result[inv.id] = periods;
+    });
+    return result;
+  }, [INVESTORS, aiInsights]);
+
+  // 선택된 기간의 인사이트 가져오기
+  const getSelectedAiData = (invId) => {
+    const invInsights = aiInsights?.[invId];
+    if (!invInsights) return null;
+    const selKey = selectedPeriod[invId];
+    if (selKey && invInsights[selKey]) return invInsights[selKey];
+    return invInsights._latest || null;
+  };
+
+  const WEEKDAYS_KO = ['일', '월', '화', '수', '목', '금', '토'];
+  const WEEKDAYS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // quarter key → 표시용 라벨 변환
+  const formatPeriodLabel = (qKey, locale, full = false) => {
+    // "2026Q1-0309" → 일별
+    if (qKey.includes('-')) {
+      const yearQ = qKey.split('-')[0]; // "2026Q1"
+      const mmdd = qKey.split('-')[1]; // "0309"
+      const year = parseInt(yearQ.slice(0, 4));
+      const mm = parseInt(mmdd.slice(0, 2));
+      const dd = parseInt(mmdd.slice(2));
+      const d = new Date(year, mm - 1, dd);
+      const wd = locale === 'ko' ? WEEKDAYS_KO[d.getDay()] : WEEKDAYS_EN[d.getDay()];
+      if (full) {
+        return locale === 'ko' ? `${mm}월 ${dd}일 (${wd})` : `${WEEKDAYS_EN[d.getDay()]}, ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+      }
+      return locale === 'ko' ? `${mm}/${dd} ${wd}` : `${mm}/${dd} ${wd}`;
+    }
+    // "2025Q4" → 분기
+    const y = qKey.slice(0, 4);
+    const q = qKey.slice(4);
+    return locale === 'ko' ? `${y}년 ${q}` : `${q} ${y}`;
+  };
+
+  // 일별인지 분기별인지
+  const isDaily = (qKey) => qKey && qKey.includes('-');
 
   // 모든 인사이트 수집 — AI 우선, 없으면 룰 기반 fallback
   const allInsights = useMemo(() => {
     const result = [];
     INVESTORS.forEach(inv => {
-      const invInsights = aiInsights?.[inv.id];
-      const aiData = invInsights?._latest || null;
+      const aiData = getSelectedAiData(inv.id);
       const hasAI = aiData && aiData.insights && aiData.insights.length > 0;
 
       if (hasAI) {
@@ -55,6 +106,7 @@ const InsightsPage = ({ onBack, onNavigate }) => {
             investor: inv,
             isAI: true,
             quarter: aiData.quarter || null,
+            quarterRaw: aiData.quarterRaw || null,
             generatedAt: aiData.generatedAt || null,
           });
         });
@@ -65,7 +117,7 @@ const InsightsPage = ({ onBack, onNavigate }) => {
       }
     });
     return result;
-  }, [INVESTORS, HOLDINGS, aiInsights, L]);
+  }, [INVESTORS, HOLDINGS, aiInsights, L, selectedPeriod]);
 
   // 필터 & 정렬
   const filtered = useMemo(() => {
@@ -257,6 +309,12 @@ const InsightsPage = ({ onBack, onNavigate }) => {
               ? Math.round(group.insights.filter(i => i.confidence).reduce((s, i) => s + i.confidence, 0) / group.insights.filter(i => i.confidence).length)
               : 0;
 
+            const periods = periodsByInvestor[inv.id] || [];
+            const currentPeriod = selectedPeriod[inv.id] || periods[0] || null;
+            const currentIsDaily = currentPeriod ? isDaily(currentPeriod) : false;
+            const periodLabel = currentPeriod ? formatPeriodLabel(currentPeriod, L.locale, true) : null;
+            const isLatestSelected = currentPeriod === periods[0];
+
             return (
               <div key={inv.id}>
                 <button onClick={() => toggleInvestor(inv.id)}
@@ -265,9 +323,30 @@ const InsightsPage = ({ onBack, onNavigate }) => {
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
                     style={{ background: inv.gradient }}>{inv.avatar}</div>
                   <div className="flex-1 text-left min-w-0">
-                    <div className="font-bold text-sm truncate" style={{ color: t.text }}>{L.investorName(inv)}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm truncate" style={{ color: t.text }}>{L.investorName(inv)}</span>
+                      {/* 일별/분기 업데이트 구분 배지 */}
+                      {group.isAI && currentIsDaily && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium"
+                          style={{ background: '#f59e0b15', color: '#f59e0b' }}>
+                          {L.locale === 'ko' ? '일별' : 'Daily'}
+                        </span>
+                      )}
+                      {group.isAI && !currentIsDaily && currentPeriod && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium"
+                          style={{ background: `${t.accent}15`, color: t.accent }}>
+                          {L.locale === 'ko' ? '분기' : 'Quarterly'}
+                        </span>
+                      )}
+                    </div>
                     <div className="text-[10px] flex items-center gap-2 mt-0.5" style={{ color: t.textMuted }}>
-                      {group.quarter && <span>{group.quarter}</span>}
+                      {/* 항상 현재 날짜/분기 표시 */}
+                      {periodLabel && (
+                        <span className="flex items-center gap-1">
+                          <Calendar size={10} />
+                          {periodLabel}
+                        </span>
+                      )}
                       {group.isAI && <span style={{ color: t.accent }}>{L.t('insightsPage.aiAnalysis')}</span>}
                       {avgConf > 0 && <span>{L.t('insightsPage.avgConfidence').replace('{value}', avgConf)}</span>}
                     </div>
@@ -276,8 +355,39 @@ const InsightsPage = ({ onBack, onNavigate }) => {
                   {expanded ? <ChevronUp size={16} style={{ color: t.textMuted }} /> : <ChevronDown size={16} style={{ color: t.textMuted }} />}
                 </button>
                 {expanded && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                    {group.insights.map((ins, i) => <InsightCard key={`${inv.id}-${i}`} ins={ins} />)}
+                  <div className="mt-3">
+                    {/* 날짜/분기 선택 탭 — 1개여도 표시 */}
+                    {periods.length >= 1 && (
+                      <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+                        <Calendar size={12} style={{ color: t.textMuted }} />
+                        {periods.map((pKey, idx) => {
+                          const isActive = pKey === currentPeriod;
+                          const label = formatPeriodLabel(pKey, L.locale);
+                          const isFirst = idx === 0; // 최신
+                          return (
+                            <button key={pKey}
+                              onClick={(e) => { e.stopPropagation(); setSelectedPeriod(prev => ({ ...prev, [inv.id]: pKey })); }}
+                              className="text-xs px-2.5 py-1 rounded-lg transition-all flex items-center gap-1"
+                              style={{
+                                background: isActive ? `${t.accent}20` : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                                border: isActive ? `1.5px solid ${t.accent}` : `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                                color: isActive ? t.accent : t.textMuted,
+                              }}>
+                              {label}
+                              {isFirst && (
+                                <span className="text-[9px] px-1 py-px rounded font-medium"
+                                  style={{ background: isActive ? `${t.green}20` : `${t.green}10`, color: t.green }}>
+                                  {L.locale === 'ko' ? '최신' : 'Latest'}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {group.insights.map((ins, i) => <InsightCard key={`${inv.id}-${i}`} ins={ins} />)}
+                    </div>
                   </div>
                 )}
               </div>
