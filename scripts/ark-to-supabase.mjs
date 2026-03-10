@@ -176,6 +176,14 @@ async function main() {
 
         if (!ticker || !company || ticker === '-') continue;
 
+        // 해외 거래소 숫자 티커 → 일반 티커로 매핑
+        const TICKER_REMAP = {
+          '4689': 'LY',        // LY Corp (도쿄증권거래소)
+          '6758': 'SONY',      // Sony Group
+          '005930': 'SSNLF',   // Samsung Electronics
+        };
+        const normalizedTicker = TICKER_REMAP[ticker] || ticker;
+
         // 날짜 추출 (첫 유효 날짜를 report date로 사용)
         if (!reportDate && date) {
           reportDate = date;
@@ -185,16 +193,16 @@ async function main() {
         const value = Math.round(parseFloat(valueStr.replace(/[,$]/g, '')) / 1000) || 0; // SEC 형식 ($1000 단위)
         const weight = parseFloat(weightStr.replace(/[%,$]/g, '')) || 0;
 
-        if (allHoldings.has(ticker)) {
-          const existing = allHoldings.get(ticker);
+        if (allHoldings.has(normalizedTicker)) {
+          const existing = allHoldings.get(normalizedTicker);
           existing.shares += shares;
           existing.value += value;
           existing.weight += weight;
           existing.funds.push(fund.name);
         } else {
-          allHoldings.set(ticker, {
+          allHoldings.set(normalizedTicker, {
             company,
-            ticker,
+            ticker: normalizedTicker,
             cusip,
             shares,
             value,
