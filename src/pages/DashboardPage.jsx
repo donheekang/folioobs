@@ -1,6 +1,6 @@
 import { useMemo, memo, useState, useEffect, useRef } from "react";
 import {
-  ArrowUpRight, ArrowDownRight, Briefcase, Plus, Layers, BarChart3, ChevronDown
+  ArrowUpRight, ArrowDownRight, Briefcase, Plus, BarChart3, ChevronDown
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -9,7 +9,6 @@ import { STYLE_ICONS } from "../data";
 import { formatUSD } from "../utils/format";
 import { trackCtaClick } from "../utils/analytics";
 import { GlassCard, Badge, MiniChart, WatchButton } from "../components/shared";
-import SectorTreemap from "../components/SectorTreemap";
 import OverlapHeatmap from "../components/OverlapHeatmap";
 
 // Skeleton card placeholder
@@ -347,31 +346,18 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       })()}
 
       {!ready ? null : <>
-      {/* Visualization: Sector Treemap + Overlap Heatmap */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <GlassCard hover={false}>
-          <div className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Layers size={18} style={{color:t.purple}} />
-              <h3 className="font-bold" style={{color:t.text}}>{L.t('dashboard.sectorDistribution')}</h3>
-            </div>
-            <div role="img" aria-label={L.t('dashboard.sectorDistribution')}>
-              <SectorTreemap onNavigate={onNavigate} />
-            </div>
+      {/* Visualization: Portfolio Overlap (Full Width) */}
+      <GlassCard hover={false}>
+        <div className="p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 size={18} style={{color:t.accent}} />
+            <h3 className="font-bold" style={{color:t.text}}>{L.t('dashboard.portfolioOverlap')}</h3>
           </div>
-        </GlassCard>
-        <GlassCard hover={false}>
-          <div className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <BarChart3 size={18} style={{color:t.accent}} />
-              <h3 className="font-bold" style={{color:t.text}}>{L.t('dashboard.portfolioOverlap')}</h3>
-            </div>
-            <div role="img" aria-label={L.t('dashboard.portfolioOverlap')}>
-              <OverlapHeatmap onNavigate={onNavigate} />
-            </div>
+          <div role="img" aria-label={L.t('dashboard.portfolioOverlap')}>
+            <OverlapHeatmap onNavigate={onNavigate} />
           </div>
-        </GlassCard>
-      </div>
+        </div>
+      </GlassCard>
 
       {/* Recent Activity — 3-Column by Action Type */}
       <section aria-label={L.t('dashboard.recentQuarterChanges')}>

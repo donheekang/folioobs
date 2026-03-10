@@ -8,6 +8,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
   const L = useLocale();
   const { investors: INVESTORS, holdings: HOLDINGS } = useData();
   const [hoveredCell, setHoveredCell] = useState(null);
+  const [selectedCell, setSelectedCell] = useState(null);
 
   const { matrix, commonStocks } = useMemo(() => {
     const invIds = INVESTORS.map(i => i.id);
@@ -53,6 +54,29 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
 
   const cellSize = 42;
 
+  // Get detail info for selected cell's common stocks
+  const selectedDetail = useMemo(() => {
+    if (!selectedCell) return null;
+    const a = INVESTORS.find(i => i.id === selectedCell.row);
+    const b = INVESTORS.find(i => i.id === selectedCell.col);
+    if (!a || !b) return null;
+    const common = commonStocks[selectedCell.row]?.[selectedCell.col] || [];
+    // Enrich with holdings data (pct from each investor)
+    const enriched = common.map(ticker => {
+      const hA = (HOLDINGS[a.id] || []).find(h => h.ticker === ticker);
+      const hB = (HOLDINGS[b.id] || []).find(h => h.ticker === ticker);
+      return {
+        ticker,
+        name: hA?.name || hB?.name || '',
+        pctA: hA?.pct ?? 0,
+        pctB: hB?.pct ?? 0,
+        valueA: hA?.value ?? 0,
+        valueB: hB?.value ?? 0,
+      };
+    }).sort((x, y) => (y.pctA + y.pctB) - (x.pctA + x.pctB));
+    return { a, b, stocks: enriched };
+  }, [selectedCell, INVESTORS, HOLDINGS, commonStocks]);
+
   return (
     <div>
       <div className="overflow-x-auto" role="grid" aria-label={L.t('nav.overlapHeatmap')}>
@@ -90,6 +114,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
                 const val = matrix[rowInv.id]?.[colInv.id] ?? 0;
                 const isDiag = rowInv.id === colInv.id;
                 const isHovered = hoveredCell?.row === rowInv.id && hoveredCell?.col === colInv.id;
+                const isSelected = selectedCell?.row === rowInv.id && selectedCell?.col === colInv.id;
                 const hasValue = !isDiag && val > 0;
                 return (
                   <div key={`${rowInv.id}-${colInv.id}`}
@@ -98,7 +123,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
                       width: `${cellSize}px`, height: `${cellSize}px`,
                       background: getColor(val, isDiag),
                       color: hasValue ? '#fff' : t.textMuted,
-                      border: isHovered && hasValue
+                      border: (isHovered || isSelected) && hasValue
                         ? `2px solid ${t.accent}`
                         : isDiag
                           ? `1px dashed ${t.name === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`
@@ -107,10 +132,19 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
                       fontWeight: hasValue ? 700 : 400,
                       fontSize: isDiag ? '10px' : '14px',
                       opacity: isDiag ? 0.5 : 1,
+                      transform: isSelected && hasValue ? 'scale(1.1)' : 'none',
                     }}
                     onMouseEnter={() => !isDiag && setHoveredCell({ row: rowInv.id, col: colInv.id })}
                     onMouseLeave={() => setHoveredCell(null)}
-                    onClick={() => hasValue && onNavigate?.("compare")}>
+                    onClick={() => {
+                      if (hasValue) {
+                        if (isSelected) {
+                          setSelectedCell(null);
+                        } else {
+                          setSelectedCell({ row: rowInv.id, col: colInv.id });
+                        }
+                      }
+                    }}>
                     {isDiag ? `${val}${L.t('shared.stocksUnit')}` : (val || "")}
                   </div>
                 );
@@ -133,8 +167,8 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
         <span className="text-xs ml-2" style={{ color: t.textMuted }}>= {L.t('shared.commonStocksCount')}</span>
       </div>
 
-      {/* Hover detail */}
-      {hoveredCell && hoveredCell.row !== hoveredCell.col && (() => {
+      {/* Hover detail (shown when hovering, but not when a cell is selected) */}
+      {!selectedCell && hoveredCell && hoveredCell.row !== hoveredCell.col && (() => {
         const a = INVESTORS.find(i => i.id === hoveredCell.row);
         const b = INVESTORS.find(i => i.id === hoveredCell.col);
         const common = commonStocks[hoveredCell.row][hoveredCell.col];
@@ -163,6 +197,64 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
           </div>
         );
       })()}
+
+      {/* Selected cell detail — expanded common stocks list */}
+      {selectedDetail && (
+        <div className="mt-4 rounded-2xl overflow-hidden"
+          style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
+          {/* Header */}
+          <div className="px-4 py-3 flex items-center justify-between"
+            style={{ borderBottom: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-bold"
+                style={{ background: selectedDetail.a.gradient }}>{selectedDetail.a.avatar}</div>
+              <span style={{ color: t.textMuted }}>×</span>
+              <div className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-bold"
+                style={{ background: selectedDetail.b.gradient }}>{selectedDetail.b.avatar}</div>
+              <span className="font-bold text-sm" style={{ color: t.text }}>
+                {L.locale === 'ko' ? '공동 보유' : 'Common Holdings'} ({selectedDetail.stocks.length})
+              </span>
+            </div>
+            <button onClick={() => setSelectedCell(null)}
+              className="text-xs px-2 py-1 rounded-lg hover:opacity-80 transition-opacity"
+              style={{ color: t.textMuted, background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
+              ✕
+            </button>
+          </div>
+
+          {/* Column headers */}
+          <div className="grid grid-cols-12 gap-2 px-4 py-2 text-xs font-medium"
+            style={{ color: t.textMuted, borderBottom: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}>
+            <div className="col-span-2">{L.locale === 'ko' ? '티커' : 'Ticker'}</div>
+            <div className="col-span-4">{L.locale === 'ko' ? '종목명' : 'Name'}</div>
+            <div className="col-span-3 text-right">{L.investorName(selectedDetail.a)} %</div>
+            <div className="col-span-3 text-right">{L.investorName(selectedDetail.b)} %</div>
+          </div>
+
+          {/* Stock rows */}
+          <div className="max-h-80 overflow-y-auto">
+            {selectedDetail.stocks.map((s, i) => (
+              <div key={s.ticker}
+                className="grid grid-cols-12 gap-2 px-4 py-2.5 text-sm items-center hover:opacity-80 transition-opacity cursor-pointer"
+                style={{
+                  borderBottom: i < selectedDetail.stocks.length - 1 ? `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}` : 'none',
+                }}
+                onClick={() => onNavigate?.("screener", s.ticker)}>
+                <div className="col-span-2 font-bold" style={{ color: t.accent }}>{s.ticker}</div>
+                <div className="col-span-4 text-xs truncate" style={{ color: t.textSecondary }}>{s.name}</div>
+                <div className="col-span-3 text-right font-medium" style={{ color: t.text }}>{s.pctA.toFixed(1)}%</div>
+                <div className="col-span-3 text-right font-medium" style={{ color: t.text }}>{s.pctB.toFixed(1)}%</div>
+              </div>
+            ))}
+          </div>
+
+          {selectedDetail.stocks.length === 0 && (
+            <div className="px-4 py-6 text-center text-sm" style={{ color: t.textMuted }}>
+              {L.locale === 'ko' ? '공동 보유 종목이 없습니다' : 'No common holdings'}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 });
