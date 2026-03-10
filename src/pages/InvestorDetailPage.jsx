@@ -454,8 +454,8 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
                           <Badge color={c}>{L.tag ? L.tag(ins.tag) : ins.tag}</Badge>
                           {ins.confidence && <span className="text-xs" style={{color:t.textMuted}}>{L.t('investor.confidence')} {ins.confidence}%</span>}
                         </div>
-                        <h4 className="font-bold text-sm mb-1" style={{color:t.text}}>{title}</h4>
-                        <p className="text-xs leading-relaxed" style={{color:t.textSecondary}}>{desc}</p>
+                        <h4 className="font-bold text-sm mb-1" style={{color:t.text, overflowWrap:'break-word', wordBreak:'break-word'}}>{title}</h4>
+                        <p className="text-xs leading-relaxed" style={{color:t.textSecondary, overflowWrap:'break-word'}}>{desc}</p>
                       </div>
                     </div></div>
                   </GlassCard>
