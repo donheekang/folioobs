@@ -51,7 +51,7 @@ export default {
 
   // ===== 대시보드 =====
   dashboard: {
-    subtitle: "워렌 버핏 · 캐시 우드 · 드러켄밀러 외 3명",
+    subtitle: "워렌 버핏 · 캐시 우드 · 드러켄밀러 외 8명",
     title: "포트폴리오 변화를 한눈에",
     description: "월가 전설들의 매매를 매일 추적하세요.",
     arkTodayLabel: "오늘 캐시 우드",
