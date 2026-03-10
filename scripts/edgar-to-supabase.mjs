@@ -37,9 +37,13 @@ const TRACKED_INVESTORS = [
   { cik: '0001536411', name: 'Stanley Druckenmiller', nameKo: '스탠리 드러켄밀러', fund: 'Duquesne Family Office', fundKo: '듀케인 패밀리 오피스', style: '매크로투자', color: '#F59E0B', gradient: 'linear-gradient(135deg, #F59E0B, #FBBF24)', avatar: 'SD', bio: '매크로 투자의 거장.', founded: 1981 },
   { cik: '0001350694', name: 'Ray Dalio', nameKo: '레이 달리오', fund: 'Bridgewater Associates', fundKo: '브릿지워터 어소시에이츠', style: '분산투자', color: '#10B981', gradient: 'linear-gradient(135deg, #10B981, #34D399)', avatar: 'RD', bio: '세계 최대 헤지펀드 창립자.', founded: 1975 },
   { cik: '0001336528', name: 'Bill Ackman', nameKo: '빌 애크먼', fund: 'Pershing Square', fundKo: '퍼싱 스퀘어', style: '행동주의투자', color: '#A855F7', gradient: 'linear-gradient(135deg, #A855F7, #C084FC)', avatar: 'BA', bio: '행동주의 투자의 대표주자.', founded: 2004 },
-  { cik: '0001061768', name: 'George Soros', nameKo: '조지 소로스', fund: 'Soros Fund Management', fundKo: '소로스 펀드 매니지먼트', style: '매크로투자', color: '#EF4444', gradient: 'linear-gradient(135deg, #EF4444, #F87171)', avatar: 'GS', bio: '전설적인 매크로 트레이더.', founded: 1970 },
+  { cik: '0001029160', name: 'George Soros', nameKo: '조지 소로스', fund: 'Soros Fund Management', fundKo: '소로스 펀드 매니지먼트', style: '매크로투자', color: '#EF4444', gradient: 'linear-gradient(135deg, #EF4444, #F87171)', avatar: 'GS', bio: '전설적인 매크로 트레이더.', founded: 1970 },
   { cik: '0001599922', name: 'Cathie Wood', nameKo: '캐시 우드', fund: 'ARK Invest', fundKo: 'ARK 인베스트', style: '성장주투자', color: '#06B6D4', gradient: 'linear-gradient(135deg, #06B6D4, #22D3EE)', avatar: 'CW', bio: '파괴적 혁신 투자의 선구자.', founded: 2014 },
   { cik: '0001649339', name: 'Michael Burry', nameKo: '마이클 버리', fund: 'Scion Asset Management', fundKo: '시온 자산운용', style: '역발상가치투자', color: '#EC4899', gradient: 'linear-gradient(135deg, #EC4899, #F472B6)', avatar: 'MB', bio: '빅숏의 주인공. 역발상 깊은 가치투자.', founded: 2000 },
+  { cik: '0001656456', name: 'David Tepper', nameKo: '데이비드 테퍼', fund: 'Appaloosa Management', fundKo: '아팔루사 매니지먼트', style: '매크로가치투자', color: '#F97316', gradient: 'linear-gradient(135deg, #F97316, #FB923C)', avatar: 'DT', bio: '매크로와 가치투자를 결합한 헤지펀드 거장.', founded: 1993 },
+  { cik: '0001167483', name: 'Chase Coleman', nameKo: '체이스 콜먼', fund: 'Tiger Global Management', fundKo: '타이거 글로벌 매니지먼트', style: '테크성장투자', color: '#3B82F6', gradient: 'linear-gradient(135deg, #3B82F6, #60A5FA)', avatar: 'CC', bio: '테크 중심 성장주 투자의 대표주자.', founded: 2001 },
+  { cik: '0001040273', name: 'Dan Loeb', nameKo: '댄 로엡', fund: 'Third Point', fundKo: '써드 포인트', style: '행동주의투자', color: '#8B5CF6', gradient: 'linear-gradient(135deg, #8B5CF6, #A78BFA)', avatar: 'DL', bio: '행동주의 헤지펀드의 선두주자.', founded: 1995 },
+  { cik: '0001061768', name: 'Seth Klarman', nameKo: '세스 클라먼', fund: 'Baupost Group', fundKo: '바우포스트 그룹', style: '가치투자', color: '#14B8A6', gradient: 'linear-gradient(135deg, #14B8A6, #2DD4BF)', avatar: 'SK', bio: '워렌 버핏의 후계자로 불리는 가치투자 대가.', founded: 1982 },
 ];
 
 // ============================================================
