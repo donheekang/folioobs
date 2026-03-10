@@ -51,7 +51,7 @@ export default {
 
   // ===== Dashboard =====
   dashboard: {
-    subtitle: "Warren Buffett · Cathie Wood · Druckenmiller + 8 more",
+    subtitle: "Warren Buffett · Cathie Wood · Druckenmiller + 7 more",
     title: "Portfolio Changes at a Glance",
     description: "Track legendary investors' trades — updated daily.",
     arkTodayLabel: "Cathie Wood today",

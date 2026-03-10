@@ -1,18 +1,18 @@
 {
   "investor": "캐시 우드 (Cathie Wood / ARK Invest)",
   "quarter": "2026Q1",
-  "reportDate": "2026-03-06",
-  "aum": "$12292.5M",
-  "holdingCount": 117,
+  "reportDate": "2026-03-09",
+  "aum": "$11972.0M",
+  "holdingCount": 115,
   "sectorCount": 6,
-  "concentration": "41.9%",
+  "concentration": "41.8%",
   "topHoldings": [
     {
       "rank": 1,
       "ticker": "TSLA",
       "company": "TESLA INC",
-      "pct": 8.59,
-      "value": 1056529,
+      "pct": 8.55,
+      "value": 1023923,
       "sector": "기술",
       "funds": [
         "ARKK",
@@ -24,8 +24,8 @@
       "rank": 2,
       "ticker": "CRSP",
       "company": "CRISPR THERAPEUTICS AG",
-      "pct": 4.45,
-      "value": 547502,
+      "pct": 4.46,
+      "value": 533878,
       "sector": "헬스케어",
       "funds": [
         "ARKK",
@@ -36,8 +36,8 @@
       "rank": 3,
       "ticker": "SHOP",
       "company": "SHOPIFY INC - CLASS A",
-      "pct": 4.29,
-      "value": 526801,
+      "pct": 4.24,
+      "value": 507886,
       "sector": "기술",
       "funds": [
         "ARKK",
@@ -49,8 +49,8 @@
       "rank": 4,
       "ticker": "AMD",
       "company": "ADVANCED MICRO DEVICES",
-      "pct": 3.82,
-      "value": 469666,
+      "pct": 3.76,
+      "value": 450478,
       "sector": "기타",
       "funds": [
         "ARKK",
@@ -61,23 +61,10 @@
     },
     {
       "rank": 5,
-      "ticker": "COIN",
-      "company": "COINBASE GLOBAL INC -CLASS A",
-      "pct": 3.67,
-      "value": 450767,
-      "sector": "기술",
-      "funds": [
-        "ARKK",
-        "ARKW",
-        "ARKF"
-      ]
-    },
-    {
-      "rank": 6,
       "ticker": "TEM",
       "company": "TEMPUS AI INC-CL A",
-      "pct": 3.63,
-      "value": 446715,
+      "pct": 3.64,
+      "value": 435567,
       "sector": "헬스케어",
       "funds": [
         "ARKK",
@@ -85,11 +72,11 @@
       ]
     },
     {
-      "rank": 7,
-      "ticker": "HOOD",
-      "company": "ROBINHOOD MARKETS INC - A",
-      "pct": 3.57,
-      "value": 439330,
+      "rank": 6,
+      "ticker": "COIN",
+      "company": "COINBASE GLOBAL INC -CLASS A",
+      "pct": 3.6,
+      "value": 430441,
       "sector": "기술",
       "funds": [
         "ARKK",
@@ -98,11 +85,11 @@
       ]
     },
     {
-      "rank": 8,
+      "rank": 7,
       "ticker": "PLTR",
       "company": "PALANTIR TECHNOLOGIES INC-A",
-      "pct": 3.38,
-      "value": 415526,
+      "pct": 3.53,
+      "value": 422954,
       "sector": "기술",
       "funds": [
         "ARKK",
@@ -112,11 +99,24 @@
       ]
     },
     {
+      "rank": 8,
+      "ticker": "HOOD",
+      "company": "ROBINHOOD MARKETS INC - A",
+      "pct": 3.51,
+      "value": 420101,
+      "sector": "기술",
+      "funds": [
+        "ARKK",
+        "ARKW",
+        "ARKF"
+      ]
+    },
+    {
       "rank": 9,
       "ticker": "CRCL",
       "company": "CIRCLE INTERNET GROUP INC",
-      "pct": 3.37,
-      "value": 413869,
+      "pct": 3.31,
+      "value": 396101,
       "sector": "기타",
       "funds": [
         "ARKK",
@@ -128,8 +128,8 @@
       "rank": 10,
       "ticker": "ROKU",
       "company": "ROKU INC",
-      "pct": 3.1,
-      "value": 380549,
+      "pct": 3.19,
+      "value": 382462,
       "sector": "기술",
       "funds": [
         "ARKK",
@@ -139,22 +139,10 @@
     },
     {
       "rank": 11,
-      "ticker": "TER",
-      "company": "TERADYNE INC",
-      "pct": 2.83,
-      "value": 348433,
-      "sector": "기타",
-      "funds": [
-        "ARKK",
-        "ARKQ"
-      ]
-    },
-    {
-      "rank": 12,
       "ticker": "RBLX",
       "company": "ROBLOX CORP -CLASS A",
-      "pct": 2.82,
-      "value": 346308,
+      "pct": 2.76,
+      "value": 330711,
       "sector": "기술",
       "funds": [
         "ARKK",
@@ -163,11 +151,23 @@
       ]
     },
     {
+      "rank": 12,
+      "ticker": "TER",
+      "company": "TERADYNE INC",
+      "pct": 2.58,
+      "value": 309244,
+      "sector": "기타",
+      "funds": [
+        "ARKK",
+        "ARKQ"
+      ]
+    },
+    {
       "rank": 13,
-      "ticker": "TWST",
-      "company": "TWIST BIOSCIENCE CORP",
-      "pct": 2.3,
-      "value": 283147,
+      "ticker": "BEAM",
+      "company": "BEAM THERAPEUTICS INC",
+      "pct": 2.38,
+      "value": 285049,
       "sector": "헬스케어",
       "funds": [
         "ARKK",
@@ -176,10 +176,10 @@
     },
     {
       "rank": 14,
-      "ticker": "BEAM",
-      "company": "BEAM THERAPEUTICS INC",
-      "pct": 2.25,
-      "value": 277054,
+      "ticker": "TWST",
+      "company": "TWIST BIOSCIENCE CORP",
+      "pct": 2.26,
+      "value": 270750,
       "sector": "헬스케어",
       "funds": [
         "ARKK",
@@ -190,8 +190,8 @@
       "rank": 15,
       "ticker": "AMZN",
       "company": "AMAZON.COM INC",
-      "pct": 2.02,
-      "value": 248050,
+      "pct": 2.01,
+      "value": 240370,
       "sector": "기술",
       "funds": [
         "ARKK",
@@ -202,22 +202,10 @@
     },
     {
       "rank": 16,
-      "ticker": "TXG",
-      "company": "10X GENOMICS INC-CLASS A",
-      "pct": 1.83,
-      "value": 224883,
-      "sector": "기타",
-      "funds": [
-        "ARKK",
-        "ARKG"
-      ]
-    },
-    {
-      "rank": 17,
       "ticker": "KTOS",
       "company": "KRATOS DEFENSE & SECURITY",
-      "pct": 1.81,
-      "value": 222933,
+      "pct": 1.89,
+      "value": 225688,
       "sector": "산업",
       "funds": [
         "ARKK",
@@ -225,11 +213,11 @@
       ]
     },
     {
-      "rank": 18,
+      "rank": 17,
       "ticker": "BLSH",
       "company": "BULLISH",
-      "pct": 1.81,
-      "value": 222302,
+      "pct": 1.83,
+      "value": 219597,
       "sector": "기타",
       "funds": [
         "ARKK",
@@ -238,11 +226,23 @@
       ]
     },
     {
+      "rank": 18,
+      "ticker": "TXG",
+      "company": "10X GENOMICS INC-CLASS A",
+      "pct": 1.78,
+      "value": 212685,
+      "sector": "기타",
+      "funds": [
+        "ARKK",
+        "ARKG"
+      ]
+    },
+    {
       "rank": 19,
       "ticker": "XYZ",
       "company": "BLOCK INC",
-      "pct": 1.6,
-      "value": 197266,
+      "pct": 1.61,
+      "value": 193274,
       "sector": "기술",
       "funds": [
         "ARKK",
@@ -254,8 +254,8 @@
       "rank": 20,
       "ticker": "TSM",
       "company": "TAIWAN SEMICONDUCTOR-SP ADR",
-      "pct": 1.59,
-      "value": 195941,
+      "pct": 1.56,
+      "value": 186287,
       "sector": "기타",
       "funds": [
         "ARKK",
@@ -271,15 +271,15 @@
     },
     {
       "sector": "기타",
-      "pct": 34.3
+      "pct": 33.9
     },
     {
       "sector": "헬스케어",
-      "pct": 17.1
+      "pct": 17.3
     },
     {
       "sector": "산업",
-      "pct": 6.9
+      "pct": 7
     },
     {
       "sector": "부동산",
@@ -291,6 +291,221 @@
     }
   ],
   "dailyTrades": [
+    {
+      "date": "2026-03-09",
+      "trades": [
+        {
+          "id": 319,
+          "trade_date": "2026-03-09",
+          "ticker": "LAB",
+          "company": "STANDARD BIOTOOLS INC",
+          "direction": "sell",
+          "shares_change": -397382,
+          "weight_today": 0,
+          "weight_prev": 0.01,
+          "funds": "ARKG",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.981685+00:00"
+        },
+        {
+          "id": 292,
+          "trade_date": "2026-03-09",
+          "ticker": "RXRX",
+          "company": "RECURSION PHARMACEUTICALS-A",
+          "direction": "sell",
+          "shares_change": -313344,
+          "weight_today": 1.02,
+          "weight_prev": 1.03,
+          "funds": "ARKK,ARKG",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 303,
+          "trade_date": "2026-03-09",
+          "ticker": "PACB",
+          "company": "PACIFIC BIOSCIENCES OF CALIF",
+          "direction": "sell",
+          "shares_change": -282816,
+          "weight_today": 0.36,
+          "weight_prev": 0.39,
+          "funds": "ARKK,ARKG",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 281,
+          "trade_date": "2026-03-09",
+          "ticker": "ACHR",
+          "company": "ARCHER AVIATION INC-A",
+          "direction": "sell",
+          "shares_change": -258240,
+          "weight_today": 1.55,
+          "weight_prev": 1.57,
+          "funds": "ARKK,ARKQ",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 307,
+          "trade_date": "2026-03-09",
+          "ticker": "JOBY",
+          "company": "JOBY AVIATION INC",
+          "direction": "buy",
+          "shares_change": 184911,
+          "weight_today": 0.27,
+          "weight_prev": 0.25,
+          "funds": "ARKQ",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 278,
+          "trade_date": "2026-03-09",
+          "ticker": "TXG",
+          "company": "10X GENOMICS INC-CLASS A",
+          "direction": "sell",
+          "shares_change": -171703,
+          "weight_today": 1.78,
+          "weight_prev": 1.83,
+          "funds": "ARKK,ARKG",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 286,
+          "trade_date": "2026-03-09",
+          "ticker": "NTLA",
+          "company": "INTELLIA THERAPEUTICS INC",
+          "direction": "sell",
+          "shares_change": -126408,
+          "weight_today": 1.38,
+          "weight_prev": 1.33,
+          "funds": "ARKK,ARKG",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 273,
+          "trade_date": "2026-03-09",
+          "ticker": "BEAM",
+          "company": "BEAM THERAPEUTICS INC",
+          "direction": "sell",
+          "shares_change": -115992,
+          "weight_today": 2.38,
+          "weight_prev": 2.25,
+          "funds": "ARKK,ARKG",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 262,
+          "trade_date": "2026-03-09",
+          "ticker": "CRSP",
+          "company": "CRISPR THERAPEUTICS AG",
+          "direction": "sell",
+          "shares_change": -100848,
+          "weight_today": 4.46,
+          "weight_prev": 4.45,
+          "funds": "ARKK,ARKG",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 283,
+          "trade_date": "2026-03-09",
+          "ticker": "BMNR",
+          "company": "BITMINE IMMERSION TECHNOLOGI",
+          "direction": "sell",
+          "shares_change": -92529,
+          "weight_today": 1.48,
+          "weight_prev": 1.55,
+          "funds": "ARKK,ARKW,ARKF",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 265,
+          "trade_date": "2026-03-09",
+          "ticker": "TEM",
+          "company": "TEMPUS AI INC-CL A",
+          "direction": "sell",
+          "shares_change": -86016,
+          "weight_today": 3.64,
+          "weight_prev": 3.63,
+          "funds": "ARKK,ARKG",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 277,
+          "trade_date": "2026-03-09",
+          "ticker": "BLSH",
+          "company": "BULLISH",
+          "direction": "sell",
+          "shares_change": -67422,
+          "weight_today": 1.83,
+          "weight_prev": 1.81,
+          "funds": "ARKK,ARKW,ARKF",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 270,
+          "trade_date": "2026-03-09",
+          "ticker": "ROKU",
+          "company": "ROKU INC",
+          "direction": "sell",
+          "shares_change": -66378,
+          "weight_today": 3.19,
+          "weight_prev": 3.1,
+          "funds": "ARKK,ARKW,ARKF",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 271,
+          "trade_date": "2026-03-09",
+          "ticker": "RBLX",
+          "company": "ROBLOX CORP -CLASS A",
+          "direction": "sell",
+          "shares_change": -54323,
+          "weight_today": 2.76,
+          "weight_prev": 2.82,
+          "funds": "ARKK,ARKW,ARKF",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        },
+        {
+          "id": 306,
+          "trade_date": "2026-03-09",
+          "ticker": "CERS",
+          "company": "CERUS CORP",
+          "direction": "sell",
+          "shares_change": -51164,
+          "weight_today": 0.28,
+          "weight_prev": 0.29,
+          "funds": "ARKK,ARKG",
+          "is_new": false,
+          "is_exit": false,
+          "created_at": "2026-03-09T23:20:22.93381+00:00"
+        }
+      ]
+    },
     {
       "date": "2026-03-06",
       "trades": [
@@ -722,5 +937,5 @@
       ]
     }
   ],
-  "savedAt": "2026-03-07T04:44:44.347Z"
+  "savedAt": "2026-03-09T23:20:23.084Z"
 }

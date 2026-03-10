@@ -55,15 +55,6 @@ export const INVESTORS = [
     metrics: { concentration: 0.28, sectorCount: 12, holdingCount: 85, topHoldingPct: 9.5, qoqChange: -1.5 }
   },
   {
-    id: "burry", name: "Michael Burry", nameKo: "마이클 버리",
-    fund: "Scion Asset Management", fundKo: "시온 자산운용",
-    style: "역발상가치투자", color: "#EC4899", gradient: "linear-gradient(135deg, #EC4899, #F472B6)",
-    aum: 0.3, bio: "2008년 서브프라임 모기지 사태를 예측한 '빅숏'의 주인공. 역발상 깊은 가치투자와 집중 베팅 전략으로 알려진 헤지펀드 매니저. 2025년 11월 Scion Asset Management 등록 해제 — 2025Q3이 마지막 13F 공시입니다.",
-    bioEn: "The real-life protagonist of 'The Big Short' who predicted the 2008 subprime mortgage crisis. Known for contrarian deep-value investing and concentrated bets. Scion Asset Management was deregistered in November 2025 — Q3 2025 is the final 13F filing.",
-    founded: 2000, avatar: "MB",
-    metrics: { concentration: 0.85, sectorCount: 3, holdingCount: 8, topHoldingPct: 35.0, qoqChange: 0 }
-  },
-  {
     id: "tepper", name: "David Tepper", nameKo: "데이비드 테퍼",
     fund: "Appaloosa Management", fundKo: "아팔루사 매니지먼트",
     style: "매크로가치투자", color: "#F97316", gradient: "linear-gradient(135deg, #F97316, #FB923C)",
