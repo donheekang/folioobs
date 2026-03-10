@@ -53,5 +53,14 @@ export const INVESTORS = [
     bioEn: "The man who broke the Bank of England. A legend of global macro investing, known for his theory of reflexivity.",
     founded: 1970, avatar: "GS",
     metrics: { concentration: 0.28, sectorCount: 12, holdingCount: 85, topHoldingPct: 9.5, qoqChange: -1.5 }
+  },
+  {
+    id: "burry", name: "Michael Burry", nameKo: "마이클 버리",
+    fund: "Scion Asset Management", fundKo: "시온 자산운용",
+    style: "역발상가치투자", color: "#EC4899", gradient: "linear-gradient(135deg, #EC4899, #F472B6)",
+    aum: 0.3, bio: "2008년 서브프라임 모기지 사태를 예측한 '빅숏'의 주인공. 역발상 깊은 가치투자와 집중 베팅 전략으로 알려진 헤지펀드 매니저. 소수 종목에 집중하며 시장 반대편에 서는 것을 두려워하지 않습니다.",
+    bioEn: "The real-life protagonist of 'The Big Short' who predicted the 2008 subprime mortgage crisis. A hedge fund manager known for contrarian deep-value investing and concentrated bets. He is not afraid to take positions against the market consensus.",
+    founded: 2000, avatar: "MB",
+    metrics: { concentration: 0.85, sectorCount: 3, holdingCount: 8, topHoldingPct: 35.0, qoqChange: 0 }
   }
 ];

@@ -147,7 +147,7 @@ async function main() {
   const validInsights = insights
     .filter(ins => ins.title && ins.desc && ins.tag)
     .map(ins => ({
-      title: ins.title.slice(0, 20),
+      title: ins.title.slice(0, 60),
       title_en: ins.title_en || null,
       desc: ins.desc,
       desc_en: ins.desc_en || null,

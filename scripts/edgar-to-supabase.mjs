@@ -39,6 +39,7 @@ const TRACKED_INVESTORS = [
   { cik: '0001336528', name: 'Bill Ackman', nameKo: '빌 애크먼', fund: 'Pershing Square', fundKo: '퍼싱 스퀘어', style: '행동주의투자', color: '#A855F7', gradient: 'linear-gradient(135deg, #A855F7, #C084FC)', avatar: 'BA', bio: '행동주의 투자의 대표주자.', founded: 2004 },
   { cik: '0001061768', name: 'George Soros', nameKo: '조지 소로스', fund: 'Soros Fund Management', fundKo: '소로스 펀드 매니지먼트', style: '매크로투자', color: '#EF4444', gradient: 'linear-gradient(135deg, #EF4444, #F87171)', avatar: 'GS', bio: '전설적인 매크로 트레이더.', founded: 1970 },
   { cik: '0001599922', name: 'Cathie Wood', nameKo: '캐시 우드', fund: 'ARK Invest', fundKo: 'ARK 인베스트', style: '성장주투자', color: '#06B6D4', gradient: 'linear-gradient(135deg, #06B6D4, #22D3EE)', avatar: 'CW', bio: '파괴적 혁신 투자의 선구자.', founded: 2014 },
+  { cik: '0001649339', name: 'Michael Burry', nameKo: '마이클 버리', fund: 'Scion Asset Management', fundKo: '시온 자산운용', style: '역발상가치투자', color: '#EC4899', gradient: 'linear-gradient(135deg, #EC4899, #F472B6)', avatar: 'MB', bio: '빅숏의 주인공. 역발상 깊은 가치투자.', founded: 2000 },
 ];
 
 // ============================================================
