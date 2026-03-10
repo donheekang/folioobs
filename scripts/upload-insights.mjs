@@ -39,6 +39,7 @@ const args = process.argv.slice(2);
 const investorArg = args.find(a => a.startsWith('--investor='))?.split('=')[1];
 const dailyFlag = args.includes('--daily');
 const forceFlag = args.includes('--force');
+const dateArg = args.find(a => a.startsWith('--date='))?.split('=')[1]; // YYYY-MM-DD 형식
 
 // --insights='[...]' 또는 --insights-file=path
 let insightsRaw = args.find(a => a.startsWith('--insights='))?.slice('--insights='.length);
@@ -104,9 +105,12 @@ async function main() {
   }
 
   const quarter = invFiling.quarter;
-  const saveQuarter = dailyFlag
-    ? `${quarter}-${new Date().toISOString().slice(5, 10).replace('-', '')}`
-    : quarter;
+  let saveQuarter = quarter;
+  if (dailyFlag) {
+    const dateStr = dateArg || new Date().toISOString().slice(0, 10); // --date=2026-03-09 또는 오늘
+    const mmdd = dateStr.slice(5).replace('-', ''); // "0309"
+    saveQuarter = `${quarter}-${mmdd}`;
+  }
 
   console.log(`  📅 분기: ${saveQuarter}`);
 

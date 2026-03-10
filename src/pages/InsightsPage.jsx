@@ -39,7 +39,8 @@ const InsightsPage = ({ onBack, onNavigate }) => {
   const allInsights = useMemo(() => {
     const result = [];
     INVESTORS.forEach(inv => {
-      const aiData = aiInsights?.[inv.id];
+      const invInsights = aiInsights?.[inv.id];
+      const aiData = invInsights?._latest || null;
       const hasAI = aiData && aiData.insights && aiData.insights.length > 0;
 
       if (hasAI) {

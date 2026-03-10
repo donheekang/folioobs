@@ -469,7 +469,7 @@ export function DataProvider({ children }) {
           console.warn('ARK 일별 매매 로드 실패:', e.message);
         }
 
-        // 9. AI 인사이트 로드
+        // 9. AI 인사이트 로드 — 투자자별 모든 날짜/분기 저장
         let aiInsightsMap = {};
         try {
           const { data: rawInsights, error: aiErr } = await supabase
@@ -480,13 +480,27 @@ export function DataProvider({ children }) {
           if (!aiErr && rawInsights?.length) {
             rawInsights.forEach(row => {
               const slug = idToSlug[row.investor_id];
-              if (slug && !aiInsightsMap[slug]) {
-                // 가장 최신 것만 사용
-                aiInsightsMap[slug] = {
+              if (!slug) return;
+              if (!aiInsightsMap[slug]) aiInsightsMap[slug] = {};
+              // quarter 키별로 저장 (예: "2026Q1-0309", "2025Q4")
+              const qKey = row.quarter;
+              if (!aiInsightsMap[slug][qKey]) {
+                aiInsightsMap[slug][qKey] = {
                   quarter: formatQuarterLabel(row.quarter),
+                  quarterRaw: row.quarter,
                   insights: row.insights || [],
                   generatedAt: row.generated_at,
                 };
+              }
+            });
+            // 각 투자자별 최신 인사이트를 _latest에 저장
+            Object.keys(aiInsightsMap).forEach(slug => {
+              const entries = Object.values(aiInsightsMap[slug]);
+              if (entries.length) {
+                const latest = entries.sort((a, b) =>
+                  new Date(b.generatedAt) - new Date(a.generatedAt)
+                )[0];
+                aiInsightsMap[slug]._latest = latest;
               }
             });
             console.log(`[DataProvider] AI 인사이트: ${Object.keys(aiInsightsMap).length}명 로드`);

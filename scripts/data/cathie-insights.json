@@ -1,42 +1,34 @@
 [
   {
-    "title": "HOOD 적극 매집 지속",
-    "title_en": "Aggressive HOOD Accumulation",
-    "desc": "HOOD(로빈후드)를 168,741주 추가 매수해 비중 3.48%→3.57%로 확대. ARKK·ARKW·ARKF 3개 ETF에 동시 편입된 고확신 포지션으로, 암호화폐 거래 수수료 성장과 세대 교체형 금융 플랫폼 비전에 대한 캐시 우드의 확신이 더욱 강화되는 것으로 보입니다.",
-    "desc_en": "Added 168,741 shares of HOOD (Robinhood), raising its weight from 3.48% to 3.57%. Held across ARKK, ARKW, and ARKF simultaneously, this high-conviction position reflects Cathie Wood's growing confidence in crypto trading revenue growth and Robinhood's generational fintech platform vision.",
-    "tag": "비중확대",
-    "confidence": 88
+    "title": "JOBY 2개 ETF 동시 매수 — eVTOL 확신",
+    "title_en": "JOBY Bought Across 2 ETFs — eVTOL Conviction",
+    "desc": "JOBY를 ARKQ(20,309주)와 ARKX(7,450주)에서 동시에 매수, 총 27,759주 추가. 연일 매수가 이어지며 도심항공교통(UAM) 테마에 대한 캐시 우드의 확신이 뚜렷합니다.",
+    "desc_en": "JOBY was bought simultaneously in ARKQ (20,309 shares) and ARKX (7,450 shares), totaling 27,759 shares. Continued daily accumulation signals strong conviction in urban air mobility (UAM).",
+    "tag": "트렌드",
+    "confidence": 90
   },
   {
-    "title": "ROKU 이틀 연속 대량 매도",
-    "title_en": "ROKU Sold Off Two Days Straight",
-    "desc": "ROKU를 3/5 -352,446주, 3/6 -71,979주로 이틀간 총 42만주 이상 매도하며 비중 3.38%→3.10%로 축소. 스트리밍 광고 시장 둔화 우려 또는 리밸런싱 차원의 포지션 조정으로 해석됩니다.",
-    "desc_en": "Sold over 420K shares of ROKU across two consecutive days (3/5: -352K, 3/6: -72K), reducing weight from 3.38% to 3.10%. This suggests concerns about streaming ad market slowdown or portfolio rebalancing, though ROKU remains in the top 10.",
+    "title": "DKNG·CNTN 매수 — 소비·핀테크 확대",
+    "title_en": "DKNG & CNTN Buys — Consumer/Fintech Expansion",
+    "desc": "DraftKings 32,155주(ARKW)와 Canton Strategic 37,485주(ARKF)를 매수. 스포츠 베팅과 핀테크 영역에서 새로운 포지션을 늘리며, 바이오 축소분을 소비·핀테크로 재배치하는 흐름입니다.",
+    "desc_en": "Bought DraftKings 32,155 shares (ARKW) and Canton Strategic 37,485 shares (ARKF). ARK is expanding into sports betting and fintech, reallocating from biotech reduction into consumer/fintech plays.",
+    "tag": "신규매수",
+    "confidence": 86
+  },
+  {
+    "title": "TXG·LAB 대량 매도 — 유전체 비중 축소",
+    "title_en": "TXG & LAB Heavy Selling — Genomics Drawdown",
+    "desc": "10X Genomics(TXG) 87,460주를 ARKK에서, Standard BioTools(LAB) 186,633주를 ARKG에서 매도. 유전체·바이오 장비 섹터 비중을 적극적으로 줄이고 있습니다.",
+    "desc_en": "Sold 10X Genomics (TXG) 87,460 shares from ARKK and Standard BioTools (LAB) 186,633 shares from ARKG. Active reduction in genomics and biotech equipment exposure.",
     "tag": "비중축소",
     "confidence": 85
   },
   {
-    "title": "바이오·유전체 종목 동시 정리",
-    "title_en": "Biotech/Genomics Mass Trim",
-    "desc": "TXG(-105K주), RXRX(-171K주), PACB(-152K주), PSNL(-68K주), ABSI(-101K주) 등 유전체/바이오 소형주를 하루에 대거 매도. 반면 CRSP(4.45%)·BEAM(2.25%) 등 핵심 유전자 편집 대형주는 유지하며, 바이오 섹터 내 옥석 가리기가 진행 중입니다.",
-    "desc_en": "Sold off multiple small-cap genomics names in a single day: TXG(-105K), RXRX(-171K), PACB(-152K), PSNL(-68K), ABSI(-101K). Core gene-editing leaders CRSP (4.45%) and BEAM (2.25%) were retained, signaling quality filtering within the biotech sector.",
-    "tag": "섹터",
-    "confidence": 82
-  },
-  {
-    "title": "매도 61건 vs 매수 7건",
-    "title_en": "61 Sells vs 7 Buys — Defensive",
-    "desc": "3/6 하루 매매에서 매도 61건 대비 매수는 단 7건으로 극단적 비대칭. AUM $12.3B 규모에서 전반적인 포지션 축소 모드에 진입한 것으로 보이며, 시장 변동성 확대 대비 현금 비중을 높이려는 전략적 방어 태세로 해석됩니다.",
-    "desc_en": "An extreme asymmetry of 61 sells vs only 7 buys on 3/6 signals a broad position reduction mode. With AUM at $12.3B, ARK appears to be raising cash as a strategic defensive posture ahead of market volatility, reflecting a clear risk management shift.",
+    "title": "매도 7 vs 매수 4 — 선별적 포지션 정리",
+    "title_en": "7 Sells vs 4 Buys — Selective Trimming",
+    "desc": "매도 7종목, 매수 4종목으로 매도 우위이나 전면 방어가 아닌 선별적 정리. SLMT(Brera Holdings)는 ARKW+ARKF 2개 펀드에서 총 69,333주 매도하며 소형주 정리 흐름이 뚜렷합니다.",
+    "desc_en": "7 sells vs 4 buys shows sell-side dominance, but it's selective trimming rather than all-out defense. SLMT (Brera Holdings) was sold across 2 funds (ARKW+ARKF) totaling 69,333 shares, continuing the small-cap cleanup.",
     "tag": "전략",
-    "confidence": 90
-  },
-  {
-    "title": "JOBY·DKNG 신흥 테마 확대",
-    "title_en": "JOBY & DKNG: Emerging Themes",
-    "desc": "JOBY(eVTOL 항공) 이틀 연속 매수(총 +187K주)와 DKNG(온라인 스포츠베팅) +58K주 매수는 UAM(도심항공교통)과 온라인 겜블링이라는 차세대 규제 완화 수혜 테마에 대한 포지션 구축을 시사합니다.",
-    "desc_en": "Consecutive buying of JOBY (eVTOL, +187K shares total) and DKNG (online sports betting, +58K shares) indicates early position-building in next-gen deregulation beneficiaries: urban air mobility and online gambling. Both at ~0.3% weight, still early stage.",
-    "tag": "트렌드",
-    "confidence": 78
+    "confidence": 82
   }
 ]

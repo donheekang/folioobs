@@ -12,9 +12,14 @@ import { ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGri
 // ============================================================
 // ARK 일별 매매 — 월별 섹션 (날짜 탭 + 매매 리스트)
 // ============================================================
-const ArkMonthSection = ({ group, theme: t }) => {
+const ArkMonthSection = ({ group, theme: t, onDateSelect }) => {
   const L = useLocale();
-  const [selectedDate, setSelectedDate] = useState(group.days[0]?.date || null);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const initDate = group.days[0]?.date || null;
+    // 초기 날짜를 부모에게 전달
+    if (initDate) setTimeout(() => onDateSelect?.(initDate), 0);
+    return initDate;
+  });
   const weekdays = L.t('investor.weekdays');
 
   const selectedDay = group.days.find(d => d.date === selectedDate);
@@ -44,7 +49,7 @@ const ArkMonthSection = ({ group, theme: t }) => {
           return (
             <button
               key={day.date}
-              onClick={() => setSelectedDate(day.date)}
+              onClick={() => { setSelectedDate(day.date); onDateSelect?.(day.date); }}
               className="flex flex-col items-center px-2.5 py-1.5 rounded-lg text-xs transition-all"
               style={{
                 background: isSelected ? `${t.accent}20` : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
@@ -148,6 +153,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
   const { investors: INVESTORS, holdings: HOLDINGS, quarterlyHistory: QUARTERLY_HISTORY, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades, aiInsights } = useData();
   const [sortKey, setSortKey] = useState("pct");
   const [sortDir, setSortDir] = useState("desc");
+  const [selectedArkDate, setSelectedArkDate] = useState(null); // ARK 날짜 선택 추적
   const investor = INVESTORS.find(i=>i.id===investorId);
   const rawHoldings = HOLDINGS[investorId]||[];
   // 같은 티커 합산 (SEC 13F에서 share class 별로 분리된 항목 통합)
@@ -381,7 +387,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
 
               <div className="space-y-5">
                 {months.map(([monthKey, group]) => (
-                  <ArkMonthSection key={monthKey} group={group} theme={t} />
+                  <ArkMonthSection key={monthKey} group={group} theme={t} onDateSelect={setSelectedArkDate} />
                 ))}
               </div>
             </div>
@@ -404,8 +410,21 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
 
       {/* Insights — AI 인사이트 우선, 없으면 규칙 기반 fallback */}
       {(() => {
-        const aiData = aiInsights[investorId];
-        const hasAI = aiData && aiData.insights.length > 0;
+        const invInsights = aiInsights[investorId] || {};
+        // 캐시 우드: 선택된 ARK 날짜에 맞는 인사이트 로드
+        // 다른 투자자: 최신 인사이트 사용
+        let aiData = null;
+        if (investorId === 'cathie' && selectedArkDate) {
+          // 날짜를 quarter key로 변환: "2026-03-09" → "2026Q1-0309"
+          const d = new Date(selectedArkDate + 'T00:00:00');
+          const q = Math.ceil((d.getMonth() + 1) / 3);
+          const mm = String(d.getMonth()+1).padStart(2,'0');
+          const dd = String(d.getDate()).padStart(2,'0');
+          const qKey = `${d.getFullYear()}Q${q}-${mm}${dd}`;
+          aiData = invInsights[qKey] || null;
+        }
+        if (!aiData) aiData = invInsights._latest || null;
+        const hasAI = aiData && aiData.insights && aiData.insights.length > 0;
         const displayInsights = hasAI ? aiData.insights : insights;
 
         const AI_TAG_ICONS = { '전략': Brain, '리스크': AlertTriangle, '섹터': PieIcon, '트렌드': TrendingUp, '신규매수': Star, '비중확대': TrendingUp, '비중축소': TrendingDown, '매크로': Activity, '밸류에이션': DollarSign };
