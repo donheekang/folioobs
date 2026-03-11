@@ -1,7 +1,17 @@
-import { useState, useMemo, memo, Fragment } from "react";
+import { useState, useEffect, useMemo, memo, Fragment } from "react";
 import { useTheme } from "../hooks/useTheme";
 import { useData } from "../hooks/useDataProvider";
 import { useLocale } from "../hooks/useLocale";
+
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return isMobile;
+};
 
 const OverlapHeatmap = memo(({ onNavigate }) => {
   const t = useTheme();
@@ -9,6 +19,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
   const { investors: INVESTORS, holdings: HOLDINGS } = useData();
   const [hoveredCell, setHoveredCell] = useState(null);
   const [selectedCell, setSelectedCell] = useState(null);
+  const isMobile = useIsMobile();
 
   const { matrix, commonStocks } = useMemo(() => {
     const invIds = INVESTORS.map(i => i.id);
@@ -52,7 +63,8 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
       : `rgba(0, 113, 227, ${0.06 + intensity * 0.44})`;
   };
 
-  const cellSize = 42;
+  const cellSize = isMobile ? 30 : 42;
+  const labelWidth = isMobile ? 36 : 72;
 
   // Get detail info for selected cell's common stocks
   const selectedDetail = useMemo(() => {
@@ -82,7 +94,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
       <div className="overflow-x-auto" role="grid" aria-label={L.t('nav.overlapHeatmap')}>
         <div style={{
           display: "grid",
-          gridTemplateColumns: `72px repeat(${INVESTORS.length}, ${cellSize}px)`,
+          gridTemplateColumns: `${labelWidth}px repeat(${INVESTORS.length}, ${cellSize}px)`,
           gap: "2px",
           justifyContent: "center",
           alignItems: "center",
@@ -92,7 +104,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
           {INVESTORS.map(inv => (
             <div key={inv.id} className="flex flex-col items-center gap-0.5 pb-1 cursor-pointer"
               onClick={() => onNavigate && onNavigate("investor", inv.id)}>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold hover:scale-110 transition-transform"
+              <div className={`${isMobile ? 'w-5 h-5 text-[9px]' : 'w-7 h-7 text-xs'} rounded-lg flex items-center justify-center text-white font-bold hover:scale-110 transition-transform`}
                 style={{ background: inv.gradient }}>{inv.avatar}</div>
             </div>
           ))}
@@ -100,14 +112,19 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
           {/* Data rows */}
           {INVESTORS.map(rowInv => (
             <Fragment key={`row-${rowInv.id}`}>
-              {/* Row label — full name, clickable */}
+              {/* Row label — avatar on mobile, full name on desktop */}
               <div
-                className="flex items-center gap-1.5 justify-end pr-1 cursor-pointer hover:opacity-80 transition-opacity"
+                className="flex items-center justify-end pr-1 cursor-pointer hover:opacity-80 transition-opacity"
                 style={{ height: `${cellSize}px` }}
                 onClick={() => onNavigate && onNavigate("investor", rowInv.id)}>
-                <span className="text-xs font-medium text-right leading-tight" style={{ color: t.textSecondary }}>
-                  {L.investorName(rowInv)}
-                </span>
+                {isMobile ? (
+                  <div className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[9px] font-bold"
+                    style={{ background: rowInv.gradient }}>{rowInv.avatar}</div>
+                ) : (
+                  <span className="text-xs font-medium text-right leading-tight" style={{ color: t.textSecondary }}>
+                    {L.investorName(rowInv)}
+                  </span>
+                )}
               </div>
               {/* Cells */}
               {INVESTORS.map(colInv => {
@@ -130,7 +147,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
                           : '2px solid transparent',
                       cursor: hasValue ? 'pointer' : 'default',
                       fontWeight: hasValue ? 700 : 400,
-                      fontSize: isDiag ? '10px' : '14px',
+                      fontSize: isDiag ? (isMobile ? '8px' : '10px') : (isMobile ? '11px' : '14px'),
                       opacity: isDiag ? 0.5 : 1,
                       transform: isSelected && hasValue ? 'scale(1.1)' : 'none',
                     }}
@@ -145,7 +162,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
                         }
                       }
                     }}>
-                    {isDiag ? `${val}${L.t('shared.stocksUnit')}` : (val || "")}
+                    {isDiag ? (isMobile ? val : `${val}${L.t('shared.stocksUnit')}`) : (val || "")}
                   </div>
                 );
               })}
