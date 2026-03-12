@@ -63,10 +63,10 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
   const [showAllBuy, setShowAllBuy] = useState(false);
   const [showAllSell, setShowAllSell] = useState(false);
 
-  // ===== 공시 후 포트폴리오 성과 계산 =====
+  // ===== 공시 후 포트폴리오 성과 계산 (캐시 우드 제외 — ARK는 일별 매매 공개) =====
   const portfolioPerformance = useMemo(() => {
     if (!stockPrices || Object.keys(stockPrices).length === 0) return [];
-    return INVESTORS.map(inv => {
+    return INVESTORS.filter(inv => inv.id !== 'cathie').map(inv => {
       const h = HOLDINGS[inv.id] || [];
       if (h.length === 0) return null;
       let totalWeight = 0;
@@ -551,6 +551,13 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   </div>
                 );
               })}
+              {/* 캐시 우드 안내 */}
+              <div className="flex items-center gap-2 pt-2 mt-1" style={{ borderTop: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
+                {(() => { const cathie = INVESTORS.find(i => i.id === 'cathie'); return cathie ? (
+                  <div className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: cathie.gradient }}>{cathie.avatar}</div>
+                ) : null; })()}
+                <span className="text-xs" style={{ color: t.textMuted }}>{L.t('dashboard.cathieExcluded')}</span>
+              </div>
             </div>
           </GlassCard>
         </section>

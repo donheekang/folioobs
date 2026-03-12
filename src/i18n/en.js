@@ -101,6 +101,7 @@ export default {
     qoqBasis: "QoQ AUM basis",
     postFilingPerf: "Post-Filing Portfolio Performance",
     priceAsOf: "as of",
+    cathieExcluded: "Cathie Wood (ARK) publishes daily trades instead of SEC 13F — shown separately.",
   },
 
   // ===== Investor Detail =====
