@@ -286,19 +286,35 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         {/* ARK Today Preview — 히어로에서 살아있는 데이터 체감 */}
         {arkDailyTrades.length > 0 && (() => {
           const latest = arkDailyTrades[0];
-          const topBuys = latest.trades.filter(tr => tr.direction?.toLowerCase() === 'buy').slice(0, 2).map(tr => tr.ticker);
-          const topSells = latest.trades.filter(tr => tr.direction?.toLowerCase() === 'sell').slice(0, 2).map(tr => tr.ticker);
-          const parts = [];
-          if (topBuys.length > 0) parts.push(`${L.t('common.buy')} ${topBuys.join(', ')}`);
-          if (topSells.length > 0) parts.push(`${L.t('common.sell')} ${topSells.join(', ')}`);
-          if (parts.length === 0) return null;
+          const buys = latest.trades.filter(tr => tr.direction?.toLowerCase() === 'buy').slice(0, 3);
+          const sells = latest.trades.filter(tr => tr.direction?.toLowerCase() === 'sell').slice(0, 3);
+          if (buys.length === 0 && sells.length === 0) return null;
+          const cathie = INVESTORS.find(i => i.id === 'cathie');
           return (
-            <div className="hero-enter hero-enter-7 mb-4">
-              <button className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all hover:scale-[1.02] cursor-pointer"
-                style={{background:t.name==='dark'?'rgba(245,158,11,0.1)':'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.2)', color:'#f59e0b'}}
+            <div className="hero-enter hero-enter-7 mb-4 w-full max-w-lg mx-auto">
+              <button className="w-full rounded-2xl p-4 transition-all hover:scale-[1.01] cursor-pointer text-left"
+                style={{background:t.name==='dark'?'rgba(245,158,11,0.08)':'rgba(245,158,11,0.05)', border:'1px solid rgba(245,158,11,0.2)'}}
                 onClick={()=>{trackCtaClick('ark_today_preview','hero');onNavigate("investor","cathie");}}>
-                <span style={{color:t.textSecondary}}>{L.t('dashboard.arkTodayLabel')}</span>
-                <span>{parts.join(' · ')}</span>
+                <div className="flex items-center gap-2 mb-3">
+                  {cathie && <div className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-bold" style={{background:cathie.gradient}}>{cathie.avatar}</div>}
+                  <span className="text-sm font-bold" style={{color:'#f59e0b'}}>{L.t('dashboard.arkTodayLabel')}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:'rgba(245,158,11,0.15)',color:'#f59e0b'}}>{L.t('dashboard.arkDailyBadge')}</span>
+                </div>
+                <div className="flex items-center gap-4 justify-center flex-wrap">
+                  {buys.length > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{background:`${t.green}20`,color:t.green}}>{L.t('common.buy')}</span>
+                      {buys.map(tr => <span key={tr.ticker} className="text-sm font-semibold" style={{color:t.text}}>{tr.ticker}</span>)}
+                    </div>
+                  )}
+                  {buys.length > 0 && sells.length > 0 && <span style={{color:t.textMuted}}>·</span>}
+                  {sells.length > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{background:`${t.red}20`,color:t.red}}>{L.t('common.sell')}</span>
+                      {sells.map(tr => <span key={tr.ticker} className="text-sm font-semibold" style={{color:t.text}}>{tr.ticker}</span>)}
+                    </div>
+                  )}
+                </div>
               </button>
             </div>
           );
