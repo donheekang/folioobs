@@ -150,7 +150,7 @@ const ArkTradeRow = ({ trade, theme: t }) => {
 const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
   const t = useTheme();
   const L = useLocale();
-  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyHistory: QUARTERLY_HISTORY, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades, aiInsights, stockPrices } = useData();
+  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyHistory: QUARTERLY_HISTORY, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades, aiInsights, stockPrices, latestQuarter } = useData();
   const [sortKey, setSortKey] = useState("pct");
   const [sortDir, setSortDir] = useState("desc");
   const [selectedArkDate, setSelectedArkDate] = useState(null); // ARK 날짜 선택 추적
@@ -478,15 +478,18 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
                 {isExpanded && (
                   <tr style={{borderBottom:`1px solid ${t.cardRowBorder}`, background: t.name==='dark'?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.02)'}}>
                     <td colSpan={7} className="px-4 py-3">
-                      {sp ? (
+                      {sp ? ((() => {
+                        // 분기 라벨 계산 (예: "Q4'25")
+                        const qLabel = latestQuarter ? latestQuarter.replace(/^(\d{4})Q(\d)$/, (_, y, q) => `Q${q}'${y.slice(2)}`) : '';
+                        return (
                         <div className="flex items-center gap-6 text-xs">
                           <div className="flex items-center gap-2">
-                            <span style={{color:t.textMuted}}>{L.t('investor.currentPrice') || '현재가'}</span>
+                            <span style={{color:t.textMuted}}>{L.t('investor.currentPrice')}</span>
                             <span className="font-bold text-sm" style={{color:t.text}}>${sp.current?.toFixed(2)}</span>
                           </div>
                           {sp.dailyChange !== null && sp.dailyChange !== undefined && (
                             <div className="flex items-center gap-1">
-                              <span style={{color:t.textMuted}}>{L.t('investor.dailyChange') || '일일 변동'}</span>
+                              <span style={{color:t.textMuted}}>{L.t('investor.dailyChange')}</span>
                               <span className="font-medium" style={{color: sp.dailyChange >= 0 ? t.green : t.red}}>
                                 {sp.dailyChange >= 0 ? '+' : ''}{sp.dailyChange.toFixed(2)}%
                               </span>
@@ -494,7 +497,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
                           )}
                           {sp.sinceFiling !== null && sp.sinceFiling !== undefined && (
                             <div className="flex items-center gap-1">
-                              <span style={{color:t.textMuted}}>{L.t('investor.sinceFiling') || '공시 후'}</span>
+                              <span style={{color:t.textMuted}}>{qLabel} {L.t('investor.sinceFiling')}</span>
                               <span className="font-medium" style={{color: sp.sinceFiling >= 0 ? t.green : t.red}}>
                                 {sp.sinceFiling >= 0 ? '+' : ''}{sp.sinceFiling.toFixed(2)}%
                               </span>
@@ -502,17 +505,17 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
                           )}
                           {sp.quarterEnd && (
                             <div className="flex items-center gap-1">
-                              <span style={{color:t.textMuted}}>{L.t('investor.quarterEndPrice') || '분기말가'}</span>
+                              <span style={{color:t.textMuted}}>{qLabel} {L.t('investor.quarterEndPrice')}</span>
                               <span style={{color:t.textSecondary}}>${sp.quarterEnd.toFixed(2)}</span>
                             </div>
                           )}
                           <div className="flex items-center gap-1">
-                            <span style={{color:t.textMuted}}>{L.t('investor.priceDate') || '기준일'}</span>
+                            <span style={{color:t.textMuted}}>{L.t('investor.priceDate')}</span>
                             <span style={{color:t.textSecondary}}>{sp.date}</span>
                           </div>
-                        </div>
-                      ) : (
-                        <span className="text-xs" style={{color:t.textMuted}}>{L.t('investor.noPriceData') || '시세 데이터 없음'}</span>
+                        </div>);
+                      })()) : (
+                        <span className="text-xs" style={{color:t.textMuted}}>{L.t('investor.noPriceData')}</span>
                       )}
                     </td>
                   </tr>
