@@ -115,6 +115,14 @@ export default {
     arkDailyNotice: "ARK Invest publishes daily trade logs instead of standard SEC 13F quarterly filings.",
     arkDailyNoticeSub: "See 'Daily Trades' below for real-time portfolio changes.",
     noQuarterlyTrend: "Not enough quarterly data for trend.",
+    // Quarterly change summary
+    quarterlyChangeSummary: "Quarterly Changes",
+    newPositions: "New Positions",
+    exits: "Exits",
+    increased: "Increased",
+    decreased: "Decreased",
+    noChanges: "No change data for this quarter.",
+    weightChange: "Weight Change",
   },
 
   // ===== Screener =====
@@ -142,6 +150,10 @@ export default {
     changeFilter: "Try adjusting your filters.",
     guruPicks: "Guru Consensus Picks",
     multiHolderStocks: "Stocks held by 2+ investors",
+    investorFilter: "Investor Filter",
+    modeAll: "Intersection (AND)",
+    modeAny: "Union (OR)",
+    commonHoldings: "Common holdings:",
   },
 
   // ===== Watchlist =====

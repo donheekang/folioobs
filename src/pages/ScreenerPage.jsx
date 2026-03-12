@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, Filter, Search, X, ChevronDown, ChevronUp, Globe } from "lucide-react";
+import { ArrowLeft, Filter, Search, X, ChevronDown, ChevronUp, Globe, Users } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
 import { useData } from "../hooks/useDataProvider";
@@ -14,9 +14,14 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
   const [sortKey, setSortKey] = useState("holders");
   const [sortDir, setSortDir] = useState("desc");
   const [filterSector, setFilterSector] = useState(initialSector || "all");
-  const [filterInvestor, setFilterInvestor] = useState("all");
+  const [filterInvestors, setFilterInvestors] = useState([]); // multi-select: investor IDs
+  const [investorMode, setInvestorMode] = useState("any"); // "any" = OR, "all" = AND (교집합)
   const [filterAction, setFilterAction] = useState("all");
   const [query, setQuery] = useState("");
+
+  const toggleInvestorFilter = (id) => {
+    setFilterInvestors(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
 
   // Aggregate all holdings across investors (투자자별 중복 합산)
   const allStocks = useMemo(() => {
@@ -72,7 +77,17 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
   const filtered = useMemo(() => {
     return allStocks.filter(s => {
       if (filterSector !== "all" && s.sector !== filterSector) return false;
-      if (filterInvestor !== "all" && !s.holders.some(h => h.investor.id === filterInvestor)) return false;
+      // 투자자 멀티 필터
+      if (filterInvestors.length > 0) {
+        const holderIds = s.holders.map(h => h.investor.id);
+        if (investorMode === "all") {
+          // 교집합: 선택된 모든 투자자가 보유해야 함
+          if (!filterInvestors.every(id => holderIds.includes(id))) return false;
+        } else {
+          // 합집합: 선택된 투자자 중 하나라도 보유하면 OK
+          if (!filterInvestors.some(id => holderIds.includes(id))) return false;
+        }
+      }
       if (filterAction !== "all") {
         if (filterAction === "new" && !s.actions.some(a => a.type === "new")) return false;
         if (filterAction === "buy" && !s.actions.some(a => a.type === "buy")) return false;
@@ -85,7 +100,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
       }
       return true;
     });
-  }, [allStocks, filterSector, filterInvestor, filterAction, query]);
+  }, [allStocks, filterSector, filterInvestors, investorMode, filterAction, query]);
 
   // Sort
   const sorted = useMemo(() => {
@@ -161,13 +176,62 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
               <option value="all">{L.t('screener.allSectors')}</option>
               {sectors.map(s => <option key={s} value={s}>{L.sector(s)}</option>)}
             </select>
-            {/* Investor filter */}
-            <select value={filterInvestor} onChange={e => setFilterInvestor(e.target.value)}
-              className="text-xs rounded-xl px-3 py-1.5 outline-none"
-              style={{ background: t.selectBg, border: `1px solid ${t.glassBorder}`, color: t.text }}>
-              <option value="all">{L.t('screener.allInvestors')}</option>
-              {INVESTORS.map(inv => <option key={inv.id} value={inv.id}>{L.investorName(inv)}</option>)}
-            </select>
+          </div>
+
+          {/* 투자자 멀티 필터 (아바타 칩) */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Users size={14} style={{ color: t.textMuted }} />
+              <span className="text-xs" style={{ color: t.textMuted }}>{L.t('screener.investorFilter')}</span>
+              {filterInvestors.length > 0 && (
+                <>
+                  {/* AND/OR 토글 */}
+                  <button
+                    onClick={() => setInvestorMode(m => m === "any" ? "all" : "any")}
+                    className="text-xs px-2 py-0.5 rounded-full font-medium transition-all"
+                    style={{
+                      background: investorMode === "all" ? `${t.purple}20` : `${t.accent}15`,
+                      color: investorMode === "all" ? t.purple : t.accent,
+                      border: `1px solid ${investorMode === "all" ? `${t.purple}40` : `${t.accent}30`}`,
+                    }}>
+                    {investorMode === "all" ? L.t('screener.modeAll') : L.t('screener.modeAny')}
+                  </button>
+                  <button onClick={() => setFilterInvestors([])} className="text-xs px-1.5 py-0.5 rounded-md" style={{ color: t.textMuted }}>
+                    <X size={12} />
+                  </button>
+                </>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {INVESTORS.map(inv => {
+                const isActive = filterInvestors.includes(inv.id);
+                return (
+                  <button key={inv.id} onClick={() => toggleInvestorFilter(inv.id)}
+                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs transition-all"
+                    style={{
+                      background: isActive ? `${inv.color}20` : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                      border: `1.5px solid ${isActive ? inv.color : 'transparent'}`,
+                      color: isActive ? t.text : t.textSecondary,
+                      opacity: isActive ? 1 : 0.75,
+                    }}>
+                    <div className="w-4 h-4 rounded flex items-center justify-center text-white text-[9px] font-bold"
+                      style={{ background: inv.gradient }}>{inv.avatar}</div>
+                    <span className="font-medium">{L.investorName(inv)}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {/* 교집합 모드일 때 공통 보유 안내 */}
+            {filterInvestors.length >= 2 && investorMode === "all" && (
+              <div className="flex items-center gap-1.5 text-xs px-2 py-1 rounded-lg" style={{ background: `${t.purple}08`, border: `1px solid ${t.purple}15` }}>
+                <Users size={12} style={{ color: t.purple }} />
+                <span style={{ color: t.purple }}>
+                  {filterInvestors.map(id => L.investorName(INVESTORS.find(i => i.id === id))).join(' + ')}
+                </span>
+                <span style={{ color: t.textMuted }}>{L.t('screener.commonHoldings')}</span>
+                <span className="font-bold" style={{ color: t.purple }}>{filtered.length}{L.t('common.stocks_count')}</span>
+              </div>
+            )}
           </div>
 
           {/* Action filter buttons */}
@@ -331,7 +395,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
       </GlassCard>
 
       {/* Multi-holder stocks highlight */}
-      {filterAction === "all" && !query.trim() && filterSector === "all" && filterInvestor === "all" && (
+      {filterAction === "all" && !query.trim() && filterSector === "all" && filterInvestors.length === 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Globe size={18} style={{ color: t.purple }} />

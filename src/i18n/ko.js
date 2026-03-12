@@ -115,6 +115,14 @@ export default {
     arkDailyNotice: "ARK Invest는 SEC 13F 분기 공시 대신 자체적으로 일별 매매 내역을 공개합니다.",
     arkDailyNoticeSub: "아래 '일별 매매 내역'에서 실시간 포트폴리오 변동을 확인하세요.",
     noQuarterlyTrend: "분기별 추이 데이터가 부족합니다.",
+    // 분기 변동 요약
+    quarterlyChangeSummary: "이번 분기 변동 요약",
+    newPositions: "신규 매수",
+    exits: "완전 매도",
+    increased: "비중 확대",
+    decreased: "비중 축소",
+    noChanges: "이번 분기 변동 데이터가 없습니다.",
+    weightChange: "비중 변화",
   },
 
   // ===== 스크리너 =====
@@ -142,6 +150,10 @@ export default {
     changeFilter: "필터를 변경해보세요.",
     guruPicks: "구루들의 공통 선택",
     multiHolderStocks: "2인 이상 보유 종목",
+    investorFilter: "투자자 필터",
+    modeAll: "교집합 (AND)",
+    modeAny: "합집합 (OR)",
+    commonHoldings: "공통 보유:",
   },
 
   // ===== 워치리스트 =====

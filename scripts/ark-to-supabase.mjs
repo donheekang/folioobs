@@ -304,19 +304,32 @@ async function main() {
       const sector = classifySector(h.company);
       const cusip = h.cusip || h.ticker; // cusip 없으면 ticker 사용
 
-      // Security upsert
-      const { data: sec } = await supabase
+      // Security: 기존 레코드가 있으면 ticker를 덮어쓰지 않음 (수동 수정 보존)
+      const { data: existingSec } = await supabase
         .from('securities')
-        .upsert({
-          cusip,
-          ticker: h.ticker,
-          name: h.company,
-          name_ko: h.company,
-          sector,
-          sector_ko: sector,
-        }, { onConflict: 'cusip' })
         .select('id')
-        .single();
+        .eq('cusip', cusip)
+        .maybeSingle();
+
+      let sec;
+      if (existingSec) {
+        // 이미 존재 → ticker 제외하고 name/sector만 업데이트
+        const { data: updated } = await supabase
+          .from('securities')
+          .update({ name: h.company, name_ko: h.company, sector, sector_ko: sector })
+          .eq('id', existingSec.id)
+          .select('id')
+          .single();
+        sec = updated;
+      } else {
+        // 신규 종목 → 전체 insert
+        const { data: inserted } = await supabase
+          .from('securities')
+          .insert({ cusip, ticker: h.ticker, name: h.company, name_ko: h.company, sector, sector_ko: sector })
+          .select('id')
+          .single();
+        sec = inserted;
+      }
 
       if (!sec) continue;
 
@@ -479,6 +492,18 @@ async function main() {
   // ---- Step 8: 일별 매매 내역 (ark_daily_trades) ----
   console.log(`\n  📅 일별 매매 내역 계산...`);
 
+  // 이미 수동 입력(이메일 기반)된 데이터가 있으면 스킵
+  const { data: existingTrades } = await supabase
+    .from('ark_daily_trades')
+    .select('id')
+    .eq('trade_date', reportDate)
+    .limit(1);
+
+  if (existingTrades?.length > 0 && !process.argv.includes('--force-trades')) {
+    console.log(`  ⏭️  이미 ${reportDate} 매매 데이터 존재 — 스킵 (이메일 기반 데이터 보존)`);
+    console.log('     --force-trades 플래그로 강제 덮어쓰기 가능');
+  } else {
+
   // 전일 데이터 가져오기: 가장 최근 filing 중 오늘이 아닌 것
   const { data: prevFiling } = await supabase
     .from('filings')
@@ -610,6 +635,8 @@ async function main() {
   } else {
     console.log(`  ℹ️  전일 데이터 없음 (첫 실행) — 일별 매매 내역 생략`);
   }
+
+  } // end of else (이메일 기반 데이터 없을 때만 실행)
 
   // 상위 10 종목 출력
   console.log(`\n  📊 상위 10 종목:`);

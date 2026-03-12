@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, ArrowUpRight, ArrowDownRight, DollarSign, Briefcase, Target, Activity, Clock, Lightbulb, ChevronDown, ChevronUp, Calendar, TrendingUp, TrendingDown, Plus, Minus, LogOut, PieChart as PieIcon, Star, AlertTriangle, Brain } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, ArrowDownRight, DollarSign, Briefcase, Target, Activity, Clock, Lightbulb, ChevronDown, ChevronUp, Calendar, TrendingUp, TrendingDown, Plus, Minus, LogOut, PieChart as PieIcon, Star, AlertTriangle, Brain, Zap } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
 import { useData } from "../hooks/useDataProvider";
@@ -221,6 +221,94 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
           return(<GlassCard key={i} hover={false}><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="p-1.5 rounded-lg" style={{background:`${s.c}15`}}><I size={14} style={{color:s.c}}/></div><span className="text-xs" style={{color:t.textMuted}}>{s.l}</span></div><div className="text-xl font-bold" style={{color:t.text}}>{s.v}</div>{s.sub&&<div className="text-xs mt-0.5" style={{color:s.c}}>{s.sub}</div>}</div></GlassCard>);
         })}
       </div>
+
+      {/* ===== 이번 분기 변동 요약 ===== */}
+      {(() => {
+        const activity = (QUARTERLY_ACTIVITY[investorId] || []);
+        const latestQ = activity.length > 0 ? activity[0] : null;
+        const latestActions = latestQ?.actions || [];
+
+        // holdings에서 분류
+        const newBuys = holdings.filter(h => h.change === 100);
+        const increased = holdings.filter(h => h.change > 0 && h.change !== 100);
+        const decreased = holdings.filter(h => h.change < 0);
+
+        // quarterlyActivity에서 exit 데이터
+        const exits = latestActions.filter(a => a.type === 'exit');
+
+        const totalChanges = newBuys.length + exits.length + increased.length + decreased.length;
+        if (totalChanges === 0) return null;
+
+        const categories = [
+          { key: 'new', label: L.t('investor.newPositions'), icon: Plus, color: t.accent || '#8B5CF6', items: newBuys.map(h => ({ ticker: h.ticker, name: h.name, pct: h.pct, change: null })) },
+          { key: 'exit', label: L.t('investor.exits'), icon: LogOut, color: t.red, items: exits.map(a => ({ ticker: a.ticker, name: a.name, pct: null, change: a.pctChange })) },
+          { key: 'up', label: L.t('investor.increased'), icon: TrendingUp, color: t.green, items: increased.sort((a,b) => b.change - a.change).map(h => ({ ticker: h.ticker, name: h.name, pct: h.pct, change: h.change })) },
+          { key: 'down', label: L.t('investor.decreased'), icon: TrendingDown, color: t.red, items: decreased.sort((a,b) => a.change - b.change).map(h => ({ ticker: h.ticker, name: h.name, pct: h.pct, change: h.change })) },
+        ].filter(c => c.items.length > 0);
+
+        return (
+          <GlassCard hover={false}>
+            <div className="p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-1.5 rounded-lg" style={{background:`${t.amber}20`}}>
+                  <Zap size={16} style={{color:t.amber}} />
+                </div>
+                <h3 className="font-bold" style={{color:t.text}}>{L.t('investor.quarterlyChangeSummary')}</h3>
+                {latestQ && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:`${t.accent}15`, color:t.accent}}>{latestQ.q}</span>}
+                <Badge color={t.amber}>{totalChanges}{L.t('common.stocks_count')}</Badge>
+              </div>
+
+              {/* 카테고리별 요약 카운트 */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                {[
+                  { label: L.t('investor.newPositions'), count: newBuys.length, color: t.accent || '#8B5CF6', icon: Plus },
+                  { label: L.t('investor.exits'), count: exits.length, color: t.red, icon: LogOut },
+                  { label: L.t('investor.increased'), count: increased.length, color: t.green, icon: TrendingUp },
+                  { label: L.t('investor.decreased'), count: decreased.length, color: t.red, icon: TrendingDown },
+                ].map((s, i) => {
+                  const I = s.icon;
+                  return (
+                    <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{background: s.count > 0 ? `${s.color}08` : 'transparent', border: `1px solid ${s.count > 0 ? `${s.color}20` : t.cardRowBorder}`}}>
+                      <I size={14} style={{color: s.count > 0 ? s.color : t.textMuted}} />
+                      <span className="text-xs" style={{color: t.textSecondary}}>{s.label}</span>
+                      <span className="text-sm font-bold ml-auto" style={{color: s.count > 0 ? s.color : t.textMuted}}>{s.count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 카테고리별 종목 리스트 */}
+              <div className="space-y-3">
+                {categories.map(cat => {
+                  const CatIcon = cat.icon;
+                  return (
+                    <div key={cat.key}>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <CatIcon size={13} style={{color: cat.color}} />
+                        <span className="text-xs font-semibold" style={{color: cat.color}}>{cat.label}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {cat.items.slice(0, 10).map((item, i) => (
+                          <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs" style={{background: `${cat.color}08`, border: `1px solid ${cat.color}15`}}>
+                            <span className="font-bold" style={{color: t.text}}>{item.ticker}</span>
+                            {item.pct != null && <span style={{color: t.textMuted}}>{item.pct.toFixed(1)}%</span>}
+                            {item.change != null && item.change !== 100 && (
+                              <span className="font-medium" style={{color: cat.color}}>
+                                {item.change > 0 ? '+' : ''}{Math.round(item.change)}%
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                        {cat.items.length > 10 && <span className="text-xs self-center px-1.5" style={{color: t.textMuted}}>+{cat.items.length - 10}</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </GlassCard>
+        );
+      })()}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <GlassCard hover={false}>
