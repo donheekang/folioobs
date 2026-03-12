@@ -623,6 +623,74 @@ export function DataProvider({ children }) {
     return () => { cancelled = true; };
   }, []);
 
+  // 실시간 시세 업데이트 (live-prices Edge Function)
+  useEffect(() => {
+    if (loading || !investors.length || Object.keys(holdings).length === 0) return;
+
+    // 모든 보유 종목 티커 수집
+    const allTickers = new Set();
+    Object.values(holdings).forEach(arr => arr.forEach(h => allTickers.add(h.ticker)));
+    if (allTickers.size === 0) return;
+
+    let cancelled = false;
+    const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+    const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    async function fetchLivePrices() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/live-prices`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ tickers: [...allTickers] }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.prices || cancelled) return;
+
+        // 기존 stockPrices에 실시간 가격 머지 (quarterEnd는 유지)
+        setStockPrices(prev => {
+          const merged = { ...prev };
+          for (const [ticker, live] of Object.entries(data.prices)) {
+            const existing = merged[ticker];
+            const currentPrice = live.c;
+            const quarterEnd = existing?.quarterEnd || null;
+            const sinceFiling = quarterEnd && quarterEnd > 0
+              ? Math.round(((currentPrice - quarterEnd) / quarterEnd) * 10000) / 100
+              : existing?.sinceFiling || null;
+
+            merged[ticker] = {
+              current: currentPrice,
+              date: data.date,
+              dailyChange: live.ch,
+              quarterEnd: quarterEnd,
+              quarterEndDate: existing?.quarterEndDate || null,
+              sinceFiling: sinceFiling,
+            };
+          }
+          console.log(`[DataProvider] 실시간 시세 업데이트: ${Object.keys(data.prices).length}개 종목`);
+          return merged;
+        });
+      } catch (e) {
+        console.warn('실시간 시세 로드 실패:', e.message);
+      }
+    }
+
+    // 초기 로드 (2초 후 — DB 데이터 먼저 표시)
+    const initialTimer = setTimeout(fetchLivePrices, 2000);
+
+    // 5분마다 자동 갱신
+    const interval = setInterval(fetchLivePrices, 5 * 60 * 1000);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
+  }, [loading, investors, holdings]);
+
   const value = useMemo(() => ({
     investors: investors || [],
     holdings: holdings || {},
