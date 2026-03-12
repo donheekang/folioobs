@@ -10,7 +10,7 @@ import { GlassCard, Badge, WatchButton } from "../components/shared";
 const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
   const t = useTheme();
   const L = useLocale();
-  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyActivity: QUARTERLY_ACTIVITY } = useData();
+  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyActivity: QUARTERLY_ACTIVITY, stockPrices } = useData();
   const [sortKey, setSortKey] = useState("holders");
   const [sortDir, setSortDir] = useState("desc");
   const [filterSector, setFilterSector] = useState(initialSector || "all");
@@ -291,8 +291,21 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                       <span className="text-xs ml-1" style={{ color: t.textMuted }}>{stock.holders.length}{L.t('common.people')}</span>
                     </div>
                     <div className="flex items-center gap-3">
+                      {(() => {
+                        const sp = stockPrices?.[stock.ticker];
+                        if (!sp) return null;
+                        return (
+                          <span className="text-xs font-bold" style={{ color: t.text }}>
+                            ${sp.current?.toFixed(2)}
+                            {sp.sinceFiling !== null && sp.sinceFiling !== undefined && (
+                              <span className="ml-1 font-medium" style={{ color: sp.sinceFiling >= 0 ? t.green : t.red }}>
+                                {sp.sinceFiling >= 0 ? '+' : ''}{sp.sinceFiling.toFixed(1)}%
+                              </span>
+                            )}
+                          </span>
+                        );
+                      })()}
                       <Badge color={SECTOR_COLORS[stock.sector] || "#64748B"}>{L.sector(stock.sector)}</Badge>
-                      <span className="text-xs font-medium" style={{ color: t.text }}>{L.t('investor.weight')} {stock.maxPct.toFixed(1)}%</span>
                       <span className="text-xs font-medium" style={{ color: t.text }}>{formatUSD(stock.totalValue)}</span>
                     </div>
                   </div>
@@ -308,6 +321,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                   {[
                     { k: null, l: "" },
                     { k: "ticker", l: L.t('screener.colTicker') },
+                    { k: null, l: L.t('screener.colPrice') || L.t('investor.currentPrice') },
                     { k: null, l: L.t('screener.colSector') },
                     { k: "holders", l: L.t('screener.colHolders') },
                     { k: "maxPct", l: L.t('screener.colMaxWeight') },
@@ -341,6 +355,22 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                       <td className="py-3 px-3">
                         <div className="font-semibold" style={{ color: t.text }}>{stock.ticker}</div>
                         <div className="text-xs" style={{ color: t.textMuted }}>{stock.name}</div>
+                      </td>
+                      <td className="py-3 px-3">
+                        {(() => {
+                          const sp = stockPrices?.[stock.ticker];
+                          if (!sp) return <span className="text-xs" style={{ color: t.textMuted }}>—</span>;
+                          return (
+                            <div>
+                              <div className="font-medium" style={{ color: t.text }}>${sp.current?.toFixed(2)}</div>
+                              {sp.sinceFiling !== null && sp.sinceFiling !== undefined && (
+                                <div className="text-xs font-medium" style={{ color: sp.sinceFiling >= 0 ? t.green : t.red }}>
+                                  {sp.sinceFiling >= 0 ? '+' : ''}{sp.sinceFiling.toFixed(1)}%
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="py-3 px-3">
                         <Badge color={SECTOR_COLORS[stock.sector] || "#64748B"}>{L.sector(stock.sector)}</Badge>

@@ -168,6 +168,7 @@ export default {
     filterSell: "비중 축소",
     filterMulti: "2인 이상 보유",
     colTicker: "종목",
+    colPrice: "현재가",
     colSector: "섹터",
     colHolders: "보유 투자자",
     colMaxWeight: "최대 비중",

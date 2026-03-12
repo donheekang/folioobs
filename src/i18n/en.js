@@ -168,6 +168,7 @@ export default {
     filterSell: "Decreased",
     filterMulti: "2+ Holders",
     colTicker: "Ticker",
+    colPrice: "Price",
     colSector: "Sector",
     colHolders: "Holders",
     colMaxWeight: "Max Weight",
