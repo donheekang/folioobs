@@ -56,7 +56,7 @@ export default {
     description: "월가 전설들의 매매를 매일 추적하세요.",
     arkTodayLabel: "오늘 캐시 우드",
     dataSourceLabel: "13F: {quarter} | ARK: 매일 업데이트",
-    ctaButton: "포트폴리오 바로 보기",
+    ctaButton: "투자자별 포트폴리오 보기",
     recentMoves: "최근 주요 변동",
     dataUpdate: "데이터 기준일",
     trackedInvestors: "추적 투자자",
@@ -85,7 +85,7 @@ export default {
     quarterHighlights: "이번 분기 하이라이트",
     hlRiser: "{name} AUM {pct} 상승",
     hlFaller: "{name} AUM {pct} 하락",
-    hlTopBuy: "{name}, {ticker} 비중 {pct}",
+    hlTopSell: "{name}, {ticker} 비중 {pct}",
     hlNewCount: "이번 분기 총 {count}건 신규 매수",
     // Task 4: 랭킹 보드
     investorRanking: "투자자 랭킹 보드",

@@ -108,11 +108,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       highlights.push({ icon: ArrowDownRight, color: '#ef4444', text: L.t('dashboard.hlFaller').replace('{name}', L.investorName(topFaller)).replace('{pct}', `${topFaller.metrics.qoqChange}%`) });
     }
 
-    // 3. 가장 큰 비중 변동 종목
-    if (buyActions.length > 0) {
-      const top = buyActions[0];
-      const pctStr = Math.round(top.pctChange) > 999 ? L.t('common.significantIncrease') : `+${Math.round(top.pctChange)}%`;
-      highlights.push({ icon: Zap, color: '#f59e0b', text: L.t('dashboard.hlTopBuy').replace('{name}', L.investorName(top.investor)).replace('{ticker}', top.ticker).replace('{pct}', pctStr) });
+    // 3. 가장 큰 비중 축소 종목 (히어로에 확대가 있으므로 축소로 차별화)
+    if (sellActions.length > 0) {
+      const top = sellActions[0];
+      const pctStr = `${Math.round(top.pctChange)}%`;
+      highlights.push({ icon: ArrowDownRight, color: '#f59e0b', text: L.t('dashboard.hlTopSell').replace('{name}', L.investorName(top.investor)).replace('{ticker}', top.ticker).replace('{pct}', pctStr) });
     }
 
     // 4. 신규 매수 총 수
@@ -121,7 +121,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     }
 
     return highlights.slice(0, 4);
-  }, [INVESTORS, buyActions, newPositions, L]);
+  }, [INVESTORS, sellActions, newPositions, L]);
 
   // ===== Task 4: 투자자 랭킹 보드 (다차원 순위) =====
   const investorRankings = useMemo(() => {
@@ -398,7 +398,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                         <>
                           {/* 캐시 우드: 바 없이 "일일매매 별도" 표시 */}
                           <div className="flex-1" />
-                          <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.cyan || '#06b6d4'}15`, color: t.cyan || '#06b6d4' }}>{L.t('dashboard.dailyTradeNote')}</span>
+                          <span className="text-xs px-3 py-1 rounded-full font-bold" style={{ background: `${t.cyan || '#06b6d4'}25`, color: t.cyan || '#06b6d4', border: `1px solid ${t.cyan || '#06b6d4'}40` }}>{L.t('dashboard.dailyTradeNote')}</span>
                         </>
                       ) : (
                         <>

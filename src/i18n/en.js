@@ -56,7 +56,7 @@ export default {
     description: "Track legendary investors' trades — updated daily.",
     arkTodayLabel: "Cathie Wood today",
     dataSourceLabel: "13F: {quarter} | ARK: Daily Updates",
-    ctaButton: "View Portfolios",
+    ctaButton: "View by Investor",
     recentMoves: "Recent Key Moves",
     dataUpdate: "Data as of",
     trackedInvestors: "Tracked Investors",
@@ -85,7 +85,7 @@ export default {
     quarterHighlights: "This Quarter's Highlights",
     hlRiser: "{name} AUM {pct} increase",
     hlFaller: "{name} AUM {pct} decline",
-    hlTopBuy: "{name}, {ticker} position {pct}",
+    hlTopSell: "{name}, {ticker} position {pct}",
     hlNewCount: "{count} new positions this quarter",
     // Task 4: Ranking board
     investorRanking: "Investor Ranking Board",
