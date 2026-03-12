@@ -467,6 +467,54 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         );
       })()}
 
+      {/* ===== 공시 후 포트폴리오 성과 ===== */}
+      {!ready ? null : portfolioPerformance.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <BarChart3 size={18} style={{ color: t.accent }} />
+              <h2 className="text-lg font-bold" style={{ color: t.text }}>{L.t('dashboard.postFilingPerf')}</h2>
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>
+            </div>
+            {priceDate && <span className="text-xs" style={{ color: t.textMuted }}>{priceDate} {L.t('dashboard.priceAsOf')}</span>}
+          </div>
+          <GlassCard>
+            <div className="p-4 space-y-3">
+              {portfolioPerformance.map((pp, i) => {
+                const isPositive = pp.performance >= 0;
+                const color = isPositive ? t.green : t.red;
+                const maxAbs = Math.max(...portfolioPerformance.map(p => Math.abs(p.performance)), 1);
+                const barWidth = Math.min(Math.abs(pp.performance) / maxAbs * 100, 100);
+                return (
+                  <div key={pp.investor.id} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => onNavigate("investor", pp.investor.id)}>
+                    <span className="text-xs font-bold w-5 text-center" style={{ color: t.textMuted }}>{i + 1}</span>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                      style={{ background: pp.investor.gradient }}>{pp.investor.avatar}</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-semibold truncate" style={{ color: t.text }}>{L.investorName(pp.investor)}</span>
+                        <span className="text-sm font-bold ml-2" style={{ color }}>{L.t('dashboard.returnLabel') || '수익률'} {isPositive ? '+' : ''}{pp.performance}%</span>
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
+                        <div className="h-full rounded-full transition-all" style={{ width: `${barWidth}%`, background: color }} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {/* 캐시 우드 안내 */}
+              <div className="flex items-center gap-2 pt-2 mt-1" style={{ borderTop: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
+                {(() => { const cathie = INVESTORS.find(i => i.id === 'cathie'); return cathie ? (
+                  <div className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: cathie.gradient }}>{cathie.avatar}</div>
+                ) : null; })()}
+                <span className="text-xs" style={{ color: t.textMuted }}>{L.t('dashboard.cathieExcluded')}</span>
+              </div>
+            </div>
+          </GlassCard>
+        </section>
+      )}
+
       {/* ===== 투자자 랭킹 보드 (Task 4) ===== */}
       {!ready ? null : investorRankings.length > 0 && (
         <section>
@@ -512,54 +560,6 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               );
             })}
           </div>
-        </section>
-      )}
-
-      {/* ===== 공시 후 포트폴리오 성과 ===== */}
-      {!ready ? null : portfolioPerformance.length > 0 && (
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <BarChart3 size={18} style={{ color: t.accent }} />
-              <h2 className="text-lg font-bold" style={{ color: t.text }}>{L.t('dashboard.postFilingPerf')}</h2>
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>
-            </div>
-            {priceDate && <span className="text-xs" style={{ color: t.textMuted }}>{priceDate} {L.t('dashboard.priceAsOf')}</span>}
-          </div>
-          <GlassCard>
-            <div className="p-4 space-y-3">
-              {portfolioPerformance.map((pp, i) => {
-                const isPositive = pp.performance >= 0;
-                const color = isPositive ? t.green : t.red;
-                const maxAbs = Math.max(...portfolioPerformance.map(p => Math.abs(p.performance)), 1);
-                const barWidth = Math.min(Math.abs(pp.performance) / maxAbs * 100, 100);
-                return (
-                  <div key={pp.investor.id} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => onNavigate("investor", pp.investor.id)}>
-                    <span className="text-xs font-bold w-5 text-center" style={{ color: t.textMuted }}>{i + 1}</span>
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                      style={{ background: pp.investor.gradient }}>{pp.investor.avatar}</div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-semibold truncate" style={{ color: t.text }}>{L.investorName(pp.investor)}</span>
-                        <span className="text-sm font-bold ml-2" style={{ color }}>{isPositive ? '+' : ''}{pp.performance}%</span>
-                      </div>
-                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
-                        <div className="h-full rounded-full transition-all" style={{ width: `${barWidth}%`, background: color }} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              {/* 캐시 우드 안내 */}
-              <div className="flex items-center gap-2 pt-2 mt-1" style={{ borderTop: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
-                {(() => { const cathie = INVESTORS.find(i => i.id === 'cathie'); return cathie ? (
-                  <div className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: cathie.gradient }}>{cathie.avatar}</div>
-                ) : null; })()}
-                <span className="text-xs" style={{ color: t.textMuted }}>{L.t('dashboard.cathieExcluded')}</span>
-              </div>
-            </div>
-          </GlassCard>
         </section>
       )}
 

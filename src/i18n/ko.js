@@ -101,6 +101,7 @@ export default {
     qoqBasis: "QoQ AUM 기준",
     postFilingPerf: "공시 후 포트폴리오 성과",
     priceAsOf: "기준",
+    returnLabel: "수익률",
     cathieExcluded: "캐시 우드(ARK)는 SEC 13F 대신 일별 매매를 공개하여 별도 표시합니다.",
   },
 
