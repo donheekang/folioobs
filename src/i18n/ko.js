@@ -99,6 +99,8 @@ export default {
     rkMostActive: "가장 활발",
     dailyTradeNote: "일일매매 별도",
     qoqBasis: "QoQ AUM 기준",
+    postFilingPerf: "공시 후 포트폴리오 성과",
+    priceAsOf: "기준",
   },
 
   // ===== 투자자 상세 =====

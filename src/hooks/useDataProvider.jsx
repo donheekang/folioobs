@@ -176,6 +176,7 @@ export function DataProvider({ children }) {
   const [lastUpdatedAt, setLastUpdatedAt] = useState('');
   const [arkDailyTrades, setArkDailyTrades] = useState([]);
   const [aiInsights, setAiInsights] = useState({});
+  const [stockPrices, setStockPrices] = useState({});  // { ticker: { current, quarterEnd, changePct } }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [usingMock, setUsingMock] = useState(false);
@@ -509,6 +510,78 @@ export function DataProvider({ children }) {
           console.warn('AI 인사이트 로드 실패:', e.message);
         }
 
+        // ===== stock_prices: 공시 후 성과 계산 =====
+        let stockPricesMap = {};
+        try {
+          // 최신 분기 말 날짜 계산
+          const qMatch = maxQuarter.match(/^(\d{4})Q(\d)$/);
+          if (qMatch) {
+            const qYear = parseInt(qMatch[1]);
+            const qNum = parseInt(qMatch[2]);
+            const qEndDates = { 1: `${qYear}-03-31`, 2: `${qYear}-06-30`, 3: `${qYear}-09-30`, 4: `${qYear}-12-31` };
+            const qEndDate = qEndDates[qNum];
+
+            // 모든 보유 종목 티커 수집
+            const allTickers = new Set();
+            Object.values(mappedHoldings).forEach(arr => arr.forEach(h => allTickers.add(h.ticker)));
+
+            if (allTickers.size > 0 && qEndDate) {
+              // 최신 시세 (가장 최근 날짜)
+              const { data: latestPrices } = await supabase
+                .from('stock_prices')
+                .select('ticker, close_price, price_date, change_pct')
+                .order('price_date', { ascending: false })
+                .limit(allTickers.size * 2);
+
+              // 분기 말 시세
+              // 분기 말 당일 or ±3일 이내 가장 가까운 날짜
+              const { data: quarterPrices } = await supabase
+                .from('stock_prices')
+                .select('ticker, close_price, price_date')
+                .gte('price_date', (() => { const d = new Date(qEndDate); d.setDate(d.getDate() - 5); return d.toISOString().split('T')[0]; })())
+                .lte('price_date', (() => { const d = new Date(qEndDate); d.setDate(d.getDate() + 3); return d.toISOString().split('T')[0]; })())
+                .order('price_date', { ascending: false });
+
+              // 티커별 최신 시세 매핑
+              const currentMap = {};
+              (latestPrices || []).forEach(p => {
+                if (!currentMap[p.ticker]) currentMap[p.ticker] = p;
+              });
+
+              // 티커별 분기 말 시세 매핑
+              const quarterMap = {};
+              (quarterPrices || []).forEach(p => {
+                if (!quarterMap[p.ticker]) quarterMap[p.ticker] = p;
+              });
+
+              // 공시 후 성과 계산
+              for (const ticker of allTickers) {
+                const curr = currentMap[ticker];
+                const qEnd = quarterMap[ticker];
+                if (curr) {
+                  const currentPrice = parseFloat(curr.close_price);
+                  const quarterEndPrice = qEnd ? parseFloat(qEnd.close_price) : null;
+                  const sinceFiling = quarterEndPrice && quarterEndPrice > 0
+                    ? ((currentPrice - quarterEndPrice) / quarterEndPrice) * 100
+                    : null;
+
+                  stockPricesMap[ticker] = {
+                    current: currentPrice,
+                    date: curr.price_date,
+                    dailyChange: curr.change_pct ? parseFloat(curr.change_pct) : null,
+                    quarterEnd: quarterEndPrice,
+                    quarterEndDate: qEnd?.price_date || null,
+                    sinceFiling: sinceFiling !== null ? Math.round(sinceFiling * 100) / 100 : null,
+                  };
+                }
+              }
+              console.log(`[DataProvider] 시세 데이터: ${Object.keys(stockPricesMap).length}개 종목`);
+            }
+          }
+        } catch (e) {
+          console.warn('시세 데이터 로드 실패:', e.message);
+        }
+
         if (cancelled) return;
         setInvestors(mappedInvestors);
         setHoldings(mappedHoldings);
@@ -516,6 +589,7 @@ export function DataProvider({ children }) {
         setQuarterlyActivity(qActivityFormatted);
         setArkDailyTrades(arkTrades);
         setAiInsights(aiInsightsMap);
+        setStockPrices(stockPricesMap);
         setUsingMock(false);
         setLoading(false);
 
@@ -545,13 +619,14 @@ export function DataProvider({ children }) {
     quarterlyActivity: quarterlyActivity || {},
     arkDailyTrades,
     aiInsights,
+    stockPrices,
     latestQuarter,
     lastUpdatedAt,
     loading,
     error,
     usingMock,
     getDbId: (slug) => SLUG_TO_DBID[slug] || null,
-  }), [investors, holdings, quarterlyHistory, quarterlyActivity, arkDailyTrades, aiInsights, latestQuarter, lastUpdatedAt, loading, error, usingMock]);
+  }), [investors, holdings, quarterlyHistory, quarterlyActivity, arkDailyTrades, aiInsights, stockPrices, latestQuarter, lastUpdatedAt, loading, error, usingMock]);
 
   return (
     <DataContext.Provider value={value}>

@@ -99,6 +99,8 @@ export default {
     rkMostActive: "Most Active",
     dailyTradeNote: "Daily trades",
     qoqBasis: "QoQ AUM basis",
+    postFilingPerf: "Post-Filing Portfolio Performance",
+    priceAsOf: "as of",
   },
 
   // ===== Investor Detail =====
