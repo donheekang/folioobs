@@ -80,6 +80,7 @@ export default {
     arkDailyBadge: "Daily Updates",
     arkMore: "more",
     arkViewAll: "View All Trades →",
+    changeRanking: "Investor Change Ranking",
   },
 
   // ===== Investor Detail =====

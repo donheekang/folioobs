@@ -1,6 +1,6 @@
 import { useMemo, memo, useState, useEffect, useRef } from "react";
 import {
-  ArrowUpRight, ArrowDownRight, Briefcase, Plus, BarChart3, ChevronDown
+  ArrowUpRight, ArrowDownRight, Briefcase, Plus, BarChart3, ChevronDown, TrendingUp, Activity
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -249,6 +249,75 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           })}
         </div>
       </section>
+
+      {/* ===== 이번 분기 투자자 변동 랭킹 ===== */}
+      {!ready ? null : INVESTORS.length > 0 && (() => {
+        const ranked = [...INVESTORS]
+          .map(inv => {
+            const acts = QUARTERLY_ACTIVITY[inv.id] || [];
+            const latestActs = acts.length > 0 && acts[0]?.actions ? acts[0].actions : [];
+            const newCount = latestActs.filter(a => a.type === 'new').length;
+            const exitCount = latestActs.filter(a => a.type === 'exit').length;
+            const buyCount = latestActs.filter(a => a.type === 'buy').length;
+            const sellCount = latestActs.filter(a => a.type === 'sell').length;
+            const totalMoves = newCount + exitCount + buyCount + sellCount;
+            return { ...inv, qoq: inv.metrics.qoqChange, absQoq: Math.abs(inv.metrics.qoqChange), newCount, exitCount, buyCount, sellCount, totalMoves };
+          })
+          .sort((a, b) => b.absQoq - a.absQoq);
+
+        const maxAbs = ranked[0]?.absQoq || 1;
+
+        return (
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <Activity size={18} style={{ color: t.amber }} />
+              <h2 className="text-lg font-bold" style={{ color: t.text }}>{L.t('dashboard.changeRanking')}</h2>
+              {latestQuarter && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>}
+            </div>
+            <GlassCard hover={false}>
+              <div className="p-4 sm:p-5 space-y-2">
+                {ranked.map((inv, i) => {
+                  const barWidth = maxAbs > 0 ? (inv.absQoq / maxAbs) * 100 : 0;
+                  const isPositive = inv.qoq >= 0;
+                  const barColor = isPositive ? t.green : t.red;
+                  return (
+                    <div key={inv.id} className="flex items-center gap-3 py-2 px-2 rounded-xl cursor-pointer transition-colors"
+                      style={{ background: 'transparent' }}
+                      onMouseEnter={e => e.currentTarget.style.background = t.cardRowHover}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      onClick={() => onNavigate("investor", inv.id)}>
+                      {/* 순위 */}
+                      <span className="text-xs font-bold w-5 text-center" style={{ color: i < 3 ? t.amber : t.textMuted }}>{i + 1}</span>
+                      {/* 아바타 */}
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: inv.gradient }}>{inv.avatar}</div>
+                      {/* 이름 */}
+                      <div className="w-24 sm:w-32 flex-shrink-0">
+                        <div className="text-sm font-semibold truncate" style={{ color: t.text }}>{L.investorName(inv)}</div>
+                      </div>
+                      {/* 바 차트 */}
+                      <div className="flex-1 h-5 rounded-full overflow-hidden relative" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }}>
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.max(barWidth, 3)}%`, background: `${barColor}30` }} />
+                      </div>
+                      {/* QoQ 값 */}
+                      <span className="text-sm font-bold w-16 text-right flex items-center justify-end gap-0.5" style={{ color: barColor }}>
+                        {isPositive ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
+                        {isPositive ? '+' : ''}{inv.qoq}%
+                      </span>
+                      {/* 활동 요약 (데스크톱) */}
+                      <div className="hidden sm:flex items-center gap-1 w-28 justify-end">
+                        {inv.newCount > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.t('common.new')} {inv.newCount}</span>}
+                        {inv.buyCount > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: `${t.green}15`, color: t.green }}>+{inv.buyCount}</span>}
+                        {inv.sellCount > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: `${t.red}15`, color: t.red }}>-{inv.sellCount}</span>}
+                        {inv.totalMoves === 0 && <span className="text-[10px]" style={{ color: t.textMuted }}>—</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </GlassCard>
+          </section>
+        );
+      })()}
 
       {/* ARK Daily Trades — Cathie Wood 실시간 매매 */}
       {!ready ? null : arkDailyTrades.length > 0 && (() => {

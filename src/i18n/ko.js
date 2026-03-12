@@ -80,6 +80,7 @@ export default {
     arkDailyBadge: "매일 업데이트",
     arkMore: "건 더보기",
     arkViewAll: "전체 매매 내역 보기 →",
+    changeRanking: "투자자 변동 랭킹",
   },
 
   // ===== 투자자 상세 =====
