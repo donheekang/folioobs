@@ -298,9 +298,15 @@ export function DataProvider({ children }) {
           mappedHoldings[invId] = [...dedupMap.values()];
         });
 
-        // 5-2. 투자자 metrics도 dedup된 종목수로 업데이트
+        // 5-2. 투자자 metrics도 dedup된 실제 holdings 기준으로 업데이트
         mappedInvestors.forEach(inv => {
-          inv.metrics.holdingCount = mappedHoldings[inv.id]?.length || 0;
+          const h = mappedHoldings[inv.id] || [];
+          inv.metrics.holdingCount = h.length;
+          // topHoldingPct: 실제 holdings의 최대 비중으로 재계산 (DB 메트릭 오류 방지)
+          if (h.length > 0) {
+            const maxPct = Math.max(...h.map(x => x.pct || 0));
+            if (maxPct > 0) inv.metrics.topHoldingPct = Math.round(maxPct * 10) / 10;
+          }
         });
 
         // 6. QUARTERLY_HISTORY 빌드 (investor_metrics에서)

@@ -217,7 +217,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
       </GlassCard>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-        {[{icon:DollarSign,l:L.t('investor.aum'),v:formatUSD(investor.aum),c:t.blue},{icon:Briefcase,l:L.t('investor.holdingCount'),v:`${holdings.length}`,c:t.green},{icon:Target,l:L.t('investor.maxWeight'),v:`${investor.metrics.topHoldingPct.toFixed(1)}%`,sub:sorted[0]?.ticker,c:t.amber},{icon:Activity,l:L.t('investor.qoqChange'),v:`${investor.metrics.qoqChange>=0?'+':''}${investor.metrics.qoqChange}%`,c:investor.metrics.qoqChange>=0?t.green:t.red}].map((s,i)=>{
+        {[{icon:DollarSign,l:L.t('investor.aum'),v:formatUSD(investor.aum),c:t.blue},{icon:Briefcase,l:L.t('investor.holdingCount'),v:`${holdings.length}`,c:t.green},{icon:Target,l:L.t('investor.maxWeight'),v:`${investor.metrics.topHoldingPct.toFixed(1)}%`,sub:[...holdings].sort((a,b)=>b.pct-a.pct)[0]?.ticker,c:t.amber},{icon:Activity,l:L.t('investor.qoqChange'),v:`${investor.metrics.qoqChange>=0?'+':''}${investor.metrics.qoqChange}%`,c:investor.metrics.qoqChange>=0?t.green:t.red}].map((s,i)=>{
           const I=s.icon;
           return(<GlassCard key={i} hover={false}><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="p-1.5 rounded-lg" style={{background:`${s.c}15`}}><I size={14} style={{color:s.c}}/></div><span className="text-xs" style={{color:t.textMuted}}>{s.l}</span></div><div className="text-xl font-bold" style={{color:t.text}}>{s.v}</div>{s.sub&&<div className="text-xs mt-0.5" style={{color:s.c}}>{s.sub}</div>}</div></GlassCard>);
         })}
