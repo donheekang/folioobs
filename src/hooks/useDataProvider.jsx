@@ -682,7 +682,8 @@ export function DataProvider({ children }) {
     const initialTimer = setTimeout(fetchLivePrices, 2000);
 
     // 5분마다 자동 갱신
-    const interval = setInterval(fetchLivePrices, 5 * 60 * 1000);
+    // Polygon Starter: 15분 지연 데이터 → 15분마다 갱신
+    const interval = setInterval(fetchLivePrices, 15 * 60 * 1000);
 
     return () => {
       cancelled = true;
