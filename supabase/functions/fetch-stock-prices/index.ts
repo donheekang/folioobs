@@ -52,6 +52,27 @@ async function fetchTickerDaily(ticker: string, date: string) {
   return data;
 }
 
+// Aggregate Bars API로 특정 날짜 범위의 종가 가져오기 (Starter 플랜 지원)
+async function fetchTickerAgg(ticker: string, date: string): Promise<number | null> {
+  // 해당 날짜 전후 5일 범위로 조회 (공휴일/주말 대비)
+  const d = new Date(date);
+  const from = new Date(d);
+  from.setDate(from.getDate() - 5);
+  const fromStr = from.toISOString().split("T")[0];
+  const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/1/day/${fromStr}/${date}?adjusted=true&sort=desc&limit=1&apiKey=${POLYGON_API_KEY}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      return data.results[0].c; // close price
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 // 가장 최근 거래일 계산 (주말/공휴일 건너뛰기)
 function getLastTradingDate(): string {
   const now = new Date();
@@ -181,7 +202,7 @@ Deno.serve(async (req) => {
           close_price: priceData.c,
           high_price: priceData.h || null,
           low_price: priceData.l || null,
-          volume: priceData.v || null,
+          volume: priceData.v ? Math.round(priceData.v) : null,
           prev_close: prevClose || null,
           change_pct: Math.round(changePct * 100) / 100,
         });
@@ -222,10 +243,24 @@ Deno.serve(async (req) => {
 
     let quarterEndFetched = 0;
     if (filings && filings.length > 0) {
-      const latestQuarter = filings[0].quarter;
-      const qEndDate = getQuarterEndDate(latestQuarter);
+      let latestQuarter = filings[0].quarter;
+      let qEndDate = getQuarterEndDate(latestQuarter);
 
-      if (qEndDate) {
+      // 분기 말이 미래면 이전 분기 사용 (Q1 2026 → Q4 2025)
+      const today = new Date().toISOString().split("T")[0];
+      if (qEndDate > today) {
+        const match = latestQuarter.match(/^(\d{4})Q(\d)$/);
+        if (match) {
+          let y = parseInt(match[1]);
+          let q = parseInt(match[2]);
+          if (q === 1) { y--; q = 4; } else { q--; }
+          latestQuarter = `${y}Q${q}`;
+          qEndDate = getQuarterEndDate(latestQuarter);
+          console.log(`분기 말이 미래 → 이전 분기 사용: ${latestQuarter} (${qEndDate})`);
+        }
+      }
+
+      if (qEndDate && qEndDate <= today) {
         // 분기 말 데이터가 이미 있는지 확인
         const { data: qExisting } = await supabase
           .from("stock_prices")
@@ -234,37 +269,55 @@ Deno.serve(async (req) => {
           .limit(1);
 
         if (!qExisting || qExisting.length === 0) {
-          // 분기 말 날짜의 시세도 가져오기
-          try {
-            const qGrouped = await fetchGroupedDaily(qEndDate);
-            const qRows: any[] = [];
-            for (const item of qGrouped) {
-              if (heldTickers.has(item.T)) {
+          // 분기 말 시세: Aggregate Bars API로 개별 조회 (Starter 플랜 호환)
+          // 타임아웃 방지: 10개씩 병렬 처리, 최대 500개
+          const tickerArray = [...heldTickers].slice(0, 500);
+          const qRows: any[] = [];
+          const BATCH = 10;
+
+          console.log(`분기 말(${qEndDate}) 개별 Aggregate 조회 시작: ${tickerArray.length}개`);
+
+          for (let i = 0; i < tickerArray.length; i += BATCH) {
+            const batch = tickerArray.slice(i, i + BATCH);
+            const results = await Promise.all(
+              batch.map(async (ticker) => {
+                const closePrice = await fetchTickerAgg(ticker, qEndDate);
+                return closePrice !== null ? { ticker, closePrice } : null;
+              })
+            );
+
+            for (const r of results) {
+              if (r) {
                 qRows.push({
-                  ticker: item.T,
+                  ticker: r.ticker,
                   price_date: qEndDate,
-                  open_price: item.o || null,
-                  close_price: item.c,
-                  high_price: item.h || null,
-                  low_price: item.l || null,
-                  volume: item.v || null,
+                  open_price: null,
+                  close_price: r.closePrice,
+                  high_price: null,
+                  low_price: null,
+                  volume: null,
                   prev_close: null,
                   change_pct: null,
                 });
               }
             }
-            if (qRows.length > 0) {
-              for (let i = 0; i < qRows.length; i += 100) {
-                await supabase
-                  .from("stock_prices")
-                  .upsert(qRows.slice(i, i + 100), { onConflict: "ticker,price_date" });
-              }
-              quarterEndFetched = qRows.length;
+
+            // 진행 상황 로그 (100개마다)
+            if ((i + BATCH) % 100 === 0 || i + BATCH >= tickerArray.length) {
+              console.log(`분기 말 진행: ${Math.min(i + BATCH, tickerArray.length)}/${tickerArray.length}, 성공: ${qRows.length}`);
             }
-            console.log(`분기 말(${qEndDate}) 시세: ${quarterEndFetched}개`);
-          } catch (e) {
-            console.error("분기 말 시세 조회 실패:", e);
           }
+
+          if (qRows.length > 0) {
+            for (let i = 0; i < qRows.length; i += 100) {
+              const { error } = await supabase
+                .from("stock_prices")
+                .upsert(qRows.slice(i, i + 100), { onConflict: "ticker,price_date" });
+              if (error) console.error(`분기 말 upsert 에러:`, error);
+            }
+            quarterEndFetched = qRows.length;
+          }
+          console.log(`분기 말(${qEndDate}) 최종 저장: ${quarterEndFetched}개`);
         }
       }
     }

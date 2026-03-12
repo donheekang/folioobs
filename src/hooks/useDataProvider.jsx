@@ -514,12 +514,23 @@ export function DataProvider({ children }) {
         let stockPricesMap = {};
         try {
           // 최신 분기 말 날짜 계산
-          const qMatch = maxQuarter.match(/^(\d{4})Q(\d)$/);
+          let priceQuarter = maxQuarter;
+          const qMatch = priceQuarter.match(/^(\d{4})Q(\d)$/);
           if (qMatch) {
-            const qYear = parseInt(qMatch[1]);
-            const qNum = parseInt(qMatch[2]);
-            const qEndDates = { 1: `${qYear}-03-31`, 2: `${qYear}-06-30`, 3: `${qYear}-09-30`, 4: `${qYear}-12-31` };
-            const qEndDate = qEndDates[qNum];
+            let qYear = parseInt(qMatch[1]);
+            let qNum = parseInt(qMatch[2]);
+            let qEndDates = { 1: `${qYear}-03-31`, 2: `${qYear}-06-30`, 3: `${qYear}-09-30`, 4: `${qYear}-12-31` };
+            let qEndDate = qEndDates[qNum];
+
+            // 분기 말이 미래면 이전 분기 사용
+            const today = new Date().toISOString().split('T')[0];
+            if (qEndDate > today) {
+              if (qNum === 1) { qYear--; qNum = 4; } else { qNum--; }
+              qEndDates = { 1: `${qYear}-03-31`, 2: `${qYear}-06-30`, 3: `${qYear}-09-30`, 4: `${qYear}-12-31` };
+              qEndDate = qEndDates[qNum];
+              priceQuarter = `${qYear}Q${qNum}`;
+              console.log(`[DataProvider] 분기 말이 미래 → 이전 분기 사용: ${priceQuarter} (${qEndDate})`);
+            }
 
             // 모든 보유 종목 티커 수집
             const allTickers = new Set();
