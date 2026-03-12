@@ -172,6 +172,7 @@ export default {
     colTicker: "종목",
     colPrice: "현재가",
     sinceFilingShort: "공시후",
+    filingBasisNote: "가격은 실시간 · 수익률은 공시 분기말 대비",
     colSector: "섹터",
     colHolders: "보유 투자자",
     colMaxWeight: "최대 비중",

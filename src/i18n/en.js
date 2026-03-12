@@ -172,6 +172,7 @@ export default {
     colTicker: "Ticker",
     colPrice: "Price",
     sinceFilingShort: "Post-Filing",
+    filingBasisNote: "Real-time prices · Returns vs. quarter-end filing",
     colSector: "Sector",
     colHolders: "Holders",
     colMaxWeight: "Max Weight",

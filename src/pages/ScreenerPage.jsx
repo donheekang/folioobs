@@ -10,7 +10,7 @@ import { GlassCard, Badge, WatchButton } from "../components/shared";
 const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
   const t = useTheme();
   const L = useLocale();
-  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyActivity: QUARTERLY_ACTIVITY, stockPrices } = useData();
+  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyActivity: QUARTERLY_ACTIVITY, stockPrices, latestQuarter } = useData();
   const [sortKey, setSortKey] = useState("holders");
   const [sortDir, setSortDir] = useState("desc");
   const [filterSector, setFilterSector] = useState(initialSector || "all");
@@ -130,12 +130,20 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
   return (
     <div className="space-y-6">
       <button onClick={onBack} className="flex items-center gap-1.5 text-sm" style={{ color: t.textMuted }}><ArrowLeft size={16} /> {L.t('common.back')}</button>
-      <div className="flex items-center gap-2">
-        <div className="p-1.5 rounded-lg" style={{ background: `${t.accent}20` }}>
-          <Filter size={20} style={{ color: t.accent }} />
+      <div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="p-1.5 rounded-lg" style={{ background: `${t.accent}20` }}>
+            <Filter size={20} style={{ color: t.accent }} />
+          </div>
+          <h1 className="text-2xl font-bold" style={{ color: t.text }}>{L.t('screener.title')}</h1>
+          <span className="text-sm" style={{ color: t.textMuted }}>{filtered.length} {L.t('common.stocks_count')}</span>
         </div>
-        <h1 className="text-2xl font-bold" style={{ color: t.text }}>{L.t('screener.title')}</h1>
-        <span className="text-sm" style={{ color: t.textMuted }}>{filtered.length} {L.t('common.stocks_count')}</span>
+        {latestQuarter && (
+          <div className="flex items-center gap-2 mt-1.5 ml-0.5 flex-wrap">
+            <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{latestQuarter.replace(/^(\d{4})Q(\d)$/, (_, y, q) => `'${y.slice(2)} Q${q}`)}</span>
+            <span className="text-xs" style={{ color: t.textMuted }}>{L.t('screener.filingBasisNote')}</span>
+          </div>
+        )}
       </div>
 
       {/* Summary Cards */}
@@ -324,7 +332,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                   {[
                     { k: null, l: "" },
                     { k: "ticker", l: L.t('screener.colTicker') },
-                    { k: null, l: L.t('screener.colPrice') || L.t('investor.currentPrice') },
+                    { k: null, l: `${L.t('screener.colPrice')} / ${L.t('screener.sinceFilingShort')}` },
                     { k: null, l: L.t('screener.colSector') },
                     { k: "holders", l: L.t('screener.colHolders') },
                     { k: "maxPct", l: L.t('screener.colMaxWeight') },
