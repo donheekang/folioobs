@@ -672,7 +672,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 <div className="mt-4 text-center">
                   <button className="text-xs font-medium px-4 py-1.5 rounded-full transition-colors hover:opacity-80"
                     style={{color:t.accent, background:`${t.accent}12`, border:`1px solid ${t.accent}25`}}
-                    onClick={()=>{trackCtaClick('ark_view_all','ark_section');onNavigate("investor","cathie");}}>
+                    onClick={()=>{trackCtaClick('ark_view_all','ark_section');onNavigate("investor","cathie/daily");}}>
                     {L.t('dashboard.arkViewAll')}
                   </button>
                 </div>
