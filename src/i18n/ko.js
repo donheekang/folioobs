@@ -143,6 +143,12 @@ export default {
     increased: "비중 확대",
     decreased: "비중 축소",
     noChanges: "이번 분기 변동 데이터가 없습니다.",
+    currentPrice: "현재가",
+    dailyChange: "일일 변동",
+    sinceFiling: "공시 후",
+    quarterEndPrice: "분기말가",
+    priceDate: "기준일",
+    noPriceData: "시세 데이터 없음",
     weightChange: "비중 변화",
   },
 

@@ -143,6 +143,12 @@ export default {
     increased: "Increased",
     decreased: "Decreased",
     noChanges: "No change data for this quarter.",
+    currentPrice: "Price",
+    dailyChange: "Daily",
+    sinceFiling: "Since Filing",
+    quarterEndPrice: "Q-End",
+    priceDate: "As of",
+    noPriceData: "No price data available",
     weightChange: "Weight Change",
   },
 
