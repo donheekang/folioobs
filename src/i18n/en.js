@@ -81,6 +81,20 @@ export default {
     arkMore: "more",
     arkViewAll: "View All Trades →",
     changeRanking: "Investor Change Ranking",
+    // Task 5: Highlights
+    quarterHighlights: "This Quarter's Highlights",
+    hlRiser: "{name} AUM {pct} increase",
+    hlFaller: "{name} AUM {pct} decline",
+    hlTopBuy: "{name} increased {ticker} by {pct}",
+    hlNewCount: "{count} new positions this quarter",
+    // Task 4: Ranking board
+    investorRanking: "Investor Ranking Board",
+    rkAum: "Largest AUM",
+    rkTech: "Top Tech Exposure",
+    rkConcentration: "Most Concentrated",
+    rkDiversified: "Most Diversified",
+    rkTopGainer: "Top QoQ Gainer",
+    rkMostActive: "Most Active",
   },
 
   // ===== Investor Detail =====

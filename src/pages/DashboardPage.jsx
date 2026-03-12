@@ -1,6 +1,6 @@
 import { useMemo, memo, useState, useEffect, useRef } from "react";
 import {
-  ArrowUpRight, ArrowDownRight, Briefcase, Plus, BarChart3, ChevronDown, TrendingUp, Activity
+  ArrowUpRight, ArrowDownRight, Briefcase, Plus, BarChart3, ChevronDown, TrendingUp, Activity, Trophy, Zap, Target, Layers, DollarSign
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -90,6 +90,83 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     }
     return picks.slice(0, 3);
   }, [buyActions, sellActions, newPositions, t, L]);
+
+  // ===== Task 5: 이번 분기 하이라이트 (한줄 요약) =====
+  const quarterHighlights = useMemo(() => {
+    if (!INVESTORS.length) return [];
+    const highlights = [];
+
+    // 1. 가장 큰 QoQ 상승 투자자
+    const topRiser = [...INVESTORS].sort((a, b) => b.metrics.qoqChange - a.metrics.qoqChange)[0];
+    if (topRiser && topRiser.metrics.qoqChange > 0) {
+      highlights.push({ icon: TrendingUp, color: '#22c55e', text: L.t('dashboard.hlRiser').replace('{name}', L.investorName(topRiser)).replace('{pct}', `+${topRiser.metrics.qoqChange}%`) });
+    }
+
+    // 2. 가장 큰 QoQ 하락 투자자
+    const topFaller = [...INVESTORS].sort((a, b) => a.metrics.qoqChange - b.metrics.qoqChange)[0];
+    if (topFaller && topFaller.metrics.qoqChange < 0) {
+      highlights.push({ icon: ArrowDownRight, color: '#ef4444', text: L.t('dashboard.hlFaller').replace('{name}', L.investorName(topFaller)).replace('{pct}', `${topFaller.metrics.qoqChange}%`) });
+    }
+
+    // 3. 가장 큰 비중 변동 종목
+    if (buyActions.length > 0) {
+      const top = buyActions[0];
+      const pctStr = Math.round(top.pctChange) > 999 ? L.t('common.significantIncrease') : `+${Math.round(top.pctChange)}%`;
+      highlights.push({ icon: Zap, color: '#f59e0b', text: L.t('dashboard.hlTopBuy').replace('{name}', L.investorName(top.investor)).replace('{ticker}', top.ticker).replace('{pct}', pctStr) });
+    }
+
+    // 4. 신규 매수 총 수
+    if (newPositions.length > 0) {
+      highlights.push({ icon: Plus, color: '#8b5cf6', text: L.t('dashboard.hlNewCount').replace('{count}', newPositions.length) });
+    }
+
+    return highlights.slice(0, 4);
+  }, [INVESTORS, buyActions, newPositions, L]);
+
+  // ===== Task 4: 투자자 랭킹 보드 (다차원 순위) =====
+  const investorRankings = useMemo(() => {
+    if (!INVESTORS.length) return [];
+    const rankings = [];
+
+    // 각 투자자의 섹터 비중 계산
+    const getSectorPct = (invId, sectorName) => {
+      const h = HOLDINGS[invId] || [];
+      const total = h.reduce((s, x) => s + x.value, 0);
+      if (total === 0) return 0;
+      const sectorVal = h.filter(x => x.sector === sectorName).reduce((s, x) => s + x.value, 0);
+      return (sectorVal / total) * 100;
+    };
+
+    // 1. AUM 최대
+    const byAum = [...INVESTORS].sort((a, b) => b.aum - a.aum)[0];
+    if (byAum) rankings.push({ label: L.t('dashboard.rkAum'), icon: DollarSign, color: t.blue, investor: byAum, value: formatUSD(byAum.aum) });
+
+    // 2. 기술주 비중 TOP
+    const byTech = [...INVESTORS].map(inv => ({ ...inv, techPct: getSectorPct(inv.id, '기술') })).sort((a, b) => b.techPct - a.techPct)[0];
+    if (byTech && byTech.techPct > 0) rankings.push({ label: L.t('dashboard.rkTech'), icon: Layers, color: t.accent, investor: byTech, value: `${byTech.techPct.toFixed(1)}%` });
+
+    // 3. 집중도 TOP (최대 비중)
+    const byConc = [...INVESTORS].sort((a, b) => b.metrics.topHoldingPct - a.metrics.topHoldingPct)[0];
+    if (byConc) rankings.push({ label: L.t('dashboard.rkConcentration'), icon: Target, color: t.amber, investor: byConc, value: `${byConc.metrics.topHoldingPct.toFixed(1)}%` });
+
+    // 4. 분산도 TOP (종목 수 최다)
+    const byDiv = [...INVESTORS].sort((a, b) => b.metrics.holdingCount - a.metrics.holdingCount)[0];
+    if (byDiv) rankings.push({ label: L.t('dashboard.rkDiversified'), icon: Briefcase, color: t.green, investor: byDiv, value: `${byDiv.metrics.holdingCount}${L.t('common.stocks_count')}` });
+
+    // 5. QoQ 최대 상승
+    const byQoq = [...INVESTORS].sort((a, b) => b.metrics.qoqChange - a.metrics.qoqChange)[0];
+    if (byQoq && byQoq.metrics.qoqChange > 0) rankings.push({ label: L.t('dashboard.rkTopGainer'), icon: TrendingUp, color: t.green, investor: byQoq, value: `+${byQoq.metrics.qoqChange}%` });
+
+    // 6. 가장 활발 (변동 종목 수)
+    const byActive = [...INVESTORS].map(inv => {
+      const acts = QUARTERLY_ACTIVITY[inv.id] || [];
+      const cnt = acts.length > 0 && acts[0]?.actions ? acts[0].actions.filter(a => a.type !== 'hold').length : 0;
+      return { ...inv, moveCount: cnt };
+    }).sort((a, b) => b.moveCount - a.moveCount)[0];
+    if (byActive && byActive.moveCount > 0) rankings.push({ label: L.t('dashboard.rkMostActive'), icon: Activity, color: t.purple, investor: byActive, value: `${byActive.moveCount}${L.t('common.stocks_count')}` });
+
+    return rankings;
+  }, [INVESTORS, HOLDINGS, QUARTERLY_ACTIVITY, t, L]);
 
   const handleActivityClick = (investorId) => onNavigate("investor", investorId);
   const ActivityItem = ({ act, label, color }) => {
@@ -200,6 +277,28 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           </button>
         </div>
       </div>
+
+      {/* ===== 이번 분기 하이라이트 (Task 5) ===== */}
+      {quarterHighlights.length > 0 && (
+        <div className="hero-enter hero-enter-9">
+          <div className="flex items-center gap-2 mb-3">
+            <Zap size={16} style={{ color: t.amber }} />
+            <span className="text-sm font-bold" style={{ color: t.text }}>{L.t('dashboard.quarterHighlights')}</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {quarterHighlights.map((hl, i) => {
+              const I = hl.icon;
+              return (
+                <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl"
+                  style={{ background: `${hl.color}08`, border: `1px solid ${hl.color}15` }}>
+                  <I size={14} style={{ color: hl.color }} />
+                  <span className="text-xs font-medium" style={{ color: t.text }}>{hl.text}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Investor Grid */}
       <section ref={investorGridRef} aria-label={L.t('dashboard.investorStatus')}>
@@ -318,6 +417,39 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           </section>
         );
       })()}
+
+      {/* ===== 투자자 랭킹 보드 (Task 4) ===== */}
+      {!ready ? null : investorRankings.length > 0 && (
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <Trophy size={18} style={{ color: t.amber }} />
+            <h2 className="text-lg font-bold" style={{ color: t.text }}>{L.t('dashboard.investorRanking')}</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {investorRankings.map((rk, i) => {
+              const I = rk.icon;
+              return (
+                <GlassCard key={i} onClick={() => onNavigate("investor", rk.investor.id)}>
+                  <div className="p-4">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <I size={13} style={{ color: rk.color }} />
+                      <span className="text-xs font-medium" style={{ color: t.textMuted }}>{rk.label}</span>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                        style={{ background: rk.investor.gradient }}>{rk.investor.avatar}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-bold truncate" style={{ color: t.text }}>{L.investorName(rk.investor)}</div>
+                        <div className="text-lg font-bold" style={{ color: rk.color }}>{rk.value}</div>
+                      </div>
+                    </div>
+                  </div>
+                </GlassCard>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ARK Daily Trades — Cathie Wood 실시간 매매 */}
       {!ready ? null : arkDailyTrades.length > 0 && (() => {

@@ -81,6 +81,20 @@ export default {
     arkMore: "건 더보기",
     arkViewAll: "전체 매매 내역 보기 →",
     changeRanking: "투자자 변동 랭킹",
+    // Task 5: 하이라이트
+    quarterHighlights: "이번 분기 하이라이트",
+    hlRiser: "{name} AUM {pct} 상승",
+    hlFaller: "{name} AUM {pct} 하락",
+    hlTopBuy: "{name}, {ticker} {pct} 확대",
+    hlNewCount: "이번 분기 총 {count}건 신규 매수",
+    // Task 4: 랭킹 보드
+    investorRanking: "투자자 랭킹 보드",
+    rkAum: "AUM 최대",
+    rkTech: "기술주 비중 TOP",
+    rkConcentration: "집중도 TOP",
+    rkDiversified: "분산도 TOP",
+    rkTopGainer: "QoQ 최대 상승",
+    rkMostActive: "가장 활발",
   },
 
   // ===== 투자자 상세 =====
