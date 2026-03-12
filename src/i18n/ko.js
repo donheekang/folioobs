@@ -26,6 +26,8 @@ export default {
     items: "개",
     people: "명",
     stocks_count: "종목",
+    showMore: "더보기",
+    collapse: "접기",
     close: "닫기",
     move: "이동",
     select: "선택",

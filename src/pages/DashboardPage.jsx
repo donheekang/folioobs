@@ -57,6 +57,12 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
   const [ready, setReady] = useState(false);
   useEffect(() => { const id = setTimeout(() => setReady(true), 350); return () => clearTimeout(id); }, []);
 
+  // Collapse state for recent quarter changes (show 5 items initially)
+  const COLLAPSE_LIMIT = 5;
+  const [showAllNew, setShowAllNew] = useState(false);
+  const [showAllBuy, setShowAllBuy] = useState(false);
+  const [showAllSell, setShowAllSell] = useState(false);
+
   // Aggregate all latest quarterly activities by action type
   const { newPositions, buyActions, sellActions } = useMemo(() => {
     const all = INVESTORS.flatMap(inv => {
@@ -137,33 +143,36 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       return (sectorVal / total) * 100;
     };
 
+    // Helper: top N from sorted array
+    const topN = (arr, n = 3) => arr.slice(0, n);
+
     // 1. AUM 최대
-    const byAum = [...INVESTORS].sort((a, b) => b.aum - a.aum)[0];
-    if (byAum) rankings.push({ label: L.t('dashboard.rkAum'), icon: DollarSign, color: t.blue, investor: byAum, value: formatUSD(byAum.aum) });
+    const byAum = topN([...INVESTORS].sort((a, b) => b.aum - a.aum));
+    if (byAum[0]) rankings.push({ label: L.t('dashboard.rkAum'), icon: DollarSign, color: t.blue, investor: byAum[0], value: formatUSD(byAum[0].aum), runners: byAum.slice(1).map(r => ({ investor: r, value: formatUSD(r.aum) })) });
 
     // 2. 기술주 비중 TOP
-    const byTech = [...INVESTORS].map(inv => ({ ...inv, techPct: getSectorPct(inv.id, '기술') })).sort((a, b) => b.techPct - a.techPct)[0];
-    if (byTech && byTech.techPct > 0) rankings.push({ label: L.t('dashboard.rkTech'), icon: Layers, color: t.accent, investor: byTech, value: `${byTech.techPct.toFixed(1)}%` });
+    const byTech = topN([...INVESTORS].map(inv => ({ ...inv, techPct: getSectorPct(inv.id, '기술') })).sort((a, b) => b.techPct - a.techPct).filter(x => x.techPct > 0));
+    if (byTech[0]) rankings.push({ label: L.t('dashboard.rkTech'), icon: Layers, color: t.accent, investor: byTech[0], value: `${byTech[0].techPct.toFixed(1)}%`, runners: byTech.slice(1).map(r => ({ investor: r, value: `${r.techPct.toFixed(1)}%` })) });
 
     // 3. 집중도 TOP (최대 비중)
-    const byConc = [...INVESTORS].sort((a, b) => b.metrics.topHoldingPct - a.metrics.topHoldingPct)[0];
-    if (byConc) rankings.push({ label: L.t('dashboard.rkConcentration'), icon: Target, color: t.amber, investor: byConc, value: `${byConc.metrics.topHoldingPct.toFixed(1)}%` });
+    const byConc = topN([...INVESTORS].sort((a, b) => b.metrics.topHoldingPct - a.metrics.topHoldingPct));
+    if (byConc[0]) rankings.push({ label: L.t('dashboard.rkConcentration'), icon: Target, color: t.amber, investor: byConc[0], value: `${byConc[0].metrics.topHoldingPct.toFixed(1)}%`, runners: byConc.slice(1).map(r => ({ investor: r, value: `${r.metrics.topHoldingPct.toFixed(1)}%` })) });
 
     // 4. 분산도 TOP (종목 수 최다)
-    const byDiv = [...INVESTORS].sort((a, b) => b.metrics.holdingCount - a.metrics.holdingCount)[0];
-    if (byDiv) rankings.push({ label: L.t('dashboard.rkDiversified'), icon: Briefcase, color: t.green, investor: byDiv, value: `${byDiv.metrics.holdingCount}${L.t('common.stocks_count')}` });
+    const byDiv = topN([...INVESTORS].sort((a, b) => b.metrics.holdingCount - a.metrics.holdingCount));
+    if (byDiv[0]) rankings.push({ label: L.t('dashboard.rkDiversified'), icon: Briefcase, color: t.green, investor: byDiv[0], value: `${byDiv[0].metrics.holdingCount}${L.t('common.stocks_count')}`, runners: byDiv.slice(1).map(r => ({ investor: r, value: `${r.metrics.holdingCount}${L.t('common.stocks_count')}` })) });
 
     // 5. QoQ 최대 상승
-    const byQoq = [...INVESTORS].sort((a, b) => b.metrics.qoqChange - a.metrics.qoqChange)[0];
-    if (byQoq && byQoq.metrics.qoqChange > 0) rankings.push({ label: L.t('dashboard.rkTopGainer'), icon: TrendingUp, color: t.green, investor: byQoq, value: `+${byQoq.metrics.qoqChange}%` });
+    const byQoq = topN([...INVESTORS].sort((a, b) => b.metrics.qoqChange - a.metrics.qoqChange).filter(x => x.metrics.qoqChange > 0));
+    if (byQoq[0]) rankings.push({ label: L.t('dashboard.rkTopGainer'), icon: TrendingUp, color: t.green, investor: byQoq[0], value: `+${byQoq[0].metrics.qoqChange}%`, runners: byQoq.slice(1).map(r => ({ investor: r, value: `+${r.metrics.qoqChange}%` })) });
 
     // 6. 가장 활발 (변동 종목 수)
-    const byActive = [...INVESTORS].map(inv => {
+    const activeList = topN([...INVESTORS].map(inv => {
       const acts = QUARTERLY_ACTIVITY[inv.id] || [];
       const cnt = acts.length > 0 && acts[0]?.actions ? acts[0].actions.filter(a => a.type !== 'hold').length : 0;
       return { ...inv, moveCount: cnt };
-    }).sort((a, b) => b.moveCount - a.moveCount)[0];
-    if (byActive && byActive.moveCount > 0) rankings.push({ label: L.t('dashboard.rkMostActive'), icon: Activity, color: t.purple, investor: byActive, value: `${byActive.moveCount}${L.t('common.stocks_count')}` });
+    }).sort((a, b) => b.moveCount - a.moveCount).filter(x => x.moveCount > 0));
+    if (activeList[0]) rankings.push({ label: L.t('dashboard.rkMostActive'), icon: Activity, color: t.purple, investor: activeList[0], value: `${activeList[0].moveCount}${L.t('common.stocks_count')}`, runners: activeList.slice(1).map(r => ({ investor: r, value: `${r.moveCount}${L.t('common.stocks_count')}` })) });
 
     return rankings;
   }, [INVESTORS, HOLDINGS, QUARTERLY_ACTIVITY, t, L]);
@@ -280,7 +289,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
       {/* ===== 이번 분기 하이라이트 (Task 5) ===== */}
       {quarterHighlights.length > 0 && (
-        <div className="hero-enter hero-enter-9">
+        <div className="hero-enter hero-enter-9 -mt-3">
           <div className="flex items-center gap-2 mb-3">
             <Zap size={16} style={{ color: t.amber }} />
             <span className="text-sm font-bold" style={{ color: t.text }}>{L.t('dashboard.quarterHighlights')}</span>
@@ -454,6 +463,21 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                         <div className="text-lg font-bold" style={{ color: rk.color }}>{rk.value}</div>
                       </div>
                     </div>
+                    {/* 2-3위 */}
+                    {rk.runners && rk.runners.length > 0 && (
+                      <div className="mt-2.5 pt-2 space-y-1" style={{ borderTop: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
+                        {rk.runners.map((ru, ri) => (
+                          <div key={ri} className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={(e) => { e.stopPropagation(); onNavigate("investor", ru.investor.id); }}>
+                            <span className="text-[10px] font-bold w-4 text-center" style={{ color: t.textMuted }}>{ri + 2}</span>
+                            <div className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
+                              style={{ background: ru.investor.gradient }}>{ru.investor.avatar}</div>
+                            <span className="text-xs truncate flex-1" style={{ color: t.textSecondary }}>{L.investorName(ru.investor)}</span>
+                            <span className="text-xs font-semibold" style={{ color: rk.color }}>{ru.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </GlassCard>
               );
@@ -588,8 +612,13 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{background:`${t.accent}15`,color:t.accent}}>{newPositions.length}</span>
             </div>
             <div className="space-y-1.5">
-              {newPositions.map((act, i) => <ActivityItem key={i} act={act} label={L.t('common.new')} color={t.accent} />)}
+              {(showAllNew ? newPositions : newPositions.slice(0, COLLAPSE_LIMIT)).map((act, i) => <ActivityItem key={i} act={act} label={L.t('common.new')} color={t.accent} />)}
               {newPositions.length === 0 && <div className="text-xs text-center py-4" style={{color:t.textMuted}}>{L.t('common.none')}</div>}
+              {newPositions.length > COLLAPSE_LIMIT && (
+                <button onClick={() => setShowAllNew(!showAllNew)} className="w-full text-xs font-medium py-1.5 rounded-lg transition-colors hover:opacity-80" style={{color:t.accent}}>
+                  {showAllNew ? L.t('common.collapse') : `+${newPositions.length - COLLAPSE_LIMIT} ${L.t('common.showMore')}`}
+                </button>
+              )}
             </div>
           </div>
 
@@ -604,8 +633,13 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{background:`${t.green}15`,color:t.green}}>{buyActions.length}</span>
             </div>
             <div className="space-y-1.5">
-              {buyActions.map((act, i) => <ActivityItem key={i} act={act} label={Math.round(act.pctChange) > 999 ? L.t('common.significantIncrease') : `+${Math.round(act.pctChange)}%`} color={t.green} />)}
+              {(showAllBuy ? buyActions : buyActions.slice(0, COLLAPSE_LIMIT)).map((act, i) => <ActivityItem key={i} act={act} label={Math.round(act.pctChange) > 999 ? L.t('common.significantIncrease') : `+${Math.round(act.pctChange)}%`} color={t.green} />)}
               {buyActions.length === 0 && <div className="text-xs text-center py-4" style={{color:t.textMuted}}>{L.t('common.none')}</div>}
+              {buyActions.length > COLLAPSE_LIMIT && (
+                <button onClick={() => setShowAllBuy(!showAllBuy)} className="w-full text-xs font-medium py-1.5 rounded-lg transition-colors hover:opacity-80" style={{color:t.accent}}>
+                  {showAllBuy ? L.t('common.collapse') : `+${buyActions.length - COLLAPSE_LIMIT} ${L.t('common.showMore')}`}
+                </button>
+              )}
             </div>
           </div>
 
@@ -620,8 +654,13 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{background:`${t.red}15`,color:t.red}}>{sellActions.length}</span>
             </div>
             <div className="space-y-1.5">
-              {sellActions.map((act, i) => <ActivityItem key={i} act={act} label={`${Math.round(act.pctChange)}%`} color={t.red} />)}
+              {(showAllSell ? sellActions : sellActions.slice(0, COLLAPSE_LIMIT)).map((act, i) => <ActivityItem key={i} act={act} label={`${Math.round(act.pctChange)}%`} color={t.red} />)}
               {sellActions.length === 0 && <div className="text-xs text-center py-4" style={{color:t.textMuted}}>{L.t('common.none')}</div>}
+              {sellActions.length > COLLAPSE_LIMIT && (
+                <button onClick={() => setShowAllSell(!showAllSell)} className="w-full text-xs font-medium py-1.5 rounded-lg transition-colors hover:opacity-80" style={{color:t.accent}}>
+                  {showAllSell ? L.t('common.collapse') : `+${sellActions.length - COLLAPSE_LIMIT} ${L.t('common.showMore')}`}
+                </button>
+              )}
             </div>
           </div>
         </div>

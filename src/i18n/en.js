@@ -26,6 +26,8 @@ export default {
     items: " ",
     people: " ",
     stocks_count: "stocks",
+    showMore: "more",
+    collapse: "Collapse",
     close: "Close",
     move: "Navigate",
     select: "Select",

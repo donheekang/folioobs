@@ -64,7 +64,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
   };
 
   const cellSize = isMobile ? 30 : 42;
-  const labelWidth = isMobile ? 36 : 72;
+  const labelWidth = isMobile ? 36 : 80;
 
   // Get detail info for selected cell's common stocks
   const selectedDetail = useMemo(() => {
@@ -121,7 +121,8 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
                   <div className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[9px] font-bold"
                     style={{ background: rowInv.gradient }}>{rowInv.avatar}</div>
                 ) : (
-                  <span className="text-xs font-medium text-right leading-tight" style={{ color: t.textSecondary }}>
+                  <span className="text-xs font-medium text-right leading-tight block truncate" style={{ color: t.textSecondary, maxWidth: `${labelWidth - 4}px` }}
+                    title={L.investorName(rowInv)}>
                     {L.investorName(rowInv)}
                   </span>
                 )}
@@ -244,8 +245,8 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
             style={{ color: t.textMuted, borderBottom: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}>
             <div className="col-span-2">{L.locale === 'ko' ? '티커' : 'Ticker'}</div>
             <div className="col-span-4">{L.locale === 'ko' ? '종목명' : 'Name'}</div>
-            <div className="col-span-3 text-right">{L.investorName(selectedDetail.a)} %</div>
-            <div className="col-span-3 text-right">{L.investorName(selectedDetail.b)} %</div>
+            <div className="col-span-3 text-right truncate" title={L.investorName(selectedDetail.a)}>{L.investorName(selectedDetail.a)} %</div>
+            <div className="col-span-3 text-right truncate" title={L.investorName(selectedDetail.b)}>{L.investorName(selectedDetail.b)} %</div>
           </div>
 
           {/* Stock rows */}
