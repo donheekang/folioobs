@@ -171,6 +171,7 @@ export default {
     filterMulti: "2+ Holders",
     colTicker: "Ticker",
     colPrice: "Price",
+    sinceFilingShort: "Post-Filing",
     colSector: "Sector",
     colHolders: "Holders",
     colMaxWeight: "Max Weight",

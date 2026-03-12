@@ -264,47 +264,50 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
               return (
                 <div key={stock.ticker} className="p-3 rounded-xl transition-colors"
                   style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)', border: `1px solid ${t.cardRowBorder}` }}>
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
+                  {/* Row 1: Ticker + Name + Action Badges */}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <WatchButton active={watchlist.isWatchedTkr(stock.ticker)} onClick={() => watchlist.toggleTicker(stock.ticker)} size={12} />
-                      <div>
-                        <span className="font-semibold text-sm" style={{ color: t.text }}>{stock.ticker}</span>
-                        <span className="text-xs ml-1.5" style={{ color: t.textMuted }}>{stock.name}</span>
-                      </div>
+                      <span className="font-semibold text-sm flex-shrink-0" style={{ color: t.text }}>{stock.ticker}</span>
+                      <span className="text-xs truncate" style={{ color: t.textMuted }}>{stock.name}</span>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 flex-shrink-0 ml-2">
                       {hasNew && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.t('common.new')}</span>}
                       {hasBuy && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: `${t.green}15`, color: t.green }}>{L.t('common.buy')}</span>}
                       {hasSell && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: `${t.red}15`, color: t.red }}>{L.t('common.sell')}</span>}
                     </div>
                   </div>
+                  {/* Row 2: Investor avatars */}
+                  <div className="flex items-center gap-1 mb-2 flex-wrap">
+                    {stock.holders.map(h => (
+                      <button key={h.investor.id} onClick={() => onNavigate("investor", h.investor.id)}
+                        className="w-5 h-5 rounded-md flex items-center justify-center text-white text-xs font-bold"
+                        style={{ background: h.investor.gradient }}
+                        title={h.investor.nameKo}>
+                        {h.investor.avatar}
+                      </button>
+                    ))}
+                    <span className="text-xs ml-1" style={{ color: t.textMuted }}>{stock.holders.length}{L.t('common.people')}</span>
+                  </div>
+                  {/* Row 3: Price + Since Filing + Sector + Value */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      {stock.holders.map(h => (
-                        <button key={h.investor.id} onClick={() => onNavigate("investor", h.investor.id)}
-                          className="w-5 h-5 rounded-md flex items-center justify-center text-white text-xs font-bold"
-                          style={{ background: h.investor.gradient }}
-                          title={h.investor.nameKo}>
-                          {h.investor.avatar}
-                        </button>
-                      ))}
-                      <span className="text-xs ml-1" style={{ color: t.textMuted }}>{stock.holders.length}{L.t('common.people')}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       {(() => {
                         const sp = stockPrices?.[stock.ticker];
                         if (!sp) return null;
                         return (
-                          <span className="text-xs font-bold" style={{ color: t.text }}>
-                            ${sp.current?.toFixed(2)}
+                          <>
+                            <span className="text-sm font-bold" style={{ color: t.text }}>${sp.current?.toFixed(2)}</span>
                             {sp.sinceFiling !== null && sp.sinceFiling !== undefined && (
-                              <span className="ml-1 font-medium" style={{ color: sp.sinceFiling >= 0 ? t.green : t.red }}>
-                                {sp.sinceFiling >= 0 ? '+' : ''}{sp.sinceFiling.toFixed(1)}%
+                              <span className="text-xs font-medium px-1.5 py-0.5 rounded-md" style={{ background: sp.sinceFiling >= 0 ? `${t.green}15` : `${t.red}15`, color: sp.sinceFiling >= 0 ? t.green : t.red }}>
+                                {L.t('screener.sinceFilingShort') || '공시후'} {sp.sinceFiling >= 0 ? '+' : ''}{sp.sinceFiling.toFixed(1)}%
                               </span>
                             )}
-                          </span>
+                          </>
                         );
                       })()}
+                    </div>
+                    <div className="flex items-center gap-2">
                       <Badge color={SECTOR_COLORS[stock.sector] || "#64748B"}>{L.sector(stock.sector)}</Badge>
                       <span className="text-xs font-medium" style={{ color: t.text }}>{formatUSD(stock.totalValue)}</span>
                     </div>
@@ -365,7 +368,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                               <div className="font-medium" style={{ color: t.text }}>${sp.current?.toFixed(2)}</div>
                               {sp.sinceFiling !== null && sp.sinceFiling !== undefined && (
                                 <div className="text-xs font-medium" style={{ color: sp.sinceFiling >= 0 ? t.green : t.red }}>
-                                  {sp.sinceFiling >= 0 ? '+' : ''}{sp.sinceFiling.toFixed(1)}%
+                                  {L.t('screener.sinceFilingShort') || '공시후'} {sp.sinceFiling >= 0 ? '+' : ''}{sp.sinceFiling.toFixed(1)}%
                                 </div>
                               )}
                             </div>
