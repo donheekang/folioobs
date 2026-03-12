@@ -85,7 +85,7 @@ export default {
     quarterHighlights: "This Quarter's Highlights",
     hlRiser: "{name} AUM {pct} increase",
     hlFaller: "{name} AUM {pct} decline",
-    hlTopBuy: "{name} increased {ticker} by {pct}",
+    hlTopBuy: "{name}, {ticker} position {pct}",
     hlNewCount: "{count} new positions this quarter",
     // Task 4: Ranking board
     investorRanking: "Investor Ranking Board",
@@ -95,6 +95,8 @@ export default {
     rkDiversified: "Most Diversified",
     rkTopGainer: "Top QoQ Gainer",
     rkMostActive: "Most Active",
+    dailyTradeNote: "Daily trades",
+    qoqBasis: "QoQ AUM basis",
   },
 
   // ===== Investor Detail =====

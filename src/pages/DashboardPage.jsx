@@ -372,6 +372,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <Activity size={18} style={{ color: t.amber }} />
               <h2 className="text-lg font-bold" style={{ color: t.text }}>{L.t('dashboard.changeRanking')}</h2>
               {latestQuarter && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>}
+              <span className="text-[10px] ml-1" style={{ color: t.textMuted }}>{L.t('dashboard.qoqBasis')}</span>
             </div>
             <GlassCard hover={false}>
               <div className="p-4 sm:p-5 space-y-2">
@@ -390,8 +391,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                       {/* 아바타 */}
                       <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: inv.gradient }}>{inv.avatar}</div>
                       {/* 이름 */}
-                      <div className="w-24 sm:w-32 flex-shrink-0">
-                        <div className="text-sm font-semibold truncate" style={{ color: t.text }}>{L.investorName(inv)}</div>
+                      <div className="w-24 sm:w-40 flex-shrink-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm font-semibold truncate" style={{ color: t.text }}>{L.investorName(inv)}</span>
+                          {inv.id === 'cathie' && <span className="text-[9px] px-1 py-0.5 rounded flex-shrink-0" style={{ background: `${t.cyan || '#06b6d4'}15`, color: t.cyan || '#06b6d4' }}>{L.t('dashboard.dailyTradeNote')}</span>}
+                        </div>
                       </div>
                       {/* 바 차트 */}
                       <div className="flex-1 h-5 rounded-full overflow-hidden relative" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }}>

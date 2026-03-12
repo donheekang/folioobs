@@ -85,7 +85,7 @@ export default {
     quarterHighlights: "이번 분기 하이라이트",
     hlRiser: "{name} AUM {pct} 상승",
     hlFaller: "{name} AUM {pct} 하락",
-    hlTopBuy: "{name}, {ticker} {pct} 확대",
+    hlTopBuy: "{name}, {ticker} 비중 {pct}",
     hlNewCount: "이번 분기 총 {count}건 신규 매수",
     // Task 4: 랭킹 보드
     investorRanking: "투자자 랭킹 보드",
@@ -95,6 +95,8 @@ export default {
     rkDiversified: "분산도 TOP",
     rkTopGainer: "QoQ 최대 상승",
     rkMostActive: "가장 활발",
+    dailyTradeNote: "일일매매 별도",
+    qoqBasis: "QoQ AUM 기준",
   },
 
   // ===== 투자자 상세 =====
