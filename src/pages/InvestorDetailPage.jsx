@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { ArrowLeft, ArrowUpRight, ArrowDownRight, DollarSign, Briefcase, Target, Activity, Clock, Lightbulb, ChevronDown, ChevronUp, Calendar, TrendingUp, TrendingDown, Plus, Minus, LogOut, PieChart as PieIcon, Star, AlertTriangle, Brain, Zap } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -147,7 +147,7 @@ const ArkTradeRow = ({ trade, theme: t }) => {
   );
 };
 
-const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
+const InvestorDetailPage = ({ investorId, onBack, watchlist, scrollTarget, onScrollTargetClear }) => {
   const t = useTheme();
   const L = useLocale();
   const { investors: INVESTORS, holdings: HOLDINGS, quarterlyHistory: QUARTERLY_HISTORY, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades, aiInsights, stockPrices, latestQuarter } = useData();
@@ -155,6 +155,17 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
   const [sortDir, setSortDir] = useState("desc");
   const [selectedArkDate, setSelectedArkDate] = useState(null); // ARK 날짜 선택 추적
   const [expandedTicker, setExpandedTicker] = useState(null); // 시세 확장 행
+  const dailyTradesRef = useRef(null);
+
+  // scrollTarget이 'daily'면 일별 매매 섹션으로 자동 스크롤
+  useEffect(() => {
+    if (scrollTarget === 'daily' && dailyTradesRef.current) {
+      setTimeout(() => {
+        dailyTradesRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        onScrollTargetClear?.();
+      }, 300);
+    }
+  }, [scrollTarget, onScrollTargetClear]);
   const investor = INVESTORS.find(i=>i.id===investorId);
   const rawHoldings = HOLDINGS[investorId]||[];
   // 같은 티커 합산 (SEC 13F에서 share class 별로 분리된 항목 통합)
@@ -528,6 +539,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
       </GlassCard>
 
       {/* ARK 일별 매매 내역 (캐시 우드 전용) */}
+      <div ref={dailyTradesRef} />
       {investorId === 'cathie' && arkDailyTrades.length > 0 && (() => {
         // 월별 그룹핑
         const monthGroups = {};

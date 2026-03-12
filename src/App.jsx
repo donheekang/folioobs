@@ -82,21 +82,32 @@ function FolioObsInner() {
   }, []);
 
   const [screenerSector, setScreenerSector] = useState(null);
+  const [scrollTarget, setScrollTarget] = useState(null);
   const [transitioning, setTransitioning] = useState(false);
 
   const doNavigate = useCallback((target, param, pushState) => {
     setTransitioning(true);
     setTimeout(() => {
       if (target === "investor") {
-        setSelectedInvestor(param); setPage("investor");
-        trackInvestorClick(param, pushState === false ? 'deeplink' : 'click');
-        trackDetailView(param);
+        // param이 "cathie/daily" 같은 형태면 scrollTarget 분리
+        let investorParam = param;
+        let section = null;
+        if (param && param.includes('/')) {
+          const parts = param.split('/');
+          investorParam = parts[0];
+          section = parts.slice(1).join('/');
+        }
+        setSelectedInvestor(investorParam); setPage("investor");
+        setScrollTarget(section);
+        trackInvestorClick(investorParam, pushState === false ? 'deeplink' : 'click');
+        trackDetailView(investorParam);
       }
-      else if (target === "screener") { setScreenerSector(param || null); setPage("screener"); }
-      else { setSelectedInvestor(null); setPage(target); }
+      else if (target === "screener") { setScreenerSector(param || null); setPage("screener"); setScrollTarget(null); }
+      else { setSelectedInvestor(null); setPage(target); setScrollTarget(null); }
       trackPageView(target, param);
       if (pushState !== false) {
-        window.history.pushState({ page: target, param }, "", `#${target}${param ? '/' + param : ''}`);
+        const hashParam = param ? '/' + param : '';
+        window.history.pushState({ page: target, param }, "", `#${target}${hashParam}`);
       }
       window.scrollTo(0, 0);
       setTransitioning(false);
@@ -387,7 +398,7 @@ function FolioObsInner() {
               )}
               <div key={page + (selectedInvestor || '')} className={transitioning ? "page-exit" : "page-enter"}>
                 {page === "dashboard" && <DashboardPage onNavigate={navigate} watchlist={watchlist} />}
-                {page === "investor" && <InvestorDetailPage investorId={selectedInvestor} onBack={goHome} watchlist={watchlist} />}
+                {page === "investor" && <InvestorDetailPage investorId={selectedInvestor} onBack={goHome} watchlist={watchlist} scrollTarget={scrollTarget} onScrollTargetClear={() => setScrollTarget(null)} />}
                 {page === "screener" && <ScreenerPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} initialSector={screenerSector} />}
                 {page === "watchlist" && <WatchlistPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} />}
                 {page === "compare" && <ComparePage onBack={goHome} />}

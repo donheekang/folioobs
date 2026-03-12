@@ -290,15 +290,22 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           const sells = latest.trades.filter(tr => tr.direction?.toLowerCase() === 'sell').slice(0, 3);
           if (buys.length === 0 && sells.length === 0) return null;
           const cathie = INVESTORS.find(i => i.id === 'cathie');
+          // 날짜 포맷
+          const latestDate = latest.date; // "2025-03-11" 형태
+          const dateObj = new Date(latestDate + 'T00:00:00');
+          const dateLabel = L.locale === 'en'
+            ? dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            : `${dateObj.getMonth()+1}월 ${dateObj.getDate()}일`;
           return (
             <div className="hero-enter hero-enter-7 mb-4 w-full max-w-lg mx-auto">
               <button className="w-full rounded-2xl p-4 transition-all hover:scale-[1.01] cursor-pointer text-left"
                 style={{background:t.name==='dark'?'rgba(245,158,11,0.08)':'rgba(245,158,11,0.05)', border:'1px solid rgba(245,158,11,0.2)'}}
-                onClick={()=>{trackCtaClick('ark_today_preview','hero');onNavigate("investor","cathie");}}>
+                onClick={()=>{trackCtaClick('ark_today_preview','hero');onNavigate("investor","cathie/daily");}}>
                 <div className="flex items-center gap-2 mb-3">
                   {cathie && <div className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-bold" style={{background:cathie.gradient}}>{cathie.avatar}</div>}
                   <span className="text-sm font-bold" style={{color:'#f59e0b'}}>{L.t('dashboard.arkTodayLabel')}</span>
                   <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:'rgba(245,158,11,0.15)',color:'#f59e0b'}}>{L.t('dashboard.arkDailyBadge')}</span>
+                  <span className="text-xs font-medium" style={{color:t.textMuted}}>{dateLabel}</span>
                 </div>
                 <div className="flex items-center gap-4 justify-center flex-wrap">
                   {buys.length > 0 && (
