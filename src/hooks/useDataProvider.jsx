@@ -663,7 +663,9 @@ export function DataProvider({ children }) {
 
             merged[ticker] = {
               current: currentPrice,
-              date: data.date,
+              date: data.live ? '실시간' : (existing?.date || null),
+              live: data.live || false,
+              source: data.source || 'unknown',
               dailyChange: live.ch,
               quarterEnd: quarterEnd,
               quarterEndDate: existing?.quarterEndDate || null,

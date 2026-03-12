@@ -436,7 +436,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
                           <div><span style={{color:t.textMuted}}>공시후 </span><span className="font-medium" style={{color:sp.sinceFiling>=0?t.green:t.red}}>{sp.sinceFiling>=0?'+':''}{sp.sinceFiling.toFixed(2)}%</span></div>
                         )}
                         {sp.quarterEnd && <div><span style={{color:t.textMuted}}>분기말 </span><span style={{color:t.textSecondary}}>${sp.quarterEnd.toFixed(2)}</span></div>}
-                        <div><span style={{color:t.textMuted}}>기준 </span><span style={{color:t.textSecondary}}>{sp.date}</span></div>
+                        <div><span style={{color:t.textMuted}}>기준 </span><span style={{color: sp.live ? t.green : t.textSecondary}}>{sp.live ? '실시간 · 15분 지연' : sp.date}</span></div>
                       </div>
                     ) : (
                       <span className="text-xs" style={{color:t.textMuted}}>시세 데이터 없음</span>
@@ -511,7 +511,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist }) => {
                           )}
                           <div className="flex items-center gap-1">
                             <span style={{color:t.textMuted}}>{L.t('investor.priceDate')}</span>
-                            <span style={{color:t.textSecondary}}>{sp.date}</span>
+                            <span style={{color: sp.live ? t.green : t.textSecondary}}>{sp.live ? '실시간 · 15분 지연' : sp.date}</span>
                           </div>
                         </div>);
                       })()) : (
