@@ -308,7 +308,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                             <span className="text-sm font-bold" style={{ color: t.text }}>${sp.current?.toFixed(2)}</span>
                             {sp.sinceFiling !== null && sp.sinceFiling !== undefined && (
                               <span className="text-xs font-medium px-1.5 py-0.5 rounded-md" style={{ background: sp.sinceFiling >= 0 ? `${t.green}15` : `${t.red}15`, color: sp.sinceFiling >= 0 ? t.green : t.red }}>
-                                {L.t('screener.sinceFilingShort') || '공시후'} {sp.sinceFiling >= 0 ? '+' : ''}{sp.sinceFiling.toFixed(1)}%
+                                {sp.sinceFiling >= 0 ? '+' : ''}{sp.sinceFiling.toFixed(1)}%
                               </span>
                             )}
                           </>
@@ -339,7 +339,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                     { k: "totalValue", l: L.t('screener.colTotalValue') },
                     { k: null, l: L.t('screener.colRecentChange') },
                   ].map((c, i) => (
-                    <th key={i} className={`text-left py-2.5 px-3 text-xs font-medium ${c.k ? 'cursor-pointer' : ''}`}
+                    <th key={i} className={`text-left py-2.5 px-3 text-xs font-medium whitespace-nowrap ${c.k ? 'cursor-pointer' : ''}`}
                       style={{ color: t.textMuted }} onClick={() => c.k && handleSort(c.k)}>
                       <div className="flex items-center gap-1">
                         {c.l}
@@ -376,7 +376,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                               <div className="font-medium" style={{ color: t.text }}>${sp.current?.toFixed(2)}</div>
                               {sp.sinceFiling !== null && sp.sinceFiling !== undefined && (
                                 <div className="text-xs font-medium" style={{ color: sp.sinceFiling >= 0 ? t.green : t.red }}>
-                                  {L.t('screener.sinceFilingShort') || '공시후'} {sp.sinceFiling >= 0 ? '+' : ''}{sp.sinceFiling.toFixed(1)}%
+                                  {sp.sinceFiling >= 0 ? '+' : ''}{sp.sinceFiling.toFixed(1)}%
                                 </div>
                               )}
                             </div>
