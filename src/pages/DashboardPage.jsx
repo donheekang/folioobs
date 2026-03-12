@@ -391,28 +391,35 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                       {/* 아바타 */}
                       <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: inv.gradient }}>{inv.avatar}</div>
                       {/* 이름 */}
-                      <div className="w-24 sm:w-40 flex-shrink-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-semibold truncate" style={{ color: t.text }}>{L.investorName(inv)}</span>
-                          {inv.id === 'cathie' && <span className="text-[9px] px-1 py-0.5 rounded flex-shrink-0" style={{ background: `${t.cyan || '#06b6d4'}15`, color: t.cyan || '#06b6d4' }}>{L.t('dashboard.dailyTradeNote')}</span>}
-                        </div>
+                      <div className="w-24 sm:w-32 flex-shrink-0">
+                        <div className="text-sm font-semibold truncate" style={{ color: t.text }}>{L.investorName(inv)}</div>
                       </div>
-                      {/* 바 차트 */}
-                      <div className="flex-1 h-5 rounded-full overflow-hidden relative" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }}>
-                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.max(barWidth, 3)}%`, background: `${barColor}30` }} />
-                      </div>
-                      {/* QoQ 값 */}
-                      <span className="text-sm font-bold w-16 text-right flex items-center justify-end gap-0.5" style={{ color: barColor }}>
-                        {isPositive ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
-                        {isPositive ? '+' : ''}{inv.qoq}%
-                      </span>
-                      {/* 활동 요약 (데스크톱) */}
-                      <div className="hidden sm:flex items-center gap-1 w-28 justify-end">
-                        {inv.newCount > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.t('common.new')} {inv.newCount}</span>}
-                        {inv.buyCount > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: `${t.green}15`, color: t.green }}>+{inv.buyCount}</span>}
-                        {inv.sellCount > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: `${t.red}15`, color: t.red }}>-{inv.sellCount}</span>}
-                        {inv.totalMoves === 0 && <span className="text-[10px]" style={{ color: t.textMuted }}>—</span>}
-                      </div>
+                      {inv.id === 'cathie' ? (
+                        <>
+                          {/* 캐시 우드: 바 없이 "일일매매 별도" 표시 */}
+                          <div className="flex-1" />
+                          <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.cyan || '#06b6d4'}15`, color: t.cyan || '#06b6d4' }}>{L.t('dashboard.dailyTradeNote')}</span>
+                        </>
+                      ) : (
+                        <>
+                          {/* 바 차트 */}
+                          <div className="flex-1 h-5 rounded-full overflow-hidden relative" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }}>
+                            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.max(barWidth, 3)}%`, background: `${barColor}30` }} />
+                          </div>
+                          {/* QoQ 값 */}
+                          <span className="text-sm font-bold w-16 text-right flex items-center justify-end gap-0.5" style={{ color: barColor }}>
+                            {isPositive ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
+                            {isPositive ? '+' : ''}{inv.qoq}%
+                          </span>
+                          {/* 활동 요약 (데스크톱) */}
+                          <div className="hidden sm:flex items-center gap-1 w-28 justify-end">
+                            {inv.newCount > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.t('common.new')} {inv.newCount}</span>}
+                            {inv.buyCount > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: `${t.green}15`, color: t.green }}>+{inv.buyCount}</span>}
+                            {inv.sellCount > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: `${t.red}15`, color: t.red }}>-{inv.sellCount}</span>}
+                            {inv.totalMoves === 0 && <span className="text-[10px]" style={{ color: t.textMuted }}>—</span>}
+                          </div>
+                        </>
+                      )}
                     </div>
                   );
                 })}
