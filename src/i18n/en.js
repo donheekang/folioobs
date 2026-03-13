@@ -56,6 +56,8 @@ export default {
     subtitle: "Warren Buffett · Cathie Wood · Druckenmiller + 7 more",
     title: "Portfolio Changes at a Glance",
     description: "Track legendary investors' trades — updated daily.",
+    heroTagline: "Real-time · Free · Updated Daily",
+    heroHook: "Track SEC 13F portfolios of {count} Wall Street legends in real time.",
     arkTodayLabel: "Cathie Wood today",
     dataSourceLabel: "13F: {quarter} | ARK: Daily Updates",
     ctaButton: "View by Investor",

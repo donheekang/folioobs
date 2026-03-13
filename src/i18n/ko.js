@@ -56,6 +56,8 @@ export default {
     subtitle: "워렌 버핏 · 캐시 우드 · 드러켄밀러 외 7명",
     title: "포트폴리오 변화를 한눈에",
     description: "월가 전설들의 매매를 매일 추적하세요.",
+    heroTagline: "실시간 · 무료 · 매일 업데이트",
+    heroHook: "월가 전설 {count}명의 SEC 13F 포트폴리오를 실시간으로 추적하세요.",
     arkTodayLabel: "오늘 캐시 우드",
     dataSourceLabel: "13F: {quarter} | ARK: 매일 업데이트",
     ctaButton: "투자자별 포트폴리오 보기",
