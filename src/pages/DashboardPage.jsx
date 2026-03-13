@@ -334,28 +334,6 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         </div>
       </div>
 
-      {/* ===== 이번 분기 하이라이트 (Task 5) ===== */}
-      {quarterHighlights.length > 0 && (
-        <div className="hero-enter hero-enter-9 -mt-3">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap size={16} style={{ color: t.amber }} />
-            <span className="text-sm font-bold" style={{ color: t.text }}>{L.t('dashboard.quarterHighlights')}</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {quarterHighlights.map((hl, i) => {
-              const I = hl.icon;
-              return (
-                <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl"
-                  style={{ background: `${hl.color}08`, border: `1px solid ${hl.color}15` }}>
-                  <I size={14} style={{ color: hl.color }} />
-                  <span className="text-xs font-medium" style={{ color: t.text }}>{hl.text}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       {/* Investor Grid */}
       <section ref={investorGridRef} aria-label={L.t('dashboard.investorStatus')}>
         <div className="flex items-center justify-between mb-4">
