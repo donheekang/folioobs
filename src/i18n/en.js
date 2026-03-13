@@ -54,7 +54,7 @@ export default {
   // ===== Dashboard =====
   dashboard: {
     subtitle: "Warren Buffett · Cathie Wood · Druckenmiller + 7 more",
-    title: "Portfolio Changes at a Glance",
+    title: "What Are Wall Street Legends Buying Now?",
     description: "Track legendary investors' trades — updated daily.",
     heroTagline: "Real-time · Free · Updated Daily",
     heroHook: "Track SEC 13F portfolios of {count} Wall Street legends in real time.",

@@ -230,59 +230,54 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
   return (
     <div className="space-y-6">
-      {/* Hero — 임팩트형: 데이터 기반 훅 + 짧은 높이 */}
+      {/* Hero — 데이터 강조형: 호기심 헤드라인 + 신뢰 배지 + 하이라이트 카드 */}
       <div className="hero-enter hero-enter-1 text-center py-6 sm:py-10" role="banner">
-        {/* 동적 헤드라인: 실제 매매 데이터로 호기심 자극 */}
-        {(() => {
-          // 데이터 기반 한줄 훅 2개 생성
-          const hooks = [];
-          if (newPositions.length > 0) {
-            const np = newPositions[0];
-            hooks.push(<span key="new" className="cursor-pointer hover:underline" onClick={()=>onNavigate("investor",np.investor.id)}><span style={{color:t.accent}}>{L.investorName(np.investor)}</span>{L.locale==='ko'?`은 ${np.ticker}를 샀다`:`bought ${np.ticker}`}</span>);
-          }
-          if (sellActions.length > 0) {
-            const sa = sellActions[0];
-            hooks.push(<span key="sell" className="cursor-pointer hover:underline" onClick={()=>onNavigate("investor",sa.investor.id)}><span style={{color:t.accent}}>{L.investorName(sa.investor)}</span>{L.locale==='ko'?`는 ${sa.ticker}를 ${Math.abs(Math.round(sa.pctChange))}% 줄였다`:`cut ${sa.ticker} by ${Math.abs(Math.round(sa.pctChange))}%`}</span>);
-          }
-          if (buyActions.length > 0 && hooks.length < 2) {
-            const ba = buyActions[0];
-            hooks.push(<span key="buy" className="cursor-pointer hover:underline" onClick={()=>onNavigate("investor",ba.investor.id)}><span style={{color:t.accent}}>{L.investorName(ba.investor)}</span>{L.locale==='ko'?`은 ${ba.ticker}를 대폭 늘렸다`:`loaded up on ${ba.ticker}`}</span>);
-          }
-          return hooks.length > 0 ? (
-            <div className="hero-enter hero-enter-1 mb-4">
-              <h1 className="text-2xl sm:text-4xl font-bold tracking-tight leading-snug" style={{color:t.text, letterSpacing:'-0.025em'}}>
-                {hooks[0]}
-                {hooks[1] && <><br className="hidden sm:block" /><span className="hidden sm:inline">, </span><span className="sm:hidden"> </span>{hooks[1]}</>}
-              </h1>
-            </div>
-          ) : (
-            <h1 className="hero-enter hero-enter-1 text-2xl sm:text-4xl font-bold tracking-tight mb-4" style={{color:t.text, letterSpacing:'-0.025em'}}>
-              {L.t('dashboard.title')}
-            </h1>
-          );
-        })()}
+        <p className="text-sm sm:text-base font-semibold mb-3 tracking-wide" style={{color:t.accent}}>{L.t('dashboard.subtitle')}</p>
+        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-3" style={{color:t.text, letterSpacing:'-0.025em'}}>
+          {L.t('dashboard.title')}
+        </h1>
 
-        {/* 서브: 설명 + 신뢰 배지 */}
-        <div className="hero-enter hero-enter-2 mb-5">
-          <p className="text-sm sm:text-base mb-2" style={{color:t.textSecondary}}>
-            {L.t('dashboard.heroHook').replace('{count}', INVESTORS.length)}
-          </p>
-          <div className="flex items-center justify-center gap-2 flex-wrap">
-            {(L.t('dashboard.heroTagline') || '').split(' · ').map((tag, i) => (
-              <span key={i} className="text-xs px-2.5 py-1 rounded-full font-medium" style={{background: t.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.05)', color: t.textMuted}}>{tag}</span>
-            ))}
-            {latestQuarter && <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{background:`${t.accent}15`, color:t.accent}}>13F: {L.quarter(latestQuarter)}</span>}
-          </div>
+        {/* 신뢰 배지 */}
+        <div className="hero-enter hero-enter-2 flex items-center justify-center gap-2 flex-wrap mb-5">
+          {(L.t('dashboard.heroTagline') || '').split(' · ').map((tag, i) => (
+            <span key={i} className="text-xs px-2.5 py-1 rounded-full font-medium" style={{background: t.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.05)', color: t.textMuted}}>{tag}</span>
+          ))}
+          {latestQuarter && <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{background:`${t.accent}15`, color:t.accent}}>13F: {L.quarter(latestQuarter)}</span>}
         </div>
 
-        {/* 핵심 수치 — 한줄 요약 */}
-        <div className="hero-enter hero-enter-3 flex items-center justify-center gap-4 sm:gap-6 mb-5 flex-wrap">
+        {/* 핵심 수치 — 한줄 */}
+        <div className="hero-enter hero-enter-3 flex items-center justify-center gap-4 sm:gap-6 mb-6 flex-wrap">
           <span className="text-sm" style={{color:t.textMuted}}>{L.t('dashboard.totalAum')} <span className="font-bold" style={{color:t.text}}>{formatUSD(totalAUM)}</span></span>
           <span style={{color:t.textMuted}}>·</span>
           <span className="text-sm" style={{color:t.textMuted}}>{L.t('dashboard.trackedStocks')} <span className="font-bold" style={{color:t.text}}>{totalStocks}{L.t('common.stocks_count')}</span></span>
           <span style={{color:t.textMuted}}>·</span>
           <span className="text-sm" style={{color:t.textMuted}}>{L.t('dashboard.trackedInvestors')} <span className="font-bold" style={{color:t.text}}>{INVESTORS.length}{L.t('common.people')}</span></span>
         </div>
+
+        {/* Trade Highlights — Card Style (복원) */}
+        {heroHighlights.length > 0 && (
+          <div className="hero-enter hero-enter-4 mb-6">
+            <p className="text-xs font-medium mb-3" style={{color:t.textMuted}}>{L.t('dashboard.recentMoves')}</p>
+            <div className="flex flex-wrap items-stretch justify-center gap-3">
+              {heroHighlights.map((h, i) => {
+                const cardBg = t.name==='dark'?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.02)';
+                const cardBorder = t.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';
+                const typeLabel = h.type==='buy'? (L.locale==='ko'?'비중 확대':'Increased') : h.type==='sell'? (L.locale==='ko'?'비중 축소':'Decreased') : (L.locale==='ko'?'신규 매수':'New Position');
+                return (
+                  <button key={i} className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    style={{background:cardBg, border:`1px solid ${cardBorder}`}}
+                    onClick={()=>onNavigate("investor",h.investor.id)}>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{background:h.investor.gradient}}>{h.investor.avatar}</div>
+                    <div className="text-left">
+                      <div className="text-sm font-bold" style={{color:t.text}}>{h.ticker} <span className="font-semibold" style={{color:h.color}}>{h.pct}</span></div>
+                      <div className="text-xs" style={{color:t.textMuted}}>{L.investorName(h.investor)} · {typeLabel}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* ARK Today Preview — 캐시 우드 일별 매매 */}
         {arkDailyTrades.length > 0 && (() => {
@@ -297,7 +292,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             ? dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
             : `${dateObj.getMonth()+1}월 ${dateObj.getDate()}일`;
           return (
-            <div className="hero-enter hero-enter-4 mb-4 w-full max-w-lg mx-auto">
+            <div className="hero-enter hero-enter-5 mb-4 w-full max-w-lg mx-auto">
               <button className="w-full rounded-2xl p-4 transition-all hover:scale-[1.01] cursor-pointer text-left"
                 style={{background:t.name==='dark'?'rgba(245,158,11,0.08)':'rgba(245,158,11,0.05)', border:'1px solid rgba(245,158,11,0.2)'}}
                 onClick={()=>{trackCtaClick('ark_today_preview','hero');onNavigate("investor","cathie/daily");}}>

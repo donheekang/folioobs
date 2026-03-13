@@ -54,7 +54,7 @@ export default {
   // ===== 대시보드 =====
   dashboard: {
     subtitle: "워렌 버핏 · 캐시 우드 · 드러켄밀러 외 7명",
-    title: "포트폴리오 변화를 한눈에",
+    title: "월가 전설들은 지금 뭘 사고 있을까?",
     description: "월가 전설들의 매매를 매일 추적하세요.",
     heroTagline: "실시간 · 무료 · 매일 업데이트",
     heroHook: "월가 전설 {count}명의 SEC 13F 포트폴리오를 실시간으로 추적하세요.",
