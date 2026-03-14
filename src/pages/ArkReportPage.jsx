@@ -154,6 +154,9 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
           <div className="text-sm font-bold tabular-nums" style={{ color }}>
             {type === 'buy' ? '+' : '-'}{fmtShares(shares)}
           </div>
+          <div className="text-[10px] tabular-nums" style={{ color: t.textSecondary }}>
+            {shares.toLocaleString()}{isKo ? '주' : ' shares'}
+          </div>
           <div className="text-[10px]" style={{ color: t.textMuted }}>
             {count}{isKo ? '회 거래' : ' trades'}
           </div>
