@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 /**
- * FolioObs — Securities 테이블 티커 보정 스크립트
+ * FolioObs — Securities 테이블 티커 보정 + 섹터 자동 분류 스크립트
  *
- * 3단계 검증:
- *   Step 1: 수동 매핑 (CUSIP → 정확한 티커)
- *   Step 2: OpenFIGI 재조회 (의심스러운 티커)
- *   Step 3: Polygon.io 교차 검증 (모든 티커 유효성 + 이름 매칭)
+ * 5단계 파이프라인:
+ *   Step 1: DB securities 조회
+ *   Step 2: 수동 매핑 (CUSIP → 정확한 티커)
+ *   Step 3: OpenFIGI 재조회 (의심스러운 티커)
+ *   Step 4: Polygon.io 교차 검증 (티커 유효성 + 이름 매칭)
+ *   Step 5: SIC 코드 기반 섹터 자동 분류 (Polygon sic_code → 기술/헬스케어/금융 등)
  *
  * 사용법:
  *   SUPABASE_SERVICE_KEY="eyJ..." POLYGON_API_KEY="B1k..." node scripts/fix-tickers.mjs
@@ -13,6 +15,7 @@
  *   옵션:
  *     --polygon-only   Polygon 검증만 실행 (Step 1,2 스킵)
  *     --dry-run        DB 수정 없이 결과만 출력
+ *     --force-sector   기존 섹터가 있어도 SIC 기반으로 덮어쓰기
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -152,10 +155,15 @@ async function batchResolveFIGI(cusipList) {
 // Polygon.io 티커 검증
 // ============================================================
 async function polygonVerifyTicker(ticker) {
-  // 캐시 확인 (24시간 유효)
+  // 캐시 확인 (24시간 유효, sicCode 없으면 재조회)
   const cached = polygonCache[ticker];
   if (cached && Date.now() - cached.ts < 24 * 60 * 60 * 1000) {
-    return cached.result;
+    // sicCode 필드가 없는 구형 캐시는 재조회
+    if (cached.result?.valid && cached.result.sicCode === undefined) {
+      // fall through to re-fetch
+    } else {
+      return cached.result;
+    }
   }
 
   try {
@@ -188,6 +196,8 @@ async function polygonVerifyTicker(ticker) {
       type: info.type || '',
       market: info.market || '',
       locale: info.locale || '',
+      sicCode: info.sic_code || '',
+      sicDescription: info.sic_description || '',
     };
     polygonCache[ticker] = { result, ts: Date.now() };
     return result;
@@ -211,6 +221,258 @@ async function polygonSearchTicker(query) {
   } catch {
     return [];
   }
+}
+
+// ============================================================
+// SIC 코드 → FolioObs 섹터 매핑
+// SEC Standard Industrial Classification → 사이트 한국어 섹터
+// ============================================================
+const SIC_TO_SECTOR = {
+  // ─── 기술 (Technology) ───
+  '기술': [
+    [3570, 3579], // Computer & Office Equipment
+    [3580, 3589], // Special Industry Machinery (일부 테크)
+    [3660, 3669], // Communications Equipment
+    [3670, 3679], // Electronic Components & Accessories (반도체 포함)
+    [3680, 3699], // Other Electronic Equipment
+    [3810, 3812], // Search, Detection, Navigation (방위산업 테크)
+    [3820, 3829], // Measuring & Controlling Instruments
+    [3825, 3825], // Instruments for Measuring
+    [7370, 7379], // Computer Programming, Data Processing (SaaS/Software)
+    [7371, 7371], // Computer Programming Services
+    [7372, 7372], // Prepackaged Software
+    [7374, 7374], // Computer Processing & Data Preparation
+    [3559, 3559], // Special Industry Machinery, NEC (반도체 장비)
+    [3674, 3674], // Semiconductors
+    [3812, 3812], // Defense Electronics
+  ],
+  // ─── 부동산 (Real Estate) — 금융보다 먼저! (6798 REIT 등) ───
+  '부동산': [
+    [6500, 6553], // Real Estate
+    [6510, 6510], // Real Estate Operators
+    [6512, 6512], // Operators of Apartment Buildings
+    [6531, 6531], // Real Estate Agents & Managers
+    [6552, 6552], // Land Subdividers & Developers
+    [6798, 6798], // Real Estate Investment Trusts (REITs)
+  ],
+  // ─── 금융 (Financials) ───
+  '금융': [
+    [6000, 6099], // Depository Institutions (Banks)
+    [6100, 6199], // Non-depository Credit Institutions
+    [6200, 6299], // Security & Commodity Brokers/Dealers
+    [6300, 6399], // Insurance Carriers
+    [6400, 6411], // Insurance Agents
+    [6700, 6797], // Holding & Investment Offices (6798 REIT 제외)
+    [6799, 6799], // Investors, NEC
+  ],
+  // ─── 헬스케어 (Healthcare) ───
+  '헬스케어': [
+    [2830, 2836], // Drugs (Pharmaceutical)
+    [2800, 2819], // Industrial Chemicals (일부 바이오)
+    [2820, 2829], // Plastics & Synthetics (일부 바이오)
+    [2835, 2836], // In Vitro Diagnostics
+    [3826, 3826], // Laboratory Analytical Instruments
+    [3827, 3827], // Optical Instruments
+    [3841, 3841], // Surgical & Medical Instruments
+    [3842, 3842], // Orthopedic, Prosthetic, Surgical Appliances
+    [3843, 3843], // Dental Equipment
+    [3844, 3844], // X-Ray Apparatus
+    [3845, 3845], // Electromedical Equipment
+    [3851, 3851], // Ophthalmic Goods
+    [5047, 5047], // Medical & Hospital Equipment (Wholesale)
+    [5912, 5912], // Drug Stores
+    [8000, 8099], // Health Services
+    [8710, 8713], // Engineering Services (일부 의료)
+  ],
+  // ─── 경기소비재 (Consumer Discretionary) ───
+  '경기소비재': [
+    [2500, 2599], // Furniture & Fixtures
+    [2700, 2799], // Printing & Publishing
+    [3140, 3149], // Footwear
+    [3710, 3711], // Motor Vehicles
+    [3713, 3713], // Truck Trailers
+    [3714, 3714], // Motor Vehicle Parts
+    [3716, 3716], // Motor Homes
+    [3720, 3721], // Aircraft
+    [3732, 3732], // Boat Building & Repairing
+    [3751, 3751], // Motorcycles, Bicycles & Parts
+    [3944, 3944], // Games, Toys & Children's Vehicles
+    [3949, 3949], // Sporting & Athletic Goods
+    [5300, 5399], // General Merchandise Stores
+    [5400, 5499], // Food Stores
+    [5500, 5599], // Auto Dealers & Gas Stations
+    [5600, 5699], // Apparel & Accessory Stores
+    [5700, 5736], // Home Furniture & Equipment
+    [5800, 5899], // Eating & Drinking Places (Restaurants)
+    [5900, 5999], // Retail Stores, NEC
+    [7000, 7099], // Hotels & Lodging
+    [7200, 7299], // Personal Services
+    [7800, 7833], // Amusement & Recreation
+    [7900, 7999], // Amusement & Recreation Services
+    [5940, 5940], // Sporting Goods
+    [5944, 5944], // Jewelry Stores
+    [5945, 5945], // Hobby, Toy & Game Shops
+    [5961, 5961], // Catalog & Mail-Order Houses (E-commerce)
+    [4500, 4512], // Air Transportation
+    [4520, 4522], // Air Transportation, Nonscheduled
+    [7011, 7011], // Hotels & Motels
+    [7812, 7812], // Motion Picture Production
+    [7819, 7819], // Services Allied to Motion Picture Production
+  ],
+  // ─── 필수소비재 (Consumer Staples) ───
+  '필수소비재': [
+    [2000, 2099], // Food & Kindred Products
+    [2100, 2199], // Tobacco Manufacturers
+    [2040, 2046], // Grain Mill Products
+    [2050, 2052], // Bakery Products
+    [2060, 2068], // Sugar & Confectionery
+    [2080, 2086], // Beverages
+    [2090, 2099], // Food Preparations, NEC
+    [2840, 2844], // Soap, Detergents, Cleaning, Perfume, Toilet
+    [5140, 5149], // Groceries (Wholesale)
+    [5411, 5411], // Grocery Stores
+    [5140, 5159], // Farm-Product Raw Materials (Wholesale)
+  ],
+  // ─── 에너지 (Energy) ───
+  '에너지': [
+    [1200, 1399], // Mining (Coal, Oil, Gas)
+    [1300, 1389], // Oil & Gas Extraction
+    [1381, 1381], // Drilling Oil & Gas Wells
+    [1382, 1382], // Oil & Gas Field Services
+    [1389, 1389], // Services Allied to Oil & Gas
+    [2900, 2999], // Petroleum Refining & Related
+    [2911, 2911], // Petroleum Refining
+    [4920, 4924], // Gas Production & Distribution (일부)
+    [5170, 5172], // Petroleum Products (Wholesale)
+    [5541, 5541], // Gasoline Service Stations
+    [4610, 4619], // Pipelines
+  ],
+  // ─── 산업 (Industrials) ───
+  '산업': [
+    [1500, 1542], // Building Construction
+    [1600, 1699], // Heavy Construction
+    [1700, 1799], // Construction - Special Trade
+    [3310, 3399], // Primary Metal Industries
+    [3410, 3499], // Fabricated Metal Products
+    [3510, 3549], // Engines & Turbines, Farm/Garden Machinery
+    [3550, 3559], // Special Industry Machinery
+    [3560, 3569], // General Industrial Machinery
+    [3580, 3599], // Misc. Manufacturing
+    [3600, 3629], // Electronic & Electrical Equipment (산업용)
+    [3640, 3659], // Lighting & Wiring Equipment
+    [3690, 3699], // Electronic Components, NEC
+    [3700, 3700], // Transportation Equipment
+    [3724, 3724], // Aircraft Engines & Parts
+    [3728, 3728], // Aircraft Parts & Auxiliary Equipment
+    [3730, 3731], // Ship Building
+    [3740, 3743], // Railroad Equipment
+    [3760, 3769], // Guided Missiles & Space Vehicles
+    [3795, 3795], // Tanks & Tank Components
+    [3799, 3799], // Transportation Equipment, NEC
+    [3900, 3999], // Miscellaneous Manufacturing
+    [4000, 4099], // Railroad Transportation
+    [4200, 4231], // Motor Freight Transportation
+    [4400, 4499], // Water Transportation
+    [4700, 4789], // Transportation Services
+    [8710, 8713], // Engineering & Architectural Services
+    [8720, 8721], // Accounting Services
+    [8730, 8734], // Research & Testing Services
+    [8740, 8748], // Management & Public Relations Services
+    [3537, 3537], // Industrial Trucks, Tractors, Trailers
+    [3561, 3561], // Pumps & Pumping Equipment
+    [3585, 3585], // Air-Conditioning & Warm Air Heating
+    [3589, 3589], // Industrial Machinery, NEC
+    [5080, 5085], // Industrial Machinery (Wholesale)
+    [5084, 5084], // Industrial Machinery & Equipment
+  ],
+  // ─── 통신 (Communication Services) ───
+  '통신': [
+    [4800, 4899], // Communications
+    [4810, 4813], // Telephone Communications
+    [4830, 4833], // Radio & TV Broadcasting
+    [4840, 4841], // Cable & Other Pay TV
+    [4899, 4899], // Communications Services, NEC
+    [4812, 4812], // Radiotelephone Communications
+    [4813, 4813], // Telephone Communications, NEC
+    [4822, 4822], // Telegraph & Other Message Communications
+    [4833, 4833], // Television Broadcasting Stations
+    [4841, 4841], // Cable & Other Pay Television Services
+    [7810, 7812], // Motion Picture Production & Distribution
+    [7820, 7822], // Motion Picture Distribution
+    [7830, 7833], // Motion Picture Theaters
+    [7840, 7841], // Video Tape Rental
+    [4832, 4832], // Radio Broadcasting Stations
+  ],
+  // (부동산은 금융 앞에 정의됨 — 6798 REIT 우선 매칭용)
+  // ─── 유틸리티 (Utilities) ───
+  '유틸리티': [
+    [4900, 4999], // Electric, Gas, & Sanitary Services
+    [4910, 4911], // Electric Services
+    [4920, 4924], // Gas Production & Distribution
+    [4930, 4932], // Combination Electric & Gas
+    [4941, 4941], // Water Supply
+    [4950, 4959], // Sanitary Services
+    [4953, 4953], // Refuse Systems
+    [4955, 4955], // Hazardous Waste Management
+    [4960, 4961], // Steam & Air-Conditioning Supply
+    [4991, 4991], // Cogeneration
+  ],
+  // ─── 원자재 (Materials) ───
+  '원자재': [
+    [1000, 1099], // Metal Mining
+    [1400, 1499], // Mining & Quarrying (Nonmetallic)
+    [2200, 2299], // Textile Mill Products
+    [2300, 2399], // Apparel
+    [2400, 2499], // Lumber & Wood Products
+    [2600, 2699], // Paper & Allied Products
+    [2810, 2819], // Industrial Chemicals
+    [2820, 2829], // Plastics & Synthetic Materials
+    [2850, 2869], // Paints, Varnishes, Lacquers, Enamels
+    [2870, 2879], // Agricultural Chemicals
+    [2890, 2899], // Industrial Chemicals, NEC
+    [3210, 3299], // Stone, Clay, Glass, Concrete
+    [3300, 3309], // Steel Works, Blast Furnaces
+    [3310, 3312], // Steel Works
+    [3317, 3317], // Steel Pipe & Tubes
+    [3350, 3357], // Rolling & Drawing (Nonferrous)
+    [3360, 3369], // Nonferrous Foundries
+    [3411, 3412], // Metal Cans
+    [5050, 5052], // Metals & Minerals (Wholesale)
+    [5160, 5169], // Chemicals (Wholesale)
+  ],
+};
+
+/**
+ * SIC 코드로 섹터 결정
+ * @param {number} sicCode - SIC 코드
+ * @param {string} sicDesc - SIC 설명 (fallback 키워드 매칭용)
+ * @returns {string|null} - 섹터 한국어 이름 또는 null
+ */
+function sicToSector(sicCode, sicDesc = '') {
+  if (!sicCode) return null;
+  const code = parseInt(sicCode, 10);
+  if (isNaN(code)) return null;
+
+  for (const [sector, ranges] of Object.entries(SIC_TO_SECTOR)) {
+    for (const [lo, hi] of ranges) {
+      if (code >= lo && code <= hi) return sector;
+    }
+  }
+
+  // SIC 범위에 안 걸리면 sic_description 키워드로 fallback
+  const desc = (sicDesc || '').toUpperCase();
+  if (desc.includes('SOFTWARE') || desc.includes('COMPUTER') || desc.includes('SEMICONDUCTOR') || desc.includes('ELECTRONIC')) return '기술';
+  if (desc.includes('PHARMA') || desc.includes('BIOTECH') || desc.includes('MEDICAL') || desc.includes('HEALTH') || desc.includes('SURGICAL')) return '헬스케어';
+  if (desc.includes('BANK') || desc.includes('INSURANCE') || desc.includes('INVEST') || desc.includes('FINANC')) return '금융';
+  if (desc.includes('OIL') || desc.includes('GAS') || desc.includes('PETROL') || desc.includes('ENERGY')) return '에너지';
+  if (desc.includes('ELECTRIC SERVICE') || desc.includes('GAS DISTRIBUT') || desc.includes('WATER SUPPLY') || desc.includes('UTILITY')) return '유틸리티';
+  if (desc.includes('REAL ESTATE') || desc.includes('REIT')) return '부동산';
+  if (desc.includes('TELECOM') || desc.includes('BROADCAST') || desc.includes('CABLE TV')) return '통신';
+  if (desc.includes('RETAIL') || desc.includes('RESTAURANT') || desc.includes('HOTEL') || desc.includes('APPAREL STORE')) return '경기소비재';
+  if (desc.includes('FOOD') || desc.includes('BEVERAGE') || desc.includes('TOBACCO') || desc.includes('SOAP') || desc.includes('GROCERY')) return '필수소비재';
+  if (desc.includes('MINING') || desc.includes('STEEL') || desc.includes('CHEMICAL') || desc.includes('PAPER') || desc.includes('LUMBER')) return '원자재';
+
+  return null;
 }
 
 /** 이름 유사도 비교 (간단한 단어 겹침) */
@@ -239,7 +501,7 @@ async function main() {
   while (true) {
     const { data, error: pgErr } = await supabase
       .from('securities')
-      .select('id, cusip, ticker, name')
+      .select('id, cusip, ticker, name, sector, sector_ko')
       .range(page * pageSize, (page + 1) * pageSize - 1);
     if (pgErr) { console.error('❌ DB 조회 실패:', pgErr.message); return; }
     if (!data || data.length === 0) break;
@@ -330,6 +592,7 @@ async function main() {
     const inactive = [];   // 비활성 (상폐/변경)
     const mismatch = [];   // 이름 불일치 (의심)
     const verified = [];   // 정상 확인
+    const sectorUpdates = []; // 섹터 업데이트 대상
 
     let processed = 0;
     for (const ticker of uniqueTickers) {
@@ -358,6 +621,25 @@ async function main() {
           mismatch.push({ ticker, dbName, polygonName: result.name, similarity: sim, secs });
         } else {
           verified.push(ticker);
+        }
+
+        // SIC 코드 → 섹터 매핑
+        if (result.sicCode) {
+          const sector = sicToSector(result.sicCode, result.sicDescription);
+          if (sector) {
+            for (const sec of secs) {
+              // 기존 섹터가 없거나 '기타'인 경우에만 업데이트 수집
+              // --force-sector 옵션이면 전부 업데이트
+              sectorUpdates.push({
+                id: sec.id,
+                ticker: sec.ticker,
+                currentSector: sec.sector_ko || sec.sector || '',
+                newSector: sector,
+                sicCode: result.sicCode,
+                sicDesc: result.sicDescription,
+              });
+            }
+          }
         }
       }
     }
@@ -430,6 +712,71 @@ async function main() {
     // Polygon 캐시 저장
     writeFileSync(POLYGON_CACHE_FILE, JSON.stringify(polygonCache, null, 2));
     console.log(`  💾 Polygon 검증 캐시 저장 (${Object.keys(polygonCache).length}개)\n`);
+
+    // ────────────────────────────────────────────
+    // Step 5: SIC 코드 기반 섹터 자동 업데이트
+    // ────────────────────────────────────────────
+    if (sectorUpdates.length > 0) {
+      const FORCE_SECTOR = ARGS.includes('--force-sector');
+      console.log('▶ Step 5: SIC 코드 기반 섹터 업데이트');
+      if (FORCE_SECTOR) console.log('  ⚡ --force-sector: 기존 섹터도 덮어씁니다');
+      console.log(`  섹터 매핑 대상: ${sectorUpdates.length}개\n`);
+
+      // 필터: 기존 섹터가 없거나 '기타'이거나 --force-sector
+      const toUpdate = sectorUpdates.filter(u =>
+        FORCE_SECTOR || !u.currentSector || u.currentSector === '기타'
+      );
+      const skipped = sectorUpdates.length - toUpdate.length;
+
+      // 변경 내역 (기존과 다른 것만)
+      const changed = toUpdate.filter(u => u.currentSector !== u.newSector);
+
+      if (changed.length === 0) {
+        console.log('  ✅ 모든 섹터가 이미 최신 상태입니다.\n');
+      } else {
+        // 섹터별 통계
+        const sectorStats = {};
+        for (const u of changed) {
+          if (!sectorStats[u.newSector]) sectorStats[u.newSector] = 0;
+          sectorStats[u.newSector]++;
+        }
+
+        console.log('  📊 섹터 업데이트 요약:');
+        Object.entries(sectorStats)
+          .sort((a, b) => b[1] - a[1])
+          .forEach(([sector, count]) => {
+            console.log(`     ${sector.padEnd(8)} ${count}개`);
+          });
+        console.log(`     ${'─'.repeat(20)}`);
+        console.log(`     변경: ${changed.length}개 / 스킵: ${skipped}개 (이미 섹터 있음)\n`);
+
+        // 샘플 출력
+        const samples = changed.slice(0, 15);
+        for (const u of samples) {
+          const from = u.currentSector || '(없음)';
+          console.log(`  🏷️  ${u.ticker.padEnd(8)} ${from.padEnd(6)} → ${u.newSector}  (SIC ${u.sicCode}: ${u.sicDesc})`);
+        }
+        if (changed.length > 15) console.log(`  ... 외 ${changed.length - 15}개\n`);
+
+        // DB 업데이트 실행
+        if (!DRY_RUN) {
+          let updated = 0;
+          for (const u of changed) {
+            const { error: secErr } = await supabase
+              .from('securities')
+              .update({ sector: u.newSector, sector_ko: u.newSector })
+              .eq('id', u.id);
+
+            if (!secErr) updated++;
+            else console.log(`  ❌ ${u.ticker} 업데이트 실패: ${secErr.message}`);
+          }
+          console.log(`\n  ✅ 섹터 업데이트 완료: ${updated}/${changed.length}개`);
+        } else {
+          console.log('\n  🧪 DRY RUN — 실제 DB 수정 없음');
+        }
+        console.log('');
+      }
+    }
   }
 
   // ────────────────────────────────────────────
