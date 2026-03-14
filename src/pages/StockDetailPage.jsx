@@ -1350,7 +1350,7 @@ function DailyPriceTable({ ticker, theme, locale }) {
 const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
   const t = useTheme();
   const L = useLocale();
-  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyActivity: QUARTERLY_ACTIVITY } = useData();
+  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades: ARK_TRADES } = useData();
 
   const ticker = initialTicker?.toUpperCase();
 
@@ -1386,6 +1386,8 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
   // ---- FolioObs data: 이 종목을 보유한 투자자들 ----
   const stockHolders = useMemo(() => {
     const holders = [];
+    const holderIds = new Set();
+
     INVESTORS.forEach(inv => {
       const invHoldings = HOLDINGS[inv.id] || [];
       const match = invHoldings.filter(h => h.ticker === ticker);
@@ -1401,10 +1403,37 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
         }
 
         holders.push({ investor: inv, value: totalValue, pct: totalPct, shares: totalShares, action });
+        holderIds.add(inv.id);
       }
     });
+
+    // ARK daily trades: 최근 매수 기록이 있지만 holdings에 없는 종목도 포함
+    // ARK_TRADES 구조: [{ date, trades: [{ ticker, direction, sharesChange, ... }] }, ...]
+    if (ARK_TRADES?.length > 0) {
+      // 날짜별 그룹을 flat하게 펼침
+      const allTrades = ARK_TRADES.flatMap(day => day.trades || []);
+      const tickerTrades = allTrades.filter(t => t.ticker === ticker);
+      if (tickerTrades.length > 0) {
+        const netShares = tickerTrades.reduce((sum, t) => sum + (t.direction === 'buy' ? (t.sharesChange || 0) : -(t.sharesChange || 0)), 0);
+        if (netShares > 0) {
+          // 캐시 우드 (ARK) 투자자 찾기
+          const cwInvestor = INVESTORS.find(inv => inv.name?.toLowerCase().includes('cathie') || inv.name?.includes('캐시'));
+          if (cwInvestor && !holderIds.has(cwInvestor.id)) {
+            holders.push({
+              investor: cwInvestor,
+              value: 0,
+              pct: 0,
+              shares: netShares,
+              action: { type: 'new', ticker, shares: netShares },
+              fromTrades: true,
+            });
+          }
+        }
+      }
+    }
+
     return holders.sort((a, b) => b.value - a.value);
-  }, [INVESTORS, HOLDINGS, QUARTERLY_ACTIVITY, ticker]);
+  }, [INVESTORS, HOLDINGS, QUARTERLY_ACTIVITY, ARK_TRADES, ticker]);
 
   // ---- Price info ----
   const priceInfo = useMemo(() => {

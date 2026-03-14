@@ -502,6 +502,27 @@ async function main() {
   if (existingTrades?.length > 0 && !process.argv.includes('--force-trades')) {
     console.log(`  ⏭️  이미 ${reportDate} 매매 데이터 존재 — 스킵 (이메일 기반 데이터 보존)`);
     console.log('     --force-trades 플래그로 강제 덮어쓰기 가능');
+
+    // 수동 입력된 매매의 종목이 securities에 없으면 자동 생성
+    const { data: manualTrades } = await supabase
+      .from('ark_daily_trades')
+      .select('ticker, company')
+      .eq('trade_date', reportDate);
+    if (manualTrades?.length) {
+      for (const mt of manualTrades) {
+        const { data: existingSec } = await supabase
+          .from('securities')
+          .select('id')
+          .eq('ticker', mt.ticker)
+          .maybeSingle();
+        if (!existingSec) {
+          const { error: secErr } = await supabase
+            .from('securities')
+            .insert({ ticker: mt.ticker, name: mt.company || mt.ticker, name_ko: mt.company || mt.ticker, cusip: `ARK-${mt.ticker}` });
+          if (!secErr) console.log(`  📌 신규 종목 등록: ${mt.ticker} (${mt.company})`);
+        }
+      }
+    }
   } else {
 
   // 전일 데이터 가져오기: 가장 최근 filing 중 오늘이 아닌 것
@@ -602,6 +623,25 @@ async function main() {
         for (let i = 0; i < trades.length; i += 50) {
           const { error: tradeErr } = await supabase.from('ark_daily_trades').insert(trades.slice(i, i + 50));
           if (tradeErr) console.warn(`  ⚠️ 일별 매매 저장 오류: ${tradeErr.message}`);
+        }
+
+        // 매매된 종목 중 securities 테이블에 없는 것 자동 생성
+        const tradeTickers = [...new Set(trades.map(t => t.ticker))];
+        for (const tt of tradeTickers) {
+          const { data: existingSec } = await supabase
+            .from('securities')
+            .select('id')
+            .eq('ticker', tt)
+            .maybeSingle();
+          if (!existingSec) {
+            const trade = trades.find(t => t.ticker === tt);
+            const { error: secErr } = await supabase
+              .from('securities')
+              .insert({ ticker: tt, name: trade?.company || tt, name_ko: trade?.company || tt, cusip: `ARK-${tt}` });
+            if (!secErr) {
+              console.log(`  📌 신규 종목 등록: ${tt} (${trade?.company})`);
+            }
+          }
         }
 
         const buys = trades.filter(t => t.direction === 'buy');
