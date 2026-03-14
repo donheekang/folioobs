@@ -520,7 +520,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                 <button className="text-xs font-medium px-3 py-1.5 rounded-full transition-colors"
                   style={{color:t.accent, background:`${t.accent}10`, border:`1px solid ${t.accent}20`}}
                   onClick={()=>onNavigate("ark-report")}>
-                  {L.locale === 'ko' ? '📊 주간·월간 리포트' : '📊 Weekly/Monthly Report'}
+                  {L.locale === 'ko' ? '주간·월간 리포트 →' : 'Weekly/Monthly Report →'}
                 </button>
               </div>
 
