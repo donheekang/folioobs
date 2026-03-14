@@ -1,6 +1,6 @@
 import { useMemo, memo, useState, useEffect, useRef } from "react";
 import {
-  ArrowUpRight, ArrowDownRight, Briefcase, Plus, BarChart3, ChevronDown, TrendingUp, Activity, Trophy, Zap, Target, Layers, DollarSign
+  ArrowUpRight, ArrowDownRight, Briefcase, Plus, BarChart3, ChevronDown, ChevronRight, TrendingUp, Activity, Trophy, Zap, Target, Layers, DollarSign
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -266,28 +266,43 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
         {/* Trade Highlights — 이번 분기 핫 종목 (종목 중심 집계) */}
         {heroHighlights.length > 0 && (
-          <div className="hero-enter hero-enter-4 mb-6">
-            <p className="text-xs font-medium mb-3" style={{color:t.textMuted}}>{L.t('dashboard.hotStocks')}</p>
-            <div className="flex flex-wrap items-stretch justify-center gap-3">
+          <div className="hero-enter hero-enter-4 mb-6 w-full" style={{maxWidth:'420px', margin:'0 auto'}}>
+            <p className="text-xs font-medium mb-3 text-center" style={{color:t.textMuted}}>{L.t('dashboard.hotStocks')}</p>
+            <div className="flex flex-col gap-2.5">
               {heroHighlights.map((h, i) => {
-                const cardBg = t.name==='dark'?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.02)';
-                const cardBorder = t.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';
+                const isGreen = h.type === 'buy';
+                const isRed = h.type === 'sell';
+                const accentColor = h.color;
+                const glowBg = isGreen
+                  ? 'rgba(34,197,94,0.06)'
+                  : isRed
+                    ? 'rgba(239,68,68,0.06)'
+                    : `${t.accent}08`;
+                const glowBorder = isGreen
+                  ? 'rgba(34,197,94,0.15)'
+                  : isRed
+                    ? 'rgba(239,68,68,0.15)'
+                    : `${t.accent}20`;
                 return (
-                  <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:scale-[1.02]"
-                    style={{background:cardBg, border:`1px solid ${cardBorder}`}}>
+                  <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:scale-[1.01]"
+                    style={{background:glowBg, border:`1px solid ${glowBorder}`}}>
                     {/* 투자자 아바타 스택 */}
-                    <div className="flex -space-x-1.5 flex-shrink-0">
+                    <div className="flex -space-x-2 flex-shrink-0">
                       {h.investors.slice(0, 3).map((inv, j) => (
-                        <div key={inv.id} className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[9px] font-bold ring-1 ring-white dark:ring-gray-900"
-                          style={{background:inv.gradient, zIndex: 3 - j}}>{inv.avatar}</div>
+                        <div key={inv.id} className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-bold ring-2"
+                          style={{background:inv.gradient, zIndex: 3 - j, '--tw-ring-color': t.name==='dark'?'rgb(17,17,17)':'rgb(255,255,255)'}}>{inv.avatar}</div>
                       ))}
-                      {h.investors.length > 3 && <div className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold"
-                        style={{background:t.name==='dark'?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)', color:t.textMuted}}>+{h.investors.length - 3}</div>}
+                      {h.investors.length > 3 && <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold ring-2"
+                        style={{background:t.name==='dark'?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)', color:t.textMuted, '--tw-ring-color': t.name==='dark'?'rgb(17,17,17)':'rgb(255,255,255)'}}>+{h.investors.length - 3}</div>}
                     </div>
-                    <div className="text-left">
-                      <div className="text-sm font-bold" style={{color:t.text}}>{h.ticker} <span className="font-semibold" style={{color:h.color}}>{h.label}</span></div>
-                      <div className="text-xs" style={{color:t.textMuted}}>{h.investors.slice(0,2).map(inv => L.investorName(inv)).join(', ')}{h.investors.length > 2 ? ` 외 ${h.investors.length - 2}명` : ''}</div>
+                    <div className="flex-1 text-left min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-extrabold tracking-tight" style={{color:t.text}}>{h.ticker}</span>
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{background:`${accentColor}18`, color:accentColor}}>{h.label}</span>
+                      </div>
+                      <div className="text-xs mt-0.5 truncate" style={{color:t.textMuted}}>{h.investors.slice(0,2).map(inv => L.investorName(inv)).join(', ')}{h.investors.length > 2 ? ` 외 ${h.investors.length - 2}명` : ''}</div>
                     </div>
+                    <ChevronRight size={14} style={{color:t.textMuted, flexShrink:0, opacity:0.5}} />
                   </div>
                 );
               })}
