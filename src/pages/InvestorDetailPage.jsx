@@ -261,7 +261,8 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
         return (
           <GlassCard hover={false}>
             <div className="p-5">
-              <div className="flex items-center gap-2 mb-4">
+              {/* 헤더 */}
+              <div className="flex items-center gap-2 mb-5">
                 <div className="p-1.5 rounded-lg" style={{background:`${t.amber}20`}}>
                   <Zap size={16} style={{color:t.amber}} />
                 </div>
@@ -270,48 +271,59 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                 <Badge color={t.amber}>{totalChanges}{L.t('common.stocks_count')}</Badge>
               </div>
 
-              {/* 카테고리별 요약 카운트 */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-                {[
-                  { label: L.t('investor.newPositions'), count: newBuys.length, color: t.accent || '#8B5CF6', icon: Plus },
-                  { label: L.t('investor.exits'), count: exits.length, color: t.red, icon: LogOut },
-                  { label: L.t('investor.increased'), count: increased.length, color: t.green, icon: TrendingUp },
-                  { label: L.t('investor.decreased'), count: decreased.length, color: t.red, icon: TrendingDown },
-                ].map((s, i) => {
-                  const I = s.icon;
-                  return (
-                    <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{background: s.count > 0 ? `${s.color}08` : 'transparent', border: `1px solid ${s.count > 0 ? `${s.color}20` : t.cardRowBorder}`}}>
-                      <I size={14} style={{color: s.count > 0 ? s.color : t.textMuted}} />
-                      <span className="text-xs" style={{color: t.textSecondary}}>{s.label}</span>
-                      <span className="text-sm font-bold ml-auto" style={{color: s.count > 0 ? s.color : t.textMuted}}>{s.count}</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* 카테고리별 종목 리스트 */}
-              <div className="space-y-3">
+              {/* 카테고리별 테이블 */}
+              <div className="space-y-5">
                 {categories.map(cat => {
                   const CatIcon = cat.icon;
                   return (
                     <div key={cat.key}>
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <CatIcon size={13} style={{color: cat.color}} />
-                        <span className="text-xs font-semibold" style={{color: cat.color}}>{cat.label}</span>
+                      {/* 카테고리 헤더 */}
+                      <div className="flex items-center gap-2 mb-2.5 pb-2" style={{borderBottom:`1px solid ${cat.color}20`}}>
+                        <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{background:`${cat.color}15`}}>
+                          <CatIcon size={13} style={{color: cat.color}} />
+                        </div>
+                        <span className="text-sm font-semibold" style={{color: cat.color}}>{cat.label}</span>
+                        <span className="text-xs font-bold px-1.5 py-0.5 rounded-full" style={{background:`${cat.color}12`, color: cat.color}}>{cat.items.length}</span>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {cat.items.slice(0, 10).map((item, i) => (
-                          <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs" style={{background: `${cat.color}08`, border: `1px solid ${cat.color}15`}}>
-                            <span className="font-bold" style={{color: t.text}}>{item.ticker}</span>
-                            {item.pct != null && <span style={{color: t.textMuted}}>{item.pct.toFixed(1)}%</span>}
-                            {item.change != null && item.change !== 100 && (
-                              <span className="font-medium" style={{color: cat.color}}>
-                                {item.change > 0 ? '+' : ''}{Math.round(item.change)}%
-                              </span>
+                      {/* 종목 리스트 */}
+                      <div className="space-y-0.5">
+                        {cat.items.slice(0, 15).map((item, i) => (
+                          <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors"
+                            style={{background:'transparent'}}
+                            onClick={()=>onNavigate("stock",item.ticker)}
+                            onMouseEnter={e=>e.currentTarget.style.background=t.cardRowHover}
+                            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                            {/* 티커 + 종목명 */}
+                            <div className="flex items-center gap-2 min-w-0" style={{flex:'1 1 0'}}>
+                              <span className="text-sm font-bold" style={{color: t.accent}}>{item.ticker}</span>
+                              <span className="text-xs truncate" style={{color: t.textMuted}}>{item.name}</span>
+                            </div>
+                            {/* 비중 */}
+                            {item.pct != null && (
+                              <div className="flex items-center gap-1.5 shrink-0" style={{minWidth:70}}>
+                                <div className="w-10 h-1.5 rounded-full overflow-hidden" style={{background:t.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'}}>
+                                  <div className="h-full rounded-full" style={{width:`${Math.min(item.pct*4,100)}%`,background:cat.color,opacity:0.6}}/>
+                                </div>
+                                <span className="text-xs font-medium" style={{color: t.textSecondary}}>{item.pct.toFixed(1)}%</span>
+                              </div>
                             )}
+                            {/* 변동률 */}
+                            <div className="shrink-0 text-right" style={{minWidth:56}}>
+                              {item.change != null && item.change !== 100 ? (
+                                <span className="text-xs font-bold" style={{color: cat.color}}>
+                                  {item.change > 0 ? '+' : ''}{Math.round(item.change)}%
+                                </span>
+                              ) : cat.key === 'new' ? (
+                                <span className="text-xs font-bold" style={{color: cat.color}}>NEW</span>
+                              ) : null}
+                            </div>
                           </div>
                         ))}
-                        {cat.items.length > 10 && <span className="text-xs self-center px-1.5" style={{color: t.textMuted}}>+{cat.items.length - 10}</span>}
+                        {cat.items.length > 15 && (
+                          <div className="text-center py-1.5">
+                            <span className="text-xs" style={{color: t.textMuted}}>+{cat.items.length - 15}개 더</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
