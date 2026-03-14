@@ -276,7 +276,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <WatchButton active={watchlist.isWatchedTkr(stock.ticker)} onClick={() => watchlist.toggleTicker(stock.ticker)} size={12} />
-                      <span className="font-semibold text-sm flex-shrink-0" style={{ color: t.text }}>{stock.ticker}</span>
+                      <button className="font-semibold text-sm flex-shrink-0 hover:underline" style={{ color: t.text }} onClick={() => onNavigate("stock", stock.ticker)}>{stock.ticker}</button>
                       <span className="text-xs truncate" style={{ color: t.textMuted }}>{stock.name}</span>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0 ml-2">
@@ -363,8 +363,8 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                       <td className="py-3 px-1 w-8">
                         <WatchButton active={watchlist.isWatchedTkr(stock.ticker)} onClick={() => watchlist.toggleTicker(stock.ticker)} size={12} />
                       </td>
-                      <td className="py-3 px-3">
-                        <div className="font-semibold" style={{ color: t.text }}>{stock.ticker}</div>
+                      <td className="py-3 px-3 cursor-pointer" onClick={() => onNavigate("stock", stock.ticker)}>
+                        <div className="font-semibold hover:underline" style={{ color: t.text }}>{stock.ticker}</div>
                         <div className="text-xs" style={{ color: t.textMuted }}>{stock.name}</div>
                       </td>
                       <td className="py-3 px-3">
@@ -449,7 +449,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <span className="font-bold text-sm" style={{ color: t.text }}>{stock.ticker}</span>
+                      <button className="font-bold text-sm hover:underline" style={{ color: t.text }} onClick={() => onNavigate("stock", stock.ticker)}>{stock.ticker}</button>
                       <span className="text-xs ml-2" style={{ color: t.textMuted }}>{stock.name}</span>
                     </div>
                     <Badge color={SECTOR_COLORS[stock.sector] || "#64748B"}>{L.sector(stock.sector)}</Badge>

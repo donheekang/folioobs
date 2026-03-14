@@ -257,7 +257,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
                 style={{
                   borderBottom: i < selectedDetail.stocks.length - 1 ? `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}` : 'none',
                 }}
-                onClick={() => onNavigate?.("screener", s.ticker)}>
+                onClick={() => onNavigate?.("stock", s.ticker)}>
                 <div className="col-span-2 font-bold" style={{ color: t.accent }}>{s.ticker}</div>
                 <div className="col-span-4 text-xs truncate" style={{ color: t.textSecondary }}>{s.name}</div>
                 <div className="col-span-3 text-right font-medium" style={{ color: t.text }}>{s.pctA.toFixed(1)}%</div>

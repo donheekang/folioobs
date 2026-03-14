@@ -25,6 +25,7 @@ import ComparePage from "./pages/ComparePage";
 import InsightsPage from "./pages/InsightsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
+import StockDetailPage from "./pages/StockDetailPage";
 
 // ========== MAIN APP ==========
 export default function FolioObs() {
@@ -51,6 +52,7 @@ function FolioObsInner() {
   const { investors: INVESTORS, holdings: HOLDINGS, loading: dataLoading, error: dataError } = useData();
   const [page, setPage] = useState("dashboard");
   const [selectedInvestor, setSelectedInvestor] = useState(null);
+  const [selectedTicker, setSelectedTicker] = useState(null);
   const [theme, setTheme] = useState("dark");
   const [locale, setLocale] = useState(() => {
     const saved = safeGetItem("folioobs_lang", null);
@@ -102,8 +104,9 @@ function FolioObsInner() {
         trackInvestorClick(investorParam, pushState === false ? 'deeplink' : 'click');
         trackDetailView(investorParam);
       }
+      else if (target === "stock") { setSelectedTicker(param); setPage("stock"); setScrollTarget(null); }
       else if (target === "screener") { setScreenerSector(param || null); setPage("screener"); setScrollTarget(null); }
-      else { setSelectedInvestor(null); setPage(target); setScrollTarget(null); }
+      else { setSelectedInvestor(null); setSelectedTicker(null); setPage(target); setScrollTarget(null); }
       trackPageView(target, param);
       if (pushState !== false) {
         const hashParam = param ? '/' + param : '';
@@ -205,7 +208,7 @@ function FolioObsInner() {
       e.preventDefault();
       const item = flatResults[searchIdx];
       if (item.type === "investor") { addRecent(L.investorName(item.inv), "investor"); navigate("investor", item.id); }
-      else { addRecent(item.tk.ticker, "ticker"); navigate("investor", item.tk.investors[0].id); }
+      else { addRecent(item.tk.ticker, "ticker"); navigate("stock", item.tk.ticker); }
       setSearchOpen(false);
     }
   }, [flatResults, searchIdx, navigate, addRecent, L]);
@@ -233,7 +236,7 @@ function FolioObsInner() {
             </button>
             <div className="flex items-center gap-0.5 sm:gap-1" role="tablist">
               {navItems.map(item => {
-                const active = page === item.id || (item.id === "dashboard" && page === "investor");
+                const active = page === item.id || (item.id === "dashboard" && page === "investor") || (item.id === "screener" && page === "stock");
                 return (
                   <button key={item.id} onClick={() => item.id === "dashboard" ? goHome() : navigate(item.id)}
                     className="px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition-all"
@@ -316,7 +319,7 @@ function FolioObsInner() {
                         <button key={tk.ticker} className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
                           style={{ color: T.text, background: isActive ? T.cardRowHover : 'transparent' }}
                           onMouseEnter={() => setSearchIdx(idx)}
-                          onClick={() => { addRecent(tk.ticker, "ticker"); navigate("investor", tk.investors[0].id); setSearchOpen(false); }}
+                          onClick={() => { addRecent(tk.ticker, "ticker"); navigate("stock", tk.ticker); setSearchOpen(false); }}
                           role="option" aria-selected={isActive}>
                           <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style={{background: T.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.04)', color: T.textSecondary}}>{tk.ticker.slice(0,2)}</div>
                           <div className="flex-1 min-w-0">
@@ -396,9 +399,10 @@ function FolioObsInner() {
                   <p className="text-xs flex-1" style={{ color: T.amber }}>{L.t('error.partialError')}</p>
                 </div>
               )}
-              <div key={page + (selectedInvestor || '')} className={transitioning ? "page-exit" : "page-enter"}>
+              <div key={page + (selectedInvestor || '') + (selectedTicker || '')} className={transitioning ? "page-exit" : "page-enter"}>
                 {page === "dashboard" && <DashboardPage onNavigate={navigate} watchlist={watchlist} />}
                 {page === "investor" && <InvestorDetailPage investorId={selectedInvestor} onBack={goHome} watchlist={watchlist} scrollTarget={scrollTarget} onScrollTargetClear={() => setScrollTarget(null)} />}
+                {page === "stock" && <StockDetailPage ticker={selectedTicker} onBack={goHome} onNavigate={navigate} />}
                 {page === "screener" && <ScreenerPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} initialSector={screenerSector} />}
                 {page === "watchlist" && <WatchlistPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} />}
                 {page === "compare" && <ComparePage onBack={goHome} />}

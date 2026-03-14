@@ -286,8 +286,9 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                     : `${t.accent}20`;
                 return (
                   <div key={i}
-                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all hover:scale-[1.02]"
-                    style={{background:glowBg, border:`1px solid ${glowBorder}`}}>
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all hover:scale-[1.02] cursor-pointer"
+                    style={{background:glowBg, border:`1px solid ${glowBorder}`}}
+                    onClick={() => onNavigate("stock", h.ticker)}>
                     {/* 투자자 아바타 스택 */}
                     <div className="flex -space-x-2 flex-shrink-0">
                       {h.investors.slice(0, 3).map((inv, j) => (
@@ -386,11 +387,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 </div>
                 <div className="space-y-2.5">
                   {topBoughtStocks.map((stock, i) => (
-                    <div key={stock.ticker} className="flex items-center gap-3">
+                    <div key={stock.ticker} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onNavigate("stock", stock.ticker)}>
                       <span className="text-sm font-bold w-5 text-center" style={{color: i < 3 ? t.green : t.textMuted}}>{i + 1}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold" style={{color:t.text}}>{stock.ticker}</span>
+                          <span className="text-sm font-bold hover:underline" style={{color:t.text}}>{stock.ticker}</span>
                           <span className="text-xs truncate" style={{color:t.textMuted}}>{stock.name?.slice(0, 15)}</span>
                         </div>
                         <div className="flex items-center gap-1 mt-1">
@@ -425,11 +426,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 </div>
                 <div className="space-y-2.5">
                   {topSoldStocks.map((stock, i) => (
-                    <div key={stock.ticker} className="flex items-center gap-3">
+                    <div key={stock.ticker} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onNavigate("stock", stock.ticker)}>
                       <span className="text-sm font-bold w-5 text-center" style={{color: i < 3 ? t.red : t.textMuted}}>{i + 1}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold" style={{color:t.text}}>{stock.ticker}</span>
+                          <span className="text-sm font-bold hover:underline" style={{color:t.text}}>{stock.ticker}</span>
                           <span className="text-xs truncate" style={{color:t.textMuted}}>{stock.name?.slice(0, 15)}</span>
                         </div>
                         <div className="flex items-center gap-1 mt-1">
