@@ -283,7 +283,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                 </div>
                 <WatchButton active={watchlist.isWatchedInv(investorId)} onClick={() => watchlist.toggleInvestor(investorId)} size={18} />
               </div>
-              <div className="flex items-center gap-2 mt-2"><Badge color={investor.color}><SI size={12}/> {L.style(investor.style)}</Badge><Badge color={t.accent}>AUM {formatUSD(investor.aum)}</Badge></div>
+              <div className="flex items-center gap-2 mt-2 flex-wrap"><Badge color={investor.color}><SI size={12}/> {L.style(investor.style)}</Badge><Badge color={t.accent}>AUM {formatUSD(investor.aum)}</Badge>{investorId === 'cathie' && <button className="text-xs font-medium px-3 py-1 rounded-full transition-colors cursor-pointer" style={{color:'#f59e0b', background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.15)'}} onClick={()=>onNavigate("ark-report")}>{L.locale === 'ko' ? '주간·월간 리포트 보기 →' : 'Weekly/Monthly Report →'}</button>}</div>
             </div>
           </div>
           <p className="text-sm leading-relaxed" style={{color:t.textSecondary}}>{L.bio(investor)}</p>
