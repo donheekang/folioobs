@@ -232,6 +232,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
   const investor = INVESTORS.find(i=>i.id===investorId);
   const rawHoldings = HOLDINGS[investorId]||[];
   // 같은 티커 합산 (SEC 13F에서 share class 별로 분리된 항목 통합)
+  // + 캐시우드: ARK 일별 매매에서 순매수한 신규 종목 추가
   const holdings = useMemo(() => {
     const map = new Map();
     rawHoldings.forEach(h => {
@@ -246,8 +247,36 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
         map.set(key, { ...h });
       }
     });
+
+    // 캐시우드: ARK 일별 매매에서 holdings에 없는 신규 종목 추가
+    if (investorId === 'cathie' && arkDailyTrades?.length > 0) {
+      const tradesByTicker = {};
+      arkDailyTrades.forEach(day => {
+        (day.trades || []).forEach(trade => {
+          if (!tradesByTicker[trade.ticker]) tradesByTicker[trade.ticker] = { buys: 0, sells: 0, company: trade.company };
+          if (trade.direction === 'buy') tradesByTicker[trade.ticker].buys += (trade.sharesChange || 0);
+          else tradesByTicker[trade.ticker].sells += (trade.sharesChange || 0);
+        });
+      });
+      Object.entries(tradesByTicker).forEach(([ticker, data]) => {
+        const netShares = data.buys - data.sells;
+        if (netShares > 0 && !map.has(ticker)) {
+          map.set(ticker, {
+            ticker,
+            name: data.company || ticker,
+            nameKo: data.company || ticker,
+            value: 0,
+            shares: netShares,
+            pct: 0,
+            change: 100, // formatChange(100) → '신규'
+            fromTrades: true,
+          });
+        }
+      });
+    }
+
     return [...map.values()];
-  }, [rawHoldings]);
+  }, [rawHoldings, investorId, arkDailyTrades]);
   const history = QUARTERLY_HISTORY[investorId]||[];
   const insights = useMemo(()=> investor ? generateInsights(investor,holdings,L) : [],[investorId, investor, holdings, L]);
   if(!investor) return (
