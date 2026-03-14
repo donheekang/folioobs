@@ -1,0 +1,37 @@
+# 매일 미국 장 마감 후 stock_prices DB 자동 업데이트
+# UTC 21:00 = ET 16:00 (장 마감) + 1시간 여유
+# 평일만 실행 (주말은 거래 데이터 없음)
+
+name: Fetch Stock Prices
+
+on:
+  schedule:
+    # UTC 21:00 (월~금) = ET 17:00 (서머타임 시 ET 17:00, 겨울 ET 16:00)
+    - cron: '0 21 * * 1-5'
+  workflow_dispatch: # 수동 실행 가능
+
+jobs:
+  fetch-prices:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke fetch-stock-prices Edge Function
+        run: |
+          echo "Invoking fetch-stock-prices..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            "${{ secrets.SUPABASE_URL }}/functions/v1/fetch-stock-prices" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+
+          echo "Status: $HTTP_CODE"
+          echo "Response: $BODY"
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "::error::Edge Function failed with status $HTTP_CODE"
+            exit 1
+          fi
+
+          echo "Stock prices updated successfully!"
