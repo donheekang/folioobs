@@ -508,6 +508,7 @@ function StockChart({ ticker, theme }) {
 function DailyPriceTable({ ticker, theme, locale }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
   const isDark = theme === 'dark';
 
   useEffect(() => {
@@ -567,7 +568,7 @@ function DailyPriceTable({ ticker, theme, locale }) {
           </tr>
         </thead>
         <tbody>
-          {data.map((bar, idx) => {
+          {(showAll ? data : data.slice(0, 5)).map((bar, idx) => {
             const prevBar = idx < data.length - 1 ? data[idx + 1] : null;
             const change = prevBar ? ((bar.c - prevBar.c) / prevBar.c * 100) : 0;
             const changeAbs = prevBar ? (bar.c - prevBar.c) : 0;
@@ -628,6 +629,15 @@ function DailyPriceTable({ ticker, theme, locale }) {
           })}
         </tbody>
       </table>
+      {data.length > 5 && (
+        <button className="w-full text-center py-2.5 mt-2 text-xs font-medium rounded-lg transition-colors"
+          style={{ color: isDark ? '#60a5fa' : '#2563eb', background: 'transparent' }}
+          onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          onClick={() => setShowAll(!showAll)}>
+          {showAll ? (locale === 'ko' ? '접기' : 'Show less') : `+${data.length - 5} ${locale === 'ko' ? '더보기' : 'more'}`}
+        </button>
+      )}
     </div>
   );
 }
