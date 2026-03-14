@@ -373,9 +373,11 @@ function StockChart({ ticker, theme }) {
   const metrics = useMemo(() => {
     if (chartData.length === 0) return null;
     const closes = chartData.map(b => b.c);
+    const highs = chartData.map(b => b.h || b.c);
+    const lows = chartData.map(b => b.l || b.c);
     const volumes = chartData.map(b => b.v || 0);
-    const min = Math.min(...closes);
-    const max = Math.max(...closes);
+    let min = Math.min(...lows);
+    let max = Math.max(...highs);
     const maxVol = Math.max(...volumes);
     const isUp = closes[closes.length - 1] >= closes[0];
 
@@ -394,13 +396,37 @@ function StockChart({ ticker, theme }) {
     // Compute RSI
     const rsi = showRSI ? computeRSI(chartData, 14) : null;
 
+    // Expand min/max to include BB bands if active
+    if (bb) {
+      bb.upper.forEach(v => { if (v !== null && v > max) max = v; });
+      bb.lower.forEach(v => { if (v !== null && v < min) min = v; });
+    }
+
     return { closes, volumes, min, max, maxVol, isUp, mas, bb, macd, rsi };
   }, [chartData, showBB, showMACD, showRSI]);
 
   // Draw chart on canvas
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !metrics) return;
+    if (!canvas) return;
+
+    // Clear canvas and show message when no data
+    if (!metrics) {
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      if (!loading) {
+        ctx.fillStyle = isDark ? '#555' : '#aaa';
+        ctx.font = '13px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('No trading data available', rect.width / 2, rect.height / 2);
+      }
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
@@ -446,7 +472,7 @@ function StockChart({ ticker, theme }) {
     }
 
     const { closes, volumes, min, max, maxVol, isUp, mas, bb, macd, rsi } = metrics;
-    const pad = (max - min) * 0.05 || 1;
+    const pad = (max - min) * 0.08 || 1;
     const priceMin = min - pad;
     const priceMax = max + pad;
 
@@ -474,7 +500,8 @@ function StockChart({ ticker, theme }) {
       ctx.lineTo(CHART_W, y);
       ctx.stroke();
       ctx.fillStyle = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)';
-      ctx.fillText(`$${price.toFixed(price >= 1000 ? 0 : 2)}`, CHART_W + 8, y);
+      const labelY = Math.max(7, Math.min(y, CHART_H - 7));
+      ctx.fillText(`$${price.toFixed(price >= 1000 ? 0 : 2)}`, CHART_W + 8, labelY);
     }
 
     // Previous close reference line (intraday only)
@@ -870,7 +897,7 @@ function StockChart({ ticker, theme }) {
       }
     }
 
-  }, [chartData, metrics, isDark, showMA, chartMode, showBB, showMACD, showRSI, range, timeframe, prevClose]);
+  }, [chartData, metrics, isDark, showMA, chartMode, showBB, showMACD, showRSI, range, timeframe, prevClose, loading]);
 
   // Draw overlay (crosshair)
   useEffect(() => {
@@ -927,7 +954,7 @@ function StockChart({ ticker, theme }) {
     }
 
     const { min, max, macd, rsi } = metrics;
-    const pad = (max - min) * 0.05 || 1;
+    const pad = (max - min) * 0.08 || 1;
     const priceMin = min - pad;
     const priceMax = max + pad;
 
@@ -1026,6 +1053,8 @@ function StockChart({ ticker, theme }) {
   }, [chartData]);
 
   const handleMove = useCallback((e) => {
+    // Prevent page scroll on touch devices when interacting with chart
+    if (e.touches) e.preventDefault();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     setHoverIdx(getIdx(clientX));
   }, [getIdx]);
@@ -1080,8 +1109,10 @@ function StockChart({ ticker, theme }) {
         )}
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
         <canvas ref={overlayRef} className="absolute inset-0 w-full h-full cursor-crosshair"
+          style={{ touchAction: 'none' }}
           onMouseMove={handleMove}
           onMouseLeave={() => setHoverIdx(-1)}
+          onTouchStart={handleMove}
           onTouchMove={handleMove}
           onTouchEnd={() => setHoverIdx(-1)}
         />

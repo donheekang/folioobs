@@ -116,9 +116,13 @@ export async function getChartData(ticker, range = '1Y', timeframe = null) {
 
   // Determine date range based on period
   switch (range) {
-    case '1D':
-      from = to;
+    case '1D': {
+      // Go back 5 days to handle weekends/holidays — filter to last trading day later
+      const d = new Date(now);
+      d.setDate(d.getDate() - 5);
+      from = formatDate(d);
       break;
+    }
     case '1W': {
       const d = new Date(now);
       d.setDate(d.getDate() - 7);
@@ -215,7 +219,16 @@ export async function getChartData(ticker, range = '1Y', timeframe = null) {
     }
   }
 
-  return getAggregates(ticker, timespan, multiplier, from, to);
+  let results = await getAggregates(ticker, timespan, multiplier, from, to);
+
+  // For intraday '1D' range, keep only the last trading day's data
+  if (range === '1D' && results.length > 0) {
+    const lastTs = results[results.length - 1].t;
+    const lastDateStr = new Date(lastTs).toISOString().split('T')[0];
+    results = results.filter(bar => new Date(bar.t).toISOString().split('T')[0] === lastDateStr);
+  }
+
+  return results;
 }
 
 function formatDate(d) {
