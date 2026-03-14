@@ -32,14 +32,17 @@ async function fetchSnapshot(tickers: string[]): Promise<Record<string, any> | n
         for (const t of data.tickers) {
           const day = t.day || {};
           const prevDay = t.prevDay || {};
-          const prevClose = prevDay.c || day.o || day.c;
-          const changePct = prevClose > 0 ? ((day.c - prevClose) / prevClose) * 100 : 0;
+          // day.c가 0이면 장 미개장(주말/공휴일) → prevDay.c 사용
+          const closePrice = (day.c && day.c > 0) ? day.c : (prevDay.c || 0);
+          if (closePrice <= 0) continue; // 가격 데이터 없으면 건너뛰기
+          const prevClose = prevDay.c || day.o || closePrice;
+          const changePct = prevClose > 0 ? ((closePrice - prevClose) / prevClose) * 100 : 0;
 
           priceMap[t.ticker] = {
-            c: Math.round((day.c || 0) * 100) / 100,
-            o: Math.round((day.o || 0) * 100) / 100,
-            h: Math.round((day.h || 0) * 100) / 100,
-            l: Math.round((day.l || 0) * 100) / 100,
+            c: Math.round(closePrice * 100) / 100,
+            o: Math.round((day.o || prevDay.o || 0) * 100) / 100,
+            h: Math.round((day.h || prevDay.h || 0) * 100) / 100,
+            l: Math.round((day.l || prevDay.l || 0) * 100) / 100,
             ch: Math.round(changePct * 100) / 100,
           };
         }
@@ -83,6 +86,7 @@ async function fetchGroupedDaily(date: string): Promise<Record<string, any>> {
 
   const priceMap: Record<string, any> = {};
   for (const item of (data.results || [])) {
+    if (!item.c || item.c <= 0) continue; // 비정상 가격 건너뛰기
     const prevClose = item.o || item.c;
     const changePct = prevClose > 0 ? ((item.c - prevClose) / prevClose) * 100 : 0;
     priceMap[item.T] = {

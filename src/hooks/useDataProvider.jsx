@@ -662,6 +662,10 @@ export function DataProvider({ children }) {
           for (const [ticker, live] of Object.entries(data.prices)) {
             const existing = merged[ticker];
             const currentPrice = live.c;
+
+            // 가격이 0이거나 비정상이면 기존 데이터 유지 (주말/공휴일 방어)
+            if (!currentPrice || currentPrice <= 0) continue;
+
             const quarterEnd = existing?.quarterEnd || null;
             const sinceFiling = quarterEnd && quarterEnd > 0
               ? Math.round(((currentPrice - quarterEnd) / quarterEnd) * 10000) / 100
