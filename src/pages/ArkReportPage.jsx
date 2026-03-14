@@ -174,7 +174,7 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
         </button>
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }}>CW</div>
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg, #06B6D4, #22D3EE)' }}>CW</div>
             <div>
               <h1 className="text-xl font-bold" style={{ color: t.text }}>
                 {isKo ? '캐시 우드 매매 리포트' : 'Cathie Wood Trade Report'}
