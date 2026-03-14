@@ -131,11 +131,18 @@ Deno.serve(async (req) => {
         ? Object.fromEntries(Object.entries(cache.data).filter(([k]) => requestedSet.has(k)))
         : cache.data;
 
+      // 캐시 응답에도 장 상태 추가
+      const etNowC = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+      const etHrC = etNowC.getHours(), etMnC = etNowC.getMinutes(), etDyC = etNowC.getDay();
+      const isOpenC = etDyC >= 1 && etDyC <= 5 && ((etHrC === 9 && etMnC >= 30) || (etHrC >= 10 && etHrC < 16));
+
       return new Response(JSON.stringify({
         count: Object.keys(filtered).length,
         source: cache.source,
         cached: true,
         live: cache.source === 'snapshot',
+        marketStatus: isOpenC ? "open" : "closed",
+        lastTradeDate: getLastTradingDate(),
         prices: filtered,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -172,10 +179,22 @@ Deno.serve(async (req) => {
     // 캐시 업데이트
     cache = { data: { ...cache?.data, ...priceMap }, timestamp: now, source };
 
+    // 장 상태 메타데이터 계산
+    const etNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+    const etHour = etNow.getHours();
+    const etMin = etNow.getMinutes();
+    const etDay = etNow.getDay(); // 0=Sun, 6=Sat
+    const isWeekday = etDay >= 1 && etDay <= 5;
+    const isMarketHours = isWeekday && ((etHour === 9 && etMin >= 30) || (etHour >= 10 && etHour < 16));
+    const marketStatus = isMarketHours ? "open" : "closed";
+    const lastTradeDate = getLastTradingDate();
+
     return new Response(JSON.stringify({
       count: Object.keys(priceMap).length,
       source,
       live: source === "snapshot",
+      marketStatus,
+      lastTradeDate,
       prices: priceMap,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

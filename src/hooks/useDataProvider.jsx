@@ -177,6 +177,8 @@ export function DataProvider({ children }) {
   const [arkDailyTrades, setArkDailyTrades] = useState([]);
   const [aiInsights, setAiInsights] = useState({});
   const [stockPrices, setStockPrices] = useState({});  // { ticker: { current, quarterEnd, changePct } }
+  const [marketStatus, setMarketStatus] = useState('unknown'); // 'open' | 'closed' | 'unknown'
+  const [lastTradeDate, setLastTradeDate] = useState(null); // 'YYYY-MM-DD'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [usingMock, setUsingMock] = useState(false);
@@ -656,6 +658,10 @@ export function DataProvider({ children }) {
         const data = await res.json();
         if (!data.prices || cancelled) return;
 
+        // 장 상태 메타데이터 업데이트
+        if (data.marketStatus) setMarketStatus(data.marketStatus);
+        if (data.lastTradeDate) setLastTradeDate(data.lastTradeDate);
+
         // 기존 stockPrices에 실시간 가격 머지 (quarterEnd는 유지)
         setStockPrices(prev => {
           const merged = { ...prev };
@@ -673,7 +679,7 @@ export function DataProvider({ children }) {
 
             merged[ticker] = {
               current: currentPrice,
-              date: data.live ? '실시간' : (existing?.date || null),
+              date: data.lastTradeDate || existing?.date || null,
               live: data.live || false,
               source: data.source || 'unknown',
               dailyChange: live.ch,
@@ -712,13 +718,15 @@ export function DataProvider({ children }) {
     arkDailyTrades,
     aiInsights,
     stockPrices,
+    marketStatus,
+    lastTradeDate,
     latestQuarter,
     lastUpdatedAt,
     loading,
     error,
     usingMock,
     getDbId: (slug) => SLUG_TO_DBID[slug] || null,
-  }), [investors, holdings, quarterlyHistory, quarterlyActivity, arkDailyTrades, aiInsights, stockPrices, latestQuarter, lastUpdatedAt, loading, error, usingMock]);
+  }), [investors, holdings, quarterlyHistory, quarterlyActivity, arkDailyTrades, aiInsights, stockPrices, marketStatus, lastTradeDate, latestQuarter, lastUpdatedAt, loading, error, usingMock]);
 
   return (
     <DataContext.Provider value={value}>

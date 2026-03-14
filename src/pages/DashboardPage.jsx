@@ -38,7 +38,7 @@ const SkeletonCard = () => (
 const DashboardPage = memo(({ onNavigate, watchlist }) => {
   const t = useTheme();
   const L = useLocale();
-  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyHistory: QUARTERLY_HISTORY, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades, stockPrices, latestQuarter, lastUpdatedAt, loading: dataLoading } = useData();
+  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyHistory: QUARTERLY_HISTORY, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades, stockPrices, marketStatus, lastTradeDate, latestQuarter, lastUpdatedAt, loading: dataLoading } = useData();
   const { toggleInvestor, isWatchedInv } = watchlist;
   const totalAUM = useMemo(() => INVESTORS.reduce((s,i) => s+i.aum, 0), [INVESTORS]);
   const avgH = useMemo(() => {
@@ -86,11 +86,27 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     }).filter(Boolean).sort((a, b) => b.performance - a.performance);
   }, [INVESTORS, HOLDINGS, stockPrices]);
 
-  // 시세 데이터 날짜 (표시용)
-  const priceDate = useMemo(() => {
-    const dates = Object.values(stockPrices).map(p => p.date).filter(Boolean);
-    return dates.length > 0 ? dates[0] : null;
-  }, [stockPrices]);
+  // 시세 데이터 날짜 라벨 (장 상태 반영)
+  const priceLabel = useMemo(() => {
+    // lastTradeDate가 있으면 사용, 없으면 stockPrices에서 추출
+    const dateStr = lastTradeDate || (() => {
+      const dates = Object.values(stockPrices).map(p => p.date).filter(d => d && d !== '실시간');
+      return dates.length > 0 ? dates[0] : null;
+    })();
+    if (!dateStr) return null;
+
+    // 날짜 포맷
+    const d = new Date(dateStr + 'T00:00:00');
+    const formatted = L.locale === 'ko'
+      ? `${d.getMonth()+1}/${d.getDate()}`
+      : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    if (marketStatus === 'open') {
+      return L.locale === 'ko' ? '실시간 기준' : 'Real-time';
+    } else {
+      return L.locale === 'ko' ? `장 마감 · ${formatted} 종가` : `Market Closed · ${formatted}`;
+    }
+  }, [stockPrices, marketStatus, lastTradeDate, L]);
 
   // Aggregate all latest quarterly activities by action type
   const { newPositions, buyActions, sellActions, exitActions } = useMemo(() => {
@@ -523,7 +539,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>
               <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', color: t.textMuted }}>{L.t('dashboard.returnLabel') || '수익률'}</span>
             </div>
-            {priceDate && <span className="text-xs" style={{ color: t.textMuted }}>{priceDate} {L.t('dashboard.priceAsOf')}</span>}
+            {priceLabel && <span className="text-xs" style={{ color: marketStatus === 'open' ? t.green : t.textMuted }}>{priceLabel}</span>}
           </div>
           <GlassCard>
             <div className="p-4 space-y-3">
