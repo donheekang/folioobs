@@ -517,10 +517,6 @@ function StockChart({ ticker, theme }) {
         ctx.lineTo(CHART_W, prevY);
         ctx.stroke();
         ctx.setLineDash([]);
-        ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)';
-        ctx.textAlign = 'left';
-        ctx.fillText('PC', CHART_W + 8, prevY - 5);
       }
     }
 
