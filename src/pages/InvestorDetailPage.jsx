@@ -12,7 +12,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGri
 // ============================================================
 // ARK 일별 매매 — 월별 섹션 (날짜 탭 + 매매 리스트)
 // ============================================================
-const ArkMonthSection = ({ group, theme: t, onDateSelect }) => {
+const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
   const L = useLocale();
   const [selectedDate, setSelectedDate] = useState(() => {
     const initDate = group.days[0]?.date || null;
@@ -93,7 +93,7 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect }) => {
               <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 px-1" style={{color:t.green}}>{L.t('investor.buySell.buy')}</div>
               <div className="space-y-1">
                 {buys.map((trade, i) => (
-                  <ArkTradeRow key={i} trade={trade} theme={t} />
+                  <ArkTradeRow key={i} trade={trade} theme={t} onNavigate={onNavigate} />
                 ))}
               </div>
             </div>
@@ -105,7 +105,7 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect }) => {
               <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 px-1" style={{color:t.red}}>{L.t('investor.buySell.sell')}</div>
               <div className="space-y-1">
                 {sells.map((trade, i) => (
-                  <ArkTradeRow key={i} trade={trade} theme={t} />
+                  <ArkTradeRow key={i} trade={trade} theme={t} onNavigate={onNavigate} />
                 ))}
               </div>
             </div>
@@ -121,7 +121,7 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect }) => {
 };
 
 // ARK 개별 매매 행
-const ArkTradeRow = ({ trade, theme: t }) => {
+const ArkTradeRow = ({ trade, theme: t, onNavigate }) => {
   const L = useLocale();
   const isBuy = trade.direction === 'buy';
   const color = isBuy ? t.green : t.red;
@@ -134,7 +134,7 @@ const ArkTradeRow = ({ trade, theme: t }) => {
       <div className="flex items-center gap-2 min-w-0">
         {trade.isNew && <span className="text-[10px] font-bold px-1 py-0.5 rounded" style={{background:`${t.accent}15`,color:t.accent}}>{L.t('common.new')}</span>}
         {trade.isExit && <span className="text-[10px] font-bold px-1 py-0.5 rounded" style={{background:`${t.red}15`,color:t.red}}>EXIT</span>}
-        <span className="text-sm font-bold" style={{color:t.text}}>{trade.ticker}</span>
+        <span className="text-sm font-bold cursor-pointer hover:underline" style={{color:t.accent}} onClick={(e)=>{e.stopPropagation();onNavigate?.("stock",trade.ticker);}}>{trade.ticker}</span>
         <span className="text-xs truncate hidden sm:inline" style={{color:t.textMuted}}>{trade.company}</span>
       </div>
       <div className="flex items-center gap-3 shrink-0">
@@ -147,7 +147,7 @@ const ArkTradeRow = ({ trade, theme: t }) => {
   );
 };
 
-const InvestorDetailPage = ({ investorId, onBack, watchlist, scrollTarget, onScrollTargetClear }) => {
+const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollTarget, onScrollTargetClear }) => {
   const t = useTheme();
   const L = useLocale();
   const { investors: INVESTORS, holdings: HOLDINGS, quarterlyHistory: QUARTERLY_HISTORY, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades, aiInsights, stockPrices, latestQuarter } = useData();
@@ -415,7 +415,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist, scrollTarget, onScr
                     <div className="flex items-center gap-2">
                       <WatchButton active={watchlist.isWatchedTkr(h.ticker)} onClick={(e) => { e.stopPropagation(); watchlist.toggleTicker(h.ticker); }} size={12} />
                       <div>
-                        <span className="font-semibold text-sm" style={{color:t.text}}>{h.ticker}</span>
+                        <span className="font-semibold text-sm cursor-pointer hover:underline" style={{color:t.accent}} onClick={(e)=>{e.stopPropagation();onNavigate("stock",h.ticker);}}>{h.ticker}</span>
                         <span className="text-xs ml-1.5" style={{color:t.textMuted}}>{h.name}</span>
                       </div>
                       {isExpanded ? <ChevronUp size={12} style={{color:t.textMuted}}/> : <ChevronDown size={12} style={{color:t.textMuted, opacity:0.4}}/>}
@@ -477,7 +477,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist, scrollTarget, onScr
                   onMouseEnter={e=>e.currentTarget.style.background=t.cardRowHover}
                   onMouseLeave={e=>e.currentTarget.style.background=isExpanded ? (t.name==='dark'?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.02)') : 'transparent'}>
                   <td className="py-3 px-1 w-8" onClick={e=>e.stopPropagation()}><WatchButton active={watchlist.isWatchedTkr(h.ticker)} onClick={() => watchlist.toggleTicker(h.ticker)} size={12} /></td>
-                  <td className="py-3 px-3"><div className="flex items-center gap-1.5"><div className="font-semibold" style={{color:t.text}}>{h.ticker}</div>{isExpanded ? <ChevronUp size={12} style={{color:t.textMuted}}/> : <ChevronDown size={12} style={{color:t.textMuted, opacity:0.4}}/>}</div><div className="text-xs" style={{color:t.textMuted}}>{h.name}</div></td>
+                  <td className="py-3 px-3"><div className="flex items-center gap-1.5"><div className="font-semibold cursor-pointer hover:underline" style={{color:t.accent}} onClick={(e)=>{e.stopPropagation();onNavigate("stock",h.ticker);}}>{h.ticker}</div>{isExpanded ? <ChevronUp size={12} style={{color:t.textMuted}}/> : <ChevronDown size={12} style={{color:t.textMuted, opacity:0.4}}/>}</div><div className="text-xs" style={{color:t.textMuted}}>{h.name}</div></td>
                   <td className="py-3 px-3"><div className="flex items-center gap-2"><div className="w-16 h-1.5 rounded-full overflow-hidden" style={{background:`${t.name==='dark'?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.08)'}`}}><div className="h-full rounded-full" style={{width:`${Math.min(h.pct*3,100)}%`,background:investor.gradient}}/></div><span className="font-medium" style={{color:t.text}}>{h.pct.toFixed(1)}%</span></div></td>
                   <td className="py-3 px-3 font-medium" style={{color:t.text}}>{formatUSD(h.value)}</td>
                   <td className="py-3 px-3" style={{color:t.textSecondary}}>{formatShares(h.shares)}</td>
@@ -564,7 +564,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist, scrollTarget, onScr
 
               <div className="space-y-5">
                 {months.map(([monthKey, group]) => (
-                  <ArkMonthSection key={monthKey} group={group} theme={t} onDateSelect={setSelectedArkDate} />
+                  <ArkMonthSection key={monthKey} group={group} theme={t} onDateSelect={setSelectedArkDate} onNavigate={onNavigate} />
                 ))}
               </div>
             </div>
@@ -580,7 +580,7 @@ const InvestorDetailPage = ({ investorId, onBack, watchlist, scrollTarget, onScr
               <Clock size={18} style={{color:t.accent}} />
               <h3 className="font-bold" style={{color:t.text}}>{L.t('investor.quarterlyTrades')}</h3>
             </div>
-            <QuarterlyTimeline investorId={investorId} />
+            <QuarterlyTimeline investorId={investorId} onNavigate={onNavigate} />
           </div>
         </GlassCard>
       )}

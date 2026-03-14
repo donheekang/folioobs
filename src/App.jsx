@@ -401,7 +401,7 @@ function FolioObsInner() {
               )}
               <div key={page + (selectedInvestor || '') + (selectedTicker || '')} className={transitioning ? "page-exit" : "page-enter"}>
                 {page === "dashboard" && <DashboardPage onNavigate={navigate} watchlist={watchlist} />}
-                {page === "investor" && <InvestorDetailPage investorId={selectedInvestor} onBack={goHome} watchlist={watchlist} scrollTarget={scrollTarget} onScrollTargetClear={() => setScrollTarget(null)} />}
+                {page === "investor" && <InvestorDetailPage investorId={selectedInvestor} onBack={goHome} onNavigate={navigate} watchlist={watchlist} scrollTarget={scrollTarget} onScrollTargetClear={() => setScrollTarget(null)} />}
                 {page === "stock" && <StockDetailPage ticker={selectedTicker} onBack={goHome} onNavigate={navigate} />}
                 {page === "screener" && <ScreenerPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} initialSector={screenerSector} />}
                 {page === "watchlist" && <WatchlistPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} />}

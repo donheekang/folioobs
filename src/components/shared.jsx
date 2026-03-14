@@ -96,7 +96,7 @@ export const ThemeToggle = ({ theme, onToggle }) => {
   );
 };
 
-export const QuarterlyTimeline = ({ investorId }) => {
+export const QuarterlyTimeline = ({ investorId, onNavigate }) => {
   const t = useTheme();
   const L = useLocale();
   const { quarterlyActivity: QUARTERLY_ACTIVITY } = useData();
@@ -133,7 +133,7 @@ export const QuarterlyTimeline = ({ investorId }) => {
                     <Icon size={12} style={{ color: cfg.color }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="text-sm font-medium" style={{ color: t.text }}>{action.ticker}</span>
+                    <span className="text-sm font-medium cursor-pointer hover:underline" style={{ color: t.accent }} onClick={()=>onNavigate?.("stock",action.ticker)}>{action.ticker}</span>
                     <span className="text-xs ml-1.5" style={{ color: t.textMuted }}>{action.name}</span>
                   </div>
                   <span className="text-xs font-medium" style={{ color: cfg.color }}>
