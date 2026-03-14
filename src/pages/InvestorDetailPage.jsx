@@ -154,7 +154,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
   const [sortKey, setSortKey] = useState("pct");
   const [sortDir, setSortDir] = useState("desc");
   const [selectedArkDate, setSelectedArkDate] = useState(null); // ARK 날짜 선택 추적
-  const [expandedTicker, setExpandedTicker] = useState(null); // 시세 확장 행
+  // expandedTicker removed — rows now navigate directly to stock detail
   const dailyTradesRef = useRef(null);
 
   // scrollTarget이 'daily'면 일별 매매 섹션으로 자동 스크롤
@@ -406,19 +406,17 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
           {/* Mobile: Card layout */}
           <div className="sm:hidden space-y-2">
             {sorted.map((h,i)=>{
-              const sp = stockPrices?.[h.ticker];
-              const isExpanded = expandedTicker === h.ticker;
               return (
-              <div key={i} className="rounded-xl" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)', border: `1px solid ${t.cardRowBorder}` }}>
-                <div className="p-3 cursor-pointer" onClick={()=>setExpandedTicker(isExpanded ? null : h.ticker)}>
+              <div key={i} className="rounded-xl cursor-pointer" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)', border: `1px solid ${t.cardRowBorder}` }}
+                onClick={()=>onNavigate("stock",h.ticker)}>
+                <div className="p-3">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <WatchButton active={watchlist.isWatchedTkr(h.ticker)} onClick={(e) => { e.stopPropagation(); watchlist.toggleTicker(h.ticker); }} size={12} />
                       <div>
-                        <span className="font-semibold text-sm cursor-pointer hover:underline" style={{color:t.accent}} onClick={(e)=>{e.stopPropagation();onNavigate("stock",h.ticker);}}>{h.ticker}</span>
+                        <span className="font-semibold text-sm" style={{color:t.accent}}>{h.ticker}</span>
                         <span className="text-xs ml-1.5" style={{color:t.textMuted}}>{h.name}</span>
                       </div>
-                      {isExpanded ? <ChevronUp size={12} style={{color:t.textMuted}}/> : <ChevronDown size={12} style={{color:t.textMuted, opacity:0.4}}/>}
                     </div>
                     {(() => { const ch = formatChange(h.change); const displayCh = ch === '신규' ? L.t('common.new') : ch === '대폭 확대' ? L.t('common.significantIncrease') : ch; return ch === '신규' ? <Badge color={t.green}><ArrowUpRight size={10}/> {displayCh}</Badge> : ch === null ? <span className="text-xs" style={{color:t.textMuted}}>—</span> : <span className="flex items-center gap-0.5 font-medium text-xs" style={{color:h.change>0?t.green:t.red}}>{h.change>0?<ArrowUpRight size={12}/>:<ArrowDownRight size={12}/>}{displayCh}</span>; })()}
                   </div>
@@ -435,25 +433,6 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                     </div>
                   </div>
                 </div>
-                {isExpanded && (
-                  <div className="px-3 pb-3 pt-1" style={{borderTop:`1px solid ${t.cardRowBorder}`}}>
-                    {sp ? (
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                        <div><span style={{color:t.textMuted}}>현재가 </span><span className="font-bold" style={{color:t.text}}>${sp.current?.toFixed(2)}</span></div>
-                        {sp.dailyChange !== null && sp.dailyChange !== undefined && (
-                          <div><span style={{color:t.textMuted}}>일일 </span><span className="font-medium" style={{color:sp.dailyChange>=0?t.green:t.red}}>{sp.dailyChange>=0?'+':''}{sp.dailyChange.toFixed(2)}%</span></div>
-                        )}
-                        {sp.sinceFiling !== null && sp.sinceFiling !== undefined && (
-                          <div><span style={{color:t.textMuted}}>공시후 </span><span className="font-medium" style={{color:sp.sinceFiling>=0?t.green:t.red}}>{sp.sinceFiling>=0?'+':''}{sp.sinceFiling.toFixed(2)}%</span></div>
-                        )}
-                        {sp.quarterEnd && <div><span style={{color:t.textMuted}}>분기말 </span><span style={{color:t.textSecondary}}>${sp.quarterEnd.toFixed(2)}</span></div>}
-                        <div><span style={{color:t.textMuted}}>기준 </span><span style={{color: sp.live ? t.green : t.textSecondary}}>{sp.live ? '실시간 · 15분 지연' : sp.date}</span></div>
-                      </div>
-                    ) : (
-                      <span className="text-xs" style={{color:t.textMuted}}>시세 데이터 없음</span>
-                    )}
-                  </div>
-                )}
               </div>
               );
             })}
@@ -469,15 +448,13 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                 ))}
               </tr></thead>
               <tbody>{sorted.map((h,i)=>{
-                const sp = stockPrices?.[h.ticker];
-                const isExpanded = expandedTicker === h.ticker;
                 return (<React.Fragment key={h.ticker}>
-                <tr style={{borderBottom: isExpanded ? 'none' : `1px solid ${t.cardRowBorder}`, cursor: 'pointer'}}
-                  onClick={()=>setExpandedTicker(isExpanded ? null : h.ticker)}
+                <tr style={{borderBottom: `1px solid ${t.cardRowBorder}`, cursor: 'pointer'}}
+                  onClick={()=>onNavigate("stock",h.ticker)}
                   onMouseEnter={e=>e.currentTarget.style.background=t.cardRowHover}
-                  onMouseLeave={e=>e.currentTarget.style.background=isExpanded ? (t.name==='dark'?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.02)') : 'transparent'}>
+                  onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
                   <td className="py-3 px-1 w-8" onClick={e=>e.stopPropagation()}><WatchButton active={watchlist.isWatchedTkr(h.ticker)} onClick={() => watchlist.toggleTicker(h.ticker)} size={12} /></td>
-                  <td className="py-3 px-3"><div className="flex items-center gap-1.5"><div className="font-semibold cursor-pointer hover:underline" style={{color:t.accent}} onClick={(e)=>{e.stopPropagation();onNavigate("stock",h.ticker);}}>{h.ticker}</div>{isExpanded ? <ChevronUp size={12} style={{color:t.textMuted}}/> : <ChevronDown size={12} style={{color:t.textMuted, opacity:0.4}}/>}</div><div className="text-xs" style={{color:t.textMuted}}>{h.name}</div></td>
+                  <td className="py-3 px-3"><div className="flex items-center gap-1.5"><div className="font-semibold" style={{color:t.accent}}>{h.ticker}</div></div><div className="text-xs" style={{color:t.textMuted}}>{h.name}</div></td>
                   <td className="py-3 px-3"><div className="flex items-center gap-2"><div className="w-16 h-1.5 rounded-full overflow-hidden" style={{background:`${t.name==='dark'?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.08)'}`}}><div className="h-full rounded-full" style={{width:`${Math.min(h.pct*3,100)}%`,background:investor.gradient}}/></div><span className="font-medium" style={{color:t.text}}>{h.pct.toFixed(1)}%</span></div></td>
                   <td className="py-3 px-3 font-medium" style={{color:t.text}}>{formatUSD(h.value)}</td>
                   <td className="py-3 px-3" style={{color:t.textSecondary}}>{formatShares(h.shares)}</td>
@@ -486,51 +463,6 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                     {(() => { const ch = formatChange(h.change); const displayCh = ch === '신규' ? L.t('common.new') : ch === '대폭 확대' ? L.t('common.significantIncrease') : ch; return ch === '신규' ? <Badge color={t.green}><ArrowUpRight size={10}/> {displayCh}</Badge> : ch === null ? <span style={{color:t.textMuted}}>—</span> : <span className="flex items-center gap-0.5 font-medium text-sm" style={{color:h.change>0?t.green:t.red}}>{h.change>0?<ArrowUpRight size={14}/>:<ArrowDownRight size={14}/>}{displayCh}</span>; })()}
                   </td>
                 </tr>
-                {isExpanded && (
-                  <tr style={{borderBottom:`1px solid ${t.cardRowBorder}`, background: t.name==='dark'?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.02)'}}>
-                    <td colSpan={7} className="px-4 py-3">
-                      {sp ? ((() => {
-                        // 분기 라벨 계산 (예: "Q4'25")
-                        const qLabel = latestQuarter ? latestQuarter.replace(/^(\d{4})Q(\d)$/, (_, y, q) => `Q${q}'${y.slice(2)}`) : '';
-                        return (
-                        <div className="flex items-center gap-6 text-xs">
-                          <div className="flex items-center gap-2">
-                            <span style={{color:t.textMuted}}>{L.t('investor.currentPrice')}</span>
-                            <span className="font-bold text-sm" style={{color:t.text}}>${sp.current?.toFixed(2)}</span>
-                          </div>
-                          {sp.dailyChange !== null && sp.dailyChange !== undefined && (
-                            <div className="flex items-center gap-1">
-                              <span style={{color:t.textMuted}}>{L.t('investor.dailyChange')}</span>
-                              <span className="font-medium" style={{color: sp.dailyChange >= 0 ? t.green : t.red}}>
-                                {sp.dailyChange >= 0 ? '+' : ''}{sp.dailyChange.toFixed(2)}%
-                              </span>
-                            </div>
-                          )}
-                          {sp.sinceFiling !== null && sp.sinceFiling !== undefined && (
-                            <div className="flex items-center gap-1">
-                              <span style={{color:t.textMuted}}>{qLabel} {L.t('investor.sinceFiling')}</span>
-                              <span className="font-medium" style={{color: sp.sinceFiling >= 0 ? t.green : t.red}}>
-                                {sp.sinceFiling >= 0 ? '+' : ''}{sp.sinceFiling.toFixed(2)}%
-                              </span>
-                            </div>
-                          )}
-                          {sp.quarterEnd && (
-                            <div className="flex items-center gap-1">
-                              <span style={{color:t.textMuted}}>{qLabel} {L.t('investor.quarterEndPrice')}</span>
-                              <span style={{color:t.textSecondary}}>${sp.quarterEnd.toFixed(2)}</span>
-                            </div>
-                          )}
-                          <div className="flex items-center gap-1">
-                            <span style={{color:t.textMuted}}>{L.t('investor.priceDate')}</span>
-                            <span style={{color: sp.live ? t.green : t.textSecondary}}>{sp.live ? '실시간 · 15분 지연' : sp.date}</span>
-                          </div>
-                        </div>);
-                      })()) : (
-                        <span className="text-xs" style={{color:t.textMuted}}>{L.t('investor.noPriceData')}</span>
-                      )}
-                    </td>
-                  </tr>
-                )}
                 </React.Fragment>);
               })}</tbody>
             </table>
