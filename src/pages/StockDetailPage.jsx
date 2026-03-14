@@ -316,30 +316,20 @@ function CompanyLogo({ ticker, details, isDark, textSecondary }) {
 }
 
 // ========== CHART COMPONENT ==========
-const RANGES = ['1D', '1W', '1M', '3M', '1Y', '5Y'];
+// Upbit-style: single timeframe selector determines both candle size and date range
 const TIMEFRAMES = [
-  { key: '15m', label: '15분' },
-  { key: '30m', label: '30분' },
-  { key: '1h', label: '1시간' },
-  { key: '1d', label: '일' },
-  { key: '1w', label: '주' },
+  { key: '15m', label: '15분', range: '1D' },
+  { key: '30m', label: '30분', range: '1W' },
+  { key: '1h', label: '1시간', range: '1M' },
+  { key: '1d', label: '일', range: '1Y' },
+  { key: '1w', label: '주', range: '5Y' },
 ];
-
-// Smart default timeframe for each range
-const RANGE_DEFAULT_TIMEFRAME = {
-  '1D': '15m',
-  '1W': '30m',
-  '1M': '1h',
-  '3M': '1d',
-  '1Y': '1d',
-  '5Y': '1w',
-};
 
 function StockChart({ ticker, theme }) {
   const canvasRef = useRef(null);
   const overlayRef = useRef(null);
-  const [range, setRange] = useState('1Y');
-  const [timeframe, setTimeframe] = useState(RANGE_DEFAULT_TIMEFRAME['1Y']);
+  const [timeframe, setTimeframe] = useState('1d');
+  const range = TIMEFRAMES.find(tf => tf.key === timeframe)?.range || '1Y';
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -376,12 +366,6 @@ function StockChart({ ticker, theme }) {
       .catch(() => {});
     return () => { cancelled = true; };
   }, [ticker, range, timeframe]);
-
-  // Handle range change with smart default timeframe
-  const handleRangeChange = (newRange) => {
-    setRange(newRange);
-    setTimeframe(RANGE_DEFAULT_TIMEFRAME[newRange] || '1d');
-  };
 
   const isDark = theme === 'dark';
 
@@ -1077,7 +1061,7 @@ function StockChart({ ticker, theme }) {
           </div>
         ) : chartData.length > 0 && metrics ? (
           <div className="flex items-center gap-2 text-xs" style={{ color: isDark ? '#666' : '#999' }}>
-            <span>{range === '1D' ? 'Intraday' : range} · {chartData.length} bars</span>
+            <span>{TIMEFRAMES.find(tf => tf.key === timeframe)?.label || timeframe} · {chartData.length} bars</span>
           </div>
         ) : null}
       </div>
@@ -1103,38 +1087,19 @@ function StockChart({ ticker, theme }) {
         />
       </div>
 
-      {/* Row 1: Period buttons */}
-      <div className="flex items-center gap-1 mt-3">
-        {RANGES.map(r => {
-          const active = range === r;
-          return (
-            <button key={r}
-              onClick={() => handleRangeChange(r)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-              style={{
-                background: active ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'transparent',
-                color: active ? (isDark ? '#fff' : '#000') : (isDark ? '#555' : '#aaa'),
-              }}>
-              {r}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Row 2: Timeframe + Indicators + MA toggles */}
-      <div className="flex items-center justify-between mt-2 gap-3 flex-wrap">
-        {/* Timeframe selector */}
+      {/* Timeframe + Indicators + MA toggles */}
+      <div className="flex items-center justify-between mt-3 gap-3 flex-wrap">
+        {/* Timeframe selector (Upbit-style: single row) */}
         <div className="flex items-center gap-1">
           {TIMEFRAMES.map(tf => {
             const active = timeframe === tf.key;
             return (
               <button key={tf.key}
                 onClick={() => setTimeframe(tf.key)}
-                className="px-2 py-1 rounded-md text-[10px] font-semibold transition-all"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                 style={{
-                  background: active ? (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)') : 'transparent',
+                  background: active ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'transparent',
                   color: active ? (isDark ? '#fff' : '#000') : (isDark ? '#555' : '#aaa'),
-                  border: `1px solid ${active ? (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)') : 'transparent'}`,
                 }}>
                 {tf.label}
               </button>
@@ -1153,7 +1118,7 @@ function StockChart({ ticker, theme }) {
               color: isDark ? '#ccc' : '#666',
               border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}`,
             }}>
-            {chartMode === 'line' ? '📈' : '🕯️'}
+            {chartMode === 'line' ? 'Line' : 'Candle'}
           </button>
 
           {/* BB toggle */}
