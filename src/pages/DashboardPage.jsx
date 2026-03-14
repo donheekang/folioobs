@@ -93,70 +93,80 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
   }, [stockPrices]);
 
   // Aggregate all latest quarterly activities by action type
-  const { newPositions, buyActions, sellActions } = useMemo(() => {
+  const { newPositions, buyActions, sellActions, exitActions } = useMemo(() => {
     const all = INVESTORS.flatMap(inv => {
       // 캐시우드(ARK)는 일별 데이터라 분기 변동이 부정확 → 대시보드에서 제외
       if (inv.id === 'cathie') return [];
       const acts = QUARTERLY_ACTIVITY[inv.id] || [];
       if (acts.length === 0 || !acts[0]?.actions) return [];
-      return acts[0].actions.filter(a => a.type !== 'hold' && a.type !== 'exit').map(a => ({ ...a, investor: inv, quarter: acts[0].q }));
+      return acts[0].actions.filter(a => a.type !== 'hold').map(a => ({ ...a, investor: inv, quarter: acts[0].q }));
     });
     return {
       newPositions: all.filter(a => a.type === 'new'),
       buyActions: all.filter(a => a.type === 'buy').sort((a,b) => b.pctChange - a.pctChange),
       sellActions: all.filter(a => a.type === 'sell').sort((a,b) => a.pctChange - b.pctChange),
+      exitActions: all.filter(a => a.type === 'exit'),
     };
   }, [INVESTORS, QUARTERLY_ACTIVITY]);
 
-  // Hero trade highlights: pick top buy + top sell for the marquee
+  // ===== 종목별 집계: 가장 많이 산/판 종목 TOP 5 =====
+  const { topBoughtStocks, topSoldStocks } = useMemo(() => {
+    // 같은 기업의 다른 share class를 통합 (GOOG/GOOGL, BRK.A/BRK.B 등)
+    const TICKER_GROUPS = { 'GOOGL': 'GOOG', 'BRK.B': 'BRK.A', 'BRK/B': 'BRK/A' };
+    const normalize = (ticker) => TICKER_GROUPS[ticker] || ticker;
+
+    const aggregate = (actions) => {
+      const map = {};
+      actions.forEach(act => {
+        const key = normalize(act.ticker);
+        if (!map[key]) map[key] = { ticker: key, name: act.name, investors: [], types: [], tickers: [key] };
+        // 원래 티커도 기록 (표시용)
+        if (!map[key].tickers.includes(act.ticker)) map[key].tickers.push(act.ticker);
+        // 같은 투자자 중복 방지
+        if (!map[key].investors.find(i => i.id === act.investor.id)) {
+          map[key].investors.push(act.investor);
+          map[key].types.push(act.type);
+        }
+      });
+      return Object.values(map).sort((a, b) => b.investors.length - a.investors.length).slice(0, 5);
+    };
+
+    return {
+      topBoughtStocks: aggregate([...newPositions, ...buyActions]),
+      topSoldStocks: aggregate([...sellActions, ...exitActions]),
+    };
+  }, [newPositions, buyActions, sellActions, exitActions]);
+
+  // Hero highlights: 가장 많이 산 종목 #1, 가장 많이 판 종목 #1, 신규 매수 #1
   const heroHighlights = useMemo(() => {
     const picks = [];
-    if (buyActions.length > 0) {
-      const a = buyActions[0];
-      picks.push({ investor: a.investor, ticker: a.ticker, pct: Math.round(a.pctChange) > 999 ? L.t('common.significantIncrease') : `+${Math.round(a.pctChange)}%`, color: t.green, type: 'buy' });
+    if (topBoughtStocks.length > 0) {
+      const s = topBoughtStocks[0];
+      const label = L.locale === 'ko' ? `${s.investors.length}명 매수` : `${s.investors.length} bought`;
+      picks.push({ ticker: s.ticker, label, color: t.green, investors: s.investors, type: 'buy' });
     }
-    if (sellActions.length > 0) {
-      const a = sellActions[0];
-      picks.push({ investor: a.investor, ticker: a.ticker, pct: `${Math.round(a.pctChange)}%`, color: t.red, type: 'sell' });
+    if (topSoldStocks.length > 0) {
+      const s = topSoldStocks[0];
+      const label = L.locale === 'ko' ? `${s.investors.length}명 매도` : `${s.investors.length} sold`;
+      picks.push({ ticker: s.ticker, label, color: t.red, investors: s.investors, type: 'sell' });
     }
     if (newPositions.length > 0) {
-      const a = newPositions[0];
-      picks.push({ investor: a.investor, ticker: a.ticker, pct: L.t('common.new'), color: t.accent, type: 'new' });
+      // 신규 매수 중 가장 많은 투자자가 매수한 종목
+      const newMap = {};
+      newPositions.forEach(act => {
+        if (!newMap[act.ticker]) newMap[act.ticker] = { ticker: act.ticker, investors: [] };
+        if (!newMap[act.ticker].investors.find(i => i.id === act.investor.id)) {
+          newMap[act.ticker].investors.push(act.investor);
+        }
+      });
+      const topNew = Object.values(newMap).sort((a, b) => b.investors.length - a.investors.length)[0];
+      if (topNew) {
+        const label = L.locale === 'ko' ? `신규 ${topNew.investors.length}명` : `New ${topNew.investors.length}`;
+        picks.push({ ticker: topNew.ticker, label, color: t.accent, investors: topNew.investors, type: 'new' });
+      }
     }
     return picks.slice(0, 3);
-  }, [buyActions, sellActions, newPositions, t, L]);
-
-  // ===== Task 5: 이번 분기 하이라이트 (한줄 요약) =====
-  const quarterHighlights = useMemo(() => {
-    if (!INVESTORS.length) return [];
-    const highlights = [];
-
-    // 1. 가장 큰 QoQ 상승 투자자
-    const topRiser = [...INVESTORS].sort((a, b) => b.metrics.qoqChange - a.metrics.qoqChange)[0];
-    if (topRiser && topRiser.metrics.qoqChange > 0) {
-      highlights.push({ icon: TrendingUp, color: '#22c55e', text: L.t('dashboard.hlRiser').replace('{name}', L.investorName(topRiser)).replace('{pct}', `+${topRiser.metrics.qoqChange}%`) });
-    }
-
-    // 2. 가장 큰 QoQ 하락 투자자
-    const topFaller = [...INVESTORS].sort((a, b) => a.metrics.qoqChange - b.metrics.qoqChange)[0];
-    if (topFaller && topFaller.metrics.qoqChange < 0) {
-      highlights.push({ icon: ArrowDownRight, color: '#ef4444', text: L.t('dashboard.hlFaller').replace('{name}', L.investorName(topFaller)).replace('{pct}', `${topFaller.metrics.qoqChange}%`) });
-    }
-
-    // 3. 가장 큰 비중 축소 종목 (히어로에 확대가 있으므로 축소로 차별화)
-    if (sellActions.length > 0) {
-      const top = sellActions[0];
-      const pctStr = `${Math.round(top.pctChange)}%`;
-      highlights.push({ icon: ArrowDownRight, color: '#f59e0b', text: L.t('dashboard.hlTopSell').replace('{name}', L.investorName(top.investor)).replace('{ticker}', top.ticker).replace('{pct}', pctStr) });
-    }
-
-    // 4. 신규 매수 총 수
-    if (newPositions.length > 0) {
-      highlights.push({ icon: Plus, color: '#8b5cf6', text: L.t('dashboard.hlNewCount').replace('{count}', newPositions.length) });
-    }
-
-    return highlights.slice(0, 4);
-  }, [INVESTORS, sellActions, newPositions, L]);
+  }, [topBoughtStocks, topSoldStocks, newPositions, t, L]);
 
   // ===== Task 4: 투자자 랭킹 보드 (다차원 순위) =====
   const investorRankings = useMemo(() => {
@@ -254,25 +264,31 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           <span className="text-sm" style={{color:t.textMuted}}>{L.t('dashboard.trackedInvestors')} <span className="font-bold" style={{color:t.text}}>{INVESTORS.length}{L.t('common.people')}</span></span>
         </div>
 
-        {/* Trade Highlights — Card Style (복원) */}
+        {/* Trade Highlights — 이번 분기 핫 종목 (종목 중심 집계) */}
         {heroHighlights.length > 0 && (
           <div className="hero-enter hero-enter-4 mb-6">
-            <p className="text-xs font-medium mb-3" style={{color:t.textMuted}}>{L.t('dashboard.recentMoves')}</p>
+            <p className="text-xs font-medium mb-3" style={{color:t.textMuted}}>{L.t('dashboard.hotStocks')}</p>
             <div className="flex flex-wrap items-stretch justify-center gap-3">
               {heroHighlights.map((h, i) => {
                 const cardBg = t.name==='dark'?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.02)';
                 const cardBorder = t.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';
-                const typeLabel = h.type==='buy'? (L.locale==='ko'?'비중 확대':'Increased') : h.type==='sell'? (L.locale==='ko'?'비중 축소':'Decreased') : (L.locale==='ko'?'신규 매수':'New Position');
                 return (
-                  <button key={i} className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    style={{background:cardBg, border:`1px solid ${cardBorder}`}}
-                    onClick={()=>onNavigate("investor",h.investor.id)}>
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{background:h.investor.gradient}}>{h.investor.avatar}</div>
-                    <div className="text-left">
-                      <div className="text-sm font-bold" style={{color:t.text}}>{h.ticker} <span className="font-semibold" style={{color:h.color}}>{h.pct}</span></div>
-                      <div className="text-xs" style={{color:t.textMuted}}>{L.investorName(h.investor)} · {typeLabel}</div>
+                  <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:scale-[1.02]"
+                    style={{background:cardBg, border:`1px solid ${cardBorder}`}}>
+                    {/* 투자자 아바타 스택 */}
+                    <div className="flex -space-x-1.5 flex-shrink-0">
+                      {h.investors.slice(0, 3).map((inv, j) => (
+                        <div key={inv.id} className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[9px] font-bold ring-1 ring-white dark:ring-gray-900"
+                          style={{background:inv.gradient, zIndex: 3 - j}}>{inv.avatar}</div>
+                      ))}
+                      {h.investors.length > 3 && <div className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold"
+                        style={{background:t.name==='dark'?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)', color:t.textMuted}}>+{h.investors.length - 3}</div>}
                     </div>
-                  </button>
+                    <div className="text-left">
+                      <div className="text-sm font-bold" style={{color:t.text}}>{h.ticker} <span className="font-semibold" style={{color:h.color}}>{h.label}</span></div>
+                      <div className="text-xs" style={{color:t.textMuted}}>{h.investors.slice(0,2).map(inv => L.investorName(inv)).join(', ')}{h.investors.length > 2 ? ` 외 ${h.investors.length - 2}명` : ''}</div>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -333,6 +349,96 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           </button>
         </div>
       </div>
+
+      {/* ===== TOP 5 매수/매도 랭킹 (히어로 바로 아래) ===== */}
+      {!ready ? null : (topBoughtStocks.length > 0 || topSoldStocks.length > 0) && (
+        <section className="hero-enter hero-enter-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Zap size={18} style={{ color: t.accent }} />
+            <h2 className="text-lg font-bold" style={{ color: t.text }}>{L.t('dashboard.hotStocksTitle')}</h2>
+            {latestQuarter && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* TOP 5 매수 */}
+            <GlassCard hover={false}>
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{background:`${t.green}15`}}>
+                    <ArrowUpRight size={14} style={{color:t.green}} />
+                  </div>
+                  <span className="text-sm font-bold" style={{color:t.text}}>{L.t('dashboard.topBought')}</span>
+                </div>
+                <div className="space-y-2.5">
+                  {topBoughtStocks.map((stock, i) => (
+                    <div key={stock.ticker} className="flex items-center gap-3">
+                      <span className="text-sm font-bold w-5 text-center" style={{color: i < 3 ? t.green : t.textMuted}}>{i + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold" style={{color:t.text}}>{stock.ticker}</span>
+                          <span className="text-xs truncate" style={{color:t.textMuted}}>{stock.name?.slice(0, 15)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1">
+                          <div className="flex -space-x-1">
+                            {stock.investors.slice(0, 4).map((inv, j) => (
+                              <div key={inv.id} className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[8px] font-bold ring-1 ring-white dark:ring-gray-900 cursor-pointer"
+                                style={{background:inv.gradient, zIndex: 4 - j}}
+                                title={L.investorName(inv)}
+                                onClick={()=>onNavigate("investor",inv.id)}>
+                                {inv.avatar}
+                              </div>
+                            ))}
+                          </div>
+                          <span className="text-[11px] font-medium" style={{color:t.green}}>{stock.investors.length}{L.t('common.people')} {L.t('common.buy')}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {topBoughtStocks.length === 0 && <div className="text-xs text-center py-3" style={{color:t.textMuted}}>{L.t('common.none')}</div>}
+                </div>
+              </div>
+            </GlassCard>
+
+            {/* TOP 5 매도 */}
+            <GlassCard hover={false}>
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{background:`${t.red}15`}}>
+                    <ArrowDownRight size={14} style={{color:t.red}} />
+                  </div>
+                  <span className="text-sm font-bold" style={{color:t.text}}>{L.t('dashboard.topSold')}</span>
+                </div>
+                <div className="space-y-2.5">
+                  {topSoldStocks.map((stock, i) => (
+                    <div key={stock.ticker} className="flex items-center gap-3">
+                      <span className="text-sm font-bold w-5 text-center" style={{color: i < 3 ? t.red : t.textMuted}}>{i + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold" style={{color:t.text}}>{stock.ticker}</span>
+                          <span className="text-xs truncate" style={{color:t.textMuted}}>{stock.name?.slice(0, 15)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1">
+                          <div className="flex -space-x-1">
+                            {stock.investors.slice(0, 4).map((inv, j) => (
+                              <div key={inv.id} className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[8px] font-bold ring-1 ring-white dark:ring-gray-900 cursor-pointer"
+                                style={{background:inv.gradient, zIndex: 4 - j}}
+                                title={L.investorName(inv)}
+                                onClick={()=>onNavigate("investor",inv.id)}>
+                                {inv.avatar}
+                              </div>
+                            ))}
+                          </div>
+                          <span className="text-[11px] font-medium" style={{color:t.red}}>{stock.investors.length}{L.t('common.people')} {L.t('common.sell')}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {topSoldStocks.length === 0 && <div className="text-xs text-center py-3" style={{color:t.textMuted}}>{L.t('common.none')}</div>}
+                </div>
+              </div>
+            </GlassCard>
+          </div>
+        </section>
+      )}
 
       {/* Investor Grid */}
       <section ref={investorGridRef} aria-label={L.t('dashboard.investorStatus')}>

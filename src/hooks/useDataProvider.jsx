@@ -394,7 +394,7 @@ export function DataProvider({ children }) {
           qActivityFormatted[slug] = Object.entries(qActivity[slug])
             .map(([q, actions]) => ({
               q,
-              actions: actions.sort((a, b) => Math.abs(b.pctChange) - Math.abs(a.pctChange)).slice(0, 10),
+              actions: actions.sort((a, b) => Math.abs(b.pctChange) - Math.abs(a.pctChange)),
             }));
         });
 
