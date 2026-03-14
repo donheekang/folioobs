@@ -2,10 +2,17 @@
 /**
  * FolioObs — Securities 테이블 티커 보정 스크립트
  *
- * CUSIP 캐시의 잘못된 약어를 OpenFIGI API로 재조회하여 정확한 티커로 수정합니다.
+ * 3단계 검증:
+ *   Step 1: 수동 매핑 (CUSIP → 정확한 티커)
+ *   Step 2: OpenFIGI 재조회 (의심스러운 티커)
+ *   Step 3: Polygon.io 교차 검증 (모든 티커 유효성 + 이름 매칭)
  *
  * 사용법:
- *   SUPABASE_SERVICE_KEY="eyJ..." node scripts/fix-tickers.mjs
+ *   SUPABASE_SERVICE_KEY="eyJ..." POLYGON_API_KEY="B1k..." node scripts/fix-tickers.mjs
+ *
+ *   옵션:
+ *     --polygon-only   Polygon 검증만 실행 (Step 1,2 스킵)
+ *     --dry-run        DB 수정 없이 결과만 출력
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -17,10 +24,18 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const SUPABASE_URL = 'https://mghfgcjcbpizjmfrtozi.supabase.co';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const POLYGON_API_KEY = process.env.POLYGON_API_KEY || process.env.VITE_POLYGON_API_KEY || '';
+
+const ARGS = process.argv.slice(2);
+const POLYGON_ONLY = ARGS.includes('--polygon-only');
+const DRY_RUN = ARGS.includes('--dry-run');
 
 if (!SUPABASE_SERVICE_KEY) {
   console.error('❌ SUPABASE_SERVICE_KEY 환경변수가 필요합니다.');
   process.exit(1);
+}
+if (!POLYGON_API_KEY) {
+  console.warn('⚠️  POLYGON_API_KEY가 없습니다. Polygon 검증을 건너뜁니다.');
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
@@ -30,6 +45,11 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const CUSIP_FILE = join(__dirname, '.cusip-cache.json');
 let cusipCache = {};
 try { if (existsSync(CUSIP_FILE)) cusipCache = JSON.parse(readFileSync(CUSIP_FILE, 'utf-8')); } catch (e) { /* */ }
+
+// Polygon 검증 결과 캐시
+const POLYGON_CACHE_FILE = join(__dirname, '.polygon-verify-cache.json');
+let polygonCache = {};
+try { if (existsSync(POLYGON_CACHE_FILE)) polygonCache = JSON.parse(readFileSync(POLYGON_CACHE_FILE, 'utf-8')); } catch (e) { /* */ }
 
 // ============================================================
 // 확실한 수동 매핑 (OpenFIGI가 못 찾는 종목들)
@@ -90,18 +110,18 @@ const MANUAL_OVERRIDES = {
 };
 
 // ============================================================
-// OpenFIGI 배치 조회 (최대 100개씩)
+// OpenFIGI 배치 조회
 // ============================================================
 async function batchResolveFIGI(cusipList) {
   const results = {};
-  const batchSize = 10; // OpenFIGI 무료 limit (50은 413 에러 발생)
+  const batchSize = 10;
 
   for (let i = 0; i < cusipList.length; i += batchSize) {
     const batch = cusipList.slice(i, i + batchSize);
     const body = batch.map(cusip => ({ idType: 'ID_CUSIP', idValue: cusip }));
 
     try {
-      await sleep(1200); // Rate limit: 25 req/min for free tier
+      await sleep(1200);
       const res = await fetch('https://api.openfigi.com/v3/mapping', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -112,9 +132,7 @@ async function batchResolveFIGI(cusipList) {
         const data = await res.json();
         for (let j = 0; j < data.length; j++) {
           const ticker = data[j]?.data?.[0]?.ticker;
-          if (ticker) {
-            results[batch[j]] = ticker;
-          }
+          if (ticker) results[batch[j]] = ticker;
         }
       } else {
         console.log(`  ⚠️ OpenFIGI ${res.status} (batch ${Math.floor(i / batchSize) + 1})`);
@@ -131,14 +149,90 @@ async function batchResolveFIGI(cusipList) {
 }
 
 // ============================================================
+// Polygon.io 티커 검증
+// ============================================================
+async function polygonVerifyTicker(ticker) {
+  // 캐시 확인 (24시간 유효)
+  const cached = polygonCache[ticker];
+  if (cached && Date.now() - cached.ts < 24 * 60 * 60 * 1000) {
+    return cached.result;
+  }
+
+  try {
+    const url = `https://api.polygon.io/v3/reference/tickers/${encodeURIComponent(ticker)}?apiKey=${POLYGON_API_KEY}`;
+    const res = await fetch(url);
+
+    if (res.status === 404) {
+      const result = { valid: false, reason: 'NOT_FOUND' };
+      polygonCache[ticker] = { result, ts: Date.now() };
+      return result;
+    }
+
+    if (res.status === 429) {
+      console.log(`  ⏳ Rate limited, waiting 12s...`);
+      await sleep(12000);
+      return polygonVerifyTicker(ticker); // retry
+    }
+
+    if (!res.ok) {
+      return { valid: false, reason: `HTTP_${res.status}` };
+    }
+
+    const data = await res.json();
+    const info = data.results || {};
+    const result = {
+      valid: true,
+      name: info.name || '',
+      active: info.active !== false,
+      exchange: info.primary_exchange || '',
+      type: info.type || '',
+      market: info.market || '',
+      locale: info.locale || '',
+    };
+    polygonCache[ticker] = { result, ts: Date.now() };
+    return result;
+  } catch (e) {
+    return { valid: false, reason: `ERROR: ${e.message}` };
+  }
+}
+
+/** Polygon 티커 검색 (잘못된 티커의 올바른 매칭 찾기) */
+async function polygonSearchTicker(query) {
+  try {
+    const url = `https://api.polygon.io/v3/reference/tickers?search=${encodeURIComponent(query)}&active=true&market=stocks&limit=5&apiKey=${POLYGON_API_KEY}`;
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.results || []).map(r => ({
+      ticker: r.ticker,
+      name: r.name,
+      exchange: r.primary_exchange,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/** 이름 유사도 비교 (간단한 단어 겹침) */
+function nameSimilarity(a, b) {
+  if (!a || !b) return 0;
+  const wordsA = a.toUpperCase().replace(/[^A-Z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 1);
+  const wordsB = b.toUpperCase().replace(/[^A-Z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 1);
+  const setB = new Set(wordsB);
+  const overlap = wordsA.filter(w => setB.has(w)).length;
+  return overlap / Math.max(wordsA.length, 1);
+}
+
+// ============================================================
 // 메인
 // ============================================================
 async function main() {
-  console.log('FolioObs — Securities 티커 보정 스크립트');
-  console.log('═'.repeat(50));
+  console.log('FolioObs — Securities 티커 보정 스크립트 (v2 + Polygon 검증)');
+  console.log('═'.repeat(60));
+  if (DRY_RUN) console.log('🧪 DRY RUN 모드 — DB 수정 없음\n');
 
-  // 1) DB에서 모든 securities 가져오기 (페이지네이션)
-  console.log('\n▶ Step 1: DB securities 조회');
+  // 1) DB에서 모든 securities 가져오기
+  console.log('▶ Step 1: DB securities 조회');
   let securities = [];
   let page = 0;
   const pageSize = 1000;
@@ -153,80 +247,201 @@ async function main() {
     if (data.length < pageSize) break;
     page++;
   }
-  console.log(`  총 ${securities.length}개 종목 (${page + 1}페이지)`);
+  console.log(`  총 ${securities.length}개 종목\n`);
 
-  // 2) 수동 매핑 먼저 적용
-  console.log('\n▶ Step 2: 수동 매핑 적용');
-  let manualFixed = 0;
-  const needsFIGI = []; // OpenFIGI로 조회할 CUSIP 목록
+  // ────────────────────────────────────────────
+  // Step 2 & 3: 수동 매핑 + OpenFIGI (--polygon-only면 스킵)
+  // ────────────────────────────────────────────
+  if (!POLYGON_ONLY) {
+    // 2) 수동 매핑
+    console.log('▶ Step 2: 수동 매핑 적용');
+    let manualFixed = 0;
+    const needsFIGI = [];
 
-  for (const sec of securities) {
-    if (MANUAL_OVERRIDES[sec.cusip]) {
-      const correctTicker = MANUAL_OVERRIDES[sec.cusip];
-      if (sec.ticker !== correctTicker) {
-        const { error: upErr } = await supabase
-          .from('securities')
-          .update({ ticker: correctTicker })
-          .eq('id', sec.id);
-        if (!upErr) {
+    for (const sec of securities) {
+      if (MANUAL_OVERRIDES[sec.cusip]) {
+        const correctTicker = MANUAL_OVERRIDES[sec.cusip];
+        if (sec.ticker !== correctTicker) {
+          if (!DRY_RUN) {
+            await supabase.from('securities').update({ ticker: correctTicker }).eq('id', sec.id);
+            cusipCache[sec.cusip] = { ticker: correctTicker, name: sec.name };
+          }
           manualFixed++;
           console.log(`  ✅ ${sec.ticker} → ${correctTicker} (${sec.name})`);
-          // 캐시도 업데이트
-          cusipCache[sec.cusip] = { ticker: correctTicker, name: sec.name };
+          sec.ticker = correctTicker; // 메모리도 업데이트
         }
-      }
-    } else {
-      // 티커가 의심스러운 경우만 OpenFIGI 재시도
-      const t = sec.ticker || '';
-      const isSuspicious = /^\d/.test(t) ||                    // 숫자로 시작
-        (t.length <= 3 && t !== t.toUpperCase()) ||             // 소문자 섞임
-        (t.length >= 5 && !['GOOGL','GOOG'].includes(t)) ||    // 너무 긴 티커 (5+)
-        t.includes('&') ||                                      // 특수문자
-        (t.length <= 2 && sec.name.split(/\s+/).length > 2);   // 이름은 긴데 티커가 1-2글자
+      } else {
+        const t = sec.ticker || '';
+        const isSuspicious = /^\d/.test(t) ||
+          (t.length <= 3 && t !== t.toUpperCase()) ||
+          (t.length >= 5 && !['GOOGL','GOOG','BRK.A','BRK.B'].includes(t)) ||
+          t.includes('&') ||
+          (t.length <= 2 && sec.name.split(/\s+/).length > 2);
 
-      if (isSuspicious) {
-        needsFIGI.push(sec);
+        if (isSuspicious) needsFIGI.push(sec);
       }
     }
-  }
-  console.log(`  수동 매핑 수정: ${manualFixed}개`);
-  console.log(`  OpenFIGI 재조회 필요: ${needsFIGI.length}개`);
+    console.log(`  수동 매핑 수정: ${manualFixed}개`);
+    console.log(`  OpenFIGI 재조회 필요: ${needsFIGI.length}개\n`);
 
-  // 3) OpenFIGI 배치 조회
-  if (needsFIGI.length > 0) {
-    console.log('\n▶ Step 3: OpenFIGI 배치 조회');
-    const cusipList = needsFIGI.map(s => s.cusip);
-    const figiResults = await batchResolveFIGI(cusipList);
-
-    console.log(`  OpenFIGI 결과: ${Object.keys(figiResults).length}개 매핑 성공`);
-
-    // DB + 캐시 업데이트
-    let figiFixed = 0;
-    for (const sec of needsFIGI) {
-      const newTicker = figiResults[sec.cusip];
-      if (newTicker && newTicker !== sec.ticker) {
-        const { error: upErr } = await supabase
-          .from('securities')
-          .update({ ticker: newTicker })
-          .eq('id', sec.id);
-        if (!upErr) {
+    // 3) OpenFIGI 배치 조회
+    if (needsFIGI.length > 0) {
+      console.log('▶ Step 3: OpenFIGI 배치 조회');
+      const figiResults = await batchResolveFIGI(needsFIGI.map(s => s.cusip));
+      let figiFixed = 0;
+      for (const sec of needsFIGI) {
+        const newTicker = figiResults[sec.cusip];
+        if (newTicker && newTicker !== sec.ticker) {
+          if (!DRY_RUN) {
+            await supabase.from('securities').update({ ticker: newTicker }).eq('id', sec.id);
+            cusipCache[sec.cusip] = { ticker: newTicker, name: sec.name };
+          }
           figiFixed++;
           if (figiFixed <= 15) console.log(`  🔧 ${sec.ticker} → ${newTicker} (${sec.name})`);
-          cusipCache[sec.cusip] = { ticker: newTicker, name: sec.name };
+          sec.ticker = newTicker;
+        }
+      }
+      if (figiFixed > 15) console.log(`  ... 외 ${figiFixed - 15}개`);
+      console.log(`  OpenFIGI 보정: ${figiFixed}개\n`);
+    }
+  }
+
+  // ────────────────────────────────────────────
+  // Step 4: Polygon.io 교차 검증 (핵심!)
+  // ────────────────────────────────────────────
+  if (POLYGON_API_KEY) {
+    console.log('▶ Step 4: Polygon.io 교차 검증');
+    console.log('  (모든 고유 티커를 Polygon API로 유효성 확인)\n');
+
+    // 고유 티커 추출
+    const tickerMap = new Map(); // ticker → [securities]
+    for (const sec of securities) {
+      const t = (sec.ticker || '').toUpperCase();
+      if (!t || t === 'N/A') continue;
+      // BRK.B → BRK-B for Polygon (Polygon uses hyphen)
+      if (!tickerMap.has(t)) tickerMap.set(t, []);
+      tickerMap.get(t).push(sec);
+    }
+
+    const uniqueTickers = [...tickerMap.keys()];
+    console.log(`  고유 티커: ${uniqueTickers.length}개\n`);
+
+    const invalid = [];    // Polygon에서 못 찾은 티커
+    const inactive = [];   // 비활성 (상폐/변경)
+    const mismatch = [];   // 이름 불일치 (의심)
+    const verified = [];   // 정상 확인
+
+    let processed = 0;
+    for (const ticker of uniqueTickers) {
+      // Polygon API 호출 간 딜레이 (rate limit 방지)
+      if (processed > 0 && processed % 5 === 0) await sleep(250);
+
+      const polygonTicker = ticker.replace('.', '-'); // BRK.B → BRK-B
+      const result = await polygonVerifyTicker(polygonTicker);
+
+      processed++;
+      if (processed % 50 === 0) {
+        process.stdout.write(`\r  검증 중... ${processed}/${uniqueTickers.length}`);
+      }
+
+      const secs = tickerMap.get(ticker);
+      const dbName = secs[0]?.name || '';
+
+      if (!result.valid) {
+        invalid.push({ ticker, dbName, reason: result.reason, secs });
+      } else if (!result.active) {
+        inactive.push({ ticker, dbName, polygonName: result.name, secs });
+      } else {
+        // 이름 매칭 확인
+        const sim = nameSimilarity(dbName, result.name);
+        if (sim < 0.2 && dbName.length > 3 && result.name.length > 3) {
+          mismatch.push({ ticker, dbName, polygonName: result.name, similarity: sim, secs });
+        } else {
+          verified.push(ticker);
         }
       }
     }
-    if (figiFixed > 15) console.log(`  ... 외 ${figiFixed - 15}개 추가 수정`);
-    console.log(`  ✅ OpenFIGI 보정: ${figiFixed}개 수정됨`);
+    console.log(`\r  검증 완료: ${processed}/${uniqueTickers.length}          \n`);
+
+    // ─── 결과 리포트 ───
+    console.log('┌─────────────────────────────────────────────────');
+    console.log(`│ ✅ 정상 확인: ${verified.length}개`);
+    console.log(`│ ❌ 존재하지 않음: ${invalid.length}개`);
+    console.log(`│ ⚠️  비활성/상폐: ${inactive.length}개`);
+    console.log(`│ 🔍 이름 불일치: ${mismatch.length}개`);
+    console.log('└─────────────────────────────────────────────────\n');
+
+    // 존재하지 않는 티커 상세
+    if (invalid.length > 0) {
+      console.log('❌ Polygon에서 찾을 수 없는 티커:');
+      let autoFixed = 0;
+      for (const { ticker, dbName, reason, secs } of invalid) {
+        console.log(`   ${ticker} — "${dbName}" (${reason})`);
+
+        // 회사명으로 Polygon 검색해서 올바른 티커 찾기
+        if (dbName && dbName !== 'N/A') {
+          await sleep(300);
+          const suggestions = await polygonSearchTicker(dbName);
+          if (suggestions.length > 0) {
+            const best = suggestions[0];
+            const sim = nameSimilarity(dbName, best.name);
+            if (sim >= 0.3) {
+              console.log(`     → 추천: ${best.ticker} (${best.name}) [유사도 ${(sim * 100).toFixed(0)}%]`);
+
+              if (!DRY_RUN && sim >= 0.5) {
+                // 자동 수정 (유사도 50% 이상)
+                for (const sec of secs) {
+                  await supabase.from('securities').update({ ticker: best.ticker }).eq('id', sec.id);
+                  cusipCache[sec.cusip] = { ticker: best.ticker, name: sec.name };
+                }
+                autoFixed++;
+                console.log(`     ✅ 자동 수정 완료!`);
+              }
+            } else if (suggestions.length > 0) {
+              console.log(`     → 후보: ${suggestions.map(s => `${s.ticker}(${s.name})`).join(', ')}`);
+            }
+          }
+        }
+      }
+      if (autoFixed > 0) console.log(`\n  🔧 Polygon 기반 자동 수정: ${autoFixed}개`);
+      console.log('');
+    }
+
+    // 비활성 티커
+    if (inactive.length > 0) {
+      console.log('⚠️  비활성/상장폐지 종목:');
+      for (const { ticker, dbName, polygonName } of inactive.slice(0, 20)) {
+        console.log(`   ${ticker} — DB: "${dbName}" / Polygon: "${polygonName}"`);
+      }
+      if (inactive.length > 20) console.log(`   ... 외 ${inactive.length - 20}개`);
+      console.log('');
+    }
+
+    // 이름 불일치 (잠재적 오류)
+    if (mismatch.length > 0) {
+      console.log('🔍 이름 불일치 (수동 확인 필요):');
+      for (const { ticker, dbName, polygonName, similarity } of mismatch.slice(0, 20)) {
+        console.log(`   ${ticker} — DB: "${dbName}" ↔ Polygon: "${polygonName}" (${(similarity * 100).toFixed(0)}%)`);
+      }
+      if (mismatch.length > 20) console.log(`   ... 외 ${mismatch.length - 20}개`);
+      console.log('');
+    }
+
+    // Polygon 캐시 저장
+    writeFileSync(POLYGON_CACHE_FILE, JSON.stringify(polygonCache, null, 2));
+    console.log(`  💾 Polygon 검증 캐시 저장 (${Object.keys(polygonCache).length}개)\n`);
   }
 
-  // 4) 캐시 저장
-  writeFileSync(CUSIP_FILE, JSON.stringify(cusipCache, null, 2));
+  // ────────────────────────────────────────────
+  // 캐시 저장 & 최종 요약
+  // ────────────────────────────────────────────
+  if (!DRY_RUN) {
+    writeFileSync(CUSIP_FILE, JSON.stringify(cusipCache, null, 2));
+  }
 
-  // 5) 결과 요약
-  console.log('\n' + '═'.repeat(50));
+  console.log('═'.repeat(60));
 
-  // 최종 상태 확인
+  // 최종 상태 확인 — 아직 의심스러운 티커
   const { data: finalCheck } = await supabase
     .from('securities')
     .select('cusip, ticker, name')
@@ -239,17 +454,7 @@ async function main() {
       console.log(`   ${s.cusip}: ${s.ticker} — ${s.name}`);
     }
   } else {
-    console.log('✅ 모든 티커가 정상입니다!');
-  }
-
-  // CPNG 확인
-  const { data: cpngCheck } = await supabase
-    .from('securities')
-    .select('cusip, ticker, name')
-    .eq('cusip', '22266T109');
-
-  if (cpngCheck && cpngCheck.length > 0) {
-    console.log(`\n🔍 CPNG 확인: ${cpngCheck[0].ticker} (${cpngCheck[0].name})`);
+    console.log('\n✅ 모든 티커가 정상입니다!');
   }
 
   console.log('\n✅ 티커 보정 완료!');

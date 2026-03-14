@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   ArrowLeft, Building2, Globe, Users,
-  ArrowUpRight, ArrowDownRight, ExternalLink
+  ArrowUpRight, ArrowDownRight, ExternalLink, TrendingUp, Calendar,
+  BarChart3, Target
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -34,6 +35,128 @@ function fmtPrice(p) {
   return `$${p.toFixed(2)}`;
 }
 
+/** Extract domain from URL for Clearbit logo */
+function extractDomain(url) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    return u.hostname.replace('www.', '');
+  } catch { return null; }
+}
+
+/** Compute Simple Moving Average */
+function computeSMA(data, period) {
+  const result = [];
+  for (let i = 0; i < data.length; i++) {
+    if (i < period - 1) { result.push(null); continue; }
+    let sum = 0;
+    for (let j = i - period + 1; j <= i; j++) sum += data[j].c;
+    result.push(sum / period);
+  }
+  return result;
+}
+
+// Moving average configs
+const MA_LINES = [
+  { period: 5,   color: '#f59e0b', label: 'MA5'  },
+  { period: 20,  color: '#8b5cf6', label: 'MA20' },
+  { period: 60,  color: '#3b82f6', label: 'MA60' },
+  { period: 120, color: '#ef4444', label: 'MA120' },
+];
+
+// ========== WELL-KNOWN TICKER → DOMAIN MAP ==========
+const TICKER_DOMAINS = {
+  AAPL: 'apple.com', MSFT: 'microsoft.com', AMZN: 'amazon.com', GOOGL: 'google.com', GOOG: 'google.com',
+  META: 'meta.com', TSLA: 'tesla.com', NVDA: 'nvidia.com', BRK: 'berkshirehathaway.com',
+  JPM: 'jpmorganchase.com', V: 'visa.com', JNJ: 'jnj.com', WMT: 'walmart.com', MA: 'mastercard.com',
+  PG: 'pg.com', UNH: 'unitedhealthgroup.com', HD: 'homedepot.com', DIS: 'disney.com',
+  BAC: 'bankofamerica.com', XOM: 'exxonmobil.com', NFLX: 'netflix.com', KO: 'coca-cola.com',
+  PEP: 'pepsico.com', COST: 'costco.com', ABBV: 'abbvie.com', AVGO: 'broadcom.com',
+  MRK: 'merck.com', LLY: 'lilly.com', TMO: 'thermofisher.com', CSCO: 'cisco.com',
+  ADBE: 'adobe.com', CRM: 'salesforce.com', ACN: 'accenture.com', AMD: 'amd.com',
+  INTC: 'intel.com', IBM: 'ibm.com', ORCL: 'oracle.com', NKE: 'nike.com',
+  QCOM: 'qualcomm.com', TXN: 'ti.com', INTU: 'intuit.com', AMAT: 'appliedmaterials.com',
+  PYPL: 'paypal.com', NOW: 'servicenow.com', ISRG: 'intuitive.com', GS: 'goldmansachs.com',
+  MS: 'morganstanley.com', BLK: 'blackrock.com', SCHW: 'schwab.com', C: 'citigroup.com',
+  WFC: 'wellsfargo.com', AXP: 'americanexpress.com', CVX: 'chevron.com', COP: 'conocophillips.com',
+  ABNB: 'airbnb.com', UBER: 'uber.com', SQ: 'squareup.com', SHOP: 'shopify.com',
+  SNAP: 'snap.com', SPOT: 'spotify.com', PINS: 'pinterest.com', ZM: 'zoom.us',
+  ROKU: 'roku.com', NET: 'cloudflare.com', SNOW: 'snowflake.com', DDOG: 'datadoghq.com',
+  CRWD: 'crowdstrike.com', ZS: 'zscaler.com', PANW: 'paloaltonetworks.com',
+  BA: 'boeing.com', CAT: 'caterpillar.com', GE: 'ge.com', MMM: '3m.com',
+  T: 'att.com', VZ: 'verizon.com', TMUS: 't-mobile.com', CMCSA: 'comcast.com',
+  MCD: 'mcdonalds.com', SBUX: 'starbucks.com', LOW: 'lowes.com', TGT: 'target.com',
+  F: 'ford.com', GM: 'gm.com', TM: 'toyota.com', LMT: 'lockheedmartin.com',
+  RTX: 'rtx.com', HON: 'honeywell.com', UPS: 'ups.com', FDX: 'fedex.com',
+  PFE: 'pfizer.com', BMY: 'bms.com', GILD: 'gilead.com', AMGN: 'amgen.com',
+  CVS: 'cvshealth.com', CI: 'cigna.com', HUM: 'humana.com', ELV: 'elevancehealth.com',
+  DE: 'deere.com', ABT: 'abbott.com', DHR: 'danaher.com', SYK: 'stryker.com',
+  MDT: 'medtronic.com', BSX: 'bostonscientific.com', ZTS: 'zoetis.com',
+  PLTR: 'palantir.com', COIN: 'coinbase.com', HOOD: 'robinhood.com',
+  ARM: 'arm.com', SMCI: 'supermicro.com', TSM: 'tsmc.com', ASML: 'asml.com',
+  MU: 'micron.com', MRVL: 'marvell.com', LRCX: 'lamresearch.com', KLAC: 'kla.com',
+  SOFI: 'sofi.com', RIVN: 'rivian.com', LCID: 'lucidmotors.com', NIO: 'nio.com',
+};
+
+// ========== LOGO COMPONENT (Multi-source fallback) ==========
+function CompanyLogo({ ticker, details, isDark, textSecondary }) {
+  const [srcIdx, setSrcIdx] = useState(0);
+
+  const polygonKey = import.meta.env.VITE_POLYGON_API_KEY;
+  const domain = extractDomain(details?.homepage_url) || TICKER_DOMAINS[ticker] || null;
+
+  // Build ordered list of logo source URLs
+  const sources = useMemo(() => {
+    const srcs = [];
+    // 1. Polygon icon
+    if (details?.branding?.icon_url) srcs.push(`${details.branding.icon_url}?apiKey=${polygonKey}`);
+    // 2. Polygon logo
+    if (details?.branding?.logo_url) srcs.push(`${details.branding.logo_url}?apiKey=${polygonKey}`);
+    // 3. Clearbit (from homepage_url or known domain)
+    if (domain) srcs.push(`https://logo.clearbit.com/${domain}`);
+    // 4. Google Favicons (128px, very reliable)
+    if (domain) srcs.push(`https://www.google.com/s2/favicons?domain=${domain}&sz=128`);
+    // 5. Known domain from map (if homepage_url domain was different)
+    const mappedDomain = TICKER_DOMAINS[ticker];
+    if (mappedDomain && mappedDomain !== domain) {
+      srcs.push(`https://logo.clearbit.com/${mappedDomain}`);
+      srcs.push(`https://www.google.com/s2/favicons?domain=${mappedDomain}&sz=128`);
+    }
+    return srcs;
+  }, [details, ticker, domain, polygonKey]);
+
+  useEffect(() => { setSrcIdx(0); }, [ticker, sources]);
+
+  const handleError = () => {
+    setSrcIdx(prev => prev + 1);
+  };
+
+  const currentSrc = srcIdx < sources.length ? sources[srcIdx] : null;
+
+  if (!currentSrc) {
+    // Final fallback: styled initials
+    const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#22c55e', '#06b6d4', '#ef4444'];
+    const colorIdx = ticker.charCodeAt(0) % colors.length;
+    return (
+      <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-bold"
+        style={{
+          background: `${colors[colorIdx]}18`,
+          color: colors[colorIdx],
+          border: `1px solid ${colors[colorIdx]}25`,
+        }}>
+        {ticker.slice(0, 2)}
+      </div>
+    );
+  }
+
+  return (
+    <img src={currentSrc} alt={ticker}
+      className="w-14 h-14 rounded-2xl object-contain"
+      style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', padding: '8px' }}
+      onError={handleError} />
+  );
+}
+
 // ========== CHART COMPONENT ==========
 const RANGES = ['1D', '1W', '1M', '3M', '1Y', '5Y'];
 
@@ -45,6 +168,7 @@ function StockChart({ ticker, theme }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hoverIdx, setHoverIdx] = useState(-1);
+  const [showMA, setShowMA] = useState({ 5: true, 20: true, 60: false, 120: false });
 
   useEffect(() => {
     let cancelled = false;
@@ -59,7 +183,7 @@ function StockChart({ ticker, theme }) {
 
   const isDark = theme === 'dark';
 
-  // Compute chart metrics
+  // Compute chart metrics + moving averages
   const metrics = useMemo(() => {
     if (chartData.length === 0) return null;
     const closes = chartData.map(b => b.c);
@@ -68,7 +192,14 @@ function StockChart({ ticker, theme }) {
     const max = Math.max(...closes);
     const maxVol = Math.max(...volumes);
     const isUp = closes[closes.length - 1] >= closes[0];
-    return { closes, volumes, min, max, maxVol, isUp };
+
+    // Compute MAs
+    const mas = {};
+    MA_LINES.forEach(({ period }) => {
+      mas[period] = computeSMA(chartData, period);
+    });
+
+    return { closes, volumes, min, max, maxVol, isUp, mas };
   }, [chartData]);
 
   // Draw chart on canvas
@@ -85,23 +216,21 @@ function StockChart({ ticker, theme }) {
 
     const W = rect.width;
     const H = rect.height;
-    const CHART_H = H * 0.75; // top 75% for price
-    const VOL_H = H * 0.18;   // bottom 18% for volume
+    const CHART_H = H * 0.75;
+    const VOL_H = H * 0.18;
     const VOL_Y = H * 0.82;
-    const MARGIN_R = 55; // right margin for Y-axis labels
+    const MARGIN_R = 55;
     const CHART_W = W - MARGIN_R;
 
-    const { closes, volumes, min, max, maxVol, isUp } = metrics;
+    const { closes, volumes, min, max, maxVol, isUp, mas } = metrics;
     const pad = (max - min) * 0.05 || 1;
     const priceMin = min - pad;
     const priceMax = max + pad;
 
     const lineColor = isUp ? '#22c55e' : '#ef4444';
-    const volColor = isUp ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)';
 
     ctx.clearRect(0, 0, W, H);
 
-    // Helper: price to Y
     const toY = (price) => CHART_H - ((price - priceMin) / (priceMax - priceMin)) * CHART_H;
     const toX = (i) => (i / (chartData.length - 1)) * CHART_W;
 
@@ -114,16 +243,12 @@ function StockChart({ ticker, theme }) {
       const ratio = i / gridCount;
       const y = CHART_H * ratio;
       const price = priceMax - (priceMax - priceMin) * ratio;
-
-      // grid line
       ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(CHART_W, y);
       ctx.stroke();
-
-      // Y label
       ctx.fillStyle = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)';
       ctx.fillText(`$${price.toFixed(price >= 1000 ? 0 : 2)}`, CHART_W + 8, y);
     }
@@ -145,13 +270,12 @@ function StockChart({ ticker, theme }) {
     // Area fill with gradient
     const gradient = ctx.createLinearGradient(0, 0, 0, CHART_H);
     if (isUp) {
-      gradient.addColorStop(0, 'rgba(34,197,94,0.15)');
+      gradient.addColorStop(0, 'rgba(34,197,94,0.12)');
       gradient.addColorStop(1, 'rgba(34,197,94,0)');
     } else {
-      gradient.addColorStop(0, 'rgba(239,68,68,0.15)');
+      gradient.addColorStop(0, 'rgba(239,68,68,0.12)');
       gradient.addColorStop(1, 'rgba(239,68,68,0)');
     }
-
     ctx.beginPath();
     chartData.forEach((bar, i) => {
       const x = toX(i);
@@ -164,7 +288,28 @@ function StockChart({ ticker, theme }) {
     ctx.fillStyle = gradient;
     ctx.fill();
 
-    // Price line
+    // Moving average lines
+    MA_LINES.forEach(({ period, color }) => {
+      if (!showMA[period]) return;
+      const maData = mas[period];
+      if (!maData) return;
+      ctx.beginPath();
+      let started = false;
+      maData.forEach((val, i) => {
+        if (val === null) return;
+        const x = toX(i);
+        const y = toY(val);
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.7;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    });
+
+    // Price line (on top of MAs)
     ctx.beginPath();
     chartData.forEach((bar, i) => {
       const x = toX(i);
@@ -174,7 +319,7 @@ function StockChart({ ticker, theme }) {
     ctx.strokeStyle = lineColor;
     ctx.lineWidth = 1.5;
     ctx.stroke();
-  }, [chartData, metrics, isDark]);
+  }, [chartData, metrics, isDark, showMA]);
 
   // Draw overlay (crosshair)
   useEffect(() => {
@@ -182,7 +327,6 @@ function StockChart({ ticker, theme }) {
     if (!canvas || !metrics || hoverIdx < 0) {
       if (canvas) {
         const ctx = canvas.getContext('2d');
-        const dpr = window.devicePixelRatio || 1;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
       return;
@@ -275,12 +419,14 @@ function StockChart({ ticker, theme }) {
     return d.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
+  const toggleMA = (period) => setShowMA(prev => ({ ...prev, [period]: !prev[period] }));
+
   return (
     <div>
       {/* Hover info bar */}
-      <div className="h-7 mb-1 flex items-center gap-4">
+      <div className="min-h-[28px] mb-1 flex items-center gap-4 flex-wrap">
         {hoverBar ? (
-          <div className="flex items-center gap-3 text-xs" style={{ color: isDark ? '#aaa' : '#666' }}>
+          <div className="flex items-center gap-3 text-xs flex-wrap" style={{ color: isDark ? '#aaa' : '#666' }}>
             <span className="font-medium" style={{ color: isDark ? '#fff' : '#000' }}>{fmtDate(hoverDate)}</span>
             <span>O <span style={{ color: isDark ? '#ddd' : '#333' }}>{fmtPrice(hoverBar.o)}</span></span>
             <span>H <span style={{ color: isDark ? '#ddd' : '#333' }}>{fmtPrice(hoverBar.h)}</span></span>
@@ -296,7 +442,7 @@ function StockChart({ ticker, theme }) {
       </div>
 
       {/* Chart container */}
-      <div className="relative w-full rounded-xl overflow-hidden" style={{ height: '300px', background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' }}>
+      <div className="relative w-full rounded-xl overflow-hidden" style={{ height: '320px', background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' }}>
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
             <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'rgba(59,130,246,0.3)', borderTopColor: 'transparent' }} />
@@ -316,23 +462,172 @@ function StockChart({ ticker, theme }) {
         />
       </div>
 
-      {/* Range tabs */}
-      <div className="flex items-center justify-center gap-1 mt-3">
-        {RANGES.map(r => {
-          const active = range === r;
-          return (
-            <button key={r}
-              onClick={() => setRange(r)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-              style={{
-                background: active ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'transparent',
-                color: active ? (isDark ? '#fff' : '#000') : (isDark ? '#555' : '#aaa'),
-              }}>
-              {r}
-            </button>
-          );
-        })}
+      {/* Range tabs + MA toggles */}
+      <div className="flex items-center justify-between mt-3 gap-2 flex-wrap">
+        <div className="flex items-center gap-1">
+          {RANGES.map(r => {
+            const active = range === r;
+            return (
+              <button key={r}
+                onClick={() => setRange(r)}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                style={{
+                  background: active ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'transparent',
+                  color: active ? (isDark ? '#fff' : '#000') : (isDark ? '#555' : '#aaa'),
+                }}>
+                {r}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* MA toggle pills */}
+        <div className="flex items-center gap-1">
+          {MA_LINES.map(({ period, color, label }) => {
+            const active = showMA[period];
+            return (
+              <button key={period}
+                onClick={() => toggleMA(period)}
+                className="px-2 py-1 rounded-md text-[10px] font-bold transition-all"
+                style={{
+                  background: active ? `${color}20` : 'transparent',
+                  color: active ? color : (isDark ? '#444' : '#bbb'),
+                  border: `1px solid ${active ? `${color}40` : 'transparent'}`,
+                }}>
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
+    </div>
+  );
+}
+
+// ========== DAILY PRICE TABLE ==========
+function DailyPriceTable({ ticker, theme, locale }) {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const isDark = theme === 'dark';
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    const now = new Date();
+    const to = now.toISOString().split('T')[0];
+    const from = new Date(now);
+    from.setDate(from.getDate() - 60); // ~2 months for ~40 trading days
+    const fromStr = from.toISOString().split('T')[0];
+
+    polygon.getAggregates(ticker, 'day', 1, fromStr, to)
+      .then(bars => {
+        if (!cancelled) {
+          // Reverse to show most recent first, take top 30
+          setData((bars || []).slice().reverse().slice(0, 30));
+          setLoading(false);
+        }
+      })
+      .catch(() => { if (!cancelled) { setData([]); setLoading(false); } });
+    return () => { cancelled = true; };
+  }, [ticker]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'rgba(59,130,246,0.3)', borderTopColor: 'transparent' }} />
+      </div>
+    );
+  }
+  if (data.length === 0) return null;
+
+  const isKo = locale === 'ko';
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-xs" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+        <thead>
+          <tr>
+            {[
+              isKo ? '날짜' : 'Date',
+              isKo ? '종가' : 'Close',
+              isKo ? '등락률' : 'Change',
+              isKo ? '시가' : 'Open',
+              isKo ? '고가' : 'High',
+              isKo ? '저가' : 'Low',
+              isKo ? '거래량' : 'Volume',
+            ].map((h, i) => (
+              <th key={i} className="text-left py-2 px-2 font-medium" style={{
+                color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                ...(i > 0 ? { textAlign: 'right' } : {}),
+              }}>
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((bar, idx) => {
+            const prevBar = idx < data.length - 1 ? data[idx + 1] : null;
+            const change = prevBar ? ((bar.c - prevBar.c) / prevBar.c * 100) : 0;
+            const changeAbs = prevBar ? (bar.c - prevBar.c) : 0;
+            const isUp = change >= 0;
+            const d = new Date(bar.t);
+            const dateStr = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+
+            return (
+              <tr key={bar.t}
+                className="transition-colors"
+                style={{ cursor: 'default' }}
+                onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <td className="py-2 px-2 font-medium" style={{
+                  color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                }}>
+                  {dateStr}
+                </td>
+                <td className="py-2 px-2 text-right font-bold" style={{
+                  color: isDark ? '#fff' : '#000',
+                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                }}>
+                  ${bar.c.toFixed(2)}
+                </td>
+                <td className="py-2 px-2 text-right font-bold" style={{
+                  color: isUp ? '#22c55e' : '#ef4444',
+                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                }}>
+                  {prevBar ? `${isUp ? '+' : ''}${changeAbs.toFixed(2)} (${isUp ? '+' : ''}${change.toFixed(2)}%)` : '-'}
+                </td>
+                <td className="py-2 px-2 text-right" style={{
+                  color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                }}>
+                  ${bar.o.toFixed(2)}
+                </td>
+                <td className="py-2 px-2 text-right" style={{
+                  color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                }}>
+                  ${bar.h.toFixed(2)}
+                </td>
+                <td className="py-2 px-2 text-right" style={{
+                  color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                }}>
+                  ${bar.l.toFixed(2)}
+                </td>
+                <td className="py-2 px-2 text-right" style={{
+                  color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                }}>
+                  {fmtVolume(bar.v)}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -349,19 +644,27 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
   const [details, setDetails] = useState(null);
   const [snapshot, setSnapshot] = useState(null);
   const [prevClose, setPrevClose] = useState(null);
+  const [yearlyBars, setYearlyBars] = useState([]);
   const [loadingInfo, setLoadingInfo] = useState(true);
 
   useEffect(() => {
     if (!ticker) return;
     setLoadingInfo(true);
+    const now = new Date();
+    const to = now.toISOString().split('T')[0];
+    const from1Y = new Date(now); from1Y.setFullYear(from1Y.getFullYear() - 1);
+    const fromStr = from1Y.toISOString().split('T')[0];
+
     Promise.allSettled([
       polygon.getTickerDetails(ticker),
       polygon.getSnapshot(ticker),
       polygon.getPreviousClose(ticker),
-    ]).then(([detailRes, snapRes, prevRes]) => {
+      polygon.getAggregates(ticker, 'day', 1, fromStr, to),
+    ]).then(([detailRes, snapRes, prevRes, yearRes]) => {
       if (detailRes.status === 'fulfilled') setDetails(detailRes.value);
       if (snapRes.status === 'fulfilled') setSnapshot(snapRes.value);
       if (prevRes.status === 'fulfilled') setPrevClose(prevRes.value);
+      if (yearRes.status === 'fulfilled') setYearlyBars(yearRes.value || []);
       setLoadingInfo(false);
     });
   }, [ticker]);
@@ -413,12 +716,56 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
       marketCap: details.market_cap || 0,
       employees: details.total_employees || 0,
       homepageUrl: details.homepage_url || '',
-      logoUrl: details.branding?.icon_url
-        ? `${details.branding.icon_url}?apiKey=${import.meta.env.VITE_POLYGON_API_KEY}`
-        : null,
       exchange: details.primary_exchange || '',
     };
   }, [details, ticker]);
+
+  // ---- 52-week high/low & period performance ----
+  const priceHighlights = useMemo(() => {
+    if (yearlyBars.length === 0 || !priceInfo) return null;
+    const currentPrice = priceInfo.price;
+
+    // 52W high / low
+    let high52 = { price: -Infinity, date: null };
+    let low52 = { price: Infinity, date: null };
+    yearlyBars.forEach(bar => {
+      if (bar.h > high52.price) { high52 = { price: bar.h, date: new Date(bar.t) }; }
+      if (bar.l < low52.price) { low52 = { price: bar.l, date: new Date(bar.t) }; }
+    });
+
+    const fromHigh = high52.price > 0 ? ((currentPrice - high52.price) / high52.price * 100) : 0;
+    const fromLow = low52.price > 0 ? ((currentPrice - low52.price) / low52.price * 100) : 0;
+
+    // Position in 52W range (0-100%)
+    const range52 = high52.price - low52.price;
+    const position52 = range52 > 0 ? ((currentPrice - low52.price) / range52 * 100) : 50;
+
+    // Period returns: find bar closest to N days ago
+    const getReturn = (daysAgo) => {
+      if (yearlyBars.length === 0) return null;
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() - daysAgo);
+      const targetTs = targetDate.getTime();
+      let closest = yearlyBars[0];
+      let minDiff = Infinity;
+      for (const bar of yearlyBars) {
+        const diff = Math.abs(bar.t - targetTs);
+        if (diff < minDiff) { minDiff = diff; closest = bar; }
+      }
+      if (!closest || closest.c === 0) return null;
+      return ((currentPrice - closest.c) / closest.c * 100);
+    };
+
+    const returns = {
+      '1W': getReturn(7),
+      '1M': getReturn(30),
+      '3M': getReturn(90),
+      '6M': getReturn(180),
+      '1Y': getReturn(365),
+    };
+
+    return { high52, low52, fromHigh, fromLow, position52, returns };
+  }, [yearlyBars, priceInfo]);
 
   const isDark = t.name === 'dark';
 
@@ -431,7 +778,8 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
   if (priceInfo?.open) stats.push({ label: L.locale === 'ko' ? '시가' : 'Open', value: fmtPrice(priceInfo.open) });
   if (priceInfo?.prevClose) stats.push({ label: L.locale === 'ko' ? '전일 종가' : 'Prev Close', value: fmtPrice(priceInfo.prevClose) });
   if (priceInfo?.high && priceInfo?.low) stats.push({ label: L.locale === 'ko' ? '일중 범위' : 'Day Range', value: `${fmtPrice(priceInfo.low)} – ${fmtPrice(priceInfo.high)}` });
-  if (prevClose?.h && prevClose?.l) stats.push({ label: '52W Range', value: '-' }); // placeholder
+  if (priceHighlights?.high52) stats.push({ label: L.locale === 'ko' ? '52주 최고' : '52W High', value: fmtPrice(priceHighlights.high52.price) });
+  if (priceHighlights?.low52) stats.push({ label: L.locale === 'ko' ? '52주 최저' : '52W Low', value: fmtPrice(priceHighlights.low52.price) });
   if (companyInfo?.sector) stats.push({ label: L.locale === 'ko' ? '섹터' : 'Sector', value: companyInfo.sector.length > 25 ? companyInfo.sector.slice(0, 25) + '...' : companyInfo.sector });
   if (companyInfo?.employees) stats.push({ label: L.locale === 'ko' ? '직원 수' : 'Employees', value: companyInfo.employees.toLocaleString() });
 
@@ -446,17 +794,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
 
       {/* ===== HEADER: Logo + Name + Price ===== */}
       <div className="flex items-start gap-4 mb-6">
-        {companyInfo?.logoUrl ? (
-          <img src={companyInfo.logoUrl} alt={ticker}
-            className="w-14 h-14 rounded-2xl object-contain"
-            style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', padding: '8px' }}
-            onError={e => { e.target.style.display = 'none'; }} />
-        ) : (
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold"
-            style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', color: t.textSecondary }}>
-            {ticker.slice(0, 2)}
-          </div>
-        )}
+        <CompanyLogo ticker={ticker} details={details} isDark={isDark} textSecondary={t.textSecondary} />
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -487,7 +825,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
                 </span>
               </div>
               <p className="text-[11px] mt-0.5" style={{ color: t.textMuted }}>
-                {L.locale === 'ko' ? '15분 지연' : '15min delayed'}
+                {L.locale === 'ko' ? '전일 종가 대비' : 'vs prev close'} · {L.locale === 'ko' ? '15분 지연' : '15min delayed'}
               </p>
             </>
           ) : loadingInfo ? (
@@ -514,6 +852,132 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
           ))}
         </div>
       )}
+
+      {/* ===== 52-WEEK RANGE & PERFORMANCE ===== */}
+      {priceHighlights && (
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* 52-Week Range Card */}
+          <GlassCard hover={false}>
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Target size={14} style={{ color: t.accent }} />
+                <span className="text-xs font-bold" style={{ color: t.text }}>
+                  {L.locale === 'ko' ? '52주 가격 범위' : '52-Week Range'}
+                </span>
+              </div>
+
+              {/* Visual range bar */}
+              <div className="mb-3">
+                <div className="flex justify-between text-[11px] mb-1.5" style={{ color: t.textMuted }}>
+                  <span>{fmtPrice(priceHighlights.low52.price)}</span>
+                  <span>{fmtPrice(priceHighlights.high52.price)}</span>
+                </div>
+                <div className="relative w-full h-2 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
+                  <div className="absolute h-full rounded-full" style={{
+                    background: `linear-gradient(90deg, ${t.red}, ${t.green})`,
+                    opacity: 0.3,
+                    width: '100%',
+                  }} />
+                  <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2"
+                    style={{
+                      left: `${Math.max(2, Math.min(98, priceHighlights.position52))}%`,
+                      transform: 'translate(-50%, -50%)',
+                      background: t.accent,
+                      borderColor: isDark ? '#1a1a2e' : '#fff',
+                      boxShadow: `0 0 6px ${t.accent}40`,
+                    }} />
+                </div>
+                <div className="text-center mt-1.5">
+                  <span className="text-[11px] font-bold" style={{ color: t.accent }}>
+                    {L.locale === 'ko' ? '현재 위치' : 'Current'}: {priceHighlights.position52.toFixed(0)}%
+                  </span>
+                </div>
+              </div>
+
+              {/* High / Low details */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="px-2.5 py-2 rounded-lg" style={{ background: isDark ? 'rgba(239,68,68,0.06)' : 'rgba(239,68,68,0.04)' }}>
+                  <p className="text-[10px] font-medium" style={{ color: t.red }}>
+                    {L.locale === 'ko' ? '52주 최저' : '52W Low'}
+                  </p>
+                  <p className="text-sm font-bold mt-0.5" style={{ color: t.text }}>{fmtPrice(priceHighlights.low52.price)}</p>
+                  <p className="text-[10px] mt-0.5" style={{ color: t.green }}>
+                    +{priceHighlights.fromLow.toFixed(1)}%
+                    <span style={{ color: t.textMuted }}> · {priceHighlights.low52.date?.toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                  </p>
+                </div>
+                <div className="px-2.5 py-2 rounded-lg" style={{ background: isDark ? 'rgba(34,197,94,0.06)' : 'rgba(34,197,94,0.04)' }}>
+                  <p className="text-[10px] font-medium" style={{ color: t.green }}>
+                    {L.locale === 'ko' ? '52주 최고' : '52W High'}
+                  </p>
+                  <p className="text-sm font-bold mt-0.5" style={{ color: t.text }}>{fmtPrice(priceHighlights.high52.price)}</p>
+                  <p className="text-[10px] mt-0.5" style={{ color: t.red }}>
+                    {priceHighlights.fromHigh.toFixed(1)}%
+                    <span style={{ color: t.textMuted }}> · {priceHighlights.high52.date?.toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </GlassCard>
+
+          {/* Period Performance Card */}
+          <GlassCard hover={false}>
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <BarChart3 size={14} style={{ color: t.accent }} />
+                <span className="text-xs font-bold" style={{ color: t.text }}>
+                  {L.locale === 'ko' ? '기간별 수익률' : 'Period Returns'}
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                {Object.entries(priceHighlights.returns).map(([period, ret]) => {
+                  if (ret === null) return null;
+                  const isUp = ret >= 0;
+                  const absRet = Math.abs(ret);
+                  const maxBar = 40; // max bar width %
+                  const barWidth = Math.min(absRet, 100) / 100 * maxBar;
+
+                  return (
+                    <div key={period} className="flex items-center gap-2">
+                      <span className="text-xs font-medium w-8 flex-shrink-0" style={{ color: t.textMuted }}>{period}</span>
+                      <div className="flex-1 h-5 rounded-md flex items-center relative overflow-hidden"
+                        style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}>
+                        <div className="h-full rounded-md transition-all duration-500"
+                          style={{
+                            width: `${Math.max(barWidth, 2)}%`,
+                            background: isUp
+                              ? (isDark ? 'rgba(34,197,94,0.25)' : 'rgba(34,197,94,0.2)')
+                              : (isDark ? 'rgba(239,68,68,0.25)' : 'rgba(239,68,68,0.2)'),
+                          }} />
+                      </div>
+                      <span className="text-xs font-bold w-16 text-right flex-shrink-0"
+                        style={{ color: isUp ? t.green : t.red }}>
+                        {isUp ? '+' : ''}{ret.toFixed(2)}%
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </GlassCard>
+        </div>
+      )}
+
+      {/* ===== DAILY PRICE TABLE (일별 시세) ===== */}
+      <div className="mt-6">
+        <GlassCard hover={false}>
+          <div className="p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar size={16} style={{ color: t.accent }} />
+              <h3 className="text-sm font-bold" style={{ color: t.text }}>
+                {L.locale === 'ko' ? '일별 시세' : 'Daily Price History'}
+              </h3>
+            </div>
+            <DailyPriceTable ticker={ticker} theme={t.name} locale={L.locale} />
+          </div>
+        </GlassCard>
+      </div>
 
       {/* ===== WHO'S HOLDING — FolioObs 핵심 ===== */}
       <div className="mt-6">
