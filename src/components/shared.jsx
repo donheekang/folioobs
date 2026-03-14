@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { ResponsiveContainer, AreaChart, Area, Tooltip } from "recharts";
 import { Heart, Moon, Sun, Plus, Minus, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
@@ -101,7 +101,14 @@ export const QuarterlyTimeline = ({ investorId, onNavigate }) => {
   const L = useLocale();
   const { quarterlyActivity: QUARTERLY_ACTIVITY } = useData();
   const activities = QUARTERLY_ACTIVITY[investorId] || [];
+  const [showAllQuarters, setShowAllQuarters] = useState(false);
+  const [expandedActions, setExpandedActions] = useState({});
   if (activities.length === 0) return null;
+
+  const QUARTER_LIMIT = 2;
+  const ACTION_LIMIT = 5;
+  const visibleQuarters = showAllQuarters ? activities : activities.slice(0, QUARTER_LIMIT);
+  const hiddenCount = activities.length - QUARTER_LIMIT;
 
   const typeConfig = {
     new: { label: L.t('common.new'), color: t.accent, icon: Plus, bg: t.name === 'dark' ? 'rgba(41,151,255,0.1)' : 'rgba(0,113,227,0.06)' },
@@ -113,38 +120,65 @@ export const QuarterlyTimeline = ({ investorId, onNavigate }) => {
 
   return (
     <div className="space-y-4">
-      {activities.map((quarter, qi) => (
-        <div key={qi}>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: qi === 0 ? t.accent : t.textMuted }} />
-            <span className="text-sm font-semibold" style={{ color: qi === 0 ? t.text : t.textSecondary }}>{L.quarter(quarter.q)}</span>
-            {qi === 0 && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: t.name === 'dark' ? 'rgba(41,151,255,0.1)' : 'rgba(0,113,227,0.06)', color: t.accent }}>{L.t('common.latest')}</span>}
-          </div>
-          <div className="ml-3 pl-3 space-y-1.5" style={{ borderLeft: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
-            {quarter.actions.map((action, ai) => {
-              const cfg = typeConfig[action.type] || typeConfig.hold;
-              const Icon = cfg.icon;
-              return (
-                <div key={ai} className="flex items-center gap-3 py-1.5 px-2 rounded-lg transition-colors"
-                  style={{ background: 'transparent' }}
+      {visibleQuarters.map((quarter, qi) => {
+        const isActionsExpanded = !!expandedActions[qi];
+        const actions = quarter.actions || [];
+        const visibleActions = isActionsExpanded ? actions : actions.slice(0, ACTION_LIMIT);
+        const hiddenActions = actions.length - ACTION_LIMIT;
+
+        return (
+          <div key={qi}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1.5 h-1.5 rounded-full" style={{ background: qi === 0 ? t.accent : t.textMuted }} />
+              <span className="text-sm font-semibold" style={{ color: qi === 0 ? t.text : t.textSecondary }}>{L.quarter(quarter.q)}</span>
+              {qi === 0 && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: t.name === 'dark' ? 'rgba(41,151,255,0.1)' : 'rgba(0,113,227,0.06)', color: t.accent }}>{L.t('common.latest')}</span>}
+              <span className="text-xs" style={{ color: t.textMuted }}>{actions.length}개 종목</span>
+            </div>
+            <div className="ml-3 pl-3 space-y-1.5" style={{ borderLeft: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
+              {visibleActions.map((action, ai) => {
+                const cfg = typeConfig[action.type] || typeConfig.hold;
+                const Icon = cfg.icon;
+                return (
+                  <div key={ai} className="flex items-center gap-3 py-1.5 px-2 rounded-lg cursor-pointer transition-colors"
+                    style={{ background: 'transparent' }}
+                    onClick={()=>onNavigate?.("stock",action.ticker)}
+                    onMouseEnter={e => e.currentTarget.style.background = t.cardRowHover}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: cfg.bg }}>
+                      <Icon size={12} style={{ color: cfg.color }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium" style={{ color: t.accent }}>{action.ticker}</span>
+                      <span className="text-xs ml-1.5" style={{ color: t.textMuted }}>{action.name}</span>
+                    </div>
+                    <span className="text-xs font-medium" style={{ color: cfg.color }}>
+                      {action.type === 'new' ? L.t('common.new') : action.type === 'hold' ? L.t('common.hold') : (() => { const v = formatChange(action.pctChange); return v === '대폭 확대' ? L.t('common.significantIncrease') : (v || '—'); })()}
+                    </span>
+                  </div>
+                );
+              })}
+              {hiddenActions > 0 && (
+                <button className="w-full text-center py-1.5 text-xs font-medium rounded-lg transition-colors"
+                  style={{ color: t.accent, background: 'transparent' }}
                   onMouseEnter={e => e.currentTarget.style.background = t.cardRowHover}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                  <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: cfg.bg }}>
-                    <Icon size={12} style={{ color: cfg.color }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-medium cursor-pointer hover:underline" style={{ color: t.accent }} onClick={()=>onNavigate?.("stock",action.ticker)}>{action.ticker}</span>
-                    <span className="text-xs ml-1.5" style={{ color: t.textMuted }}>{action.name}</span>
-                  </div>
-                  <span className="text-xs font-medium" style={{ color: cfg.color }}>
-                    {action.type === 'new' ? L.t('common.new') : action.type === 'hold' ? L.t('common.hold') : (() => { const v = formatChange(action.pctChange); return v === '대폭 확대' ? L.t('common.significantIncrease') : (v || '—'); })()}
-                  </span>
-                </div>
-              );
-            })}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  onClick={() => setExpandedActions(prev => ({ ...prev, [qi]: !prev[qi] }))}>
+                  {isActionsExpanded ? '접기' : `+${hiddenActions} 더보기`}
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
+      {hiddenCount > 0 && (
+        <button className="w-full text-center py-2.5 text-xs font-medium rounded-xl transition-colors"
+          style={{ color: t.accent, background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${t.cardRowBorder}` }}
+          onMouseEnter={e => e.currentTarget.style.background = t.cardRowHover}
+          onMouseLeave={e => e.currentTarget.style.background = t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}
+          onClick={() => setShowAllQuarters(!showAllQuarters)}>
+          {showAllQuarters ? '최근 2분기만 보기' : `+${hiddenCount}개 분기 더보기`}
+        </button>
+      )}
     </div>
   );
 };
