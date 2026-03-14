@@ -266,7 +266,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
         {/* Trade Highlights — 이번 분기 핫 종목 (종목 중심 집계) */}
         {heroHighlights.length > 0 && (
-          <div className="hero-enter hero-enter-4 mb-6 w-full" style={{maxWidth:'680px', margin:'0 auto'}}>
+          <div className="hero-enter hero-enter-4 w-full" style={{maxWidth:'680px', margin:'0 auto 2.5rem'}}>
             <p className="text-xs font-medium mb-3 text-center" style={{color:t.textMuted}}>{L.t('dashboard.hotStocks')}</p>
             {/* 데스크톱: 가로 flex 나란히 / 모바일: 1번 풀너비 + 2,3번 반반 grid */}
             <div className="hot-stocks-grid">
@@ -286,7 +286,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                     : `${t.accent}20`;
                 return (
                   <div key={i}
-                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all hover:scale-[1.02] ${i === 0 ? 'hot-stock-first' : ''}`}
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all hover:scale-[1.02]"
                     style={{background:glowBg, border:`1px solid ${glowBorder}`}}>
                     {/* 투자자 아바타 스택 */}
                     <div className="flex -space-x-2 flex-shrink-0">
