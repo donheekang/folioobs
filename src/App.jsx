@@ -26,6 +26,7 @@ import InsightsPage from "./pages/InsightsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import StockDetailPage from "./pages/StockDetailPage";
+import ArkReportPage from "./pages/ArkReportPage";
 
 // ========== MAIN APP ==========
 export default function FolioObs() {
@@ -407,6 +408,7 @@ function FolioObsInner() {
                 {page === "watchlist" && <WatchlistPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} />}
                 {page === "compare" && <ComparePage onBack={goHome} />}
                 {page === "insights" && <InsightsPage onBack={goHome} onNavigate={navigate} />}
+                {page === "ark-report" && <ArkReportPage onBack={goHome} onNavigate={navigate} />}
                 {page === "privacy" && <PrivacyPage onBack={goHome} />}
                 {page === "terms" && <TermsPage onBack={goHome} />}
               </div>

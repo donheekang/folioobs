@@ -512,9 +512,16 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
         return (
           <GlassCard hover={false}>
             <div className="p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Calendar size={18} style={{color:t.accent}} />
-                <h3 className="font-bold" style={{color:t.text}}>{L.t('investor.dailyTrades')}</h3>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Calendar size={18} style={{color:t.accent}} />
+                  <h3 className="font-bold" style={{color:t.text}}>{L.t('investor.dailyTrades')}</h3>
+                </div>
+                <button className="text-xs font-medium px-3 py-1.5 rounded-full transition-colors"
+                  style={{color:t.accent, background:`${t.accent}10`, border:`1px solid ${t.accent}20`}}
+                  onClick={()=>onNavigate("ark-report")}>
+                  {L.locale === 'ko' ? '📊 주간·월간 리포트' : '📊 Weekly/Monthly Report'}
+                </button>
               </div>
 
               <div className="space-y-5">
