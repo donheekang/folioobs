@@ -104,67 +104,114 @@ export async function getPreviousClose(ticker) {
 // ========== HELPER: 기간별 차트 데이터 가져오기 ==========
 
 /**
- * 기간 프리셋으로 차트 데이터 가져오기
+ * 기간 프리셋 + 선택적 타임프레임으로 차트 데이터 가져오기
  * @param {string} ticker
  * @param {'1D'|'1W'|'1M'|'3M'|'1Y'|'5Y'} range
+ * @param {'15m'|'30m'|'1h'|'1d'|'1w'|null} timeframe - optional, overrides auto timeframe
  */
-export async function getChartData(ticker, range = '1Y') {
+export async function getChartData(ticker, range = '1Y', timeframe = null) {
   const now = new Date();
   const to = formatDate(now);
   let from, timespan, multiplier;
 
+  // Determine date range based on period
   switch (range) {
     case '1D':
       from = to;
-      timespan = 'minute';
-      multiplier = 5;
       break;
     case '1W': {
       const d = new Date(now);
       d.setDate(d.getDate() - 7);
       from = formatDate(d);
-      timespan = 'minute';
-      multiplier = 30;
       break;
     }
     case '1M': {
       const d = new Date(now);
       d.setMonth(d.getMonth() - 1);
       from = formatDate(d);
-      timespan = 'hour';
-      multiplier = 1;
       break;
     }
     case '3M': {
       const d = new Date(now);
       d.setMonth(d.getMonth() - 3);
       from = formatDate(d);
-      timespan = 'day';
-      multiplier = 1;
       break;
     }
     case '1Y': {
       const d = new Date(now);
       d.setFullYear(d.getFullYear() - 1);
       from = formatDate(d);
-      timespan = 'day';
-      multiplier = 1;
       break;
     }
     case '5Y': {
       const d = new Date(now);
       d.setFullYear(d.getFullYear() - 5);
       from = formatDate(d);
-      timespan = 'week';
-      multiplier = 1;
       break;
     }
     default: {
       const d = new Date(now);
       d.setFullYear(d.getFullYear() - 1);
       from = formatDate(d);
-      timespan = 'day';
-      multiplier = 1;
+    }
+  }
+
+  // Determine timeframe (timespan + multiplier)
+  if (timeframe) {
+    // Custom timeframe specified
+    switch (timeframe) {
+      case '15m':
+        timespan = 'minute';
+        multiplier = 15;
+        break;
+      case '30m':
+        timespan = 'minute';
+        multiplier = 30;
+        break;
+      case '1h':
+        timespan = 'hour';
+        multiplier = 1;
+        break;
+      case '1d':
+        timespan = 'day';
+        multiplier = 1;
+        break;
+      case '1w':
+        timespan = 'week';
+        multiplier = 1;
+        break;
+      default:
+        // Fallback to auto
+        timespan = 'day';
+        multiplier = 1;
+    }
+  } else {
+    // Auto timeframe based on range (smart default)
+    switch (range) {
+      case '1D':
+        timespan = 'minute';
+        multiplier = 15;
+        break;
+      case '1W':
+        timespan = 'minute';
+        multiplier = 30;
+        break;
+      case '1M':
+        timespan = 'hour';
+        multiplier = 1;
+        break;
+      case '3M':
+      case '1Y':
+        timespan = 'day';
+        multiplier = 1;
+        break;
+      case '5Y':
+        timespan = 'week';
+        multiplier = 1;
+        break;
+      default:
+        timespan = 'day';
+        multiplier = 1;
     }
   }
 

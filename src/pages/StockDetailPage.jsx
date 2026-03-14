@@ -56,6 +56,164 @@ function computeSMA(data, period) {
   return result;
 }
 
+/** Compute Exponential Moving Average */
+function computeEMA(data, period) {
+  const result = [];
+  const k = 2 / (period + 1);
+  let ema = null;
+  for (let i = 0; i < data.length; i++) {
+    if (ema === null) {
+      // Initialize EMA with SMA of first period values
+      if (i < period - 1) { result.push(null); continue; }
+      let sum = 0;
+      for (let j = i - period + 1; j <= i; j++) sum += data[j].c;
+      ema = sum / period;
+    } else {
+      ema = data[i].c * k + ema * (1 - k);
+    }
+    result.push(ema);
+  }
+  return result;
+}
+
+/** Compute Bollinger Bands (period=20, stddev=2) */
+function computeBollingerBands(data, period = 20, stddev = 2) {
+  const sma = computeSMA(data, period);
+  const upper = [];
+  const lower = [];
+  const middle = sma;
+
+  for (let i = 0; i < data.length; i++) {
+    if (sma[i] === null) {
+      upper.push(null);
+      lower.push(null);
+      continue;
+    }
+    // Calculate standard deviation for this window
+    let sumSq = 0;
+    for (let j = i - period + 1; j <= i; j++) {
+      const diff = data[j].c - sma[i];
+      sumSq += diff * diff;
+    }
+    const std = Math.sqrt(sumSq / period);
+    upper.push(sma[i] + stddev * std);
+    lower.push(sma[i] - stddev * std);
+  }
+
+  return { upper, middle, lower };
+}
+
+/** Compute MACD */
+function computeMACD(data) {
+  const ema12 = computeEMA(data, 12);
+  const ema26 = computeEMA(data, 26);
+  const macdLine = [];
+  const signalLine = [];
+  const histogram = [];
+
+  // MACD line = EMA12 - EMA26
+  for (let i = 0; i < data.length; i++) {
+    if (ema12[i] !== null && ema26[i] !== null) {
+      macdLine.push(ema12[i] - ema26[i]);
+    } else {
+      macdLine.push(null);
+    }
+  }
+
+  // Signal line = EMA(9) of MACD line
+  const signal = computeEMA(
+    macdLine.map(val => ({ c: val })).filter(x => x.c !== null),
+    9
+  );
+
+  let signalIdx = 0;
+  for (let i = 0; i < data.length; i++) {
+    if (macdLine[i] !== null) {
+      signalLine.push(signal[signalIdx] !== undefined ? signal[signalIdx] : null);
+      signalIdx++;
+    } else {
+      signalLine.push(null);
+    }
+  }
+
+  // Histogram = MACD - Signal
+  for (let i = 0; i < data.length; i++) {
+    if (macdLine[i] !== null && signalLine[i] !== null) {
+      histogram.push(macdLine[i] - signalLine[i]);
+    } else {
+      histogram.push(null);
+    }
+  }
+
+  return { macdLine, signalLine, histogram };
+}
+
+/** Compute RSI (period=14) */
+function computeRSI(data, period = 14) {
+  const result = [];
+  let gains = 0, losses = 0;
+
+  for (let i = 0; i < data.length; i++) {
+    if (i === 0) {
+      result.push(null);
+      continue;
+    }
+
+    const change = data[i].c - data[i - 1].c;
+    if (change > 0) {
+      gains += change;
+    } else {
+      losses += -change;
+    }
+
+    if (i < period) {
+      result.push(null);
+      continue;
+    }
+
+    if (i === period) {
+      // Initialize with SMA of gains/losses
+      const avgGain = gains / period;
+      const avgLoss = losses / period;
+      const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+      result.push(100 - (100 / (1 + rs)));
+    } else {
+      // Use EMA smoothing for subsequent values
+      const prevRSI = result[i - 1];
+      const k = 1 / period;
+      // This is a simplified RSI calculation
+      const change = data[i].c - data[i - 1].c;
+      const gain = change > 0 ? change : 0;
+      const loss = change < 0 ? -change : 0;
+      // For proper RSI, we need to track avgGain and avgLoss
+      result.push(prevRSI);
+    }
+  }
+
+  // More accurate RSI calculation
+  const rsiResult = [];
+  for (let i = 0; i < data.length; i++) {
+    if (i < period) {
+      rsiResult.push(null);
+      continue;
+    }
+
+    let avgGain = 0, avgLoss = 0;
+    for (let j = i - period + 1; j <= i; j++) {
+      const change = data[j].c - data[j - 1].c;
+      if (change > 0) avgGain += change;
+      else avgLoss += -change;
+    }
+    avgGain /= period;
+    avgLoss /= period;
+
+    const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+    rsiResult.push(100 - (100 / (1 + rs)));
+  }
+
+  return rsiResult;
+}
+
 // Moving average configs
 const MA_LINES = [
   { period: 5,   color: '#f59e0b', label: 'MA5'  },
@@ -159,31 +317,75 @@ function CompanyLogo({ ticker, details, isDark, textSecondary }) {
 
 // ========== CHART COMPONENT ==========
 const RANGES = ['1D', '1W', '1M', '3M', '1Y', '5Y'];
+const TIMEFRAMES = [
+  { key: '15m', label: '15분' },
+  { key: '30m', label: '30분' },
+  { key: '1h', label: '1시간' },
+  { key: '1d', label: '일' },
+  { key: '1w', label: '주' },
+];
+
+// Smart default timeframe for each range
+const RANGE_DEFAULT_TIMEFRAME = {
+  '1D': '15m',
+  '1W': '30m',
+  '1M': '1h',
+  '3M': '1d',
+  '1Y': '1d',
+  '5Y': '1w',
+};
 
 function StockChart({ ticker, theme }) {
   const canvasRef = useRef(null);
   const overlayRef = useRef(null);
   const [range, setRange] = useState('1Y');
+  const [timeframe, setTimeframe] = useState(RANGE_DEFAULT_TIMEFRAME['1Y']);
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hoverIdx, setHoverIdx] = useState(-1);
   const [showMA, setShowMA] = useState({ 5: true, 20: true, 60: false, 120: false });
+  const [chartMode, setChartMode] = useState('line'); // 'line' or 'candle'
+  const [showBB, setShowBB] = useState(false);
+  const [showMACD, setShowMACD] = useState(false);
+  const [showRSI, setShowRSI] = useState(false);
+  const [prevClose, setPrevClose] = useState(null);
 
+  // Fetch chart data
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
     setHoverIdx(-1);
-    polygon.getChartData(ticker, range)
+    polygon.getChartData(ticker, range, timeframe)
       .then(bars => { if (!cancelled) { setChartData(bars || []); setLoading(false); } })
       .catch(err => { if (!cancelled) { setError(err.message); setLoading(false); } });
     return () => { cancelled = true; };
-  }, [ticker, range]);
+  }, [ticker, range, timeframe]);
+
+  // Fetch previous close for intraday
+  useEffect(() => {
+    const isIntraday = range === '1D' || ['15m', '30m', '1h'].includes(timeframe);
+    if (!isIntraday) {
+      setPrevClose(null);
+      return;
+    }
+    let cancelled = false;
+    polygon.getPreviousClose(ticker)
+      .then(data => { if (!cancelled && data) setPrevClose(data.c); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [ticker, range, timeframe]);
+
+  // Handle range change with smart default timeframe
+  const handleRangeChange = (newRange) => {
+    setRange(newRange);
+    setTimeframe(RANGE_DEFAULT_TIMEFRAME[newRange] || '1d');
+  };
 
   const isDark = theme === 'dark';
 
-  // Compute chart metrics + moving averages
+  // Compute chart metrics + moving averages + indicators
   const metrics = useMemo(() => {
     if (chartData.length === 0) return null;
     const closes = chartData.map(b => b.c);
@@ -199,8 +401,17 @@ function StockChart({ ticker, theme }) {
       mas[period] = computeSMA(chartData, period);
     });
 
-    return { closes, volumes, min, max, maxVol, isUp, mas };
-  }, [chartData]);
+    // Compute Bollinger Bands (reuse MA20 as middle)
+    const bb = showBB ? computeBollingerBands(chartData, 20, 2) : null;
+
+    // Compute MACD
+    const macd = showMACD ? computeMACD(chartData) : null;
+
+    // Compute RSI
+    const rsi = showRSI ? computeRSI(chartData, 14) : null;
+
+    return { closes, volumes, min, max, maxVol, isUp, mas, bb, macd, rsi };
+  }, [chartData, showBB, showMACD, showRSI]);
 
   // Draw chart on canvas
   useEffect(() => {
@@ -216,13 +427,39 @@ function StockChart({ ticker, theme }) {
 
     const W = rect.width;
     const H = rect.height;
-    const CHART_H = H * 0.75;
-    const VOL_H = H * 0.18;
-    const VOL_Y = H * 0.82;
+
+    // Calculate layout based on active sub-indicators
+    let CHART_H, VOL_H, MACD_H, RSI_H, VOL_Y, MACD_Y, RSI_Y;
+    const subIndicatorCount = (showMACD ? 1 : 0) + (showRSI ? 1 : 0);
+
+    if (subIndicatorCount === 0) {
+      CHART_H = H * 0.75;
+      VOL_H = H * 0.18;
+      MACD_H = 0;
+      RSI_H = 0;
+      VOL_Y = H * 0.82;
+    } else if (subIndicatorCount === 1) {
+      CHART_H = H * 0.55;
+      VOL_H = H * 0.12;
+      MACD_H = H * 0.25;
+      RSI_H = H * 0.25;
+      VOL_Y = H * 0.67;
+      MACD_Y = H * 0.68;
+      RSI_Y = H * 0.68;
+    } else {
+      CHART_H = H * 0.45;
+      VOL_H = H * 0.10;
+      MACD_H = H * 0.18;
+      RSI_H = H * 0.18;
+      VOL_Y = H * 0.55;
+      MACD_Y = H * 0.56;
+      RSI_Y = H * 0.75;
+    }
+
     const MARGIN_R = 55;
     const CHART_W = W - MARGIN_R;
 
-    const { closes, volumes, min, max, maxVol, isUp, mas } = metrics;
+    const { closes, volumes, min, max, maxVol, isUp, mas, bb, macd, rsi } = metrics;
     const pad = (max - min) * 0.05 || 1;
     const priceMin = min - pad;
     const priceMax = max + pad;
@@ -234,6 +471,7 @@ function StockChart({ ticker, theme }) {
     const toY = (price) => CHART_H - ((price - priceMin) / (priceMax - priceMin)) * CHART_H;
     const toX = (i) => (i / (chartData.length - 1)) * CHART_W;
 
+    // ===== MAIN CHART AREA =====
     // Grid lines + Y-axis labels
     const gridCount = 4;
     ctx.textAlign = 'left';
@@ -253,6 +491,26 @@ function StockChart({ ticker, theme }) {
       ctx.fillText(`$${price.toFixed(price >= 1000 ? 0 : 2)}`, CHART_W + 8, y);
     }
 
+    // Previous close reference line (intraday only)
+    const isIntraday = range === '1D' || ['15m', '30m', '1h'].includes(timeframe);
+    if (isIntraday && prevClose) {
+      const prevY = toY(prevClose);
+      if (prevY >= 0 && prevY <= CHART_H) {
+        ctx.strokeStyle = isDark ? 'rgba(150,150,150,0.4)' : 'rgba(100,100,100,0.4)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(0, prevY);
+        ctx.lineTo(CHART_W, prevY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)';
+        ctx.textAlign = 'left';
+        ctx.fillText('PC', CHART_W + 8, prevY - 5);
+      }
+    }
+
     // Volume bars
     if (maxVol > 0) {
       const barW = Math.max(1, (CHART_W / chartData.length) * 0.6);
@@ -267,26 +525,140 @@ function StockChart({ ticker, theme }) {
       });
     }
 
-    // Area fill with gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, CHART_H);
-    if (isUp) {
-      gradient.addColorStop(0, 'rgba(34,197,94,0.12)');
-      gradient.addColorStop(1, 'rgba(34,197,94,0)');
-    } else {
-      gradient.addColorStop(0, 'rgba(239,68,68,0.12)');
-      gradient.addColorStop(1, 'rgba(239,68,68,0)');
+    // Bollinger Bands fill
+    if (showBB && bb) {
+      const bbGradient = ctx.createLinearGradient(0, 0, 0, CHART_H);
+      bbGradient.addColorStop(0, isDark ? 'rgba(139,92,246,0.05)' : 'rgba(139,92,246,0.08)');
+      bbGradient.addColorStop(1, isDark ? 'rgba(139,92,246,0.02)' : 'rgba(139,92,246,0.03)');
+      ctx.fillStyle = bbGradient;
+      ctx.beginPath();
+      let startedUpper = false;
+      bb.upper.forEach((val, i) => {
+        if (val === null || bb.lower[i] === null) return;
+        const x = toX(i);
+        const yUpper = toY(val);
+        const yLower = toY(bb.lower[i]);
+        if (!startedUpper) {
+          ctx.moveTo(x, yUpper);
+          startedUpper = true;
+        } else {
+          ctx.lineTo(x, yUpper);
+        }
+      });
+      for (let i = bb.lower.length - 1; i >= 0; i--) {
+        if (bb.lower[i] !== null) {
+          ctx.lineTo(toX(i), toY(bb.lower[i]));
+          break;
+        }
+      }
+      for (let i = chartData.length - 1; i >= 0; i--) {
+        if (bb.lower[i] !== null) {
+          const x = toX(i);
+          const yLower = toY(bb.lower[i]);
+          ctx.lineTo(x, yLower);
+          break;
+        }
+      }
+      ctx.closePath();
+      ctx.fill();
     }
-    ctx.beginPath();
-    chartData.forEach((bar, i) => {
-      const x = toX(i);
-      const y = toY(bar.c);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.lineTo(toX(chartData.length - 1), CHART_H);
-    ctx.lineTo(0, CHART_H);
-    ctx.closePath();
-    ctx.fillStyle = gradient;
-    ctx.fill();
+
+    // Area fill with gradient (line mode)
+    if (chartMode === 'line') {
+      const gradient = ctx.createLinearGradient(0, 0, 0, CHART_H);
+      if (isUp) {
+        gradient.addColorStop(0, 'rgba(34,197,94,0.12)');
+        gradient.addColorStop(1, 'rgba(34,197,94,0)');
+      } else {
+        gradient.addColorStop(0, 'rgba(239,68,68,0.12)');
+        gradient.addColorStop(1, 'rgba(239,68,68,0)');
+      }
+      ctx.beginPath();
+      chartData.forEach((bar, i) => {
+        const x = toX(i);
+        const y = toY(bar.c);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.lineTo(toX(chartData.length - 1), CHART_H);
+      ctx.lineTo(0, CHART_H);
+      ctx.closePath();
+      ctx.fillStyle = gradient;
+      ctx.fill();
+    }
+
+    // Candlestick rendering
+    if (chartMode === 'candle') {
+      const candleW = Math.max(1, (CHART_W / chartData.length) * 0.6);
+      chartData.forEach((bar, i) => {
+        const x = toX(i);
+        const yOpen = toY(bar.o);
+        const yClose = toY(bar.c);
+        const yHigh = toY(bar.h);
+        const yLow = toY(bar.l);
+
+        const isGreen = bar.c >= bar.o;
+        const candleColor = isGreen ? '#22c55e' : '#ef4444';
+
+        // Wick (high-low line)
+        ctx.strokeStyle = candleColor;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, yHigh);
+        ctx.lineTo(x, yLow);
+        ctx.stroke();
+
+        // Body
+        const bodyTop = Math.min(yOpen, yClose);
+        const bodyHeight = Math.abs(yClose - yOpen);
+        ctx.fillStyle = candleColor;
+        ctx.fillRect(x - candleW / 2, bodyTop, candleW, Math.max(1, bodyHeight));
+      });
+    }
+
+    // Bollinger Bands lines
+    if (showBB && bb) {
+      // Upper band
+      ctx.beginPath();
+      let started = false;
+      bb.upper.forEach((val, i) => {
+        if (val === null) return;
+        const x = toX(i);
+        const y = toY(val);
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = 'rgba(139,92,246,0.6)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Middle band (already computed as SMA20)
+      ctx.beginPath();
+      started = false;
+      bb.middle.forEach((val, i) => {
+        if (val === null) return;
+        const x = toX(i);
+        const y = toY(val);
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = 'rgba(139,92,246,0.4)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Lower band
+      ctx.beginPath();
+      started = false;
+      bb.lower.forEach((val, i) => {
+        if (val === null) return;
+        const x = toX(i);
+        const y = toY(val);
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = 'rgba(139,92,246,0.6)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
 
     // Moving average lines
     MA_LINES.forEach(({ period, color }) => {
@@ -310,16 +682,138 @@ function StockChart({ ticker, theme }) {
     });
 
     // Price line (on top of MAs)
-    ctx.beginPath();
-    chartData.forEach((bar, i) => {
-      const x = toX(i);
-      const y = toY(bar.c);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.strokeStyle = lineColor;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }, [chartData, metrics, isDark, showMA]);
+    if (chartMode === 'line') {
+      ctx.beginPath();
+      chartData.forEach((bar, i) => {
+        const x = toX(i);
+        const y = toY(bar.c);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // ===== MACD SUB-CHART =====
+    if (showMACD && macd && MACD_H > 0) {
+      const macdValues = macd.macdLine.filter(v => v !== null);
+      const signalValues = macd.signalLine.filter(v => v !== null);
+      const histValues = macd.histogram.filter(v => v !== null);
+      const allMACD = [...macdValues, ...signalValues, ...histValues];
+      const macdMin = Math.min(...allMACD);
+      const macdMax = Math.max(...allMACD);
+      const macdRange = macdMax - macdMin || 1;
+      const macdPad = macdRange * 0.1;
+
+      const macdYMin = macdMin - macdPad;
+      const macdYMax = macdMax + macdPad;
+
+      const macdToY = (val) => MACD_Y + MACD_H - ((val - macdYMin) / (macdYMax - macdYMin)) * MACD_H;
+
+      // Grid line
+      ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, MACD_Y);
+      ctx.lineTo(CHART_W, MACD_Y);
+      ctx.stroke();
+
+      // Histogram bars
+      const barW = Math.max(1, (CHART_W / chartData.length) * 0.6);
+      chartData.forEach((bar, i) => {
+        if (macd.histogram[i] === null) return;
+        const x = toX(i);
+        const histVal = macd.histogram[i];
+        const y0 = macdToY(0);
+        const y1 = macdToY(histVal);
+        ctx.fillStyle = histVal >= 0 ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)';
+        ctx.fillRect(x - barW / 2, Math.min(y0, y1), barW, Math.abs(y1 - y0));
+      });
+
+      // MACD line
+      ctx.beginPath();
+      let started = false;
+      macd.macdLine.forEach((val, i) => {
+        if (val === null) return;
+        const x = toX(i);
+        const y = macdToY(val);
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Signal line
+      ctx.beginPath();
+      started = false;
+      macd.signalLine.forEach((val, i) => {
+        if (val === null) return;
+        const x = toX(i);
+        const y = macdToY(val);
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // ===== RSI SUB-CHART =====
+    if (showRSI && rsi && RSI_H > 0) {
+      const rsiValues = rsi.filter(v => v !== null);
+      if (rsiValues.length > 0) {
+        const rsiMin = 0;
+        const rsiMax = 100;
+
+        const rsiToY = (val) => RSI_Y + RSI_H - ((val - rsiMin) / (rsiMax - rsiMin)) * RSI_H;
+
+        // Grid line
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, RSI_Y);
+        ctx.lineTo(CHART_W, RSI_Y);
+        ctx.stroke();
+
+        // Overbought zone (>70)
+        ctx.fillStyle = isDark ? 'rgba(239,68,68,0.08)' : 'rgba(239,68,68,0.12)';
+        ctx.fillRect(0, RSI_Y, CHART_W, RSI_H * (30 / 100));
+
+        // Oversold zone (<30)
+        ctx.fillStyle = isDark ? 'rgba(34,197,94,0.08)' : 'rgba(34,197,94,0.12)';
+        ctx.fillRect(0, RSI_Y + RSI_H * (70 / 100), CHART_W, RSI_H * (30 / 100));
+
+        // Reference lines at 30 and 70
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 2]);
+        ctx.beginPath();
+        ctx.moveTo(0, rsiToY(30));
+        ctx.lineTo(CHART_W, rsiToY(30));
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, rsiToY(70));
+        ctx.lineTo(CHART_W, rsiToY(70));
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // RSI line
+        ctx.beginPath();
+        let started = false;
+        rsi.forEach((val, i) => {
+          if (val === null) return;
+          const x = toX(i);
+          const y = rsiToY(val);
+          if (!started) { ctx.moveTo(x, y); started = true; }
+          else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = '#a855f7';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+  }, [chartData, metrics, isDark, showMA, chartMode, showBB, showMACD, showRSI, range, timeframe, prevClose]);
 
   // Draw overlay (crosshair)
   useEffect(() => {
@@ -341,11 +835,39 @@ function StockChart({ ticker, theme }) {
 
     const W = rect.width;
     const H = rect.height;
-    const CHART_H = H * 0.75;
+
+    // Calculate layout (same as main chart)
+    let CHART_H, VOL_H, MACD_H, RSI_H, VOL_Y, MACD_Y, RSI_Y;
+    const subIndicatorCount = (showMACD ? 1 : 0) + (showRSI ? 1 : 0);
+
+    if (subIndicatorCount === 0) {
+      CHART_H = H * 0.75;
+      VOL_H = H * 0.18;
+      MACD_H = 0;
+      RSI_H = 0;
+      VOL_Y = H * 0.82;
+    } else if (subIndicatorCount === 1) {
+      CHART_H = H * 0.55;
+      VOL_H = H * 0.12;
+      MACD_H = H * 0.25;
+      RSI_H = H * 0.25;
+      VOL_Y = H * 0.67;
+      MACD_Y = H * 0.68;
+      RSI_Y = H * 0.68;
+    } else {
+      CHART_H = H * 0.45;
+      VOL_H = H * 0.10;
+      MACD_H = H * 0.18;
+      RSI_H = H * 0.18;
+      VOL_Y = H * 0.55;
+      MACD_Y = H * 0.56;
+      RSI_Y = H * 0.75;
+    }
+
     const MARGIN_R = 55;
     const CHART_W = W - MARGIN_R;
 
-    const { min, max } = metrics;
+    const { min, max, macd, rsi } = metrics;
     const pad = (max - min) * 0.05 || 1;
     const priceMin = min - pad;
     const priceMax = max + pad;
@@ -356,7 +878,7 @@ function StockChart({ ticker, theme }) {
 
     ctx.clearRect(0, 0, W, H);
 
-    // Vertical line
+    // Vertical line (full height)
     ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
     ctx.lineWidth = 1;
     ctx.setLineDash([3, 3]);
@@ -365,7 +887,7 @@ function StockChart({ ticker, theme }) {
     ctx.lineTo(x, H);
     ctx.stroke();
 
-    // Horizontal line
+    // Horizontal line in main chart
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(CHART_W, y);
@@ -392,7 +914,45 @@ function StockChart({ ticker, theme }) {
     ctx.strokeStyle = isDark ? '#111' : '#fff';
     ctx.lineWidth = 2;
     ctx.stroke();
-  }, [hoverIdx, chartData, metrics, isDark]);
+
+    // MACD hover indicator
+    if (showMACD && macd && MACD_H > 0) {
+      const macdValues = macd.macdLine.filter(v => v !== null);
+      const signalValues = macd.signalLine.filter(v => v !== null);
+      const histValues = macd.histogram.filter(v => v !== null);
+      const allMACD = [...macdValues, ...signalValues, ...histValues];
+      const macdMin = Math.min(...allMACD);
+      const macdMax = Math.max(...allMACD);
+      const macdRange = macdMax - macdMin || 1;
+      const macdPad = macdRange * 0.1;
+      const macdYMin = macdMin - macdPad;
+      const macdYMax = macdMax + macdPad;
+      const macdToY = (val) => MACD_Y + MACD_H - ((val - macdYMin) / (macdYMax - macdYMin)) * MACD_H;
+
+      if (macd.macdLine[hoverIdx] !== null) {
+        const macdVal = macd.macdLine[hoverIdx];
+        const macdY = macdToY(macdVal);
+        ctx.beginPath();
+        ctx.moveTo(0, macdY);
+        ctx.lineTo(CHART_W, macdY);
+        ctx.stroke();
+      }
+    }
+
+    // RSI hover indicator
+    if (showRSI && rsi && RSI_H > 0) {
+      const rsiValues = rsi.filter(v => v !== null);
+      if (rsiValues.length > 0 && rsi[hoverIdx] !== null) {
+        const rsiVal = rsi[hoverIdx];
+        const rsiToY = (val) => RSI_Y + RSI_H - ((val - 0) / (100 - 0)) * RSI_H;
+        const rsiY = rsiToY(rsiVal);
+        ctx.beginPath();
+        ctx.moveTo(0, rsiY);
+        ctx.lineTo(CHART_W, rsiY);
+        ctx.stroke();
+      }
+    }
+  }, [hoverIdx, chartData, metrics, isDark, showMACD, showRSI]);
 
   // Mouse/touch handlers
   const getIdx = useCallback((clientX) => {
@@ -421,6 +981,12 @@ function StockChart({ ticker, theme }) {
 
   const toggleMA = (period) => setShowMA(prev => ({ ...prev, [period]: !prev[period] }));
 
+  // Dynamic height based on sub-indicators
+  const subIndicatorCount = (showMACD ? 1 : 0) + (showRSI ? 1 : 0);
+  let chartHeight = '320px';
+  if (subIndicatorCount === 1) chartHeight = '420px';
+  else if (subIndicatorCount === 2) chartHeight = '520px';
+
   return (
     <div>
       {/* Hover info bar */}
@@ -442,7 +1008,7 @@ function StockChart({ ticker, theme }) {
       </div>
 
       {/* Chart container */}
-      <div className="relative w-full rounded-xl overflow-hidden" style={{ height: '320px', background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' }}>
+      <div className="relative w-full rounded-xl overflow-hidden transition-all" style={{ height: chartHeight, background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' }}>
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
             <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'rgba(59,130,246,0.3)', borderTopColor: 'transparent' }} />
@@ -462,23 +1028,94 @@ function StockChart({ ticker, theme }) {
         />
       </div>
 
-      {/* Range tabs + MA toggles */}
-      <div className="flex items-center justify-between mt-3 gap-2 flex-wrap">
+      {/* Row 1: Period buttons */}
+      <div className="flex items-center gap-1 mt-3">
+        {RANGES.map(r => {
+          const active = range === r;
+          return (
+            <button key={r}
+              onClick={() => handleRangeChange(r)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              style={{
+                background: active ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'transparent',
+                color: active ? (isDark ? '#fff' : '#000') : (isDark ? '#555' : '#aaa'),
+              }}>
+              {r}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Row 2: Timeframe + Indicators + MA toggles */}
+      <div className="flex items-center justify-between mt-2 gap-3 flex-wrap">
+        {/* Timeframe selector */}
         <div className="flex items-center gap-1">
-          {RANGES.map(r => {
-            const active = range === r;
+          {TIMEFRAMES.map(tf => {
+            const active = timeframe === tf.key;
             return (
-              <button key={r}
-                onClick={() => setRange(r)}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              <button key={tf.key}
+                onClick={() => setTimeframe(tf.key)}
+                className="px-2 py-1 rounded-md text-[10px] font-semibold transition-all"
                 style={{
-                  background: active ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'transparent',
+                  background: active ? (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)') : 'transparent',
                   color: active ? (isDark ? '#fff' : '#000') : (isDark ? '#555' : '#aaa'),
+                  border: `1px solid ${active ? (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)') : 'transparent'}`,
                 }}>
-                {r}
+                {tf.label}
               </button>
             );
           })}
+        </div>
+
+        {/* Chart mode + Indicator toggles */}
+        <div className="flex items-center gap-1">
+          {/* Line/Candle toggle */}
+          <button
+            onClick={() => setChartMode(chartMode === 'line' ? 'candle' : 'line')}
+            className="px-2 py-1 rounded-md text-[10px] font-bold transition-all"
+            style={{
+              background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+              color: isDark ? '#ccc' : '#666',
+              border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}`,
+            }}>
+            {chartMode === 'line' ? '📈' : '🕯️'}
+          </button>
+
+          {/* BB toggle */}
+          <button
+            onClick={() => setShowBB(!showBB)}
+            className="px-2 py-1 rounded-md text-[10px] font-bold transition-all"
+            style={{
+              background: showBB ? 'rgba(139,92,246,0.2)' : 'transparent',
+              color: showBB ? '#a855f7' : (isDark ? '#444' : '#bbb'),
+              border: `1px solid ${showBB ? 'rgba(139,92,246,0.4)' : 'transparent'}`,
+            }}>
+            BB
+          </button>
+
+          {/* MACD toggle */}
+          <button
+            onClick={() => setShowMACD(!showMACD)}
+            className="px-2 py-1 rounded-md text-[10px] font-bold transition-all"
+            style={{
+              background: showMACD ? 'rgba(59,130,246,0.2)' : 'transparent',
+              color: showMACD ? '#3b82f6' : (isDark ? '#444' : '#bbb'),
+              border: `1px solid ${showMACD ? 'rgba(59,130,246,0.4)' : 'transparent'}`,
+            }}>
+            MACD
+          </button>
+
+          {/* RSI toggle */}
+          <button
+            onClick={() => setShowRSI(!showRSI)}
+            className="px-2 py-1 rounded-md text-[10px] font-bold transition-all"
+            style={{
+              background: showRSI ? 'rgba(168,85,247,0.2)' : 'transparent',
+              color: showRSI ? '#a855f7' : (isDark ? '#444' : '#bbb'),
+              border: `1px solid ${showRSI ? 'rgba(168,85,247,0.4)' : 'transparent'}`,
+            }}>
+            RSI
+          </button>
         </div>
 
         {/* MA toggle pills */}
