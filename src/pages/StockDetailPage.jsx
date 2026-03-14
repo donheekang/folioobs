@@ -429,35 +429,37 @@ function StockChart({ ticker, theme }) {
     const H = rect.height;
 
     // Calculate layout based on active sub-indicators
+    const MARGIN_B = 22; // Bottom margin for X-axis labels
+    const MARGIN_R = 55;
+    const CHART_W = W - MARGIN_R;
+    const usableH = H - MARGIN_B;
+
     let CHART_H, VOL_H, MACD_H, RSI_H, VOL_Y, MACD_Y, RSI_Y;
     const subIndicatorCount = (showMACD ? 1 : 0) + (showRSI ? 1 : 0);
 
     if (subIndicatorCount === 0) {
-      CHART_H = H * 0.75;
-      VOL_H = H * 0.18;
+      CHART_H = usableH * 0.75;
+      VOL_H = usableH * 0.18;
       MACD_H = 0;
       RSI_H = 0;
-      VOL_Y = H * 0.82;
+      VOL_Y = usableH * 0.82;
     } else if (subIndicatorCount === 1) {
-      CHART_H = H * 0.55;
-      VOL_H = H * 0.12;
-      MACD_H = H * 0.25;
-      RSI_H = H * 0.25;
-      VOL_Y = H * 0.67;
-      MACD_Y = H * 0.68;
-      RSI_Y = H * 0.68;
+      CHART_H = usableH * 0.55;
+      VOL_H = usableH * 0.12;
+      MACD_H = usableH * 0.25;
+      RSI_H = usableH * 0.25;
+      VOL_Y = usableH * 0.67;
+      MACD_Y = usableH * 0.68;
+      RSI_Y = usableH * 0.68;
     } else {
-      CHART_H = H * 0.45;
-      VOL_H = H * 0.10;
-      MACD_H = H * 0.18;
-      RSI_H = H * 0.18;
-      VOL_Y = H * 0.55;
-      MACD_Y = H * 0.56;
-      RSI_Y = H * 0.75;
+      CHART_H = usableH * 0.45;
+      VOL_H = usableH * 0.10;
+      MACD_H = usableH * 0.18;
+      RSI_H = usableH * 0.18;
+      VOL_Y = usableH * 0.55;
+      MACD_Y = usableH * 0.56;
+      RSI_Y = usableH * 0.75;
     }
-
-    const MARGIN_R = 55;
-    const CHART_W = W - MARGIN_R;
 
     const { closes, volumes, min, max, maxVol, isUp, mas, bb, macd, rsi } = metrics;
     const pad = (max - min) * 0.05 || 1;
@@ -813,6 +815,77 @@ function StockChart({ ticker, theme }) {
         ctx.stroke();
       }
     }
+    // ===== X-AXIS DATE/TIME LABELS =====
+    if (chartData.length > 1) {
+      ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillStyle = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+
+      const labelY = usableH + 4;
+
+      // Detect actual data interval from timestamps to determine label format
+      const t0 = chartData[0]?.t;
+      const t1 = chartData[1]?.t;
+      const avgInterval = t0 && t1 ? (chartData[chartData.length - 1].t - t0) / (chartData.length - 1) : 0;
+      const isActuallyIntraday = avgInterval > 0 && avgInterval < 4 * 3600 * 1000; // < 4h between bars
+      const isActuallyDaily = avgInterval >= 4 * 3600 * 1000 && avgInterval < 5 * 86400 * 1000;
+      const isActuallyWeekly = avgInterval >= 5 * 86400 * 1000;
+
+      // Determine total time span
+      const totalSpanDays = t0 ? (chartData[chartData.length - 1].t - t0) / 86400000 : 0;
+
+      const maxLabels = Math.floor(CHART_W / 70);
+      const step = Math.max(1, Math.floor(chartData.length / maxLabels));
+
+      let prevLabel = '';
+      for (let i = 0; i < chartData.length; i += step) {
+        const bar = chartData[i];
+        if (!bar.t) continue;
+
+        // Convert to US Eastern Time for intraday display
+        const d = new Date(bar.t);
+        let label = '';
+
+        if (isActuallyIntraday && totalSpanDays <= 1.5) {
+          // Single day intraday: show time in ET
+          const utcH = d.getUTCHours();
+          const utcM = d.getUTCMinutes();
+          const month = d.getUTCMonth();
+          const isDST = month >= 2 && month <= 10;
+          const etOffset = isDST ? -4 : -5;
+          let etH = utcH + etOffset;
+          if (etH < 0) etH += 24;
+          label = `${etH}:${utcM.toString().padStart(2, '0')}`;
+        } else if (isActuallyIntraday && totalSpanDays > 1.5) {
+          // Multi-day intraday (1W 30min): show date at day boundaries
+          const dateKey = `${d.getMonth() + 1}/${d.getDate()}`;
+          if (dateKey === prevLabel) continue;
+          label = dateKey;
+        } else if (totalSpanDays <= 35) {
+          // Short range (1W, 1M): show date "3/10"
+          label = `${d.getMonth() + 1}/${d.getDate()}`;
+        } else if (totalSpanDays > 1000) {
+          // Very long range (5Y+): show year, only on change
+          const yearStr = `${d.getFullYear()}`;
+          if (yearStr === prevLabel) continue;
+          label = yearStr;
+        } else {
+          // Medium range (3M, 1Y): show month, only on change
+          const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+          const monthLabel = months[d.getMonth()];
+          if (monthLabel === prevLabel) continue;
+          label = monthLabel;
+        }
+
+        prevLabel = label;
+        const x = toX(i);
+        if (x > 10 && x < CHART_W - 20) {
+          ctx.fillText(label, x, labelY);
+        }
+      }
+    }
+
   }, [chartData, metrics, isDark, showMA, chartMode, showBB, showMACD, showRSI, range, timeframe, prevClose]);
 
   // Draw overlay (crosshair)
@@ -837,35 +910,37 @@ function StockChart({ ticker, theme }) {
     const H = rect.height;
 
     // Calculate layout (same as main chart)
+    const MARGIN_B = 22;
+    const MARGIN_R = 55;
+    const CHART_W = W - MARGIN_R;
+    const usableH = H - MARGIN_B;
+
     let CHART_H, VOL_H, MACD_H, RSI_H, VOL_Y, MACD_Y, RSI_Y;
     const subIndicatorCount = (showMACD ? 1 : 0) + (showRSI ? 1 : 0);
 
     if (subIndicatorCount === 0) {
-      CHART_H = H * 0.75;
-      VOL_H = H * 0.18;
+      CHART_H = usableH * 0.75;
+      VOL_H = usableH * 0.18;
       MACD_H = 0;
       RSI_H = 0;
-      VOL_Y = H * 0.82;
+      VOL_Y = usableH * 0.82;
     } else if (subIndicatorCount === 1) {
-      CHART_H = H * 0.55;
-      VOL_H = H * 0.12;
-      MACD_H = H * 0.25;
-      RSI_H = H * 0.25;
-      VOL_Y = H * 0.67;
-      MACD_Y = H * 0.68;
-      RSI_Y = H * 0.68;
+      CHART_H = usableH * 0.55;
+      VOL_H = usableH * 0.12;
+      MACD_H = usableH * 0.25;
+      RSI_H = usableH * 0.25;
+      VOL_Y = usableH * 0.67;
+      MACD_Y = usableH * 0.68;
+      RSI_Y = usableH * 0.68;
     } else {
-      CHART_H = H * 0.45;
-      VOL_H = H * 0.10;
-      MACD_H = H * 0.18;
-      RSI_H = H * 0.18;
-      VOL_Y = H * 0.55;
-      MACD_Y = H * 0.56;
-      RSI_Y = H * 0.75;
+      CHART_H = usableH * 0.45;
+      VOL_H = usableH * 0.10;
+      MACD_H = usableH * 0.18;
+      RSI_H = usableH * 0.18;
+      VOL_Y = usableH * 0.55;
+      MACD_Y = usableH * 0.56;
+      RSI_Y = usableH * 0.75;
     }
-
-    const MARGIN_R = 55;
-    const CHART_W = W - MARGIN_R;
 
     const { min, max, macd, rsi } = metrics;
     const pad = (max - min) * 0.05 || 1;
@@ -878,13 +953,13 @@ function StockChart({ ticker, theme }) {
 
     ctx.clearRect(0, 0, W, H);
 
-    // Vertical line (full height)
+    // Vertical line (full height minus x-axis area)
     ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
     ctx.lineWidth = 1;
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
     ctx.moveTo(x, 0);
-    ctx.lineTo(x, H);
+    ctx.lineTo(x, usableH);
     ctx.stroke();
 
     // Horizontal line in main chart
