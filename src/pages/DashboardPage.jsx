@@ -223,14 +223,16 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     return (
       <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer transition-colors"
         style={{background:defaultBg, border:`1px solid ${defaultBorder}`}}
-        onClick={()=>handleActivityClick(act.investor.id)}
-        onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();handleActivityClick(act.investor.id);}}}
+        onClick={()=>onNavigate("stock", act.ticker)}
+        onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onNavigate("stock", act.ticker);}}}
         onMouseEnter={e=>{e.currentTarget.style.background=t.cardRowHover;e.currentTarget.style.borderColor=t.glassBorderHover;}}
         onMouseLeave={e=>{e.currentTarget.style.background=defaultBg;e.currentTarget.style.borderColor=defaultBorder;}}
         role="button" tabIndex={0} aria-label={`${L.investorName(act.investor)} - ${act.ticker} ${label}`}>
-        <div className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{background:act.investor.gradient}}>{act.investor.avatar}</div>
+        <div className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-bold flex-shrink-0 hover:opacity-80"
+          style={{background:act.investor.gradient}}
+          onClick={(e)=>{e.stopPropagation();handleActivityClick(act.investor.id);}}>{act.investor.avatar}</div>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold" style={{color:t.text}}>{act.ticker}</div>
+          <div className="text-sm font-semibold" style={{color:t.accent}}>{act.ticker}</div>
           <div className="text-xs" style={{color:t.textMuted}}>{act.name}</div>
         </div>
         <span className="text-xs font-medium" style={{color}}>{label}</span>
