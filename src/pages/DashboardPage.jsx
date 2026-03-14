@@ -1,6 +1,6 @@
 import { useMemo, memo, useState, useEffect, useRef } from "react";
 import {
-  ArrowUpRight, ArrowDownRight, Briefcase, Plus, BarChart3, ChevronDown, ChevronRight, TrendingUp, Activity, Trophy, Zap, Target, Layers, DollarSign
+  ArrowUpRight, ArrowDownRight, Briefcase, Plus, BarChart3, ChevronDown, TrendingUp, Activity, Trophy, Zap, Target, Layers, DollarSign
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -266,9 +266,10 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
         {/* Trade Highlights — 이번 분기 핫 종목 (종목 중심 집계) */}
         {heroHighlights.length > 0 && (
-          <div className="hero-enter hero-enter-4 mb-6 w-full" style={{maxWidth:'420px', margin:'0 auto'}}>
+          <div className="hero-enter hero-enter-4 mb-6 w-full" style={{maxWidth:'680px', margin:'0 auto'}}>
             <p className="text-xs font-medium mb-3 text-center" style={{color:t.textMuted}}>{L.t('dashboard.hotStocks')}</p>
-            <div className="flex flex-col gap-2.5">
+            {/* 데스크톱: 가로 flex 나란히 / 모바일: 1번 풀너비 + 2,3번 반반 grid */}
+            <div className="hot-stocks-grid">
               {heroHighlights.map((h, i) => {
                 const isGreen = h.type === 'buy';
                 const isRed = h.type === 'sell';
@@ -284,25 +285,25 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                     ? 'rgba(239,68,68,0.15)'
                     : `${t.accent}20`;
                 return (
-                  <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:scale-[1.01]"
+                  <div key={i}
+                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all hover:scale-[1.02] ${i === 0 ? 'hot-stock-first' : ''}`}
                     style={{background:glowBg, border:`1px solid ${glowBorder}`}}>
                     {/* 투자자 아바타 스택 */}
                     <div className="flex -space-x-2 flex-shrink-0">
                       {h.investors.slice(0, 3).map((inv, j) => (
-                        <div key={inv.id} className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-bold ring-2"
+                        <div key={inv.id} className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[9px] font-bold ring-2"
                           style={{background:inv.gradient, zIndex: 3 - j, '--tw-ring-color': t.name==='dark'?'rgb(17,17,17)':'rgb(255,255,255)'}}>{inv.avatar}</div>
                       ))}
-                      {h.investors.length > 3 && <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold ring-2"
+                      {h.investors.length > 3 && <div className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold ring-2"
                         style={{background:t.name==='dark'?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)', color:t.textMuted, '--tw-ring-color': t.name==='dark'?'rgb(17,17,17)':'rgb(255,255,255)'}}>+{h.investors.length - 3}</div>}
                     </div>
                     <div className="flex-1 text-left min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-base font-extrabold tracking-tight" style={{color:t.text}}>{h.ticker}</span>
-                        <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{background:`${accentColor}18`, color:accentColor}}>{h.label}</span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-sm font-extrabold tracking-tight" style={{color:t.text}}>{h.ticker}</span>
+                        <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full" style={{background:`${accentColor}18`, color:accentColor}}>{h.label}</span>
                       </div>
                       <div className="text-xs mt-0.5 truncate" style={{color:t.textMuted}}>{h.investors.slice(0,2).map(inv => L.investorName(inv)).join(', ')}{h.investors.length > 2 ? ` 외 ${h.investors.length - 2}명` : ''}</div>
                     </div>
-                    <ChevronRight size={14} style={{color:t.textMuted, flexShrink:0, opacity:0.5}} />
                   </div>
                 );
               })}
