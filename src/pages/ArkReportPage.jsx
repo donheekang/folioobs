@@ -270,9 +270,8 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
                         <div className="flex items-center gap-2 mb-3">
                           <Sparkles size={15} style={{ color: '#a78bfa' }} />
                           <span className="text-sm font-bold" style={{ color: t.text }}>
-                            {isKo ? 'AI 인사이트' : 'AI Insights'}
+                            {isKo ? '주간 인사이트' : 'Weekly Insights'}
                           </span>
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(139,92,246,0.15)', color: '#a78bfa' }}>BETA</span>
                         </div>
                         <div className="space-y-2.5">
                           {arkInsights.map((ins, ii) => {
