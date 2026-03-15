@@ -10,6 +10,7 @@ import { LocaleContext, createLocaleValue } from "./hooks/useLocale";
 
 // Data
 import { formatUSD } from "./utils/format";
+import polygon from "./services/polygon";
 import { trackInvestorClick, trackDetailView, trackPageView } from "./utils/analytics";
 
 // Shared Components
@@ -34,6 +35,38 @@ export default function FolioObs() {
     <DataProvider>
       <FolioObsInner />
     </DataProvider>
+  );
+}
+
+// Ticker Logo for search results (loads Polygon branding, 24h cached)
+function TickerLogo({ ticker, theme }) {
+  const [src, setSrc] = useState(null);
+  const [failed, setFailed] = useState(false);
+  const apiKey = import.meta.env.VITE_POLYGON_API_KEY;
+
+  useEffect(() => {
+    if (!ticker || !apiKey) return;
+    polygon.getTickerDetails(ticker).then(d => {
+      const url = d?.branding?.icon_url || d?.branding?.logo_url;
+      if (url) setSrc(`${url}?apiKey=${apiKey}`);
+    }).catch(() => {});
+  }, [ticker, apiKey]);
+
+  if (!src || failed) {
+    const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#22c55e', '#06b6d4'];
+    const c = colors[ticker.charCodeAt(0) % colors.length];
+    return (
+      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
+        style={{ background: `${c}18`, color: c }}>
+        {ticker.slice(0, 2)}
+      </div>
+    );
+  }
+
+  return (
+    <img src={src} alt={ticker} className="w-8 h-8 rounded-lg object-contain"
+      style={{ background: theme.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
+      onError={() => setFailed(true)} />
   );
 }
 
@@ -322,7 +355,7 @@ function FolioObsInner() {
                           onMouseEnter={() => setSearchIdx(idx)}
                           onClick={() => { addRecent(tk.ticker, "ticker"); navigate("stock", tk.ticker); setSearchOpen(false); }}
                           role="option" aria-selected={isActive}>
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style={{background: T.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.04)', color: T.textSecondary}}>{tk.ticker.slice(0,2)}</div>
+                          <TickerLogo ticker={tk.ticker} theme={T} />
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium">{tk.ticker} <span className="font-normal text-xs" style={{color:T.textMuted}}>{tk.name}</span></div>
                             <div className="flex items-center gap-1 mt-0.5">
