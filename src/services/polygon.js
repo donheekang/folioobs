@@ -12,6 +12,7 @@ const CACHE_TTL = {
   snapshot: 60 * 1000,                    // 1min — price data
   aggregates: 5 * 60 * 1000,             // 5min — chart bars
   prev_close: 60 * 60 * 1000,            // 1h — previous close
+  news: 10 * 60 * 1000,                  // 10min — news articles
 };
 
 function getCached(key, ttl) {
@@ -99,6 +100,30 @@ export async function getPreviousClose(ticker) {
     CACHE_TTL.prev_close
   );
   return data.results?.[0] || null;
+}
+
+/**
+ * 종목 관련 뉴스
+ * GET /v2/reference/news?ticker={ticker}&limit={limit}
+ * @param {string} ticker - 종목 심볼
+ * @param {number} limit - 가져올 뉴스 수 (기본 5)
+ */
+export async function getTickerNews(ticker, limit = 5) {
+  const data = await polygonFetch(
+    `/v2/reference/news?ticker=${ticker.toUpperCase()}&limit=${limit}&order=desc&sort=published_utc`,
+    CACHE_TTL.news
+  );
+  return (data.results || []).map(n => ({
+    id: n.id,
+    title: n.title,
+    author: n.author,
+    publishedAt: n.published_utc,
+    articleUrl: n.article_url,
+    imageUrl: n.image_url,
+    source: n.publisher?.name || '',
+    sourceLogo: n.publisher?.logo_url || '',
+    tickers: n.tickers || [],
+  }));
 }
 
 // ========== HELPER: 기간별 차트 데이터 가져오기 ==========
@@ -242,6 +267,7 @@ const polygon = {
   getAggregates,
   getPreviousClose,
   getChartData,
+  getTickerNews,
 };
 
 export default polygon;

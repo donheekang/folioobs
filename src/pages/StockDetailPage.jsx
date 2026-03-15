@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   ArrowLeft, Building2, Globe, Users,
   ArrowUpRight, ArrowDownRight, ExternalLink, TrendingUp, Calendar,
-  BarChart3, Target
+  BarChart3, Target, Newspaper
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -1359,6 +1359,8 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
   const [snapshot, setSnapshot] = useState(null);
   const [prevClose, setPrevClose] = useState(null);
   const [yearlyBars, setYearlyBars] = useState([]);
+  const [tickerNews, setTickerNews] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(false);
   const [loadingInfo, setLoadingInfo] = useState(true);
 
   useEffect(() => {
@@ -1381,6 +1383,13 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
       if (yearRes.status === 'fulfilled') setYearlyBars(yearRes.value || []);
       setLoadingInfo(false);
     });
+
+    // 뉴스 별도 로드 (non-blocking)
+    setNewsLoading(true);
+    polygon.getTickerNews(ticker, 5)
+      .then(news => setTickerNews(news))
+      .catch(() => setTickerNews([]))
+      .finally(() => setNewsLoading(false));
   }, [ticker]);
 
   // ---- FolioObs data: 이 종목을 보유한 투자자들 ----
@@ -1791,6 +1800,75 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
           </div>
         )}
       </div>
+
+      {/* ===== NEWS ===== */}
+      {(tickerNews.length > 0 || newsLoading) && (
+        <div className="mt-6">
+          <GlassCard hover={false}>
+            <div className="p-4 sm:p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Newspaper size={16} style={{ color: t.textMuted }} />
+                <h3 className="text-sm font-bold" style={{ color: t.text }}>
+                  {L.locale === 'ko' ? '관련 뉴스' : 'Related News'}
+                </h3>
+              </div>
+              {newsLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: `${t.accent}33`, borderTopColor: t.accent }} />
+                </div>
+              ) : (
+                <div className="space-y-0">
+                  {tickerNews.map((news, i) => {
+                    const pubDate = news.publishedAt ? new Date(news.publishedAt) : null;
+                    const timeAgo = pubDate ? (() => {
+                      const diff = Date.now() - pubDate.getTime();
+                      const mins = Math.floor(diff / 60000);
+                      const hrs = Math.floor(diff / 3600000);
+                      const days = Math.floor(diff / 86400000);
+                      if (L.locale === 'ko') {
+                        if (mins < 60) return `${mins}분 전`;
+                        if (hrs < 24) return `${hrs}시간 전`;
+                        if (days < 7) return `${days}일 전`;
+                        return pubDate.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+                      } else {
+                        if (mins < 60) return `${mins}m ago`;
+                        if (hrs < 24) return `${hrs}h ago`;
+                        if (days < 7) return `${days}d ago`;
+                        return pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                      }
+                    })() : '';
+                    const isDark = t.name === 'dark';
+                    return (
+                      <a key={news.id || i} href={news.articleUrl} target="_blank" rel="noopener noreferrer"
+                        className="flex gap-3 py-3 transition-colors"
+                        style={{ borderTop: i > 0 ? `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` : 'none' }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium leading-snug mb-1.5" style={{ color: t.text, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            {news.title}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs" style={{ color: t.textMuted }}>
+                            {news.source && <span>{news.source}</span>}
+                            {news.source && timeAgo && <span>·</span>}
+                            {timeAgo && <span>{timeAgo}</span>}
+                          </div>
+                        </div>
+                        {news.imageUrl && (
+                          <div className="w-16 h-16 sm:w-20 sm:h-16 rounded-lg overflow-hidden flex-shrink-0" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
+                            <img src={news.imageUrl} alt="" className="w-full h-full object-cover"
+                              onError={e => { e.target.style.display = 'none'; }} />
+                          </div>
+                        )}
+                      </a>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </GlassCard>
+        </div>
+      )}
 
       {/* ===== COMPANY DESCRIPTION ===== */}
       {companyInfo?.description && (
