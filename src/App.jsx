@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { Eye, Search, X, Clock, TrendingUp, Users, Globe } from "lucide-react";
+import { Eye, Search, X, Clock, TrendingUp, Users, Globe, ArrowUpRight, ArrowDownRight, Flame, Star, ChevronRight } from "lucide-react";
 
 // Theme & Hooks
 import { THEMES, ThemeContext } from "./hooks/useTheme";
@@ -83,7 +83,7 @@ const LangToggle = ({ locale, onToggle, theme }) => (
 );
 
 function FolioObsInner() {
-  const { investors: INVESTORS, holdings: HOLDINGS, loading: dataLoading, error: dataError } = useData();
+  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyActivity: QUARTERLY_ACTIVITY, latestQuarter, loading: dataLoading, error: dataError } = useData();
   const [page, setPage] = useState("dashboard");
   const [selectedInvestor, setSelectedInvestor] = useState(null);
   const [selectedTicker, setSelectedTicker] = useState(null);
@@ -201,6 +201,33 @@ function FolioObsInner() {
     return { investors, tickers: [...allTickers.values()].slice(0, 6) };
   }, [searchQuery]);
 
+  // ===== 핫 종목 TOP 5 (검색 홈에서 표시) =====
+  const hotStocks = useMemo(() => {
+    const TICKER_GROUPS = { 'GOOGL': 'GOOG', 'BRK.B': 'BRK.A', 'BRK/B': 'BRK/A' };
+    const normalize = (ticker) => TICKER_GROUPS[ticker] || ticker;
+    const map = {};
+    INVESTORS.forEach(inv => {
+      if (inv.id === 'cathie') return;
+      const acts = QUARTERLY_ACTIVITY[inv.id] || [];
+      if (!acts.length || !acts[0]?.actions) return;
+      acts[0].actions.filter(a => a.type !== 'hold').forEach(a => {
+        const key = normalize(a.ticker);
+        if (!map[key]) map[key] = { ticker: key, name: a.name, buyInvestors: [], sellInvestors: [] };
+        const list = (a.type === 'buy' || a.type === 'new') ? map[key].buyInvestors : map[key].sellInvestors;
+        if (!list.find(i => i.id === inv.id)) list.push(inv);
+      });
+    });
+    return Object.values(map)
+      .map(s => ({ ...s, totalInvestors: s.buyInvestors.length + s.sellInvestors.length, isBuy: s.buyInvestors.length >= s.sellInvestors.length }))
+      .sort((a, b) => b.totalInvestors - a.totalInvestors)
+      .slice(0, 5);
+  }, [INVESTORS, QUARTERLY_ACTIVITY]);
+
+  // ===== 인기 투자자 (AUM 순) =====
+  const popularInvestors = useMemo(() => {
+    return [...INVESTORS].sort((a, b) => (b.aum || 0) - (a.aum || 0)).slice(0, 5);
+  }, [INVESTORS]);
+
   const [recentSearches, setRecentSearches] = useState(() => safeGetJSON("folioobs_recent", []));
   const [searchIdx, setSearchIdx] = useState(-1);
   const searchInputRef = useRef(null);
@@ -297,106 +324,196 @@ function FolioObsInner() {
           </div>
         </nav>
 
-        {/* Search Overlay */}
+        {/* Fullscreen Search */}
         {searchOpen && (
-          <div className="fixed inset-0 z-[60]" onClick={() => setSearchOpen(false)} role="dialog" aria-modal="true">
-            <div className="absolute inset-0" style={{ background: T.name === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.3)', backdropFilter: 'blur(8px)' }} />
-            <div className="relative max-w-lg mx-auto mt-16 px-4" onClick={e => e.stopPropagation()}>
-              <div className="rounded-xl overflow-hidden" style={{ background: T.name === 'dark' ? '#1c1c1e' : '#ffffff', border: `1px solid ${T.glassBorder}`, boxShadow: T.name === 'dark' ? '0 16px 48px rgba(0,0,0,0.5)' : '0 16px 48px rgba(0,0,0,0.12)' }}>
-                <div className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: `1px solid ${T.glassBorder}` }}>
+          <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: T.bg }} role="dialog" aria-modal="true">
+            {/* Search Header */}
+            <div className="flex-shrink-0" style={{ borderBottom: `1px solid ${T.glassBorder}` }}>
+              <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+                <button onClick={() => setSearchOpen(false)} className="p-1 rounded-lg transition hover:opacity-70" style={{ color: T.textMuted }}>
+                  <X size={20} />
+                </button>
+                <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
                   <Search size={16} style={{ color: T.textMuted }} />
                   <input ref={searchInputRef} autoFocus value={searchQuery}
                     onChange={e => { setSearchQuery(e.target.value); setSearchIdx(-1); }}
                     placeholder={L.t('nav.searchPlaceholder')}
                     className="flex-1 bg-transparent outline-none text-sm" style={{ color: T.text }}
                     onKeyDown={handleSearchKeyDown} />
-                  {searchQuery && <button onClick={() => setSearchQuery("")} className="p-1" style={{color:T.textMuted}}><X size={14}/></button>}
-                  <kbd className="hidden sm:inline text-xs px-1.5 py-0.5 rounded" style={{ background: T.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.04)', color: T.textMuted }}>ESC</kbd>
+                  {searchQuery && <button onClick={() => setSearchQuery("")} className="p-0.5" style={{ color: T.textMuted }}><X size={14} /></button>}
                 </div>
-                {searchQuery.trim() && (
-                  <div className="max-h-80 overflow-y-auto" role="listbox">
+                <kbd className="hidden sm:inline text-xs px-1.5 py-0.5 rounded" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: T.textMuted }}>ESC</kbd>
+              </div>
+            </div>
+
+            {/* Search Body */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-2xl mx-auto px-4 py-4">
+                {/* === Search Results (when typing) === */}
+                {searchQuery.trim() ? (
+                  <div role="listbox">
                     {flatResults.length === 0 && (
-                      <div className="px-4 py-8 text-center">
-                        <Search size={28} style={{ color: T.textMuted, opacity: 0.3 }} className="mx-auto mb-2" />
+                      <div className="py-16 text-center">
+                        <Search size={32} style={{ color: T.textMuted, opacity: 0.2 }} className="mx-auto mb-3" />
                         <p className="text-sm" style={{ color: T.textMuted }}>{L.t('nav.noResults')(searchQuery)}</p>
                       </div>
                     )}
                     {searchResults.investors.length > 0 && (
-                      <div className="px-3 pt-2 pb-1 flex items-center gap-1.5"><Users size={12} style={{color:T.textMuted}}/><span className="text-xs font-medium" style={{color:T.textMuted}}>{L.t('nav.investor')}</span></div>
+                      <div className="px-1 pt-1 pb-2 flex items-center gap-1.5">
+                        <Users size={12} style={{ color: T.textMuted }} />
+                        <span className="text-xs font-medium" style={{ color: T.textMuted }}>{L.t('nav.investor')}</span>
+                      </div>
                     )}
                     {searchResults.investors.map((inv, idx) => {
                       const isActive = searchIdx === idx;
                       return (
-                        <button key={inv.id} className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
+                        <button key={inv.id} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-colors"
                           style={{ color: T.text, background: isActive ? T.cardRowHover : 'transparent' }}
                           onMouseEnter={() => setSearchIdx(idx)}
                           onClick={() => { addRecent(L.investorName(inv), "investor"); navigate("investor", inv.id); setSearchOpen(false); }}
                           role="option" aria-selected={isActive}>
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{background:inv.gradient}}>{inv.avatar}</div>
+                          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold" style={{ background: inv.gradient }}>{inv.avatar}</div>
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium">{L.investorName(inv)}</div>
-                            <div className="text-xs" style={{color:T.textMuted}}>{L.fundName(inv)} · {formatUSD(inv.aum)}</div>
+                            <div className="text-xs mt-0.5" style={{ color: T.textMuted }}>{L.fundName(inv)} · {formatUSD(inv.aum)}</div>
                           </div>
-                          {isActive && <span className="text-xs" style={{color:T.textMuted}}>↵</span>}
+                          <ChevronRight size={14} style={{ color: T.textMuted, opacity: 0.5 }} />
                         </button>
                       );
                     })}
                     {searchResults.tickers.length > 0 && (
-                      <div className="px-3 pt-2 pb-1 flex items-center gap-1.5" style={{borderTop: searchResults.investors.length > 0 ? `1px solid ${T.glassBorder}` : 'none'}}>
-                        <TrendingUp size={12} style={{color:T.textMuted}}/><span className="text-xs font-medium" style={{color:T.textMuted}}>{L.t('nav.ticker')}</span>
+                      <div className="px-1 pt-4 pb-2 flex items-center gap-1.5" style={{ borderTop: searchResults.investors.length > 0 ? `1px solid ${T.glassBorder}` : 'none', marginTop: searchResults.investors.length > 0 ? '8px' : 0 }}>
+                        <TrendingUp size={12} style={{ color: T.textMuted }} />
+                        <span className="text-xs font-medium" style={{ color: T.textMuted }}>{L.t('nav.ticker')}</span>
                       </div>
                     )}
                     {searchResults.tickers.map((tk, i) => {
                       const idx = searchResults.investors.length + i;
                       const isActive = searchIdx === idx;
                       return (
-                        <button key={tk.ticker} className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
+                        <button key={tk.ticker} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-colors"
                           style={{ color: T.text, background: isActive ? T.cardRowHover : 'transparent' }}
                           onMouseEnter={() => setSearchIdx(idx)}
                           onClick={() => { addRecent(tk.ticker, "ticker"); navigate("stock", tk.ticker); setSearchOpen(false); }}
                           role="option" aria-selected={isActive}>
                           <TickerLogo ticker={tk.ticker} theme={T} />
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium">{tk.ticker} <span className="font-normal text-xs" style={{color:T.textMuted}}>{tk.name}</span></div>
+                            <div className="text-sm font-medium">{tk.ticker} <span className="font-normal text-xs" style={{ color: T.textMuted }}>{tk.name}</span></div>
                             <div className="flex items-center gap-1 mt-0.5">
-                              {tk.investors.slice(0,3).map(inv => (
-                                <span key={inv.id} className="text-xs px-1.5 py-0.5 rounded" style={{background: T.name==='dark'?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.03)', color: T.textMuted}}>{L.investorName(inv)}</span>
+                              {tk.investors.slice(0, 3).map(inv => (
+                                <span key={inv.id} className="text-xs px-1.5 py-0.5 rounded" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', color: T.textMuted }}>{L.investorName(inv)}</span>
                               ))}
                             </div>
                           </div>
-                          {isActive && <span className="text-xs" style={{color:T.textMuted}}>↵</span>}
+                          <ChevronRight size={14} style={{ color: T.textMuted, opacity: 0.5 }} />
                         </button>
                       );
                     })}
                   </div>
-                )}
-                {!searchQuery.trim() && (
-                  <div className="px-3 py-3">
-                    {recentSearches.length > 0 ? (
-                      <>
-                        <div className="flex items-center justify-between mb-2 px-1">
-                          <div className="flex items-center gap-1.5"><Clock size={12} style={{color:T.textMuted}}/><span className="text-xs font-medium" style={{color:T.textMuted}}>{L.t('nav.recentSearches')}</span></div>
-                          <button onClick={clearRecent} className="text-xs" style={{color:T.textMuted}}>{L.t('nav.clear')}</button>
+                ) : (
+                  /* === Search Home (no query) === */
+                  <div className="space-y-6">
+                    {/* Recent Searches */}
+                    {recentSearches.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-1.5">
+                            <Clock size={13} style={{ color: T.textMuted }} />
+                            <span className="text-xs font-semibold" style={{ color: T.textMuted }}>{L.t('nav.recentSearches')}</span>
+                          </div>
+                          <button onClick={clearRecent} className="text-xs hover:opacity-70 transition" style={{ color: T.textMuted }}>{L.t('nav.clear')}</button>
                         </div>
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-2">
                           {recentSearches.map((r, i) => (
                             <button key={i} onClick={() => setSearchQuery(r.term)}
-                              className="text-xs px-2.5 py-1.5 rounded-lg transition-colors"
-                              style={{ background: T.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.04)', color: T.textSecondary }}>
-                              {r.type === "investor" ? "👤" : "📈"} {r.term}
+                              className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-full transition-colors hover:opacity-80"
+                              style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: T.textSecondary }}>
+                              {r.type === "investor" ? <Users size={10} /> : <TrendingUp size={10} />}
+                              <span>{r.term}</span>
+                              <button onClick={(e) => { e.stopPropagation(); setRecentSearches(prev => { const next = prev.filter((_, j) => j !== i); safeSetItem("folioobs_recent", next); return next; }); }}
+                                className="ml-0.5 opacity-40 hover:opacity-100 transition"><X size={10} /></button>
                             </button>
                           ))}
                         </div>
-                      </>
-                    ) : (
-                      <div className="py-4 text-center">
-                        <p className="text-xs" style={{ color: T.textMuted }}>{L.t('nav.searchEmpty')}</p>
                       </div>
                     )}
-                    <div className="mt-3 pt-2 flex items-center justify-center gap-3 text-xs" style={{ borderTop: `1px solid ${T.glassBorder}`, color: T.textMuted }}>
-                      <span><kbd className="px-1 py-0.5 rounded" style={{background:T.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.04)'}}>↑↓</kbd> {L.t('common.move')}</span>
-                      <span><kbd className="px-1 py-0.5 rounded" style={{background:T.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.04)'}}>↵</kbd> {L.t('common.select')}</span>
-                      <span><kbd className="px-1 py-0.5 rounded" style={{background:T.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.04)'}}>ESC</kbd> {L.t('common.close')}</span>
+
+                    {/* Hot Stocks */}
+                    {hotStocks.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-3">
+                          <Flame size={13} style={{ color: T.accent }} />
+                          <span className="text-xs font-semibold" style={{ color: T.textMuted }}>
+                            {L.locale === 'ko' ? '핫 종목' : 'Hot Stocks'}
+                          </span>
+                          {latestQuarter && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: `${T.accent}15`, color: T.accent }}>{latestQuarter}</span>}
+                        </div>
+                        <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${T.glassBorder}` }}>
+                          {hotStocks.map((s, i) => (
+                            <button key={s.ticker}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:opacity-80"
+                              style={{ background: 'transparent', borderBottom: i < hotStocks.length - 1 ? `1px solid ${T.glassBorder}` : 'none' }}
+                              onClick={() => { addRecent(s.ticker, "ticker"); navigate("stock", s.ticker); setSearchOpen(false); }}>
+                              <span className="w-5 text-center text-xs font-bold" style={{ color: i < 3 ? T.accent : T.textMuted }}>{i + 1}</span>
+                              <TickerLogo ticker={s.ticker} theme={T} />
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium" style={{ color: T.text }}>{s.ticker} <span className="font-normal text-xs" style={{ color: T.textMuted }}>{s.name}</span></div>
+                                <div className="flex items-center gap-1 mt-0.5">
+                                  {s.buyInvestors.slice(0, 2).map(inv => (
+                                    <span key={inv.id} className="text-xs" style={{ color: T.green }}>{inv.avatar}</span>
+                                  ))}
+                                  {s.sellInvestors.slice(0, 2).map(inv => (
+                                    <span key={inv.id} className="text-xs" style={{ color: T.red }}>{inv.avatar}</span>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="flex items-center gap-0.5 text-xs font-medium" style={{ color: s.isBuy ? T.green : T.red }}>
+                                  {s.isBuy ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                                  {L.locale === 'ko'
+                                    ? `${s.totalInvestors}명 거래`
+                                    : `${s.totalInvestors} traded`}
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Popular Investors */}
+                    {popularInvestors.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-3">
+                          <Star size={13} style={{ color: T.amber || '#f59e0b' }} />
+                          <span className="text-xs font-semibold" style={{ color: T.textMuted }}>
+                            {L.locale === 'ko' ? '인기 투자자' : 'Popular Investors'}
+                          </span>
+                        </div>
+                        <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${T.glassBorder}` }}>
+                          {popularInvestors.map((inv, i) => (
+                            <button key={inv.id}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:opacity-80"
+                              style={{ background: 'transparent', borderBottom: i < popularInvestors.length - 1 ? `1px solid ${T.glassBorder}` : 'none' }}
+                              onClick={() => { addRecent(L.investorName(inv), "investor"); navigate("investor", inv.id); setSearchOpen(false); }}>
+                              <span className="w-5 text-center text-xs font-bold" style={{ color: i < 3 ? (T.amber || '#f59e0b') : T.textMuted }}>{i + 1}</span>
+                              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold" style={{ background: inv.gradient }}>{inv.avatar}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium" style={{ color: T.text }}>{L.investorName(inv)}</div>
+                                <div className="text-xs mt-0.5" style={{ color: T.textMuted }}>{L.fundName(inv)}</div>
+                              </div>
+                              <div className="text-xs font-medium" style={{ color: T.textSecondary }}>{formatUSD(inv.aum)}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Keyboard shortcuts hint */}
+                    <div className="flex items-center justify-center gap-4 pt-2 pb-4 text-xs" style={{ color: T.textMuted }}>
+                      <span><kbd className="px-1.5 py-0.5 rounded" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>↑↓</kbd> {L.t('common.move')}</span>
+                      <span><kbd className="px-1.5 py-0.5 rounded" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>↵</kbd> {L.t('common.select')}</span>
+                      <span><kbd className="px-1.5 py-0.5 rounded" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>ESC</kbd> {L.t('common.close')}</span>
                     </div>
                   </div>
                 )}
