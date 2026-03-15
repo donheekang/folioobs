@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from "react";
-import { ArrowLeft, ArrowUpRight, ArrowDownRight, Calendar, TrendingUp, TrendingDown, Plus, LogOut, FileText, ChevronDown, BarChart3, Activity } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, ArrowDownRight, Calendar, TrendingUp, TrendingDown, Plus, LogOut, FileText, ChevronDown, BarChart3, Activity, Sparkles } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
 import { useData } from "../hooks/useDataProvider";
 import { GlassCard, Badge } from "../components/shared";
+import { generateArkReportInsight } from "../utils/insights";
 
 // ============================================================
 // 캐시우드 ARK 주간/월간 리포트
@@ -259,6 +260,42 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
                       );
                     })}
                   </div>
+
+                  {/* ── AI 인사이트 ── */}
+                  {(() => {
+                    const arkInsights = generateArkReportInsight(stats, report.days, isKo);
+                    if (arkInsights.length === 0) return null;
+                    return (
+                      <div className="rounded-xl p-4" style={{ background: t.name === 'dark' ? 'rgba(139,92,246,0.04)' : 'rgba(139,92,246,0.03)', border: `1px solid ${t.name === 'dark' ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.1)'}` }}>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Sparkles size={15} style={{ color: '#a78bfa' }} />
+                          <span className="text-sm font-bold" style={{ color: t.text }}>
+                            {isKo ? 'AI 인사이트' : 'AI Insights'}
+                          </span>
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(139,92,246,0.15)', color: '#a78bfa' }}>BETA</span>
+                        </div>
+                        <div className="space-y-2.5">
+                          {arkInsights.map((ins, ii) => {
+                            const Icon = ins.icon;
+                            return (
+                              <div key={ii} className="flex items-start gap-2.5">
+                                <div className="mt-0.5 w-5 h-5 rounded-md flex items-center justify-center shrink-0" style={{ background: `${ins.color}15` }}>
+                                  <Icon size={12} style={{ color: ins.color }} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold" style={{ color: t.text }}>{ins.title}</span>
+                                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: `${ins.color}12`, color: ins.color }}>{ins.tag}</span>
+                                  </div>
+                                  <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: t.textSecondary }}>{ins.desc}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* ── Top 매수 / Top 매도 (2열) ── */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
