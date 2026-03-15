@@ -89,6 +89,49 @@ export const generateInsights = (investor, holdings, L) => {
   return insights;
 };
 
+// ── ARK 종목 테마 매핑 (인사이트 스토리텔링용) ──
+const TICKER_THEME = {
+  CRSP: { ko: '유전자 편집 선두주자', en: 'gene editing leader' },
+  EDIT: { ko: '유전자 편집', en: 'gene editing' },
+  NTLA: { ko: '유전자 치료', en: 'gene therapy' },
+  TXG:  { ko: '단일세포 유전체 분석', en: 'single-cell genomics' },
+  BEAM: { ko: '염기 편집 바이오텍', en: 'base editing biotech' },
+  EXAS: { ko: '암 조기진단', en: 'cancer early detection' },
+  TSLA: { ko: '전기차·자율주행', en: 'EV & autonomous driving' },
+  COIN: { ko: '암호화폐 거래소', en: 'crypto exchange' },
+  SQ:   { ko: '핀테크·디지털결제', en: 'fintech & digital payments' },
+  ROKU: { ko: '스트리밍 플랫폼', en: 'streaming platform' },
+  PATH: { ko: 'AI 자동화(RPA)', en: 'AI automation (RPA)' },
+  PLTR: { ko: 'AI 데이터 분석', en: 'AI data analytics' },
+  RKLB: { ko: '우주 발사체', en: 'space launch' },
+  DKNG: { ko: '온라인 스포츠 베팅', en: 'online sports betting' },
+  U:    { ko: '3D 엔진·메타버스', en: '3D engine & metaverse' },
+  HOOD: { ko: '개인투자자 거래 플랫폼', en: 'retail trading platform' },
+  DNA:  { ko: '합성생물학', en: 'synthetic biology' },
+  TWLO: { ko: '클라우드 커뮤니케이션', en: 'cloud communications' },
+  ZM:   { ko: '화상회의·원격근무', en: 'video conferencing' },
+  SHOP: { ko: '이커머스 플랫폼', en: 'e-commerce platform' },
+  SPOT: { ko: '음악 스트리밍', en: 'music streaming' },
+  IONQ: { ko: '양자컴퓨팅', en: 'quantum computing' },
+  TEM:  { ko: 'AI 기반 정밀의료', en: 'AI-powered precision medicine' },
+  JOBY: { ko: '도심항공모빌리티(UAM)', en: 'urban air mobility' },
+  WGS:  { ko: '유전체 진단', en: 'genomic diagnostics' },
+  VERV: { ko: '유전자 편집 심혈관 치료', en: 'gene editing cardiovascular' },
+  ARCT: { ko: 'mRNA 치료제', en: 'mRNA therapeutics' },
+  PSTG: { ko: '차세대 데이터 스토리지', en: 'next-gen data storage' },
+  ACHR: { ko: 'eVTOL 항공기', en: 'eVTOL aircraft' },
+  RXRX: { ko: 'AI 신약개발', en: 'AI drug discovery' },
+  LAB:  { ko: '바이오툴(표준)', en: 'biotools (standards)' },
+  LY:   { ko: '온라인 여행 플랫폼', en: 'online travel platform' },
+  IONS: { ko: 'RNA 표적 치료제', en: 'RNA-targeted therapeutics' },
+  PSNL: { ko: '개인맞춤 암 백신', en: 'personalized cancer vaccines' },
+};
+
+const getTheme = (ticker, isKo) => {
+  const t = TICKER_THEME[ticker];
+  return t ? (isKo ? t.ko : t.en) : null;
+};
+
 // ── ARK 주간/월간 리포트 인사이트 ──
 export const generateArkReportInsight = (stats, days, isKo = true) => {
   const allTrades = days.flatMap(d => d.trades);
@@ -123,72 +166,87 @@ export const generateArkReportInsight = (stats, days, isKo = true) => {
   const convictionBuy = Object.values(tickerInfo).filter(t => t.buyCount >= 3).sort((a, b) => b.buyShares - a.buyShares)[0];
   const convictionSell = Object.values(tickerInfo).filter(t => t.sellCount >= 3).sort((a, b) => b.sellShares - a.sellShares)[0];
 
-  // ── 가장 임팩트 있는 인사이트 1개만 선택 ──
-  // 우선순위: 섹터 로테이션 > 확신 매수/매도 > 매수/매도 비율
+  // 가장 큰 매수 종목 (주식 수 기준)
+  const bigBuyTicker = Object.values(tickerInfo).filter(t => t.buyShares > 0).sort((a, b) => b.buyShares - a.buyShares)[0];
 
-  // 1) 섹터 로테이션 (가장 강한 신호)
+  // ── 가장 임팩트 있는 인사이트 1개만 선택 ──
+
+  // 1) 섹터 로테이션 (가장 강한 신호) + 테마 스토리
   const hasRotation = topBuySec && topSellSec && topBuySec[0] !== topSellSec[0] && topBuySec[1].count >= 3 && topSellSec[1].count >= 3;
   if (hasRotation) {
-    const buyTickers = [...topBuySec[1].tickers].slice(0, 2).join(', ');
-    const sellTickers = [...topSellSec[1].tickers].slice(0, 2).join(', ');
+    // 매수 쪽에서 테마가 있는 핵심 종목 찾기
+    const buyTickerList = [...topBuySec[1].tickers];
+    const keyBuy = buyTickerList.find(tk => getTheme(tk, isKo)) || buyTickerList[0];
+    const keyBuyTheme = getTheme(keyBuy, isKo);
+    const sellTickerList = [...topSellSec[1].tickers];
+    const keySell = sellTickerList.find(tk => getTheme(tk, isKo)) || sellTickerList[0];
+    const keySellTheme = getTheme(keySell, isKo);
+
+    const desc = isKo
+      ? `${keyBuy}${keyBuyTheme ? `(${keyBuyTheme})` : ''} 중심으로 ${topBuySec[0]} 비중을 늘리는 반면, ${keySell}${keySellTheme ? `(${keySellTheme})` : ''} 등 ${topSellSec[0]}주는 정리 중. ${keyBuyTheme ? `${keyBuyTheme} 분야의 성장에 베팅하는 흐름.` : `자금이 ${topBuySec[0]} 쪽으로 이동 중.`}`
+      : `Building ${topBuySec[0]} around ${keyBuy}${keyBuyTheme ? ` (${keyBuyTheme})` : ''} while trimming ${topSellSec[0]} names like ${keySell}. ${keyBuyTheme ? `Betting on ${keyBuyTheme} growth.` : `Capital rotating into ${topBuySec[0]}.`}`;
+
     return [{
       icon: Brain,
-      title: isKo ? `${topSellSec[0]} → ${topBuySec[0]} 전환` : `${topSellSec[0]} → ${topBuySec[0]} Rotation`,
-      desc: isKo
-        ? `${topSellSec[0]}(${sellTickers}) 비중을 줄이고 ${topBuySec[0]}(${buyTickers})을 늘리고 있습니다. 자금 흐름이 ${topBuySec[0]} 쪽으로 이동 중.`
-        : `Trimming ${topSellSec[0]} (${sellTickers}) and building ${topBuySec[0]} (${buyTickers}). Capital flowing toward ${topBuySec[0]}.`,
+      title: isKo ? `${topSellSec[0]} → ${topBuySec[0]} 자금 이동` : `${topSellSec[0]} → ${topBuySec[0]} Shift`,
+      desc,
       tag: isKo ? '섹터전환' : 'Rotation',
       color: '#8b5cf6',
     }];
   }
 
-  // 2) 같은 종목 3일 이상 연속 매수 → 확신 신호
+  // 2) 같은 종목 3일+ 연속 매수 → 확신 신호 + 테마
   if (convictionBuy) {
+    const theme = getTheme(convictionBuy.ticker, isKo);
+    const desc = isKo
+      ? `${convictionBuy.ticker}${theme ? `(${theme})` : ''}를 ${convictionBuy.buyCount}일에 걸쳐 ${convictionBuy.buyShares.toLocaleString()}주 매수. ${theme ? `${theme} 분야에 대한 강한 확신으로, ` : ''}나눠서 사는 건 단기 트레이딩이 아닌 장기 베팅.`
+      : `${convictionBuy.buyShares.toLocaleString()} shares of ${convictionBuy.ticker}${theme ? ` (${theme})` : ''} over ${convictionBuy.buyCount} days. ${theme ? `Strong conviction in ${theme} — ` : ''}spreading buys = long-term bet, not a quick trade.`
     return [{
       icon: Star,
-      title: isKo ? `${convictionBuy.ticker} ${convictionBuy.buyCount}일 연속 매수` : `${convictionBuy.ticker}: ${convictionBuy.buyCount}-Day Buying Streak`,
-      desc: isKo
-        ? `${convictionBuy.company}를 ${convictionBuy.buyCount}일에 걸쳐 ${convictionBuy.buyShares.toLocaleString()}주 매수. 나눠서 사는 건 단기 트레이딩이 아닌 확신에 기반한 매수.`
-        : `${convictionBuy.buyShares.toLocaleString()} shares over ${convictionBuy.buyCount} days. Spreading buys = conviction, not a quick trade.`,
+      title: isKo ? `${convictionBuy.ticker} ${convictionBuy.buyCount}일 연속 매수` : `${convictionBuy.ticker}: ${convictionBuy.buyCount}-Day Buying`,
+      desc,
       tag: isKo ? '확신매수' : 'Conviction',
       color: '#22c55e',
     }];
   }
 
-  // 3) 같은 종목 3일 이상 연속 매도 → 정리 신호
+  // 3) 같은 종목 3일+ 연속 매도 → 정리 신호 + 테마
   if (convictionSell) {
+    const theme = getTheme(convictionSell.ticker, isKo);
+    const desc = isKo
+      ? `${convictionSell.ticker}${theme ? `(${theme})` : ''}를 ${convictionSell.sellCount}일 연속 매도, 총 ${convictionSell.sellShares.toLocaleString()}주 처분. ${theme ? `${theme} 분야 전망이 바뀌었거나 ` : ''}포지션 정리 신호.`
+      : `${convictionSell.sellShares.toLocaleString()} shares of ${convictionSell.ticker}${theme ? ` (${theme})` : ''} sold over ${convictionSell.sellCount} days. ${theme ? `Outlook on ${theme} may have changed — ` : ''}position unwinding signal.`;
     return [{
       icon: AlertTriangle,
       title: isKo ? `${convictionSell.ticker} ${convictionSell.sellCount}일 연속 매도` : `${convictionSell.ticker}: ${convictionSell.sellCount}-Day Selling`,
-      desc: isKo
-        ? `${convictionSell.company}를 ${convictionSell.sellCount}일에 걸쳐 ${convictionSell.sellShares.toLocaleString()}주 처분. 점진적 매도는 포지션 정리 신호.`
-        : `${convictionSell.sellShares.toLocaleString()} shares sold over ${convictionSell.sellCount} days. Gradual selling signals position unwinding.`,
+      desc,
       tag: isKo ? '포지션정리' : 'Unwinding',
       color: '#f59e0b',
     }];
   }
 
-  // 4) 매수/매도 비율이 극단적일 때만
-  if (ratio >= 2.0) {
-    const topBuy = buys.sort((a, b) => Math.abs(b.sharesChange) - Math.abs(a.sharesChange))[0];
+  // 4) 매수/매도 비율이 극단적 + 핵심 종목 테마
+  if (ratio >= 2.0 && bigBuyTicker) {
+    const theme = getTheme(bigBuyTicker.ticker, isKo);
     return [{
       icon: TrendingUp,
-      title: isKo ? '매수 집중 구간' : 'Heavy Buying Period',
+      title: isKo ? `${bigBuyTicker.ticker} 중심 매수 집중` : `Buying Led by ${bigBuyTicker.ticker}`,
       desc: isKo
-        ? `매수 ${stats.buyCount}건 vs 매도 ${stats.sellCount}건. ${topBuy ? `${topBuy.ticker} 중심으로` : ''} 적극적으로 포지션을 늘리는 구간.`
-        : `${stats.buyCount} buys vs ${stats.sellCount} sells. ${topBuy ? `Led by ${topBuy.ticker}.` : ''} Actively building positions.`,
+        ? `매수 ${stats.buyCount}건 vs 매도 ${stats.sellCount}건으로 매수 우위. ${bigBuyTicker.ticker}${theme ? `(${theme})` : ''} ${bigBuyTicker.buyShares.toLocaleString()}주를 중심으로 적극적 포지션 확대.`
+        : `${stats.buyCount} buys vs ${stats.sellCount} sells. ${bigBuyTicker.ticker}${theme ? ` (${theme})` : ''} leads with ${bigBuyTicker.buyShares.toLocaleString()} shares.`,
       tag: isKo ? '매수우위' : 'Bullish',
       color: '#22c55e',
     }];
   }
   if (ratio <= 0.5) {
     const topSell = sells.sort((a, b) => Math.abs(b.sharesChange) - Math.abs(a.sharesChange))[0];
+    const theme = topSell ? getTheme(topSell.ticker, isKo) : null;
     return [{
       icon: TrendingDown,
-      title: isKo ? '매도 집중 구간' : 'Heavy Selling Period',
+      title: isKo ? `${topSell ? topSell.ticker + ' ' : ''}중심 매도 집중` : `Selling${topSell ? ' Led by ' + topSell.ticker : ''}`,
       desc: isKo
-        ? `매도 ${stats.sellCount}건 vs 매수 ${stats.buyCount}건. ${topSell ? `${topSell.ticker} 중심으로` : ''} 비중을 줄이며 현금 확보 중.`
-        : `${stats.sellCount} sells vs ${stats.buyCount} buys. ${topSell ? `Led by ${topSell.ticker}.` : ''} Reducing exposure.`,
+        ? `매도 ${stats.sellCount}건 vs 매수 ${stats.buyCount}건. ${topSell ? `${topSell.ticker}${theme ? `(${theme})` : ''} 중심으로 ` : ''}비중을 줄이며 현금 확보.`
+        : `${stats.sellCount} sells vs ${stats.buyCount} buys.${topSell ? ` ${topSell.ticker}${theme ? ` (${theme})` : ''} leads.` : ''} Reducing exposure.`,
       tag: isKo ? '매도우위' : 'Bearish',
       color: '#ef4444',
     }];
