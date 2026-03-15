@@ -12,7 +12,7 @@ import { generateArkReportInsight } from "../utils/insights";
 const ArkReportPage = ({ onBack, onNavigate }) => {
   const t = useTheme();
   const L = useLocale();
-  const { arkDailyTrades } = useData();
+  const { arkDailyTrades, aiInsights } = useData();
   const isKo = L.locale === 'ko';
 
   const [mode, setMode] = useState('weekly');
@@ -261,10 +261,32 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
                     })}
                   </div>
 
-                  {/* ── AI 인사이트 ── */}
+                  {/* ── 인사이트 (DB 우선, 없으면 규칙 기반 폴백) ── */}
                   {(() => {
-                    const arkInsights = generateArkReportInsight(stats, report.days, isKo);
-                    if (arkInsights.length === 0) return null;
+                    // DB에서 주간 인사이트 찾기: "weekly-MMDD" 형식 키
+                    const weekStart = mode === 'weekly' ? report.start : null;
+                    const weekKey = weekStart ? `weekly-${weekStart.slice(5).replace('-', '')}` : null;
+                    const cathieInsights = aiInsights?.cathie || {};
+                    const dbInsight = weekKey && cathieInsights[weekKey]?.insights?.[0];
+
+                    // DB 인사이트가 있으면 그걸 쓰고, 없으면 규칙 기반
+                    const TAG_COLORS = { '섹터전환': '#8b5cf6', '확신매수': '#22c55e', '포지션정리': '#f59e0b', '매수우위': '#22c55e', '매도우위': '#ef4444', 'Rotation': '#8b5cf6', 'Conviction': '#22c55e', 'Unwinding': '#f59e0b', 'Bullish': '#22c55e', 'Bearish': '#ef4444' };
+                    let displayInsights;
+
+                    if (dbInsight) {
+                      displayInsights = [{
+                        title: dbInsight.title,
+                        desc: dbInsight.desc,
+                        tag: dbInsight.tag,
+                        color: TAG_COLORS[dbInsight.tag] || '#8b5cf6',
+                        icon: Sparkles,
+                        fromDb: true,
+                      }];
+                    } else {
+                      displayInsights = generateArkReportInsight(stats, report.days, isKo);
+                    }
+
+                    if (displayInsights.length === 0) return null;
                     return (
                       <div className="rounded-xl p-4" style={{ background: t.name === 'dark' ? 'rgba(139,92,246,0.04)' : 'rgba(139,92,246,0.03)', border: `1px solid ${t.name === 'dark' ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.1)'}` }}>
                         <div className="flex items-center gap-2 mb-3">
@@ -274,8 +296,8 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
                           </span>
                         </div>
                         <div className="space-y-2.5">
-                          {arkInsights.map((ins, ii) => {
-                            const Icon = ins.icon;
+                          {displayInsights.map((ins, ii) => {
+                            const Icon = ins.icon || Sparkles;
                             return (
                               <div key={ii} className="flex items-start gap-2.5">
                                 <div className="mt-0.5 w-5 h-5 rounded-md flex items-center justify-center shrink-0" style={{ background: `${ins.color}15` }}>
