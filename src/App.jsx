@@ -406,7 +406,7 @@ function FolioObsInner() {
                 {page === "stock" && <StockDetailPage ticker={selectedTicker} onBack={goHome} onNavigate={navigate} />}
                 {page === "screener" && <ScreenerPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} initialSector={screenerSector} />}
                 {page === "watchlist" && <WatchlistPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} />}
-                {page === "compare" && <ComparePage onBack={goHome} />}
+                {page === "compare" && <ComparePage onBack={goHome} onNavigate={navigate} />}
                 {page === "insights" && <InsightsPage onBack={goHome} onNavigate={navigate} />}
                 {page === "ark-report" && <ArkReportPage onBack={goHome} onNavigate={navigate} />}
                 {page === "privacy" && <PrivacyPage onBack={goHome} />}
