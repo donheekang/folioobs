@@ -270,7 +270,7 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
                         <div className="flex items-center gap-2 mb-3">
                           <Sparkles size={15} style={{ color: '#a78bfa' }} />
                           <span className="text-sm font-bold" style={{ color: t.text }}>
-                            {isKo ? '주간 인사이트' : 'Weekly Insights'}
+                            {isKo ? (mode === 'weekly' ? '주간 인사이트' : '월간 인사이트') : (mode === 'weekly' ? 'Weekly Insights' : 'Monthly Insights')}
                           </span>
                         </div>
                         <div className="space-y-2.5">
