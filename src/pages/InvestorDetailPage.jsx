@@ -261,7 +261,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
       const tradesByTicker = {};
       arkDailyTrades.forEach(day => {
         (day.trades || []).forEach(trade => {
-          if (!tradesByTicker[trade.ticker]) tradesByTicker[trade.ticker] = { buys: 0, sells: 0, company: trade.company };
+          if (!tradesByTicker[trade.ticker]) tradesByTicker[trade.ticker] = { buys: 0, sells: 0, company: trade.company, sector: trade.sector || '' };
           if (trade.direction === 'buy') tradesByTicker[trade.ticker].buys += (trade.sharesChange || 0);
           else tradesByTicker[trade.ticker].sells += (trade.sharesChange || 0);
         });
@@ -278,6 +278,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
             shares: netShares,
             pct: 0,
             change: 100, // formatChange(100) → '신규'
+            sector: data.sector || '기타',
             fromTrades: true,
           });
         }

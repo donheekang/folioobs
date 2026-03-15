@@ -448,6 +448,21 @@ export function DataProvider({ children }) {
             .limit(500);
 
           if (!arkErr && rawTrades?.length) {
+            // ARK 매매 ticker들의 sector 정보를 securities 테이블에서 조회
+            const arkTickers = [...new Set(rawTrades.map(t => t.ticker))];
+            let sectorMap = {};
+            try {
+              const { data: secData } = await supabase
+                .from('securities')
+                .select('ticker, sector, sector_ko')
+                .in('ticker', arkTickers);
+              if (secData) {
+                secData.forEach(s => {
+                  sectorMap[s.ticker] = (s.sector_ko && s.sector_ko.trim()) || (s.sector && s.sector.trim()) || '';
+                });
+              }
+            } catch (e) { console.warn('ARK sector lookup 실패:', e.message); }
+
             // 날짜별 그룹핑
             const byDate = {};
             rawTrades.forEach(t => {
@@ -463,6 +478,7 @@ export function DataProvider({ children }) {
                 funds: t.funds,
                 isNew: t.is_new,
                 isExit: t.is_exit,
+                sector: sectorMap[t.ticker] || '',
               });
             });
             // 날짜 내림차순 배열로 변환
