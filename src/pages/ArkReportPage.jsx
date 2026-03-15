@@ -244,12 +244,10 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
               {isOpen && (
                 <div className="mt-6 space-y-6">
                   {/* ── 요약 카드 ── */}
-                  <div className="grid grid-cols-4 gap-2 sm:gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {[
                       { label: isKo ? '총 매수' : 'Buys', value: stats.buyCount, color: t.green, icon: TrendingUp },
                       { label: isKo ? '총 매도' : 'Sells', value: stats.sellCount, color: t.red, icon: TrendingDown },
-                      { label: isKo ? '신규 편입' : 'New', value: stats.newCount, color: t.accent, icon: Plus },
-                      { label: isKo ? '완전 매도' : 'Exits', value: stats.exitCount, color: '#f59e0b', icon: LogOut },
                     ].map((s, i) => {
                       const I = s.icon;
                       return (
@@ -309,51 +307,6 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
                     </div>
                   </div>
 
-                  {/* ── 신규 편입 & 완전 매도 ── */}
-                  {(stats.newPositions.length > 0 || stats.exits.length > 0) && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {stats.newPositions.length > 0 && (
-                        <div className="rounded-xl p-4" style={{ background: `${t.accent}05`, border: `1px solid ${t.accent}12` }}>
-                          <div className="flex items-center gap-2 mb-3">
-                            <Plus size={14} style={{ color: t.accent }} />
-                            <span className="text-sm font-bold" style={{ color: t.accent }}>
-                              {isKo ? '신규 편입' : 'New Positions'}
-                            </span>
-                            <Badge color={t.accent}>{stats.newPositions.length}</Badge>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {stats.newPositions.map((tr, i) => (
-                              <span key={i} className="text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer transition-all hover:scale-105"
-                                style={{ background: `${t.accent}12`, color: t.accent }}
-                                onClick={() => onNavigate("stock", tr.ticker)}>
-                                {tr.ticker}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {stats.exits.length > 0 && (
-                        <div className="rounded-xl p-4" style={{ background: `${t.red}05`, border: `1px solid ${t.red}12` }}>
-                          <div className="flex items-center gap-2 mb-3">
-                            <LogOut size={14} style={{ color: t.red }} />
-                            <span className="text-sm font-bold" style={{ color: t.red }}>
-                              {isKo ? '완전 매도' : 'Full Exits'}
-                            </span>
-                            <Badge color={t.red}>{stats.exits.length}</Badge>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {stats.exits.map((tr, i) => (
-                              <span key={i} className="text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer transition-all hover:scale-105"
-                                style={{ background: `${t.red}12`, color: t.red }}
-                                onClick={() => onNavigate("stock", tr.ticker)}>
-                                {tr.ticker}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
 
                   {/* ── 일별 거래 내역 ── */}
                   <div>
