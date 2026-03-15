@@ -206,36 +206,7 @@ export const generateArkReportInsight = (stats, days, isKo = true) => {
     });
   }
 
-  // ── 3) 같은 섹터 내 종목 교체 (팔고 사기) ──
-  const sectorSwaps = [];
-  Object.keys(sectorBuys).forEach(sec => {
-    if (sectorSells[sec]) {
-      const bought = [...sectorBuys[sec].tickers];
-      const sold = [...sectorSells[sec].tickers];
-      const swapped = bought.filter(t => !sold.includes(t));
-      const dropped = sold.filter(t => !bought.includes(t));
-      if (swapped.length > 0 && dropped.length > 0) {
-        sectorSwaps.push({ sector: sec, bought: swapped, sold: dropped });
-      }
-    }
-  });
-
-  if (sectorSwaps.length > 0) {
-    const swap = sectorSwaps[0];
-    const boughtStr = swap.bought.slice(0, 2).join(', ');
-    const soldStr = swap.sold.slice(0, 2).join(', ');
-    insights.push({
-      icon: Lightbulb,
-      title: isKo ? `${swap.sector} 내 종목 교체` : `${swap.sector} Stock Swap`,
-      desc: isKo
-        ? `같은 ${swap.sector} 섹터 안에서 ${soldStr}을(를) 팔고 ${boughtStr}을(를) 매수했습니다. 섹터 자체는 유망하게 보지만, 그 안에서 더 좋은 종목으로 갈아타는 전략입니다.`
-        : `Swapping ${soldStr} for ${boughtStr} within ${swap.sector} — bullish on the sector but upgrading to preferred picks.`,
-      tag: isKo ? '종목교체' : 'Swap',
-      color: '#06b6d4',
-    });
-  }
-
-  // ── 4) 대규모 단일 거래 → 이유 추론 ──
+  // ── 3) 대규모 단일 거래 → 이유 추론 ──
   const bigBuy = buys.sort((a, b) => Math.abs(b.sharesChange) - Math.abs(a.sharesChange))[0];
   const bigSell = sells.sort((a, b) => Math.abs(b.sharesChange) - Math.abs(a.sharesChange))[0];
 
