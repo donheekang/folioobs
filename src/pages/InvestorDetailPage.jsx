@@ -250,6 +250,14 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
 
     // 캐시우드: ARK 일별 매매에서 holdings에 없는 신규 종목 추가
     if (investorId === 'cathie' && arkDailyTrades?.length > 0) {
+      // 기존 holdings 티커의 base 형태도 수집 (SOLQ/U → SOLQ, ETHQ/U → ETHQ)
+      const existingBases = new Set();
+      for (const key of map.keys()) {
+        existingBases.add(key);
+        existingBases.add(key.split('/')[0]); // SOLQ/U → SOLQ
+        existingBases.add(key.split('.')[0]); // BRK.B → BRK
+      }
+
       const tradesByTicker = {};
       arkDailyTrades.forEach(day => {
         (day.trades || []).forEach(trade => {
@@ -260,7 +268,8 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
       });
       Object.entries(tradesByTicker).forEach(([ticker, data]) => {
         const netShares = data.buys - data.sells;
-        if (netShares > 0 && !map.has(ticker)) {
+        // 중복 체크: 정확한 매치 + base ticker 매치 (SOLQ/U ↔ SOLQ)
+        if (netShares > 0 && !existingBases.has(ticker)) {
           map.set(ticker, {
             ticker,
             name: data.company || ticker,
@@ -326,8 +335,9 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
         })}
       </div>
 
-      {/* ===== 이번 분기 변동 요약 ===== */}
+      {/* ===== 이번 분기 변동 요약 (캐시우드는 일별 매매라 분기 요약 불필요) ===== */}
       {(() => {
+        if (investorId === 'cathie') return null;
         const activity = (QUARTERLY_ACTIVITY[investorId] || []);
         const latestQ = activity.length > 0 ? activity[0] : null;
         const latestActions = latestQ?.actions || [];
