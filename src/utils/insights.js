@@ -89,155 +89,112 @@ export const generateInsights = (investor, holdings, L) => {
   return insights;
 };
 
-// ── ARK 주간/월간 리포트 AI 인사이트 ──
+// ── ARK 주간/월간 리포트 인사이트 ──
 export const generateArkReportInsight = (stats, days, isKo = true) => {
-  const insights = [];
   const allTrades = days.flatMap(d => d.trades);
-  if (allTrades.length === 0) return insights;
+  if (allTrades.length === 0) return [];
 
-  // ── 데이터 준비 ──
   const buys = allTrades.filter(tr => tr.direction === 'buy');
   const sells = allTrades.filter(tr => tr.direction === 'sell');
 
-  // 섹터별 매수/매도 집계 (종목 리스트 포함)
-  const sectorBuys = {};
-  const sectorSells = {};
+  // 섹터별 집계
+  const sectorBuys = {}, sectorSells = {};
   allTrades.forEach(tr => {
     const sec = tr.sector || '';
-    if (!sec || sec === '기타' || sec === 'Other') return; // 기타 제외
+    if (!sec || sec === '기타' || sec === 'Other') return;
     const map = tr.direction === 'buy' ? sectorBuys : sectorSells;
-    if (!map[sec]) map[sec] = { count: 0, tickers: new Set(), shares: 0 };
+    if (!map[sec]) map[sec] = { count: 0, tickers: new Set() };
     map[sec].count++;
     map[sec].tickers.add(tr.ticker);
-    map[sec].shares += Math.abs(tr.sharesChange);
   });
 
-  // 종목별 매매 방향 & 반복 횟수
+  // 종목별 집계
   const tickerInfo = {};
   allTrades.forEach(tr => {
-    if (!tickerInfo[tr.ticker]) tickerInfo[tr.ticker] = { ticker: tr.ticker, company: tr.company, sector: tr.sector, buyCount: 0, sellCount: 0, buyShares: 0, sellShares: 0 };
+    if (!tickerInfo[tr.ticker]) tickerInfo[tr.ticker] = { ticker: tr.ticker, company: tr.company, buyCount: 0, sellCount: 0, buyShares: 0, sellShares: 0 };
     const info = tickerInfo[tr.ticker];
     if (tr.direction === 'buy') { info.buyCount++; info.buyShares += Math.abs(tr.sharesChange); }
     else { info.sellCount++; info.sellShares += Math.abs(tr.sharesChange); }
   });
 
-  const topBuySectors = Object.entries(sectorBuys).sort((a, b) => b[1].count - a[1].count);
-  const topSellSectors = Object.entries(sectorSells).sort((a, b) => b[1].count - a[1].count);
   const ratio = stats.buyCount / Math.max(stats.sellCount, 1);
+  const topBuySec = Object.entries(sectorBuys).sort((a, b) => b[1].count - a[1].count)[0];
+  const topSellSec = Object.entries(sectorSells).sort((a, b) => b[1].count - a[1].count)[0];
+  const convictionBuy = Object.values(tickerInfo).filter(t => t.buyCount >= 3).sort((a, b) => b.buyShares - a.buyShares)[0];
+  const convictionSell = Object.values(tickerInfo).filter(t => t.sellCount >= 3).sort((a, b) => b.sellShares - a.sellShares)[0];
 
-  // ── 1) 핵심 전략 인사이트: 전체 매매의 "왜" ──
-  // 섹터 로테이션 감지 (한 섹터 팔고 다른 섹터 사기)
-  const mainBuySec = topBuySectors[0];
-  const mainSellSec = topSellSectors[0];
-  const hasRotation = mainBuySec && mainSellSec && mainBuySec[0] !== mainSellSec[0] && mainBuySec[1].count >= 2 && mainSellSec[1].count >= 2;
+  // ── 가장 임팩트 있는 인사이트 1개만 선택 ──
+  // 우선순위: 섹터 로테이션 > 확신 매수/매도 > 매수/매도 비율
 
+  // 1) 섹터 로테이션 (가장 강한 신호)
+  const hasRotation = topBuySec && topSellSec && topBuySec[0] !== topSellSec[0] && topBuySec[1].count >= 3 && topSellSec[1].count >= 3;
   if (hasRotation) {
-    const buyNames = [...mainBuySec[1].tickers].slice(0, 3).join(', ');
-    const sellNames = [...mainSellSec[1].tickers].slice(0, 3).join(', ');
-    insights.push({
+    const buyTickers = [...topBuySec[1].tickers].slice(0, 2).join(', ');
+    const sellTickers = [...topSellSec[1].tickers].slice(0, 2).join(', ');
+    return [{
       icon: Brain,
-      title: isKo ? '섹터 로테이션 진행 중' : 'Sector Rotation Underway',
+      title: isKo ? `${topSellSec[0]} → ${topBuySec[0]} 전환` : `${topSellSec[0]} → ${topBuySec[0]} Rotation`,
       desc: isKo
-        ? `${mainSellSec[0]}(${sellNames}) 비중을 줄이면서 ${mainBuySec[0]}(${buyNames})으로 자금을 이동하고 있습니다. 캐시 우드가 ${mainBuySec[0]} 섹터의 성장성을 더 높게 평가하고 있다는 신호입니다.`
-        : `Rotating out of ${mainSellSec[0]} (${sellNames}) into ${mainBuySec[0]} (${buyNames}), signaling higher growth conviction in ${mainBuySec[0]}.`,
-      tag: isKo ? '전략' : 'Strategy',
+        ? `${topSellSec[0]}(${sellTickers}) 비중을 줄이고 ${topBuySec[0]}(${buyTickers})을 늘리고 있습니다. 자금 흐름이 ${topBuySec[0]} 쪽으로 이동 중.`
+        : `Trimming ${topSellSec[0]} (${sellTickers}) and building ${topBuySec[0]} (${buyTickers}). Capital flowing toward ${topBuySec[0]}.`,
+      tag: isKo ? '섹터전환' : 'Rotation',
       color: '#8b5cf6',
-    });
-  } else if (ratio >= 1.5) {
-    // 매수 우위 → 왜?
-    const buyTickers = buys.slice(0, 3).map(b => b.ticker);
-    const uniqueBuyTickers = [...new Set(buyTickers)].join(', ');
-    insights.push({
-      icon: TrendingUp,
-      title: isKo ? '적극적 포지션 확대' : 'Aggressive Position Building',
-      desc: isKo
-        ? `매수가 매도의 ${ratio.toFixed(1)}배로, 시장 하락을 매수 기회로 활용하거나 확신이 높은 종목에 베팅을 늘리고 있습니다. ${uniqueBuyTickers} 등을 중심으로 포지션을 키우는 중입니다.`
-        : `Buys outpace sells ${ratio.toFixed(1)}x — using market dips as buying opportunities or increasing bets on high-conviction picks like ${uniqueBuyTickers}.`,
-      tag: isKo ? '전략' : 'Strategy',
-      color: '#22c55e',
-    });
-  } else if (ratio <= 0.67) {
-    const sellTickers = [...new Set(sells.slice(0, 3).map(s => s.ticker))].join(', ');
-    insights.push({
-      icon: TrendingDown,
-      title: isKo ? '리스크 관리 모드' : 'Risk Management Mode',
-      desc: isKo
-        ? `매도가 매수의 ${(1/ratio).toFixed(1)}배로, 포트폴리오 리스크를 줄이고 현금 비중을 높이는 방어적 전략입니다. ${sellTickers} 등의 비중을 줄이며 변동성에 대비하고 있습니다.`
-        : `Sells outpace buys ${(1/ratio).toFixed(1)}x — defensive strategy to reduce risk and raise cash. Trimming ${sellTickers} to prepare for volatility.`,
-      tag: isKo ? '전략' : 'Strategy',
-      color: '#ef4444',
-    });
+    }];
   }
 
-  // ── 2) 확신 종목 인사이트: 반복 매매의 "왜" ──
-  // 같은 종목을 여러 날에 걸쳐 같은 방향으로 거래 → 확신
-  const convictionBuys = Object.values(tickerInfo).filter(t => t.buyCount >= 2).sort((a, b) => b.buyShares - a.buyShares);
-  const convictionSells = Object.values(tickerInfo).filter(t => t.sellCount >= 3).sort((a, b) => b.sellShares - a.sellShares);
-
-  if (convictionBuys.length > 0) {
-    const top = convictionBuys[0];
-    const sharesFmt = top.buyShares.toLocaleString();
-    const daysCount = top.buyCount;
-    const others = convictionBuys.slice(1, 3).map(t => t.ticker);
-    const otherStr = others.length > 0 ? (isKo ? ` ${others.join(', ')}도 꾸준히 매수 중.` : ` Also steadily buying ${others.join(', ')}.`) : '';
-    insights.push({
+  // 2) 같은 종목 3일 이상 연속 매수 → 확신 신호
+  if (convictionBuy) {
+    return [{
       icon: Star,
-      title: isKo ? `${top.ticker}에 대한 강한 확신` : `High Conviction: ${top.ticker}`,
+      title: isKo ? `${convictionBuy.ticker} ${convictionBuy.buyCount}일 연속 매수` : `${convictionBuy.ticker}: ${convictionBuy.buyCount}-Day Buying Streak`,
       desc: isKo
-        ? `${top.company}를 ${daysCount}일에 걸쳐 총 ${sharesFmt}주 매수했습니다. 하루가 아닌 여러 날에 나눠 산다는 건 단기 트레이딩이 아니라 장기적 확신에 기반한 매수입니다.${otherStr}`
-        : `Bought ${sharesFmt} shares of ${top.company} over ${daysCount} days. Spreading buys across days signals long-term conviction, not a short-term trade.${otherStr}`,
+        ? `${convictionBuy.company}를 ${convictionBuy.buyCount}일에 걸쳐 ${convictionBuy.buyShares.toLocaleString()}주 매수. 나눠서 사는 건 단기 트레이딩이 아닌 확신에 기반한 매수.`
+        : `${convictionBuy.buyShares.toLocaleString()} shares over ${convictionBuy.buyCount} days. Spreading buys = conviction, not a quick trade.`,
       tag: isKo ? '확신매수' : 'Conviction',
       color: '#22c55e',
-    });
+    }];
   }
 
-  if (convictionSells.length > 0) {
-    const top = convictionSells[0];
-    const sharesFmt = top.sellShares.toLocaleString();
-    const daysCount = top.sellCount;
-    insights.push({
+  // 3) 같은 종목 3일 이상 연속 매도 → 정리 신호
+  if (convictionSell) {
+    return [{
       icon: AlertTriangle,
-      title: isKo ? `${top.ticker} 지속적 비중 축소` : `Steady Exit: ${top.ticker}`,
+      title: isKo ? `${convictionSell.ticker} ${convictionSell.sellCount}일 연속 매도` : `${convictionSell.ticker}: ${convictionSell.sellCount}-Day Selling`,
       desc: isKo
-        ? `${top.company}를 ${daysCount}일 연속 매도하며 총 ${sharesFmt}주를 처분했습니다. 점진적 매도는 투자 전망이 바뀌었거나 펀드 리밸런싱 필요성을 시사합니다.`
-        : `Sold ${sharesFmt} shares of ${top.company} over ${daysCount} days. Gradual selling suggests a changed thesis or fund rebalancing needs.`,
-      tag: isKo ? '비중축소' : 'Reduction',
+        ? `${convictionSell.company}를 ${convictionSell.sellCount}일에 걸쳐 ${convictionSell.sellShares.toLocaleString()}주 처분. 점진적 매도는 포지션 정리 신호.`
+        : `${convictionSell.sellShares.toLocaleString()} shares sold over ${convictionSell.sellCount} days. Gradual selling signals position unwinding.`,
+      tag: isKo ? '포지션정리' : 'Unwinding',
       color: '#f59e0b',
-    });
+    }];
   }
 
-  // ── 3) 대규모 단일 거래 → 이유 추론 ──
-  const bigBuy = buys.sort((a, b) => Math.abs(b.sharesChange) - Math.abs(a.sharesChange))[0];
-  const bigSell = sells.sort((a, b) => Math.abs(b.sharesChange) - Math.abs(a.sharesChange))[0];
-
-  if (bigSell && Math.abs(bigSell.sharesChange) >= 200000 && insights.length < 4) {
-    const shares = Math.abs(bigSell.sharesChange).toLocaleString();
-    // 같은 주에 다른 종목 매수도 했다면 → 자금 재배치
-    const hasBuys = buys.length > 0;
-    insights.push({
-      icon: Lightbulb,
-      title: isKo ? `${bigSell.ticker} 대량 매도의 의미` : `Why Sell ${bigSell.ticker}?`,
+  // 4) 매수/매도 비율이 극단적일 때만
+  if (ratio >= 2.0) {
+    const topBuy = buys.sort((a, b) => Math.abs(b.sharesChange) - Math.abs(a.sharesChange))[0];
+    return [{
+      icon: TrendingUp,
+      title: isKo ? '매수 집중 구간' : 'Heavy Buying Period',
       desc: isKo
-        ? `${bigSell.company} ${shares}주를 한 번에 매도했습니다. ${hasBuys ? '같은 기간 다른 종목 매수가 있어, 이 매도 자금을 확신이 더 높은 종목으로 재배치한 것으로 보입니다.' : '대규모 포지션 정리는 해당 종목의 투자 논리에 변화가 생겼음을 의미합니다.'}`
-        : `Sold ${shares} shares of ${bigSell.company} in one move. ${hasBuys ? 'With buys happening in the same period, this capital is likely being redeployed to higher-conviction picks.' : 'A large position exit suggests a changed investment thesis.'}`,
-      tag: isKo ? '분석' : 'Analysis',
-      color: '#ef4444',
-    });
-  } else if (bigBuy && Math.abs(bigBuy.sharesChange) >= 100000 && insights.length < 4) {
-    const shares = Math.abs(bigBuy.sharesChange).toLocaleString();
-    insights.push({
-      icon: Lightbulb,
-      title: isKo ? `${bigBuy.ticker} 대량 매수의 의미` : `Why Buy ${bigBuy.ticker}?`,
-      desc: isKo
-        ? `${bigBuy.company} ${shares}주를 대량 매수했습니다. 이 규모의 매수는 단순 리밸런싱이 아니라, 해당 종목이 저평가되어 있다는 캐시 우드의 강한 판단을 반영합니다.`
-        : `Bought ${shares} shares of ${bigBuy.company} — this scale of buying isn't simple rebalancing, it reflects Cathie Wood's conviction that it's undervalued.`,
-      tag: isKo ? '분석' : 'Analysis',
+        ? `매수 ${stats.buyCount}건 vs 매도 ${stats.sellCount}건. ${topBuy ? `${topBuy.ticker} 중심으로` : ''} 적극적으로 포지션을 늘리는 구간.`
+        : `${stats.buyCount} buys vs ${stats.sellCount} sells. ${topBuy ? `Led by ${topBuy.ticker}.` : ''} Actively building positions.`,
+      tag: isKo ? '매수우위' : 'Bullish',
       color: '#22c55e',
-    });
+    }];
+  }
+  if (ratio <= 0.5) {
+    const topSell = sells.sort((a, b) => Math.abs(b.sharesChange) - Math.abs(a.sharesChange))[0];
+    return [{
+      icon: TrendingDown,
+      title: isKo ? '매도 집중 구간' : 'Heavy Selling Period',
+      desc: isKo
+        ? `매도 ${stats.sellCount}건 vs 매수 ${stats.buyCount}건. ${topSell ? `${topSell.ticker} 중심으로` : ''} 비중을 줄이며 현금 확보 중.`
+        : `${stats.sellCount} sells vs ${stats.buyCount} buys. ${topSell ? `Led by ${topSell.ticker}.` : ''} Reducing exposure.`,
+      tag: isKo ? '매도우위' : 'Bearish',
+      color: '#ef4444',
+    }];
   }
 
-  // 최대 4개로 제한 (너무 많으면 산만)
-  return insights.slice(0, 4);
+  return [];
 };
 
 export const generateComparisonInsight = (inv1, inv2, HOLDINGS = {}) => {
