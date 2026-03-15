@@ -248,15 +248,26 @@ export function DataProvider({ children }) {
           const filing = latestFilingByInvestor[inv.id];
           if (!filing) continue;
 
-          const { data: invHoldings, error: hErr } = await supabase
-            .from('holdings')
-            .select(`
-              *,
-              securities (ticker, name, name_ko, sector, sector_ko)
-            `)
-            .eq('filing_id', filing.id)
-            .order('value', { ascending: false })
-            .limit(2000); // 달리오 1040종목 대응
+          // Supabase REST API 기본 max rows = 1000이므로 pagination 필요
+          let invHoldings = [];
+          let from = 0;
+          const PAGE_SIZE = 1000;
+          let hErr = null;
+          while (true) {
+            const { data: page, error: pageErr } = await supabase
+              .from('holdings')
+              .select(`
+                *,
+                securities (ticker, name, name_ko, sector, sector_ko)
+              `)
+              .eq('filing_id', filing.id)
+              .order('value', { ascending: false })
+              .range(from, from + PAGE_SIZE - 1);
+            if (pageErr) { hErr = pageErr; break; }
+            invHoldings.push(...(page || []));
+            if (!page || page.length < PAGE_SIZE) break; // 마지막 페이지
+            from += PAGE_SIZE;
+          }
 
           if (hErr) { console.warn(`holdings 쿼리 실패 (${inv.name}):`, hErr.message); continue; }
 
