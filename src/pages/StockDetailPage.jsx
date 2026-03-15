@@ -35,14 +35,6 @@ function fmtPrice(p) {
   return `$${p.toFixed(2)}`;
 }
 
-/** Extract domain from URL for Clearbit logo */
-function extractDomain(url) {
-  if (!url) return null;
-  try {
-    const u = new URL(url);
-    return u.hostname.replace('www.', '');
-  } catch { return null; }
-}
 
 /** Compute Simple Moving Average */
 function computeSMA(data, period) {
@@ -223,65 +215,21 @@ const MA_LINES = [
 ];
 
 // ========== WELL-KNOWN TICKER → DOMAIN MAP ==========
-const TICKER_DOMAINS = {
-  AAPL: 'apple.com', MSFT: 'microsoft.com', AMZN: 'amazon.com', GOOGL: 'google.com', GOOG: 'google.com',
-  META: 'meta.com', TSLA: 'tesla.com', NVDA: 'nvidia.com', BRK: 'berkshirehathaway.com',
-  JPM: 'jpmorganchase.com', V: 'visa.com', JNJ: 'jnj.com', WMT: 'walmart.com', MA: 'mastercard.com',
-  PG: 'pg.com', UNH: 'unitedhealthgroup.com', HD: 'homedepot.com', DIS: 'disney.com',
-  BAC: 'bankofamerica.com', XOM: 'exxonmobil.com', NFLX: 'netflix.com', KO: 'coca-cola.com',
-  PEP: 'pepsico.com', COST: 'costco.com', ABBV: 'abbvie.com', AVGO: 'broadcom.com',
-  MRK: 'merck.com', LLY: 'lilly.com', TMO: 'thermofisher.com', CSCO: 'cisco.com',
-  ADBE: 'adobe.com', CRM: 'salesforce.com', ACN: 'accenture.com', AMD: 'amd.com',
-  INTC: 'intel.com', IBM: 'ibm.com', ORCL: 'oracle.com', NKE: 'nike.com',
-  QCOM: 'qualcomm.com', TXN: 'ti.com', INTU: 'intuit.com', AMAT: 'appliedmaterials.com',
-  PYPL: 'paypal.com', NOW: 'servicenow.com', ISRG: 'intuitive.com', GS: 'goldmansachs.com',
-  MS: 'morganstanley.com', BLK: 'blackrock.com', SCHW: 'schwab.com', C: 'citigroup.com',
-  WFC: 'wellsfargo.com', AXP: 'americanexpress.com', CVX: 'chevron.com', COP: 'conocophillips.com',
-  ABNB: 'airbnb.com', UBER: 'uber.com', SQ: 'squareup.com', SHOP: 'shopify.com',
-  SNAP: 'snap.com', SPOT: 'spotify.com', PINS: 'pinterest.com', ZM: 'zoom.us',
-  ROKU: 'roku.com', NET: 'cloudflare.com', SNOW: 'snowflake.com', DDOG: 'datadoghq.com',
-  CRWD: 'crowdstrike.com', ZS: 'zscaler.com', PANW: 'paloaltonetworks.com',
-  BA: 'boeing.com', CAT: 'caterpillar.com', GE: 'ge.com', MMM: '3m.com',
-  T: 'att.com', VZ: 'verizon.com', TMUS: 't-mobile.com', CMCSA: 'comcast.com',
-  MCD: 'mcdonalds.com', SBUX: 'starbucks.com', LOW: 'lowes.com', TGT: 'target.com',
-  F: 'ford.com', GM: 'gm.com', TM: 'toyota.com', LMT: 'lockheedmartin.com',
-  RTX: 'rtx.com', HON: 'honeywell.com', UPS: 'ups.com', FDX: 'fedex.com',
-  PFE: 'pfizer.com', BMY: 'bms.com', GILD: 'gilead.com', AMGN: 'amgen.com',
-  CVS: 'cvshealth.com', CI: 'cigna.com', HUM: 'humana.com', ELV: 'elevancehealth.com',
-  DE: 'deere.com', ABT: 'abbott.com', DHR: 'danaher.com', SYK: 'stryker.com',
-  MDT: 'medtronic.com', BSX: 'bostonscientific.com', ZTS: 'zoetis.com',
-  PLTR: 'palantir.com', COIN: 'coinbase.com', HOOD: 'robinhood.com',
-  ARM: 'arm.com', SMCI: 'supermicro.com', TSM: 'tsmc.com', ASML: 'asml.com',
-  MU: 'micron.com', MRVL: 'marvell.com', LRCX: 'lamresearch.com', KLAC: 'kla.com',
-  SOFI: 'sofi.com', RIVN: 'rivian.com', LCID: 'lucidmotors.com', NIO: 'nio.com',
-};
-
-// ========== LOGO COMPONENT (Multi-source fallback) ==========
+// ========== LOGO COMPONENT (Polygon only) ==========
 function CompanyLogo({ ticker, details, isDark, textSecondary }) {
   const [srcIdx, setSrcIdx] = useState(0);
 
   const polygonKey = import.meta.env.VITE_POLYGON_API_KEY;
-  const domain = extractDomain(details?.homepage_url) || TICKER_DOMAINS[ticker] || null;
 
-  // Build ordered list of logo source URLs
+  // Build ordered list of logo source URLs (Polygon only)
   const sources = useMemo(() => {
     const srcs = [];
-    // 1. Polygon icon
+    // 1. Polygon icon (best quality)
     if (details?.branding?.icon_url) srcs.push(`${details.branding.icon_url}?apiKey=${polygonKey}`);
-    // 2. Polygon logo
+    // 2. Polygon logo (fallback)
     if (details?.branding?.logo_url) srcs.push(`${details.branding.logo_url}?apiKey=${polygonKey}`);
-    // 3. Clearbit (from homepage_url or known domain)
-    if (domain) srcs.push(`https://logo.clearbit.com/${domain}`);
-    // 4. Google Favicons (128px, very reliable)
-    if (domain) srcs.push(`https://www.google.com/s2/favicons?domain=${domain}&sz=128`);
-    // 5. Known domain from map (if homepage_url domain was different)
-    const mappedDomain = TICKER_DOMAINS[ticker];
-    if (mappedDomain && mappedDomain !== domain) {
-      srcs.push(`https://logo.clearbit.com/${mappedDomain}`);
-      srcs.push(`https://www.google.com/s2/favicons?domain=${mappedDomain}&sz=128`);
-    }
     return srcs;
-  }, [details, ticker, domain, polygonKey]);
+  }, [details, polygonKey]);
 
   useEffect(() => { setSrcIdx(0); }, [ticker, sources]);
 
