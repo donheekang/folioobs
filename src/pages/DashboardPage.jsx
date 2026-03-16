@@ -232,6 +232,50 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     return rankings;
   }, [INVESTORS, HOLDINGS, QUARTERLY_ACTIVITY, t, L]);
 
+  // ===== 보유종목 수익률 랭킹 (분기 기준, 실시간/15분 지연) =====
+  const performanceRanking = useMemo(() => {
+    if (!Object.keys(stockPrices).length || !INVESTORS.length) return { top: [], bottom: [], priceDate: null, quarterEndDate: null };
+
+    // 모든 투자자의 보유종목 통합 (종목별 보유 투자자 정보 포함)
+    const tickerMap = {};
+    INVESTORS.forEach(inv => {
+      (HOLDINGS[inv.id] || []).forEach(h => {
+        const price = stockPrices[h.ticker];
+        if (!price || price.sinceFiling === null || price.sinceFiling === undefined) return;
+        if (!tickerMap[h.ticker]) {
+          tickerMap[h.ticker] = {
+            ticker: h.ticker,
+            name: h.name,
+            sector: h.sector,
+            current: price.current,
+            quarterEnd: price.quarterEnd,
+            sinceFiling: price.sinceFiling,
+            dailyChange: price.dailyChange,
+            investors: [],
+          };
+        }
+        if (!tickerMap[h.ticker].investors.find(i => i.id === inv.id)) {
+          tickerMap[h.ticker].investors.push(inv);
+        }
+      });
+    });
+
+    const all = Object.values(tickerMap).sort((a, b) => b.sinceFiling - a.sinceFiling);
+    const top = all.slice(0, 10);
+    const bottom = [...all].sort((a, b) => a.sinceFiling - b.sinceFiling).slice(0, 10);
+
+    // 가격 날짜 정보
+    const anyPrice = Object.values(stockPrices)[0];
+    return {
+      top,
+      bottom,
+      priceDate: anyPrice?.date || null,
+      quarterEndDate: anyPrice?.quarterEndDate || null,
+    };
+  }, [INVESTORS, HOLDINGS, stockPrices]);
+
+  const [perfTab, setPerfTab] = useState('top'); // 'top' | 'bottom'
+
   const handleActivityClick = (investorId) => onNavigate("investor", investorId);
   const ActivityItem = ({ act, label, color }) => {
     const defaultBg = t.name==='dark'?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.02)';
@@ -389,6 +433,135 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           </button>
         </div>
       </div>
+
+      {/* ===== 보유종목 수익률 랭킹 (실시간) ===== */}
+      {!ready ? null : performanceRanking.top.length > 0 && (
+        <section className="hero-enter hero-enter-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Trophy size={18} style={{ color: '#f59e0b' }} />
+              <h2 className="text-lg font-bold" style={{ color: t.text }}>
+                {L.locale === 'ko' ? '보유종목 수익률 랭킹' : 'Holdings Performance'}
+              </h2>
+              {latestQuarter && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>}
+            </div>
+            <div className="flex items-center gap-1">
+              {marketStatus === 'open' && (
+                <span className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: `${t.green}15`, color: t.green }}>
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: t.green }} />
+                  {L.locale === 'ko' ? '실시간' : 'Live'}
+                </span>
+              )}
+              {marketStatus !== 'open' && performanceRanking.priceDate && (
+                <span className="text-xs" style={{ color: t.textMuted }}>
+                  {L.locale === 'ko' ? '15분 지연' : '15min delayed'}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* 탭 */}
+          <div className="flex gap-2 mb-4">
+            <button onClick={() => setPerfTab('top')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+              style={{
+                background: perfTab === 'top' ? `${t.green}15` : 'transparent',
+                color: perfTab === 'top' ? t.green : t.textMuted,
+                border: `1px solid ${perfTab === 'top' ? `${t.green}30` : t.glassBorder}`,
+              }}>
+              <ArrowUpRight size={12} />
+              {L.locale === 'ko' ? '수익률 TOP 10' : 'Top Gainers'}
+            </button>
+            <button onClick={() => setPerfTab('bottom')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+              style={{
+                background: perfTab === 'bottom' ? `${t.red}15` : 'transparent',
+                color: perfTab === 'bottom' ? t.red : t.textMuted,
+                border: `1px solid ${perfTab === 'bottom' ? `${t.red}30` : t.glassBorder}`,
+              }}>
+              <ArrowDownRight size={12} />
+              {L.locale === 'ko' ? '수익률 BOTTOM 10' : 'Top Losers'}
+            </button>
+          </div>
+
+          {/* 랭킹 리스트 */}
+          <GlassCard hover={false}>
+            <div className="divide-y" style={{ borderColor: t.glassBorder }}>
+              {/* 헤더 */}
+              <div className="flex items-center gap-3 px-4 py-2.5">
+                <span className="w-5" />
+                <span className="flex-1 text-xs font-medium" style={{ color: t.textMuted }}>
+                  {L.locale === 'ko' ? '종목' : 'Stock'}
+                </span>
+                <span className="w-16 text-right text-xs font-medium" style={{ color: t.textMuted }}>
+                  {L.locale === 'ko' ? '현재가' : 'Price'}
+                </span>
+                <span className="w-20 text-right text-xs font-medium" style={{ color: t.textMuted }}>
+                  {L.locale === 'ko' ? '분기 수익률' : 'QTD Return'}
+                </span>
+              </div>
+              {(perfTab === 'top' ? performanceRanking.top : performanceRanking.bottom).map((stock, i) => {
+                const isPositive = stock.sinceFiling > 0;
+                const color = isPositive ? t.green : t.red;
+                const rankColor = i < 3 ? (perfTab === 'top' ? '#f59e0b' : t.red) : t.textMuted;
+                return (
+                  <div key={stock.ticker}
+                    className="flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors hover:opacity-80"
+                    style={{ borderColor: t.glassBorder }}
+                    onClick={() => onNavigate("stock", stock.ticker)}>
+                    <span className="w-5 text-center text-xs font-bold" style={{ color: rankColor }}>{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold" style={{ color: t.text }}>{stock.ticker}</span>
+                        <span className="text-xs truncate hidden sm:inline" style={{ color: t.textMuted }}>{stock.name?.slice(0, 20)}</span>
+                      </div>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <div className="flex -space-x-1">
+                          {stock.investors.slice(0, 4).map((inv, j) => (
+                            <div key={inv.id} className="w-4 h-4 rounded flex items-center justify-center text-white text-[7px] font-bold ring-1"
+                              style={{ background: inv.gradient, zIndex: 4 - j, ringColor: t.name === 'dark' ? '#000' : '#fff' }}
+                              title={L.investorName(inv)}>
+                              {inv.avatar}
+                            </div>
+                          ))}
+                        </div>
+                        {stock.investors.length > 4 && (
+                          <span className="text-[10px]" style={{ color: t.textMuted }}>+{stock.investors.length - 4}</span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="w-16 text-right text-sm font-medium tabular-nums" style={{ color: t.textSecondary }}>
+                      ${stock.current?.toFixed(stock.current >= 1000 ? 0 : 2)}
+                    </span>
+                    <div className="w-20 text-right">
+                      <span className="inline-flex items-center gap-0.5 text-sm font-bold tabular-nums" style={{ color }}>
+                        {isPositive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                        {isPositive ? '+' : ''}{stock.sinceFiling.toFixed(1)}%
+                      </span>
+                      {stock.dailyChange !== null && (
+                        <div className="text-[10px] tabular-nums" style={{ color: stock.dailyChange >= 0 ? t.green : t.red }}>
+                          {L.locale === 'ko' ? '오늘' : 'Today'} {stock.dailyChange >= 0 ? '+' : ''}{stock.dailyChange.toFixed(1)}%
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* 기준 정보 */}
+            <div className="px-4 py-2.5 text-center" style={{ borderTop: `1px solid ${t.glassBorder}` }}>
+              <span className="text-[10px]" style={{ color: t.textMuted }}>
+                {L.locale === 'ko'
+                  ? `${performanceRanking.quarterEndDate || ''} 분기말 종가 대비 현재 수익률`
+                  : `Return since quarter-end close (${performanceRanking.quarterEndDate || ''})`}
+                {marketStatus === 'open'
+                  ? (L.locale === 'ko' ? ' · 실시간' : ' · Real-time')
+                  : (L.locale === 'ko' ? ' · 15분 지연' : ' · 15min delayed')}
+              </span>
+            </div>
+          </GlassCard>
+        </section>
+      )}
 
       {/* ===== TOP 5 매수/매도 랭킹 (히어로 바로 아래) ===== */}
       {!ready ? null : (topBoughtStocks.length > 0 || topSoldStocks.length > 0) && (
