@@ -446,19 +446,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               </h2>
               {latestQuarter && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>}
             </div>
-            <div className="flex items-center gap-1">
-              {marketStatus === 'open' && (
-                <span className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: `${t.green}15`, color: t.green }}>
-                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: t.green }} />
-                  {L.locale === 'ko' ? '실시간' : 'Live'}
-                </span>
-              )}
-              {marketStatus !== 'open' && performanceRanking.priceDate && (
-                <span className="text-xs" style={{ color: t.textMuted }}>
-                  {L.locale === 'ko' ? '15분 지연' : '15min delayed'}
-                </span>
-              )}
-            </div>
+            <span className="flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full"
+              style={{ background: marketStatus === 'open' ? `${t.green}12` : `${t.textMuted}10`, color: marketStatus === 'open' ? t.green : t.textMuted }}>
+              {marketStatus === 'open' && <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: t.green }} />}
+              {L.locale === 'ko' ? '15분 지연' : '15min delayed'}
+            </span>
           </div>
 
           {/* 탭 */}
@@ -570,9 +562,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 {L.locale === 'ko'
                   ? `${performanceRanking.quarterEndDate || ''} 분기말 종가 대비 현재 수익률`
                   : `Return since quarter-end close (${performanceRanking.quarterEndDate || ''})`}
-                {marketStatus === 'open'
-                  ? (L.locale === 'ko' ? ' · 실시간' : ' · Real-time')
-                  : (L.locale === 'ko' ? ' · 15분 지연' : ' · 15min delayed')}
+                {L.locale === 'ko' ? ' · 15분 지연' : ' · 15min delayed'}
               </span>
             </div>
           </GlassCard>
