@@ -514,7 +514,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           <div className="flex items-center gap-2 mb-4 flex-wrap">
             {/* 인원수 필터 */}
             <div className="flex gap-0.5 p-0.5 rounded-full" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
-              {[{v:1, label:'전체', en:'All'}, {v:2, label:'2+명', en:'2+'}, {v:3, label:'3+명', en:'3+'}].map(opt => (
+              {[{v:1, label:'1명+', en:'1+'}, {v:2, label:'2명+', en:'2+'}, {v:3, label:'3명+', en:'3+'}].map(opt => (
                 <button key={opt.v} onClick={() => { setPerfMinInvestors(opt.v); setPerfShowAll(false); }}
                   className="px-2 py-1 rounded-full text-[10px] font-semibold transition-all"
                   style={{
