@@ -529,7 +529,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             <div className="relative">
               <select
                 value={perfInvestorId}
-                onChange={e => { setPerfInvestorId(e.target.value); setPerfShowAll(false); }}
+                onChange={e => { const v = e.target.value; setPerfInvestorId(v); if (v !== 'all') setPerfMinInvestors(1); setPerfShowAll(false); }}
                 className="appearance-none text-[11px] font-medium pl-2 pr-5 py-1 rounded-full cursor-pointer outline-none"
                 style={{
                   background: perfInvestorId !== 'all' ? `${t.accent}15` : (t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
