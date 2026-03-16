@@ -57,25 +57,50 @@ async function fetchSnapshot(tickers: string[]): Promise<Record<string, any> | n
 }
 
 // Fallback: Grouped Daily (장 마감 후 데이터)
+// Deno Deploy에서 toLocaleString timezone이 불안정하므로 UTC 기반 수동 계산
 function getLastTradingDate(): string {
   const now = new Date();
-  const etStr = now.toLocaleString("en-US", { timeZone: "America/New_York" });
-  const et = new Date(etStr);
-  const hour = et.getHours();
-  let d = new Date(et);
+  const utcMonth = now.getUTCMonth(); // 0-11
+  // DST 간이 판정: 3월~10월 EDT(UTC-4), 11월~2월 EST(UTC-5)
+  const isDST = utcMonth >= 2 && utcMonth <= 10;
+  const offsetHours = isDST ? 4 : 5;
 
-  // 장 마감(16:00 ET) 전이면 전일 사용, 새벽(0-4시)이면 당일(어제 장 마감 후)
+  // UTC → ET 변환
+  const etMs = now.getTime() - offsetHours * 3600000;
+  const et = new Date(etMs);
+  const hour = et.getUTCHours();
+
+  let y = et.getUTCFullYear();
+  let m = et.getUTCMonth();
+  let day = et.getUTCDate();
+
+  // 장 마감(17:00 ET) 전이면 전일, 새벽(0-4시)이면 당일
   if (hour >= 4 && hour < 17) {
-    d.setDate(d.getDate() - 1);
+    day -= 1;
   }
+
+  let d = new Date(Date.UTC(y, m, day));
+
   // 주말 건너뛰기
-  while (d.getDay() === 0 || d.getDay() === 6) {
-    d.setDate(d.getDate() - 1);
+  while (d.getUTCDay() === 0 || d.getUTCDay() === 6) {
+    d.setUTCDate(d.getUTCDate() - 1);
   }
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${dd}`;
+
+  const fy = d.getUTCFullYear();
+  const fm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const fd = String(d.getUTCDate()).padStart(2, '0');
+  return `${fy}-${fm}-${fd}`;
+}
+
+// UTC 기반 ET 시간 계산 헬퍼
+function getETNow(): { hour: number; min: number; day: number } {
+  const now = new Date();
+  const utcMonth = now.getUTCMonth();
+  const isDST = utcMonth >= 2 && utcMonth <= 10;
+  const offsetHours = isDST ? 4 : 5;
+  const etMs = now.getTime() - offsetHours * 3600000;
+  const et = new Date(etMs);
+  return { hour: et.getUTCHours(), min: et.getUTCMinutes(), day: et.getUTCDay() };
 }
 
 async function fetchGroupedDaily(date: string): Promise<Record<string, any>> {
@@ -179,13 +204,10 @@ Deno.serve(async (req) => {
     // 캐시 업데이트
     cache = { data: { ...cache?.data, ...priceMap }, timestamp: now, source };
 
-    // 장 상태 메타데이터 계산
-    const etNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
-    const etHour = etNow.getHours();
-    const etMin = etNow.getMinutes();
-    const etDay = etNow.getDay(); // 0=Sun, 6=Sat
-    const isWeekday = etDay >= 1 && etDay <= 5;
-    const isMarketHours = isWeekday && ((etHour === 9 && etMin >= 30) || (etHour >= 10 && etHour < 16));
+    // 장 상태 메타데이터 계산 (UTC 기반 ET 계산)
+    const etNow = getETNow();
+    const isWeekday = etNow.day >= 1 && etNow.day <= 5;
+    const isMarketHours = isWeekday && ((etNow.hour === 9 && etNow.min >= 30) || (etNow.hour >= 10 && etNow.hour < 16));
     const marketStatus = isMarketHours ? "open" : "closed";
     const lastTradeDate = getLastTradingDate();
 

@@ -102,7 +102,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
     if (marketStatus === 'open') {
-      return L.locale === 'ko' ? '실시간 기준' : 'Real-time';
+      return L.locale === 'ko' ? '실시간 15분 지연' : '15-min delayed';
     } else {
       return L.locale === 'ko' ? `장 마감 · ${formatted} 종가` : `Market Closed · ${formatted}`;
     }
@@ -289,13 +289,9 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
   // 필터 적용된 랭킹 데이터
   const filteredRanking = useMemo(() => {
     let items = performanceRanking.all || [];
-    // 투자자 수 필터: 0=전체, 2=정확히2명, 3=정확히3명, 4=3명이상(4+)
-    if (perfMinInvestors === 2) {
-      items = items.filter(s => s.investors.length === 2);
-    } else if (perfMinInvestors === 3) {
-      items = items.filter(s => s.investors.length === 3);
-    } else if (perfMinInvestors >= 4) {
-      items = items.filter(s => s.investors.length >= 3);
+    // 투자자 수 필터: 0=전체, 2~6=정확히 N명
+    if (perfMinInvestors >= 2) {
+      items = items.filter(s => s.investors.length === perfMinInvestors);
     }
     // 투자자 필터 (교집합 — 선택한 투자자 모두가 보유한 종목만)
     if (perfSelectedInvestors.size > 0) {
@@ -486,11 +482,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               </h2>
               {latestQuarter && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>}
             </div>
-            <span className="flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full"
-              style={{ background: marketStatus === 'open' ? `${t.green}12` : `${t.textMuted}10`, color: marketStatus === 'open' ? t.green : t.textMuted }}>
-              {marketStatus === 'open' && <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: t.green }} />}
-              {L.locale === 'ko' ? '15분 지연' : '15min delayed'}
-            </span>
+            {priceLabel && <span className="text-xs" style={{ color: marketStatus === 'open' ? t.green : t.textMuted }}>{priceLabel}</span>}
           </div>
 
           {/* 필터 바 — 투자자 칩 토글 + 보조 필터 */}
@@ -552,7 +544,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             {/* 투자자 수 세그먼트 */}
             <div className="flex p-[3px] rounded-lg" style={{ background: segBg }}>
-              {[{v:0, label:'전체', en:'All'}, {v:2, label:'2명', en:'2'}, {v:3, label:'3명', en:'3'}, {v:4, label:'3명이상', en:'3+'}].map(opt => {
+              {[{v:0, label:'전체', en:'All'}, {v:2, label:'2명', en:'2'}, {v:3, label:'3명', en:'3'}, {v:4, label:'4명', en:'4'}, {v:5, label:'5명', en:'5'}, {v:6, label:'6명', en:'6'}].map(opt => {
                 const isActive = perfMinInvestors === opt.v;
                 return (
                   <button key={opt.v} onClick={() => { setPerfMinInvestors(opt.v); setPerfShowAll(false); }}

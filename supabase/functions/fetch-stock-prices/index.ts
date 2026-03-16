@@ -74,24 +74,39 @@ async function fetchTickerAgg(ticker: string, date: string): Promise<number | nu
 }
 
 // 가장 최근 거래일 계산 (주말/공휴일 건너뛰기)
+// Deno Deploy에서 toLocaleString timezone이 불안정하므로 UTC 기반 수동 계산
 function getLastTradingDate(): string {
   const now = new Date();
-  // UTC 기준 현재 시각 → 미국 동부 시간 고려
-  // 미장은 16:00 ET에 마감, UTC 기준 21:00
-  const et = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+  const utcMonth = now.getUTCMonth(); // 0-11
+  // DST 간이 판정: 3월~10월 EDT(UTC-4), 11월~2월 EST(UTC-5)
+  const isDST = utcMonth >= 2 && utcMonth <= 10;
+  const offsetHours = isDST ? 4 : 5;
 
-  let d = new Date(et);
-  // 장 마감 전이면 전일 기준
-  if (d.getHours() < 17) {
-    d.setDate(d.getDate() - 1);
+  // UTC → ET 변환
+  const etMs = now.getTime() - offsetHours * 3600000;
+  const et = new Date(etMs);
+  const hour = et.getUTCHours();
+
+  let y = et.getUTCFullYear();
+  let m = et.getUTCMonth();
+  let day = et.getUTCDate();
+
+  // 장 마감(17:00 ET) 전이면 전일 기준
+  if (hour < 17) {
+    day -= 1;
   }
+
+  let d = new Date(Date.UTC(y, m, day));
 
   // 주말 건너뛰기
-  while (d.getDay() === 0 || d.getDay() === 6) {
-    d.setDate(d.getDate() - 1);
+  while (d.getUTCDay() === 0 || d.getUTCDay() === 6) {
+    d.setUTCDate(d.getUTCDate() - 1);
   }
 
-  return d.toISOString().split("T")[0];
+  const fy = d.getUTCFullYear();
+  const fm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const fd = String(d.getUTCDate()).padStart(2, '0');
+  return `${fy}-${fm}-${fd}`;
 }
 
 // 분기 말 날짜 계산 (공시 기준일)
@@ -123,6 +138,13 @@ Deno.serve(async (req) => {
 
     console.log("=== fetch-stock-prices 시작 ===");
 
+    // 요청 body에서 날짜 오버라이드 확인
+    let bodyDate: string | null = null;
+    try {
+      const body = await req.json();
+      if (body?.date) bodyDate = body.date;
+    } catch { /* no body */ }
+
     // 1. 보유 종목 티커 목록 가져오기
     const heldTickers = await getHeldTickers();
     console.log(`보유 종목 수: ${heldTickers.size}`);
@@ -134,8 +156,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 2. 가장 최근 거래일
-    const tradeDate = getLastTradingDate();
+    // 2. 가장 최근 거래일 (body.date가 있으면 오버라이드)
+    const tradeDate = bodyDate || getLastTradingDate();
     console.log(`거래일: ${tradeDate}`);
 
     // 3. 이미 가져온 데이터 확인
