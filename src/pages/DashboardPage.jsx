@@ -1,6 +1,6 @@
 import { useMemo, memo, useState, useEffect, useRef } from "react";
 import {
-  ArrowUpRight, ArrowDownRight, Briefcase, Plus, BarChart3, ChevronDown, TrendingUp, Activity, Trophy, Zap, Target, Layers, DollarSign
+  ArrowUpRight, ArrowDownRight, ArrowUpDown, Briefcase, Plus, BarChart3, ChevronDown, TrendingUp, Activity, Trophy, Zap, Target, Layers, DollarSign
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -273,15 +273,13 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     };
   }, [INVESTORS, HOLDINGS, stockPrices]);
 
-  const [perfTab, setPerfTab] = useState('top'); // 'top' | 'bottom'
+  const [perfSortAsc, setPerfSortAsc] = useState(false); // false = 높은순, true = 낮은순
   const [perfShowAll, setPerfShowAll] = useState(false);
-  const [perfMinInvestors, setPerfMinInvestors] = useState(2); // 1 = 전체, 2 = 2+명, 3 = 3+명
-  const [perfInvestorId, setPerfInvestorId] = useState('all'); // 'all' | investor.id
+  const [perfSelectedInvestors, setPerfSelectedInvestors] = useState(new Set()); // 선택된 투자자 ID Set (빈 Set = 전체)
+  const [perfMinInvestors, setPerfMinInvestors] = useState(0); // 0=전체, 2=정확히2명, 3=정확히3명, 4=3명이상
   const [perfSector, setPerfSector] = useState('all'); // 'all' | sector name
   const [perfDailyDir, setPerfDailyDir] = useState('all'); // 'all' | 'up' | 'down' (오늘 상승/하락)
-  const [perfNewOnly, setPerfNewOnly] = useState(false); // 이번 분기 신규매수만
-
-  // 이번 분기 신규 매수 종목 Set (필터용)
+  // newPositionTickers는 랭킹에 NEW 표시용으로만 사용
   const newPositionTickers = useMemo(() => {
     const set = new Set();
     newPositions.forEach(act => set.add(act.ticker));
@@ -291,22 +289,33 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
   // 필터 적용된 랭킹 데이터
   const filteredRanking = useMemo(() => {
     let items = performanceRanking.all || [];
-    // 인원수 필터
-    if (perfMinInvestors > 1) items = items.filter(s => s.investors.length >= perfMinInvestors);
-    // 투자자 필터
-    if (perfInvestorId !== 'all') items = items.filter(s => s.investors.some(i => i.id === perfInvestorId));
+    // 투자자 수 필터: 0=전체, 2=정확히2명, 3=정확히3명, 4=3명이상(4+)
+    if (perfMinInvestors === 2) {
+      items = items.filter(s => s.investors.length === 2);
+    } else if (perfMinInvestors === 3) {
+      items = items.filter(s => s.investors.length === 3);
+    } else if (perfMinInvestors >= 4) {
+      items = items.filter(s => s.investors.length >= 3);
+    }
+    // 투자자 필터 (교집합 — 선택한 투자자 모두가 보유한 종목만)
+    if (perfSelectedInvestors.size > 0) {
+      items = items.filter(s => {
+        const stockInvIds = new Set(s.investors.map(i => i.id));
+        for (const id of perfSelectedInvestors) {
+          if (!stockInvIds.has(id)) return false;
+        }
+        return true;
+      });
+    }
     // 섹터 필터
     if (perfSector !== 'all') items = items.filter(s => s.sector === perfSector);
     // 오늘 상승/하락 필터
     if (perfDailyDir === 'up') items = items.filter(s => s.dailyChange !== null && s.dailyChange > 0);
     if (perfDailyDir === 'down') items = items.filter(s => s.dailyChange !== null && s.dailyChange < 0);
-    // 신규매수만 필터
-    if (perfNewOnly) items = items.filter(s => newPositionTickers.has(s.ticker));
-    const sorted = [...items].sort((a, b) => b.sinceFiling - a.sinceFiling);
-    const top = sorted.slice(0, 100);
-    const bottom = [...items].sort((a, b) => a.sinceFiling - b.sinceFiling).slice(0, 100);
-    return { top, bottom };
-  }, [performanceRanking.all, perfMinInvestors, perfInvestorId, perfSector, perfDailyDir, perfNewOnly, newPositionTickers]);
+    // 정렬: 수익률순만
+    const sorted = [...items].sort((a, b) => perfSortAsc ? a.sinceFiling - b.sinceFiling : b.sinceFiling - a.sinceFiling);
+    return sorted.slice(0, 100);
+  }, [performanceRanking.all, perfMinInvestors, perfSelectedInvestors, perfSector, perfDailyDir, perfSortAsc]);
 
   const handleActivityClick = (investorId) => onNavigate("investor", investorId);
   const ActivityItem = ({ act, label, color }) => {
@@ -484,117 +493,153 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             </span>
           </div>
 
-          {/* 탭: TOP / BOTTOM */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex gap-2">
-              <button onClick={() => { setPerfTab('top'); setPerfShowAll(false); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-                style={{
-                  background: perfTab === 'top' ? `${t.green}15` : 'transparent',
-                  color: perfTab === 'top' ? t.green : t.textMuted,
-                  border: `1px solid ${perfTab === 'top' ? `${t.green}30` : t.glassBorder}`,
-                }}>
-                <ArrowUpRight size={12} />
-                {L.locale === 'ko' ? '수익률 TOP' : 'Top Gainers'}
-              </button>
-              <button onClick={() => { setPerfTab('bottom'); setPerfShowAll(false); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-                style={{
-                  background: perfTab === 'bottom' ? `${t.red}15` : 'transparent',
-                  color: perfTab === 'bottom' ? t.red : t.textMuted,
-                  border: `1px solid ${perfTab === 'bottom' ? `${t.red}30` : t.glassBorder}`,
-                }}>
-                <ArrowDownRight size={12} />
-                {L.locale === 'ko' ? '수익률 BOTTOM' : 'Top Losers'}
-              </button>
-            </div>
-          </div>
-
-          {/* 필터 바: 인원수 + 투자자 + 섹터 */}
-          <div className="flex items-center gap-2 mb-4 flex-wrap">
-            {/* 인원수 필터 */}
-            <div className="flex gap-0.5 p-0.5 rounded-full" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
-              {[{v:1, label:'1명+', en:'1+'}, {v:2, label:'2명+', en:'2+'}, {v:3, label:'3명+', en:'3+'}].map(opt => (
-                <button key={opt.v} onClick={() => { setPerfMinInvestors(opt.v); setPerfShowAll(false); }}
-                  className="px-2 py-1 rounded-full text-[10px] font-semibold transition-all"
+          {/* 필터 바 — 투자자 칩 토글 + 보조 필터 */}
+          {(() => {
+            const isDark = t.name === 'dark';
+            const segBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
+            const segActiveBg = isDark ? 'rgba(255,255,255,0.14)' : '#fff';
+            const segActiveShadow = isDark ? '0 1px 4px rgba(0,0,0,0.3)' : '0 1px 4px rgba(0,0,0,0.08)';
+            const dropBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
+            const dropBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+            const activeCount = (perfSelectedInvestors.size > 0 ? 1 : 0) + (perfMinInvestors !== 0 ? 1 : 0) + (perfSector !== 'all' ? 1 : 0) + (perfDailyDir !== 'all' ? 1 : 0);
+            const toggleInvestor = (id) => {
+              setPerfSelectedInvestors(prev => {
+                const next = new Set(prev);
+                if (next.has(id)) next.delete(id); else next.add(id);
+                return next;
+              });
+              setPerfShowAll(false);
+            };
+            return (
+          <>
+          {/* 투자자 칩 토글 */}
+          <div className="flex items-center gap-[6px] mb-3 flex-wrap">
+            {INVESTORS.map(inv => {
+              const isSelected = perfSelectedInvestors.has(inv.id);
+              return (
+                <button key={inv.id} onClick={() => toggleInvestor(inv.id)}
+                  className="px-[10px] py-[5px] rounded-full text-[12px] font-semibold transition-all duration-200 cursor-pointer select-none"
                   style={{
-                    background: perfMinInvestors === opt.v ? (t.name === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)') : 'transparent',
-                    color: perfMinInvestors === opt.v ? t.text : t.textMuted,
+                    background: isSelected ? `${inv.color}25` : `${inv.color}0C`,
+                    color: inv.color,
+                    opacity: isSelected ? 1 : 0.7,
+                    border: `1.5px solid ${isSelected ? `${inv.color}60` : `${inv.color}20`}`,
+                    boxShadow: isSelected ? `0 0 8px ${inv.color}20` : 'none',
                   }}>
-                  {L.locale === 'ko' ? opt.label : opt.en}
+                  {L.investorName(inv)}
                 </button>
+              );
+            })}
+          </div>
+          {/* 선택된 투자자 이름 표시 */}
+          {perfSelectedInvestors.size >= 2 && (
+            <div className="flex items-center gap-1 flex-wrap mb-1 ml-0.5">
+              {INVESTORS.filter(inv => perfSelectedInvestors.has(inv.id)).map((inv, idx, arr) => (
+                <span key={inv.id} className="flex items-center gap-1">
+                  <span className="text-[12px] font-bold" style={{ color: inv.color }}>{L.investorName(inv)}</span>
+                  {idx < arr.length - 1 && (
+                    <span className="text-[11px] font-medium" style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)' }}>×</span>
+                  )}
+                </span>
               ))}
+              <span className="text-[10px] ml-1 px-2 py-[2px] rounded-full font-medium" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)', background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
+                {L.locale === 'ko' ? '교집합' : 'AND'}
+              </span>
             </div>
-            {/* 투자자 필터 */}
-            <div className="relative">
-              <select
-                value={perfInvestorId}
-                onChange={e => { const v = e.target.value; setPerfInvestorId(v); if (v !== 'all') setPerfMinInvestors(1); setPerfShowAll(false); }}
-                className="appearance-none text-[11px] font-medium pl-2 pr-5 py-1 rounded-full cursor-pointer outline-none"
-                style={{
-                  background: perfInvestorId !== 'all' ? `${t.accent}15` : (t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
-                  color: perfInvestorId !== 'all' ? t.accent : t.textMuted,
-                  border: `1px solid ${perfInvestorId !== 'all' ? `${t.accent}30` : 'transparent'}`,
-                }}>
-                <option value="all">{L.locale === 'ko' ? '투자자 전체' : 'All Investors'}</option>
-                {INVESTORS.map(inv => (
-                  <option key={inv.id} value={inv.id}>{inv.avatar} {L.investorName(inv)}</option>
-                ))}
-              </select>
-              <ChevronDown size={10} className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: t.textMuted }} />
+          )}
+
+          {/* 보조 필터 — 섹터, 상승/하락, 정렬, 초기화 */}
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            {/* 투자자 수 세그먼트 */}
+            <div className="flex p-[3px] rounded-lg" style={{ background: segBg }}>
+              {[{v:0, label:'전체', en:'All'}, {v:2, label:'2명', en:'2'}, {v:3, label:'3명', en:'3'}, {v:4, label:'3명이상', en:'3+'}].map(opt => {
+                const isActive = perfMinInvestors === opt.v;
+                return (
+                  <button key={opt.v} onClick={() => { setPerfMinInvestors(opt.v); setPerfShowAll(false); }}
+                    className="text-[11px] font-semibold px-3 py-[5px] rounded-md transition-all duration-200"
+                    style={{
+                      background: isActive ? segActiveBg : 'transparent',
+                      color: isActive ? t.text : t.textMuted,
+                      boxShadow: isActive ? segActiveShadow : 'none',
+                    }}>
+                    {L.locale === 'ko' ? opt.label : opt.en}
+                  </button>
+                );
+              })}
             </div>
-            {/* 섹터 필터 */}
+
+            {/* 구분선 */}
+            <div className="w-px h-5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
+
+            {/* 섹터 드롭다운 */}
             <div className="relative">
               <select
                 value={perfSector}
                 onChange={e => { setPerfSector(e.target.value); setPerfShowAll(false); }}
-                className="appearance-none text-[11px] font-medium pl-2 pr-5 py-1 rounded-full cursor-pointer outline-none"
+                className="appearance-none text-[11px] font-medium pl-3 pr-6 py-[6px] rounded-lg cursor-pointer outline-none transition-all duration-200"
                 style={{
-                  background: perfSector !== 'all' ? `${t.accent}15` : (t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
+                  background: perfSector !== 'all' ? `${t.accent}12` : dropBg,
                   color: perfSector !== 'all' ? t.accent : t.textMuted,
-                  border: `1px solid ${perfSector !== 'all' ? `${t.accent}30` : 'transparent'}`,
+                  border: `1px solid ${perfSector !== 'all' ? `${t.accent}25` : dropBorder}`,
+                  backdropFilter: 'blur(8px)',
                 }}>
                 <option value="all">{L.locale === 'ko' ? '섹터 전체' : 'All Sectors'}</option>
                 {(performanceRanking.sectors || []).map(s => (
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
-              <ChevronDown size={10} className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: t.textMuted }} />
+              <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: perfSector !== 'all' ? t.accent : t.textMuted }} />
             </div>
-            {/* 오늘 상승/하락 필터 */}
-            <div className="flex gap-0.5 p-0.5 rounded-full" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
-              {[{v:'all', label:'전체', en:'All'}, {v:'up', label:'상승', en:'Up'}, {v:'down', label:'하락', en:'Down'}].map(opt => (
-                <button key={opt.v} onClick={() => { setPerfDailyDir(opt.v); setPerfShowAll(false); }}
-                  className="px-2 py-1 rounded-full text-[10px] font-semibold transition-all"
-                  style={{
-                    background: perfDailyDir === opt.v ? (opt.v === 'up' ? `${t.green}20` : opt.v === 'down' ? `${t.red}20` : (t.name === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)')) : 'transparent',
-                    color: perfDailyDir === opt.v ? (opt.v === 'up' ? t.green : opt.v === 'down' ? t.red : t.text) : t.textMuted,
-                  }}>
-                  {L.locale === 'ko' ? opt.label : opt.en}
-                </button>
-              ))}
+
+            {/* 구분선 */}
+            <div className="w-px h-5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
+
+            {/* 오늘 방향 — 세그먼트 컨트롤 */}
+            <div className="flex p-[3px] rounded-lg" style={{ background: segBg }}>
+              {[{v:'all', label:'전체', en:'All'}, {v:'up', label:'상승', en:'↑'}, {v:'down', label:'하락', en:'↓'}].map(opt => {
+                const isActive = perfDailyDir === opt.v;
+                const activeColor = opt.v === 'up' ? t.green : opt.v === 'down' ? t.red : t.text;
+                const activeBg2 = opt.v === 'up' ? `${t.green}18` : opt.v === 'down' ? `${t.red}18` : segActiveBg;
+                return (
+                  <button key={opt.v} onClick={() => { setPerfDailyDir(opt.v); setPerfShowAll(false); }}
+                    className="px-2.5 py-[5px] rounded-md text-[11px] font-semibold transition-all duration-200"
+                    style={{
+                      background: isActive ? activeBg2 : 'transparent',
+                      color: isActive ? activeColor : t.textMuted,
+                      boxShadow: isActive && opt.v === 'all' ? segActiveShadow : 'none',
+                    }}>
+                    {L.locale === 'ko' ? opt.label : opt.en}
+                  </button>
+                );
+              })}
             </div>
-            {/* 신규매수만 필터 */}
-            {newPositionTickers.size > 0 && (
-              <button onClick={() => { setPerfNewOnly(p => !p); setPerfShowAll(false); }}
-                className="px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all"
-                style={{
-                  background: perfNewOnly ? `${t.accent}20` : (t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
-                  color: perfNewOnly ? t.accent : t.textMuted,
-                  border: `1px solid ${perfNewOnly ? `${t.accent}30` : 'transparent'}`,
-                }}>
-                {L.locale === 'ko' ? 'NEW 종목' : 'New Positions'}
-              </button>
-            )}
-            {/* 필터 초기화 */}
-            {(perfMinInvestors !== 2 || perfInvestorId !== 'all' || perfSector !== 'all' || perfDailyDir !== 'all' || perfNewOnly) && (
-              <button onClick={() => { setPerfMinInvestors(2); setPerfInvestorId('all'); setPerfSector('all'); setPerfDailyDir('all'); setPerfNewOnly(false); setPerfShowAll(false); }}
-                className="text-[10px] font-medium px-2 py-1 rounded-full transition-colors hover:opacity-80"
-                style={{ color: t.textMuted, background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
-                {L.locale === 'ko' ? '↻ 초기화' : '↻ Reset'}
+
+            {/* 구분선 */}
+            <div className="w-px h-5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
+
+            {/* 정렬 토글 */}
+            <button onClick={() => { setPerfSortAsc(p => !p); setPerfShowAll(false); }}
+              className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-[5px] rounded-lg transition-all duration-200 hover:opacity-80"
+              style={{ background: segBg, color: t.text }}>
+              {perfSortAsc ? <ArrowDownRight size={12} style={{ color: t.red }} /> : <ArrowUpRight size={12} style={{ color: t.green }} />}
+              {L.locale === 'ko' ? (perfSortAsc ? '낮은순' : '높은순') : (perfSortAsc ? 'Low→High' : 'High→Low')}
+            </button>
+
+            {/* 초기화 */}
+            {activeCount > 0 && (
+              <button onClick={() => { setPerfSelectedInvestors(new Set()); setPerfMinInvestors(0); setPerfSector('all'); setPerfDailyDir('all'); setPerfShowAll(false); }}
+                className="flex items-center gap-1 text-[10px] font-medium px-2.5 py-[5px] rounded-lg transition-all duration-200 hover:opacity-80"
+                style={{ color: t.accent, background: `${t.accent}10`, border: `1px solid ${t.accent}20` }}>
+                <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full text-[9px] font-bold" style={{ background: t.accent, color: isDark ? '#000' : '#fff' }}>
+                  {activeCount}
+                </span>
+                {L.locale === 'ko' ? '초기화' : 'Reset'}
               </button>
             )}
           </div>
+          </>
+            );
+          })()}
 
           {/* 랭킹 리스트 */}
           <GlassCard hover={false}>
@@ -612,18 +657,17 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   {L.locale === 'ko' ? '분기 수익률' : 'QTD Return'}
                 </span>
               </div>
-              {(perfTab === 'top' ? filteredRanking.top : filteredRanking.bottom).length === 0 && (
+              {filteredRanking.length === 0 && (
                 <div className="px-4 py-8 text-center">
                   <span className="text-xs" style={{ color: t.textMuted }}>
                     {L.locale === 'ko' ? '조건에 맞는 종목이 없습니다' : 'No stocks match the current filters'}
                   </span>
                 </div>
               )}
-              {(perfTab === 'top' ? filteredRanking.top : filteredRanking.bottom
-              ).slice(0, perfShowAll ? 100 : 10).map((stock, i) => {
+              {filteredRanking.slice(0, perfShowAll ? 100 : 10).map((stock, i) => {
                 const isPositive = stock.sinceFiling > 0;
                 const color = isPositive ? t.green : t.red;
-                const rankColor = i < 3 ? (perfTab === 'top' ? '#f59e0b' : t.red) : t.textMuted;
+                const rankColor = i < 3 ? '#f59e0b' : t.textMuted;
                 return (
                   <div key={stock.ticker}
                     className="flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors hover:opacity-80"
@@ -635,18 +679,21 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                         <span className="text-sm font-bold" style={{ color: t.text }}>{stock.ticker}</span>
                         <span className="text-xs truncate hidden sm:inline" style={{ color: t.textMuted }}>{stock.name?.slice(0, 20)}</span>
                       </div>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <div className="flex -space-x-1">
-                          {stock.investors.slice(0, 4).map((inv, j) => (
-                            <div key={inv.id} className="w-4 h-4 rounded flex items-center justify-center text-white text-[7px] font-bold ring-1"
-                              style={{ background: inv.gradient, zIndex: 4 - j, ringColor: t.name === 'dark' ? '#000' : '#fff' }}
-                              title={L.investorName(inv)}>
-                              {inv.avatar}
-                            </div>
-                          ))}
-                        </div>
-                        {stock.investors.length > 4 && (
-                          <span className="text-[10px]" style={{ color: t.textMuted }}>+{stock.investors.length - 4}</span>
+                      <div className="flex items-center gap-1 mt-1 flex-wrap">
+                        {stock.investors.slice(0, 3).map((inv) => (
+                          <span key={inv.id} className="text-[9px] font-semibold px-1.5 py-[1px] rounded-md"
+                            style={{
+                              color: inv.color,
+                              background: `${inv.color}14`,
+                              border: `1px solid ${inv.color}20`,
+                            }}>
+                            {L.investorName(inv)}
+                          </span>
+                        ))}
+                        {stock.investors.length > 3 && (
+                          <span className="text-[9px] px-1 py-[1px]" style={{ color: t.textMuted }}>
+                            {L.locale === 'ko' ? `+${stock.investors.length - 3}` : `+${stock.investors.length - 3}`}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -671,14 +718,14 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             {/* 기준 정보 */}
             {/* 더보기 / 접기 버튼 */}
             {(() => {
-              const totalCount = (perfTab === 'top' ? filteredRanking.top : filteredRanking.bottom).length;
+              const totalCount = filteredRanking.length;
               return totalCount > 10 && (
                 <div className="px-4 py-3 text-center" style={{ borderTop: `1px solid ${t.glassBorder}` }}>
                   <button onClick={() => setPerfShowAll(p => !p)}
                     className="text-xs font-medium px-4 py-1.5 rounded-full transition-colors hover:opacity-80"
                     style={{ background: `${t.accent}12`, color: t.accent, border: `1px solid ${t.accent}25` }}>
                     {perfShowAll
-                      ? (L.locale === 'ko' ? 'TOP 10만 보기' : 'Show Top 10')
+                      ? (L.locale === 'ko' ? '10개만 보기' : 'Show 10')
                       : (L.locale === 'ko' ? `전체 ${totalCount}개 보기` : `Show all ${totalCount}`)}
                   </button>
                 </div>

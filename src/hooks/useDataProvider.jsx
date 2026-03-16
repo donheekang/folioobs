@@ -572,21 +572,44 @@ export function DataProvider({ children }) {
             Object.values(mappedHoldings).forEach(arr => arr.forEach(h => allTickers.add(h.ticker)));
 
             if (allTickers.size > 0 && qEndDate) {
-              // 최신 시세 (가장 최근 날짜)
-              const { data: latestPrices } = await supabase
-                .from('stock_prices')
-                .select('ticker, close_price, price_date, change_pct')
-                .order('price_date', { ascending: false })
-                .limit(allTickers.size * 2);
+              // 최신 시세 (가장 최근 날짜) — Supabase 1000행 제한 우회를 위해 pagination
+              const latestPrices = [];
+              {
+                let from = 0;
+                const PAGE = 1000;
+                while (true) {
+                  const { data: page } = await supabase
+                    .from('stock_prices')
+                    .select('ticker, close_price, price_date, change_pct')
+                    .order('price_date', { ascending: false })
+                    .range(from, from + PAGE - 1);
+                  latestPrices.push(...(page || []));
+                  if (!page || page.length < PAGE) break;
+                  from += PAGE;
+                }
+              }
 
               // 분기 말 시세
               // 분기 말 당일 or ±3일 이내 가장 가까운 날짜
-              const { data: quarterPrices } = await supabase
-                .from('stock_prices')
-                .select('ticker, close_price, price_date')
-                .gte('price_date', (() => { const d = new Date(qEndDate); d.setDate(d.getDate() - 5); return d.toISOString().split('T')[0]; })())
-                .lte('price_date', (() => { const d = new Date(qEndDate); d.setDate(d.getDate() + 3); return d.toISOString().split('T')[0]; })())
-                .order('price_date', { ascending: false });
+              const qDateFrom = (() => { const d = new Date(qEndDate); d.setDate(d.getDate() - 5); return d.toISOString().split('T')[0]; })();
+              const qDateTo = (() => { const d = new Date(qEndDate); d.setDate(d.getDate() + 3); return d.toISOString().split('T')[0]; })();
+              const quarterPrices = [];
+              {
+                let from = 0;
+                const PAGE = 1000;
+                while (true) {
+                  const { data: page } = await supabase
+                    .from('stock_prices')
+                    .select('ticker, close_price, price_date')
+                    .gte('price_date', qDateFrom)
+                    .lte('price_date', qDateTo)
+                    .order('price_date', { ascending: false })
+                    .range(from, from + PAGE - 1);
+                  quarterPrices.push(...(page || []));
+                  if (!page || page.length < PAGE) break;
+                  from += PAGE;
+                }
+              }
 
               // 티커별 최신 시세 매핑
               const currentMap = {};
