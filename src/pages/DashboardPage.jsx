@@ -406,7 +406,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                         <span className="text-sm font-extrabold tracking-tight" style={{color:t.text}}>{h.ticker}</span>
                         <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full" style={{background:`${accentColor}18`, color:accentColor}}>{h.label}</span>
                       </div>
-                      <div className="text-xs mt-0.5 truncate" style={{color:t.textMuted}}>{h.investors.slice(0,2).map(inv => L.investorName(inv)).join(', ')}{h.investors.length > 2 ? ` 외 ${h.investors.length - 2}명` : ''}</div>
+                      <div className="text-xs mt-0.5 truncate" style={{color:t.textMuted}}>{h.investors.slice(0,2).map(inv => L.investorName(inv)).join(', ')}{h.investors.length > 2 ? (L.locale === 'ko' ? ` 외 ${h.investors.length - 2}명` : ` + ${h.investors.length - 2} more`) : ''}</div>
                     </div>
                   </div>
                 );

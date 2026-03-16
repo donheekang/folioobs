@@ -303,6 +303,8 @@ export default {
     "매크로투자": "Macro",
     "분산투자": "Diversified",
     "행동주의투자": "Activist",
+    "매크로가치투자": "Macro Value",
+    "테크성장투자": "Tech Growth",
   },
 
   // ===== Insight Tags =====
@@ -336,6 +338,8 @@ export default {
       "매크로투자": "Macro trends driven, diverse asset classes.",
       "분산투자": "ETFs and broad sector exposure for steady returns.",
       "행동주의투자": "Concentrated positions with active management.",
+      "매크로가치투자": "Combining macro trends with deep value investing.",
+      "테크성장투자": "Tech-focused growth strategy with high conviction bets.",
     },
     expansionTrend: "Aggressive Expansion Trend",
     defensiveTrend: "Defensive Adjustment Trend",

@@ -8,7 +8,8 @@ export const SECTOR_COLORS = {
 
 export const STYLE_ICONS = {
   "가치투자": Shield, "성장주투자": Zap, "매크로투자": Activity,
-  "분산투자": Layers, "행동주의투자": Target
+  "분산투자": Layers, "행동주의투자": Target,
+  "매크로가치투자": Activity, "테크성장투자": Zap
 };
 
 export const TAG_COLORS_MAP = (t) => ({
