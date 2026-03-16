@@ -278,6 +278,15 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
   const [perfMinInvestors, setPerfMinInvestors] = useState(2); // 1 = 전체, 2 = 2+명, 3 = 3+명
   const [perfInvestorId, setPerfInvestorId] = useState('all'); // 'all' | investor.id
   const [perfSector, setPerfSector] = useState('all'); // 'all' | sector name
+  const [perfDailyDir, setPerfDailyDir] = useState('all'); // 'all' | 'up' | 'down' (오늘 상승/하락)
+  const [perfNewOnly, setPerfNewOnly] = useState(false); // 이번 분기 신규매수만
+
+  // 이번 분기 신규 매수 종목 Set (필터용)
+  const newPositionTickers = useMemo(() => {
+    const set = new Set();
+    newPositions.forEach(act => set.add(act.ticker));
+    return set;
+  }, [newPositions]);
 
   // 필터 적용된 랭킹 데이터
   const filteredRanking = useMemo(() => {
@@ -288,11 +297,16 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     if (perfInvestorId !== 'all') items = items.filter(s => s.investors.some(i => i.id === perfInvestorId));
     // 섹터 필터
     if (perfSector !== 'all') items = items.filter(s => s.sector === perfSector);
+    // 오늘 상승/하락 필터
+    if (perfDailyDir === 'up') items = items.filter(s => s.dailyChange !== null && s.dailyChange > 0);
+    if (perfDailyDir === 'down') items = items.filter(s => s.dailyChange !== null && s.dailyChange < 0);
+    // 신규매수만 필터
+    if (perfNewOnly) items = items.filter(s => newPositionTickers.has(s.ticker));
     const sorted = [...items].sort((a, b) => b.sinceFiling - a.sinceFiling);
     const top = sorted.slice(0, 100);
     const bottom = [...items].sort((a, b) => a.sinceFiling - b.sinceFiling).slice(0, 100);
     return { top, bottom };
-  }, [performanceRanking.all, perfMinInvestors, perfInvestorId, perfSector]);
+  }, [performanceRanking.all, perfMinInvestors, perfInvestorId, perfSector, perfDailyDir, perfNewOnly, newPositionTickers]);
 
   const handleActivityClick = (investorId) => onNavigate("investor", investorId);
   const ActivityItem = ({ act, label, color }) => {
@@ -522,7 +536,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   color: perfInvestorId !== 'all' ? t.accent : t.textMuted,
                   border: `1px solid ${perfInvestorId !== 'all' ? `${t.accent}30` : 'transparent'}`,
                 }}>
-                <option value="all">{L.locale === 'ko' ? '👤 투자자 전체' : '👤 All Investors'}</option>
+                <option value="all">{L.locale === 'ko' ? '투자자 전체' : 'All Investors'}</option>
                 {INVESTORS.map(inv => (
                   <option key={inv.id} value={inv.id}>{inv.avatar} {L.investorName(inv)}</option>
                 ))}
@@ -540,16 +554,41 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   color: perfSector !== 'all' ? t.accent : t.textMuted,
                   border: `1px solid ${perfSector !== 'all' ? `${t.accent}30` : 'transparent'}`,
                 }}>
-                <option value="all">{L.locale === 'ko' ? '📊 섹터 전체' : '📊 All Sectors'}</option>
+                <option value="all">{L.locale === 'ko' ? '섹터 전체' : 'All Sectors'}</option>
                 {(performanceRanking.sectors || []).map(s => (
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
               <ChevronDown size={10} className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: t.textMuted }} />
             </div>
+            {/* 오늘 상승/하락 필터 */}
+            <div className="flex gap-0.5 p-0.5 rounded-full" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
+              {[{v:'all', label:'전체', en:'All'}, {v:'up', label:'상승', en:'Up'}, {v:'down', label:'하락', en:'Down'}].map(opt => (
+                <button key={opt.v} onClick={() => { setPerfDailyDir(opt.v); setPerfShowAll(false); }}
+                  className="px-2 py-1 rounded-full text-[10px] font-semibold transition-all"
+                  style={{
+                    background: perfDailyDir === opt.v ? (opt.v === 'up' ? `${t.green}20` : opt.v === 'down' ? `${t.red}20` : (t.name === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)')) : 'transparent',
+                    color: perfDailyDir === opt.v ? (opt.v === 'up' ? t.green : opt.v === 'down' ? t.red : t.text) : t.textMuted,
+                  }}>
+                  {L.locale === 'ko' ? opt.label : opt.en}
+                </button>
+              ))}
+            </div>
+            {/* 신규매수만 필터 */}
+            {newPositionTickers.size > 0 && (
+              <button onClick={() => { setPerfNewOnly(p => !p); setPerfShowAll(false); }}
+                className="px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all"
+                style={{
+                  background: perfNewOnly ? `${t.accent}20` : (t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
+                  color: perfNewOnly ? t.accent : t.textMuted,
+                  border: `1px solid ${perfNewOnly ? `${t.accent}30` : 'transparent'}`,
+                }}>
+                {L.locale === 'ko' ? 'NEW 종목' : 'New Positions'}
+              </button>
+            )}
             {/* 필터 초기화 */}
-            {(perfMinInvestors !== 2 || perfInvestorId !== 'all' || perfSector !== 'all') && (
-              <button onClick={() => { setPerfMinInvestors(2); setPerfInvestorId('all'); setPerfSector('all'); setPerfShowAll(false); }}
+            {(perfMinInvestors !== 2 || perfInvestorId !== 'all' || perfSector !== 'all' || perfDailyDir !== 'all' || perfNewOnly) && (
+              <button onClick={() => { setPerfMinInvestors(2); setPerfInvestorId('all'); setPerfSector('all'); setPerfDailyDir('all'); setPerfNewOnly(false); setPerfShowAll(false); }}
                 className="text-[10px] font-medium px-2 py-1 rounded-full transition-colors hover:opacity-80"
                 style={{ color: t.textMuted, background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
                 {L.locale === 'ko' ? '↻ 초기화' : '↻ Reset'}
