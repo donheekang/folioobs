@@ -261,8 +261,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     });
 
     const all = Object.values(tickerMap).sort((a, b) => b.sinceFiling - a.sinceFiling);
-    const top = all.slice(0, 10);
-    const bottom = [...all].sort((a, b) => a.sinceFiling - b.sinceFiling).slice(0, 10);
+    const top = all.slice(0, 100);
+    const bottom = [...all].sort((a, b) => a.sinceFiling - b.sinceFiling).slice(0, 100);
 
     // 가격 날짜 정보
     const anyPrice = Object.values(stockPrices)[0];
@@ -275,6 +275,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
   }, [INVESTORS, HOLDINGS, stockPrices]);
 
   const [perfTab, setPerfTab] = useState('top'); // 'top' | 'bottom'
+  const [perfShowAll, setPerfShowAll] = useState(false);
 
   const handleActivityClick = (investorId) => onNavigate("investor", investorId);
   const ActivityItem = ({ act, label, color }) => {
@@ -462,7 +463,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
           {/* 탭 */}
           <div className="flex gap-2 mb-4">
-            <button onClick={() => setPerfTab('top')}
+            <button onClick={() => { setPerfTab('top'); setPerfShowAll(false); }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
               style={{
                 background: perfTab === 'top' ? `${t.green}15` : 'transparent',
@@ -472,7 +473,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <ArrowUpRight size={12} />
               {L.locale === 'ko' ? '수익률 TOP 10' : 'Top Gainers'}
             </button>
-            <button onClick={() => setPerfTab('bottom')}
+            <button onClick={() => { setPerfTab('bottom'); setPerfShowAll(false); }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
               style={{
                 background: perfTab === 'bottom' ? `${t.red}15` : 'transparent',
@@ -500,7 +501,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   {L.locale === 'ko' ? '분기 수익률' : 'QTD Return'}
                 </span>
               </div>
-              {(perfTab === 'top' ? performanceRanking.top : performanceRanking.bottom).map((stock, i) => {
+              {(perfTab === 'top' ? performanceRanking.top : performanceRanking.bottom).slice(0, perfShowAll ? 100 : 10).map((stock, i) => {
                 const isPositive = stock.sinceFiling > 0;
                 const color = isPositive ? t.green : t.red;
                 const rankColor = i < 3 ? (perfTab === 'top' ? '#f59e0b' : t.red) : t.textMuted;
@@ -549,6 +550,21 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               })}
             </div>
             {/* 기준 정보 */}
+            {/* 더보기 / 접기 버튼 */}
+            {(() => {
+              const totalCount = (perfTab === 'top' ? performanceRanking.top : performanceRanking.bottom).length;
+              return totalCount > 10 && (
+                <div className="px-4 py-3 text-center" style={{ borderTop: `1px solid ${t.glassBorder}` }}>
+                  <button onClick={() => setPerfShowAll(p => !p)}
+                    className="text-xs font-medium px-4 py-1.5 rounded-full transition-colors hover:opacity-80"
+                    style={{ background: `${t.accent}12`, color: t.accent, border: `1px solid ${t.accent}25` }}>
+                    {perfShowAll
+                      ? (L.locale === 'ko' ? 'TOP 10만 보기' : 'Show Top 10')
+                      : (L.locale === 'ko' ? `전체 ${totalCount}개 보기` : `Show all ${totalCount}`)}
+                  </button>
+                </div>
+              );
+            })()}
             <div className="px-4 py-2.5 text-center" style={{ borderTop: `1px solid ${t.glassBorder}` }}>
               <span className="text-[10px]" style={{ color: t.textMuted }}>
                 {L.locale === 'ko'
