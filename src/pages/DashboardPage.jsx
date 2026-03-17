@@ -485,9 +485,10 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         {/* ARK Today Preview — 캐시 우드 일별 매매 */}
         {arkDailyTrades.length > 0 && (() => {
           const latest = arkDailyTrades[0];
-          const buys = latest.trades.filter(tr => tr.direction?.toLowerCase() === 'buy').slice(0, 3);
-          const sells = latest.trades.filter(tr => tr.direction?.toLowerCase() === 'sell').slice(0, 3);
-          if (buys.length === 0 && sells.length === 0) return null;
+          const realTrades = latest.trades.filter(tr => tr.ticker !== 'NO_TRADES');
+          const isNoTradeDay = realTrades.length === 0;
+          const buys = realTrades.filter(tr => tr.direction?.toLowerCase() === 'buy').slice(0, 3);
+          const sells = realTrades.filter(tr => tr.direction?.toLowerCase() === 'sell').slice(0, 3);
           const cathie = INVESTORS.find(i => i.id === 'cathie');
           const latestDate = latest.date;
           const dateObj = new Date(latestDate + 'T00:00:00');
@@ -505,6 +506,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:'rgba(245,158,11,0.15)',color:'#f59e0b'}}>{L.t('dashboard.arkDailyBadge')}</span>
                   <span className="text-xs font-medium" style={{color:t.textMuted}}>{dateLabel}</span>
                 </div>
+                {isNoTradeDay ? (
+                  <div className="text-center py-1">
+                    <span className="text-sm" style={{color:t.textMuted}}>{L.locale === 'ko' ? '거래 없음' : 'No trades'}</span>
+                  </div>
+                ) : (
                 <div className="flex items-center gap-4 justify-center flex-wrap">
                   {buys.length > 0 && (
                     <div className="flex items-center gap-1.5">
@@ -520,6 +526,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                     </div>
                   )}
                 </div>
+                )}
               </button>
               <button className="mt-2 text-xs font-medium px-3 py-1 rounded-full transition-colors"
                 style={{color:'#f59e0b', background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.15)'}}

@@ -86,7 +86,8 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
   const weekdays = L.t('investor.weekdays');
 
   const selectedDay = group.days.find(d => d.date === selectedDate);
-  const trades = selectedDay?.trades || [];
+  const trades = (selectedDay?.trades || []).filter(tr => tr.ticker !== 'NO_TRADES');
+  const isNoTradeDay = trades.length === 0 && (selectedDay?.trades || []).some(tr => tr.ticker === 'NO_TRADES');
   const buys = trades.filter(tr => tr.direction === 'buy');
   const sells = trades.filter(tr => tr.direction === 'sell');
 
@@ -105,7 +106,8 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
           const dayNum = d.getDate();
           const weekday = weekdays[d.getDay()];
           const isSelected = day.date === selectedDate;
-          const dayTrades = day.trades || [];
+          const dayTrades = (day.trades || []).filter(tr => tr.ticker !== 'NO_TRADES');
+          const dayIsNoTrade = dayTrades.length === 0 && (day.trades || []).some(tr => tr.ticker === 'NO_TRADES');
           const dayBuys = dayTrades.filter(tr => tr.direction === 'buy').length;
           const daySells = dayTrades.filter(tr => tr.direction === 'sell').length;
 
@@ -125,6 +127,7 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
               <div className="flex gap-1 mt-0.5">
                 {dayBuys > 0 && <span className="w-1.5 h-1.5 rounded-full" style={{background:t.green}} />}
                 {daySells > 0 && <span className="w-1.5 h-1.5 rounded-full" style={{background:t.red}} />}
+                {dayIsNoTrade && <span className="w-1.5 h-1.5 rounded-full" style={{background:t.textMuted, opacity:0.5}} />}
               </div>
             </button>
           );
@@ -175,7 +178,9 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
           )}
 
           {trades.length === 0 && (
-            <div className="text-xs text-center py-4" style={{color:t.textMuted}}>{L.t('investor.noChange')}</div>
+            <div className="text-xs text-center py-4" style={{color:t.textMuted}}>
+              {isNoTradeDay ? (L.locale === 'ko' ? '거래 없음' : 'No trades') : L.t('investor.noChange')}
+            </div>
           )}
         </div>
       )}
