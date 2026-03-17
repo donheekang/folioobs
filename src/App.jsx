@@ -28,6 +28,7 @@ import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import StockDetailPage from "./pages/StockDetailPage";
 import ArkReportPage from "./pages/ArkReportPage";
+import InsiderTradingPage from "./pages/InsiderTradingPage";
 
 // ========== MAIN APP ==========
 export default function FolioObs() {
@@ -279,6 +280,7 @@ function FolioObsInner() {
   const navItems = [
     { id: "dashboard", label: L.t('common.dashboard'), short: L.t('common.home') },
     { id: "screener", label: L.t('common.screener'), short: L.t('common.stocks') },
+    { id: "insider", label: L.t('common.insider'), short: L.t('common.insiderShort') },
     { id: "watchlist", label: L.t('common.watchlist'), short: L.t('common.watch') },
     { id: "compare", label: L.t('common.compare'), short: L.t('common.compare') },
     { id: "insights", label: L.t('common.insights'), short: L.t('common.analysis') },
@@ -558,6 +560,7 @@ function FolioObsInner() {
                 {page === "watchlist" && <WatchlistPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} />}
                 {page === "compare" && <ComparePage onBack={goHome} onNavigate={navigate} />}
                 {page === "insights" && <InsightsPage onBack={goHome} onNavigate={navigate} />}
+                {page === "insider" && <InsiderTradingPage onBack={goHome} onNavigate={navigate} />}
                 {page === "ark-report" && <ArkReportPage onBack={goHome} onNavigate={navigate} />}
                 {page === "privacy" && <PrivacyPage onBack={goHome} />}
                 {page === "terms" && <TermsPage onBack={goHome} />}

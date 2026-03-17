@@ -7,6 +7,8 @@ export default {
     watchlist: "Watchlist",
     compare: "Compare",
     insights: "Insights",
+    insider: "Insider",
+    insiderShort: "Insider",
     home: "Home",
     stocks: "Stocks",
     watch: "Watch",

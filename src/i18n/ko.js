@@ -7,6 +7,8 @@ export default {
     watchlist: "워치리스트",
     compare: "비교",
     insights: "인사이트",
+    insider: "내부자거래",
+    insiderShort: "내부자",
     home: "홈",
     stocks: "종목",
     watch: "관심",
