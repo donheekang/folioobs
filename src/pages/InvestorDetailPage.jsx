@@ -216,6 +216,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
   const { investors: INVESTORS, holdings: HOLDINGS, quarterlyHistory: QUARTERLY_HISTORY, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades, aiInsights, stockPrices, latestQuarter } = useData();
   const [sortKey, setSortKey] = useState("pct");
   const [sortDir, setSortDir] = useState("desc");
+  const [showAllHoldings, setShowAllHoldings] = useState(false);
   const [selectedArkDate, setSelectedArkDate] = useState(null); // ARK 날짜 선택 추적
   // expandedTicker removed — rows now navigate directly to stock detail
   const dailyTradesRef = useRef(null);
@@ -301,6 +302,9 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
   );
 
   const sorted = [...holdings].sort((a,b)=>(sortDir==="desc"?-1:1)*(a[sortKey]-b[sortKey]));
+  const HOLDINGS_LIMIT = 50;
+  const hasMoreHoldings = sorted.length > HOLDINGS_LIMIT;
+  const displayHoldings = showAllHoldings ? sorted : sorted.slice(0, HOLDINGS_LIMIT);
   const sectorData = getSectorData(holdings);
   const SI = STYLE_ICONS[investor.style]||Briefcase;
   const handleSort = (k)=>{ if(sortKey===k)setSortDir(d=>d==="desc"?"asc":"desc"); else{setSortKey(k);setSortDir("desc");} };
@@ -468,7 +472,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
           )}
           {/* Mobile: Card layout */}
           <div className="sm:hidden space-y-2">
-            {sorted.map((h,i)=>{
+            {displayHoldings.map((h,i)=>{
               return (
               <div key={i} className="rounded-xl cursor-pointer" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)', border: `1px solid ${t.cardRowBorder}` }}
                 onClick={()=>onNavigate("stock",h.ticker)}>
@@ -510,7 +514,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                   </th>
                 ))}
               </tr></thead>
-              <tbody>{sorted.map((h,i)=>{
+              <tbody>{displayHoldings.map((h,i)=>{
                 return (<React.Fragment key={h.ticker}>
                 <tr style={{borderBottom: `1px solid ${t.cardRowBorder}`, cursor: 'pointer'}}
                   onClick={()=>onNavigate("stock",h.ticker)}
@@ -530,6 +534,37 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
               })}</tbody>
             </table>
           </div>
+          {/* 더보기 / 접기 버튼 */}
+          {hasMoreHoldings && (
+            <div className="mt-4 text-center">
+              <button
+                className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer"
+                style={{
+                  color: investor.color,
+                  background: `${investor.color}10`,
+                  border: `1.5px solid ${investor.color}25`,
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = `${investor.color}20`; }}
+                onMouseLeave={e => { e.currentTarget.style.background = `${investor.color}10`; }}
+                onClick={() => setShowAllHoldings(!showAllHoldings)}
+              >
+                {showAllHoldings
+                  ? (L.locale === 'ko' ? '접기' : 'Show Less')
+                  : (L.locale === 'ko'
+                      ? `+${sorted.length - HOLDINGS_LIMIT}개 더보기`
+                      : `Show ${sorted.length - HOLDINGS_LIMIT} More`)
+                }
+                {showAllHoldings ? <ChevronUp size={14} className="inline ml-1" /> : <ChevronDown size={14} className="inline ml-1" />}
+              </button>
+              {!showAllHoldings && (
+                <p className="text-xs mt-2" style={{ color: t.textMuted }}>
+                  {L.locale === 'ko'
+                    ? `상위 ${HOLDINGS_LIMIT}개 종목 표시 중 (전체 ${sorted.length}개)`
+                    : `Showing top ${HOLDINGS_LIMIT} of ${sorted.length} holdings`}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </GlassCard>
 

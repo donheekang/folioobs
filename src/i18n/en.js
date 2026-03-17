@@ -55,14 +55,14 @@ export default {
 
   // ===== Dashboard =====
   dashboard: {
-    subtitle: "Warren Buffett · Cathie Wood · Druckenmiller + 7 more",
-    title: "What Are Wall Street Legends Buying Now?",
-    description: "Track legendary investors' trades — updated daily.",
+    subtitle: "Warren Buffett · Ray Dalio · Cathie Wood · George Soros + 7 more",
+    title: "What are they buying and selling right now?",
+    description: "Track legendary investors' actual portfolios through SEC 13F filing data.",
     heroTagline: "Real-time · Free · Updated Daily",
     heroHook: "Track SEC 13F portfolios of {count} Wall Street legends in real time.",
     arkTodayLabel: "Cathie Wood today",
     dataSourceLabel: "13F: {quarter} | ARK: Daily Updates",
-    ctaButton: "View by Investor",
+    ctaButton: "View Portfolios",
     recentMoves: "Recent Key Moves",
     hotStocks: "Hot Stocks This Quarter",
     hotStocksTitle: "Most Traded Stocks This Quarter",

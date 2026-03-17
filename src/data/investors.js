@@ -89,5 +89,14 @@ export const INVESTORS = [
     bioEn: "Often called the successor to Warren Buffett. His book 'Margin of Safety' trades for thousands of dollars out of print. Known for extremely conservative investing with high cash allocations.",
     founded: 1982, avatar: "SK",
     metrics: { concentration: 0.25, sectorCount: 10, holdingCount: 60, topHoldingPct: 8.0, qoqChange: 0 }
+  },
+  {
+    id: "nps", name: "National Pension Service", nameKo: "국민연금",
+    fund: "National Pension Service", fundKo: "국민연금공단",
+    style: "국가연기금", color: "#DC2626", gradient: "linear-gradient(135deg, #DC2626, #EF4444)",
+    aum: 135, bio: "대한민국 국민연금공단. 세계 3위 규모의 공적 연기금으로, 미국 주식 약 560종목에 $135B 이상을 운용합니다.",
+    bioEn: "South Korea's National Pension Service. The world's 3rd largest public pension fund, managing over $135B across approximately 560 US equity positions.",
+    founded: 1988, avatar: "NP",
+    metrics: { concentration: 0.07, sectorCount: 11, holdingCount: 561, topHoldingPct: 6.9, qoqChange: 0 }
   }
 ];

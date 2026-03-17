@@ -44,6 +44,7 @@ const TRACKED_INVESTORS = [
   { cik: '0001167483', name: 'Chase Coleman', nameKo: '체이스 콜먼', fund: 'Tiger Global Management', fundKo: '타이거 글로벌 매니지먼트', style: '테크성장투자', color: '#3B82F6', gradient: 'linear-gradient(135deg, #3B82F6, #60A5FA)', avatar: 'CC', bio: '테크 중심 성장주 투자의 대표주자.', founded: 2001 },
   { cik: '0001040273', name: 'Dan Loeb', nameKo: '댄 로엡', fund: 'Third Point', fundKo: '써드 포인트', style: '행동주의투자', color: '#8B5CF6', gradient: 'linear-gradient(135deg, #8B5CF6, #A78BFA)', avatar: 'DL', bio: '행동주의 헤지펀드의 선두주자.', founded: 1995 },
   { cik: '0001061768', name: 'Seth Klarman', nameKo: '세스 클라먼', fund: 'Baupost Group', fundKo: '바우포스트 그룹', style: '가치투자', color: '#14B8A6', gradient: 'linear-gradient(135deg, #14B8A6, #2DD4BF)', avatar: 'SK', bio: '워렌 버핏의 후계자로 불리는 가치투자 대가.', founded: 1982 },
+  { cik: '0001608046', name: 'National Pension Service', nameKo: '국민연금', fund: 'National Pension Service', fundKo: '국민연금공단', style: '국가연기금', color: '#DC2626', gradient: 'linear-gradient(135deg, #DC2626, #EF4444)', avatar: 'NP', bio: '대한민국 국민연금공단. 세계 3위 규모의 공적 연기금.', founded: 1988, valueDivisor: 1000 },
 ];
 
 // ============================================================

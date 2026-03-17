@@ -14,6 +14,7 @@ const NAME_TO_SLUG = {
   'Ray Dalio': 'dalio',
   'Bill Ackman': 'ackman',
   'George Soros': 'soros',
+  'National Pension Service': 'nps',
 };
 
 const SLUG_TO_DBID = {}; // 런타임에 채워짐
@@ -349,23 +350,36 @@ export function DataProvider({ children }) {
           qHistory[slug] = arr.filter(a => a.value >= lowThreshold && a.value <= highThreshold);
         });
 
-        // 7. QUARTERLY_ACTIVITY 빌드 (holding_changes에서 — 투자자별 개별 쿼리)
+        // 7. QUARTERLY_ACTIVITY 빌드 (holding_changes에서 — 투자자별 페이지네이션 쿼리)
         let dbChanges = [];
+        const PAGE_SIZE = 1000;
         for (const inv of dbInvestors) {
-          const { data: invChanges, error: chErr } = await supabase
-            .from('holding_changes')
-            .select(`
-              investor_id, quarter, change_type, pct_change,
-              securities (ticker, name, name_ko)
-            `)
-            .eq('investor_id', inv.id)
-            .order('quarter', { ascending: false })
-            .limit(3000);
+          let allInvChanges = [];
+          let offset = 0;
+          let hasMore = true;
+          while (hasMore) {
+            const { data: page, error: chErr } = await supabase
+              .from('holding_changes')
+              .select(`
+                investor_id, quarter, change_type, pct_change,
+                securities (ticker, name, name_ko)
+              `)
+              .eq('investor_id', inv.id)
+              .order('quarter', { ascending: false })
+              .range(offset, offset + PAGE_SIZE - 1);
 
-          if (chErr) { console.warn(`holding_changes 실패 (${inv.name}):`, chErr.message); continue; }
-          if (invChanges?.length) {
-            dbChanges.push(...invChanges);
-            console.log(`[DataProvider] ${inv.name}: ${invChanges.length}개 변동 기록`);
+            if (chErr) { console.warn(`holding_changes 실패 (${inv.name}):`, chErr.message); hasMore = false; continue; }
+            if (page?.length) {
+              allInvChanges.push(...page);
+              offset += page.length;
+              hasMore = page.length === PAGE_SIZE;
+            } else {
+              hasMore = false;
+            }
+          }
+          if (allInvChanges.length) {
+            dbChanges.push(...allInvChanges);
+            console.log(`[DataProvider] ${inv.name}: ${allInvChanges.length}개 변동 기록`);
           }
         }
 

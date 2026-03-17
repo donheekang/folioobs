@@ -88,6 +88,9 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
   // 시세 데이터 날짜 라벨 (장 상태 반영)
   const priceLabel = useMemo(() => {
+    // 장 상태를 아직 모르면(unknown) 라벨 숨김 — 초기 로드 시 "장 마감" 깜빡임 방지
+    if (marketStatus === 'unknown') return null;
+
     // lastTradeDate가 있으면 사용, 없으면 stockPrices에서 추출
     const dateStr = lastTradeDate || (() => {
       const dates = Object.values(stockPrices).map(p => p.date).filter(d => d && d !== '실시간');
@@ -183,6 +186,41 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     }
     return picks.slice(0, 3);
   }, [topBoughtStocks, topSoldStocks, newPositions, t, L]);
+
+  // ===== 실시간 매매 스니펫: 유명 종목 우선, 가장 눈에 띄는 매수/매도 1건씩 =====
+  const tradeSnippets = useMemo(() => {
+    const FAMOUS_TICKERS = new Set([
+      'AAPL','MSFT','GOOGL','GOOG','AMZN','NVDA','META','TSLA','BRK.B','BRK.A',
+      'JPM','V','MA','UNH','JNJ','WMT','PG','HD','BAC','XOM','CVX','KO','PEP',
+      'ABBV','MRK','COST','AVGO','TMO','MCD','CSCO','ACN','LIN','ABT','DHR',
+      'ADBE','TXN','CRM','AMD','NFLX','CMCSA','INTC','PM','NKE','ORCL','DIS',
+      'QCOM','IBM','GE','CAT','BA','GS','MS','UBER','ABNB','COIN','SQ','PLTR',
+      'SNAP','PYPL','SHOP','SPOT','ARM','DELL','CRWD','PANW','SNOW','NET',
+      'BABA','TSM','ASML','SAP','NVO','SONY','TM','LLY','PFE','MRNA',
+      'SPY','QQQ','IWM','VTI','VOO','SCHD','BND','GLD','SLV',
+      'SOFI','RIVN','LCID','NIO','XPEV','LI','CPNG','SE','MELI','GRAB',
+    ]);
+    const pickBest = (actions, type) => {
+      // 1순위: 유명 종목 중 pctChange 가장 큰 것
+      const famous = actions.filter(a => FAMOUS_TICKERS.has(a.ticker));
+      if (famous.length > 0) {
+        const top = famous[0]; // 이미 pctChange 정렬되어 있음
+        return { investor: top.investor, ticker: top.ticker, pctChange: top.pctChange, type };
+      }
+      // 2순위: 아무거나 가장 큰 것
+      if (actions.length > 0) {
+        const top = actions[0];
+        return { investor: top.investor, ticker: top.ticker, pctChange: top.pctChange, type };
+      }
+      return null;
+    };
+    const snippets = [];
+    const buy = pickBest(buyActions, 'buy');
+    if (buy) snippets.push(buy);
+    const sell = pickBest(sellActions, 'sell');
+    if (sell) snippets.push(sell);
+    return snippets;
+  }, [buyActions, sellActions]);
 
   // ===== Task 4: 투자자 랭킹 보드 (다차원 순위) =====
   const investorRankings = useMemo(() => {
@@ -366,6 +404,35 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           <span style={{color:t.textMuted}}>·</span>
           <span className="text-sm" style={{color:t.textMuted}}>{L.t('dashboard.trackedInvestors')} <span className="font-bold" style={{color:t.text}}>{INVESTORS.length}{L.t('common.people')}</span></span>
         </div>
+
+        {/* 실시간 매매 스니펫 — 눈에 띄는 매수/매도 1건씩 pill 형태 */}
+        {tradeSnippets.length > 0 && (
+          <div className="hero-enter hero-enter-3 flex items-center justify-center gap-2 flex-wrap mb-6">
+
+            {tradeSnippets.map((s, i) => {
+              const isBuy = s.type === 'buy';
+              const color = isBuy ? t.green : t.red;
+              const bg = isBuy ? `${t.green}12` : `${t.red}12`;
+              const border = isBuy ? `${t.green}30` : `${t.red}30`;
+              const label = isBuy
+                ? (L.locale === 'ko' ? '매수' : 'Buy')
+                : (L.locale === 'ko' ? '매도' : 'Sell');
+              const pctLabel = s.pctChange > 0 ? `+${Math.round(s.pctChange)}%` : `${Math.round(s.pctChange)}%`;
+              return (
+                <button key={i}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all hover:scale-105 cursor-pointer"
+                  style={{background:bg, border:`1px solid ${border}`, color}}
+                  onClick={() => onNavigate("investor", s.investor.id)}>
+                  <span className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[8px] font-bold" style={{background:s.investor.gradient}}>{s.investor.avatar}</span>
+                  <span style={{color:t.text}}>{L.investorName(s.investor)}</span>
+                  <span className="font-bold">{s.ticker}</span>
+                  <span className="font-bold">{pctLabel}</span>
+                  <span className="text-xs font-semibold px-1 py-0.5 rounded" style={{background:`${color}20`,color}}>{label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Trade Highlights — 이번 분기 핫 종목 (종목 중심 집계) */}
         {heroHighlights.length > 0 && (
