@@ -21,6 +21,13 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
   // ── 주간/월간 그룹핑 ──
   const reports = useMemo(() => {
     if (!arkDailyTrades?.length) return [];
+    // 로컬 날짜를 YYYY-MM-DD 문자열로 (toISOString은 UTC라 시간대 오차 발생)
+    const toLocalDateStr = (d) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${dd}`;
+    };
     if (mode === 'weekly') {
       const weekMap = {};
       arkDailyTrades.forEach(day => {
@@ -28,7 +35,7 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
         const dow = d.getDay();
         const monday = new Date(d);
         monday.setDate(d.getDate() - ((dow + 6) % 7));
-        const weekKey = monday.toISOString().split('T')[0];
+        const weekKey = toLocalDateStr(monday);
         if (!weekMap[weekKey]) weekMap[weekKey] = { start: weekKey, days: [] };
         weekMap[weekKey].days.push(day);
       });

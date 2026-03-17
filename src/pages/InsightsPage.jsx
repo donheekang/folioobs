@@ -42,9 +42,19 @@ const InsightsPage = ({ onBack, onNavigate }) => {
     INVESTORS.forEach(inv => {
       const invInsights = aiInsights?.[inv.id];
       if (!invInsights) return;
+      // 정렬용 키 생성: weekly-0308 → "2026Q1-0308w", 2026Q1-0316 → "2026Q1-0316"
+      const sortKey = (k) => {
+        if (k.startsWith('weekly-')) {
+          const mmdd = k.split('-')[1];
+          // weekly를 해당 날짜의 일별 키보다 뒤로 (같은 날짜면 weekly가 먼저)
+          const now = new Date();
+          return `${now.getFullYear()}Q${Math.ceil((now.getMonth()+1)/3)}-${mmdd}w`;
+        }
+        return k;
+      };
       const periods = Object.keys(invInsights)
         .filter(k => k !== '_latest')
-        .sort((a, b) => b.localeCompare(a)); // 최신순
+        .sort((a, b) => sortKey(b).localeCompare(sortKey(a))); // 최신순
       if (periods.length > 0) result[inv.id] = periods;
     });
     return result;
@@ -64,6 +74,16 @@ const InsightsPage = ({ onBack, onNavigate }) => {
 
   // quarter key → 표시용 라벨 변환
   const formatPeriodLabel = (qKey, locale, full = false) => {
+    // "weekly-0308" → 주간
+    if (qKey.startsWith('weekly-')) {
+      const mmdd = qKey.split('-')[1]; // "0308"
+      const mm = parseInt(mmdd.slice(0, 2));
+      const dd = parseInt(mmdd.slice(2));
+      if (full) {
+        return locale === 'ko' ? `주간 리포트 ${mm}월 ${dd}일` : `Weekly Report ${mm}/${dd}`;
+      }
+      return locale === 'ko' ? `주간 ${mm}/${dd}` : `Wk ${mm}/${dd}`;
+    }
     // "2026Q1-0309" → 일별
     if (qKey.includes('-')) {
       const yearQ = qKey.split('-')[0]; // "2026Q1"
@@ -84,8 +104,8 @@ const InsightsPage = ({ onBack, onNavigate }) => {
     return locale === 'ko' ? `${y}년 ${q}` : `${q} ${y}`;
   };
 
-  // 일별인지 분기별인지
-  const isDaily = (qKey) => qKey && qKey.includes('-');
+  // 일별인지 분기별인지 (weekly는 일별 취급)
+  const isDaily = (qKey) => qKey && (qKey.includes('-'));
 
   // 모든 인사이트 수집 — AI 우선, 없으면 룰 기반 fallback
   const allInsights = useMemo(() => {
