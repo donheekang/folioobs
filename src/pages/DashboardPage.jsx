@@ -553,7 +553,6 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               </h2>
               {latestQuarter && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>}
             </div>
-            {priceLabel && <span className="text-xs" style={{ color: marketStatus === 'open' ? t.green : t.textMuted }}>{priceLabel}</span>}
           </div>
 
           {/* 필터 바 — 투자자 칩 토글 + 보조 필터 */}
@@ -699,6 +698,9 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 {L.locale === 'ko' ? '초기화' : 'Reset'}
               </button>
             )}
+
+            {/* 실시간/장 마감 라벨 — 필터 줄 오른쪽 끝 */}
+            {priceLabel && <span className="ml-auto text-[11px] whitespace-nowrap" style={{ color: marketStatus === 'open' ? t.green : t.textMuted }}>{priceLabel}</span>}
           </div>
           </>
             );
