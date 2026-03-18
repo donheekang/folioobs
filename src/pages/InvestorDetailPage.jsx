@@ -633,7 +633,11 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
         // 캐시 우드: 선택된 ARK 날짜에 맞는 인사이트 로드
         // 다른 투자자: 최신 인사이트 사용
         let aiData = null;
-        if (investorId === 'cathie' && selectedArkDate) {
+        // 캐시 우드: 선택된 날짜가 NO_TRADES인지 확인
+        const isSelectedNoTradeDay = investorId === 'cathie' && selectedArkDate && arkDailyTrades.some(day =>
+          day.date === selectedArkDate && day.trades.some(tr => tr.ticker === 'NO_TRADES') && day.trades.filter(tr => tr.ticker !== 'NO_TRADES').length === 0
+        );
+        if (investorId === 'cathie' && selectedArkDate && !isSelectedNoTradeDay) {
           // 날짜를 quarter key로 변환: "2026-03-09" → "2026Q1-0309"
           const d = new Date(selectedArkDate + 'T00:00:00');
           const q = Math.ceil((d.getMonth() + 1) / 3);
@@ -642,7 +646,9 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
           const qKey = `${d.getFullYear()}Q${q}-${mm}${dd}`;
           aiData = invInsights[qKey] || null;
         }
-        if (!aiData) aiData = invInsights._latest || null;
+        if (!aiData && !isSelectedNoTradeDay) aiData = invInsights._latest || null;
+        // 거래 없음 날짜에는 인사이트 섹션 전체 숨김
+        if (isSelectedNoTradeDay) return null;
         const hasAI = aiData && aiData.insights && aiData.insights.length > 0;
         const displayInsights = hasAI ? aiData.insights : insights;
 
