@@ -1409,8 +1409,15 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
   // ---- Company details ----
   const companyInfo = useMemo(() => {
     if (!details) return null;
+    // holdings에서 한국어 종목명 찾기
+    let koName = null;
+    for (const inv of INVESTORS) {
+      const h = (HOLDINGS[inv.id] || []).find(h => h.ticker === ticker);
+      if (h?.name) { koName = h.name; break; }
+    }
     return {
-      name: details.name || ticker,
+      name: koName || details.name || ticker,
+      nameEn: details.name || ticker,
       description: details.description || '',
       sector: details.sic_description || '',
       marketCap: details.market_cap || 0,
@@ -1418,7 +1425,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
       homepageUrl: details.homepage_url || '',
       exchange: details.primary_exchange || '',
     };
-  }, [details, ticker]);
+  }, [details, ticker, INVESTORS, HOLDINGS]);
 
   // ---- 52-week high/low & period performance ----
   const priceHighlights = useMemo(() => {
@@ -1506,7 +1513,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
             )}
           </div>
           <p className="text-sm mt-0.5" style={{ color: t.textMuted }}>
-            {loadingInfo ? '...' : (companyInfo?.name || ticker)}
+            {loadingInfo ? '...' : (companyInfo ? L.stockName(companyInfo) : ticker)}
           </p>
         </div>
 

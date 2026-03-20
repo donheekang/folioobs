@@ -87,7 +87,7 @@ const WatchlistPage = ({ onBack, onNavigate, watchlist }) => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-sm cursor-pointer hover:underline" style={{ color: t.accent }} onClick={()=>onNavigate("stock",ticker)}>{ticker}</span>
-                      <span className="text-xs" style={{ color: t.textMuted }}>{holders[0]?.holding?.name}</span>
+                      <span className="text-xs" style={{ color: t.textMuted }}>{holders[0]?.holding ? L.stockName(holders[0].holding) : ''}</span>
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
                       {holders.map(h => (

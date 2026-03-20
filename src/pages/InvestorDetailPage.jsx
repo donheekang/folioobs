@@ -37,7 +37,7 @@ const ChangeCategoryList = ({ cat, onNavigate, theme: t }) => {
             onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
             <div className="flex items-center gap-2 min-w-0" style={{flex:'1 1 0'}}>
               <span className="text-sm font-bold" style={{color: t.accent}}>{item.ticker}</span>
-              <span className="text-xs truncate" style={{color: t.textMuted}}>{item.name}</span>
+              <span className="text-xs truncate" style={{color: t.textMuted}}>{L.stockName(item)}</span>
             </div>
             {item.pct != null && (
               <div className="flex items-center gap-1.5 shrink-0" style={{minWidth:70}}>
@@ -364,10 +364,10 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
         if (totalChanges === 0) return null;
 
         const categories = [
-          { key: 'new', label: L.t('investor.newPositions'), icon: Plus, color: t.accent || '#8B5CF6', items: newBuys.map(h => ({ ticker: h.ticker, name: h.name, pct: h.pct, change: null })) },
-          { key: 'exit', label: L.t('investor.exits'), icon: LogOut, color: t.red, items: exits.map(a => ({ ticker: a.ticker, name: a.name, pct: null, change: a.pctChange })) },
-          { key: 'up', label: L.t('investor.increased'), icon: TrendingUp, color: t.green, items: increased.sort((a,b) => b.change - a.change).map(h => ({ ticker: h.ticker, name: h.name, pct: h.pct, change: h.change })) },
-          { key: 'down', label: L.t('investor.decreased'), icon: TrendingDown, color: t.red, items: decreased.sort((a,b) => a.change - b.change).map(h => ({ ticker: h.ticker, name: h.name, pct: h.pct, change: h.change })) },
+          { key: 'new', label: L.t('investor.newPositions'), icon: Plus, color: t.accent || '#8B5CF6', items: newBuys.map(h => ({ ticker: h.ticker, name: h.name, nameEn: h.nameEn, pct: h.pct, change: null })) },
+          { key: 'exit', label: L.t('investor.exits'), icon: LogOut, color: t.red, items: exits.map(a => ({ ticker: a.ticker, name: a.name, nameEn: a.nameEn, pct: null, change: a.pctChange })) },
+          { key: 'up', label: L.t('investor.increased'), icon: TrendingUp, color: t.green, items: increased.sort((a,b) => b.change - a.change).map(h => ({ ticker: h.ticker, name: h.name, nameEn: h.nameEn, pct: h.pct, change: h.change })) },
+          { key: 'down', label: L.t('investor.decreased'), icon: TrendingDown, color: t.red, items: decreased.sort((a,b) => a.change - b.change).map(h => ({ ticker: h.ticker, name: h.name, nameEn: h.nameEn, pct: h.pct, change: h.change })) },
         ].filter(c => c.items.length > 0);
 
         return (
@@ -487,7 +487,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                       <WatchButton active={watchlist.isWatchedTkr(h.ticker)} onClick={(e) => { e.stopPropagation(); watchlist.toggleTicker(h.ticker); }} size={12} />
                       <div>
                         <span className="font-semibold text-sm" style={{color:t.accent}}>{h.ticker}</span>
-                        <span className="text-xs ml-1.5" style={{color:t.textMuted}}>{h.name}</span>
+                        <span className="text-xs ml-1.5" style={{color:t.textMuted}}>{L.stockName(h)}</span>
                       </div>
                     </div>
                     {(() => { const ch = formatChange(h.change); const displayCh = ch === '신규' ? L.t('common.new') : ch === '대폭 확대' ? L.t('common.significantIncrease') : ch; return ch === '신규' ? <Badge color={t.green}><ArrowUpRight size={10}/> {displayCh}</Badge> : ch === null ? <span className="text-xs" style={{color:t.textMuted}}>—</span> : <span className="flex items-center gap-0.5 font-medium text-xs" style={{color:h.change>0?t.green:t.red}}>{h.change>0?<ArrowUpRight size={12}/>:<ArrowDownRight size={12}/>}{displayCh}</span>; })()}
@@ -526,7 +526,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                   onMouseEnter={e=>e.currentTarget.style.background=t.cardRowHover}
                   onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
                   <td className="py-3 px-1 w-8" onClick={e=>e.stopPropagation()}><WatchButton active={watchlist.isWatchedTkr(h.ticker)} onClick={() => watchlist.toggleTicker(h.ticker)} size={12} /></td>
-                  <td className="py-3 px-3"><div className="flex items-center gap-1.5"><div className="font-semibold" style={{color:t.accent}}>{h.ticker}</div></div><div className="text-xs" style={{color:t.textMuted}}>{h.name}</div></td>
+                  <td className="py-3 px-3"><div className="flex items-center gap-1.5"><div className="font-semibold" style={{color:t.accent}}>{h.ticker}</div></div><div className="text-xs" style={{color:t.textMuted}}>{L.stockName(h)}</div></td>
                   <td className="py-3 px-3"><div className="flex items-center gap-2"><div className="w-16 h-1.5 rounded-full overflow-hidden" style={{background:`${t.name==='dark'?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.08)'}`}}><div className="h-full rounded-full" style={{width:`${Math.min(h.pct*3,100)}%`,background:investor.gradient}}/></div><span className="font-medium" style={{color:t.text}}>{h.pct.toFixed(1)}%</span></div></td>
                   <td className="py-3 px-3 font-medium" style={{color:t.text}}>{formatUSD(h.value)}</td>
                   <td className="py-3 px-3" style={{color:t.textSecondary}}>{formatShares(h.shares)}</td>

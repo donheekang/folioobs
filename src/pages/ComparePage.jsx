@@ -35,7 +35,7 @@ const ComparePage = ({ onBack, onNavigate }) => {
     const firstTickers = [...maps[0].keys()];
     const common = firstTickers.filter(ticker => maps.every(m => m.has(ticker)));
     return common.map(ticker => {
-      const row = { ticker, name: maps[0].get(ticker)?.name || ticker };
+      const row = { ticker, name: maps[0].get(ticker)?.name || ticker, nameEn: maps[0].get(ticker)?.nameEn || ticker };
       selInvs.forEach((inv, i) => {
         const h = maps[i].get(ticker);
         row[`pct_${inv.id}`] = h?.pct || 0;
@@ -66,7 +66,7 @@ const ComparePage = ({ onBack, onNavigate }) => {
     allTickers.forEach(ticker => {
       const data = selInvs.map((inv, i) => {
         const h = maps[i].get(ticker);
-        return h ? { inv, change: h.change, name: h.name } : null;
+        return h ? { inv, change: h.change, name: h.name, nameEn: h.nameEn } : null;
       }).filter(Boolean);
 
       if (data.length >= 2) {
@@ -74,7 +74,7 @@ const ComparePage = ({ onBack, onNavigate }) => {
         const hasNegative = data.some(d => d.change < 0);
         const entry = {
           ticker,
-          name: data[0].name,
+          name: data[0].name, nameEn: data[0].nameEn,
           investors: data.map(d => ({
             id: d.inv.id,
             name: L.investorName(d.inv),
@@ -110,7 +110,7 @@ const ComparePage = ({ onBack, onNavigate }) => {
       const h = (HOLDINGS[inv.id] || []).slice(0, 10);
       h.forEach(holding => {
         if (!allTickers.has(holding.ticker)) {
-          allTickers.set(holding.ticker, { ticker: holding.ticker, name: holding.name });
+          allTickers.set(holding.ticker, { ticker: holding.ticker, name: holding.name, nameEn: holding.nameEn });
         }
       });
     });
@@ -274,7 +274,7 @@ const ComparePage = ({ onBack, onNavigate }) => {
                         <td className="py-2.5 px-3">
                           <div>
                             <span className="font-semibold" style={{color:t.accent}}>{row.ticker}</span>
-                            <div className="text-xs truncate max-w-[140px]" style={{color:t.textMuted}}>{row.name}</div>
+                            <div className="text-xs truncate max-w-[140px]" style={{color:t.textMuted}}>{L.stockName(row)}</div>
                           </div>
                         </td>
                         {selInvs.map(inv => (
@@ -332,7 +332,7 @@ const ComparePage = ({ onBack, onNavigate }) => {
                         onClick={() => onNavigate?.('stock', item.ticker)}>
                         <div className="min-w-[80px]">
                           <span className="font-semibold text-sm" style={{color:t.accent}}>{item.ticker}</span>
-                          <div className="text-xs truncate max-w-[100px]" style={{color:t.textMuted}}>{item.name}</div>
+                          <div className="text-xs truncate max-w-[100px]" style={{color:t.textMuted}}>{L.stockName(item)}</div>
                         </div>
                         <div className="flex-1 flex items-center gap-3 flex-wrap">
                           {item.investors.map(inv => (
@@ -370,7 +370,7 @@ const ComparePage = ({ onBack, onNavigate }) => {
                         onClick={() => onNavigate?.('stock', item.ticker)}>
                         <div className="min-w-[80px]">
                           <span className="font-semibold text-sm" style={{color:t.accent}}>{item.ticker}</span>
-                          <div className="text-xs truncate max-w-[100px]" style={{color:t.textMuted}}>{item.name}</div>
+                          <div className="text-xs truncate max-w-[100px]" style={{color:t.textMuted}}>{L.stockName(item)}</div>
                         </div>
                         <div className="flex-1 flex items-center gap-3 flex-wrap">
                           {item.investors.map(inv => (

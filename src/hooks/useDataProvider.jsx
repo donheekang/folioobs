@@ -921,6 +921,7 @@ export function DataProvider({ children }) {
                   ? sec.name_ko
                   : (KO_NAME_FALLBACK[ticker] || sec.name_ko || sec.name || 'Unknown')
               ),
+              nameEn: decodeHtmlEntities(sec.name || 'Unknown'),
               type: c.change_type, // 'new', 'buy', 'sell', 'exit'
               pctChange: c.pct_change || 0,
             });

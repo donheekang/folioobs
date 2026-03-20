@@ -138,7 +138,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       const map = {};
       actions.forEach(act => {
         const key = normalize(act.ticker);
-        if (!map[key]) map[key] = { ticker: key, name: act.name, investors: [], types: [], tickers: [key] };
+        if (!map[key]) map[key] = { ticker: key, name: act.name, nameEn: act.nameEn, investors: [], types: [], tickers: [key] };
         // 원래 티커도 기록 (표시용)
         if (!map[key].tickers.includes(act.ticker)) map[key].tickers.push(act.ticker);
         // 같은 투자자 중복 방지
@@ -284,6 +284,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           tickerMap[h.ticker] = {
             ticker: h.ticker,
             name: h.name,
+            nameEn: h.nameEn,
             sector: h.sector,
             current: price.current,
             quarterEnd: price.quarterEnd,
@@ -372,7 +373,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           onClick={(e)=>{e.stopPropagation();handleActivityClick(act.investor.id);}}>{act.investor.avatar}</div>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold" style={{color:t.accent}}>{act.ticker}</div>
-          <div className="text-xs" style={{color:t.textMuted}}>{act.name}</div>
+          <div className="text-xs" style={{color:t.textMuted}}>{L.stockName(act)}</div>
         </div>
         <span className="text-xs font-medium" style={{color}}>{label}</span>
       </div>
@@ -869,7 +870,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-bold" style={{ color: t.text }}>{stock.ticker}</span>
-                        <span className="text-xs truncate hidden sm:inline" style={{ color: t.textMuted }}>{stock.name?.slice(0, 20)}</span>
+                        <span className="text-xs truncate hidden sm:inline" style={{ color: t.textMuted }}>{L.stockName(stock)?.slice(0, 20)}</span>
                       </div>
                       <div className="flex items-center gap-1 mt-1 flex-wrap">
                         {stock.investors.map((inv) => (
@@ -955,7 +956,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold hover:underline" style={{color:t.text}}>{stock.ticker}</span>
-                          <span className="text-xs truncate" style={{color:t.textMuted}}>{stock.name?.slice(0, 15)}</span>
+                          <span className="text-xs truncate" style={{color:t.textMuted}}>{L.stockName(stock)?.slice(0, 15)}</span>
                         </div>
                         <div className="flex items-center gap-1 mt-1">
                           <div className="flex -space-x-1">
@@ -994,7 +995,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold hover:underline" style={{color:t.text}}>{stock.ticker}</span>
-                          <span className="text-xs truncate" style={{color:t.textMuted}}>{stock.name?.slice(0, 15)}</span>
+                          <span className="text-xs truncate" style={{color:t.textMuted}}>{L.stockName(stock)?.slice(0, 15)}</span>
                         </div>
                         <div className="flex items-center gap-1 mt-1">
                           <div className="flex -space-x-1">
@@ -1315,14 +1316,14 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           const buyMap = {}; // ticker -> investors who bought/new
           const sellMap = {}; // ticker -> investors who sold/exited
           [...newPositions, ...buyActions].forEach(act => {
-            if (!buyMap[act.ticker]) buyMap[act.ticker] = { ticker: act.ticker, name: act.name, investors: [], actions: [] };
+            if (!buyMap[act.ticker]) buyMap[act.ticker] = { ticker: act.ticker, name: act.name, nameEn: act.nameEn, investors: [], actions: [] };
             if (!buyMap[act.ticker].investors.find(i => i.id === act.investor.id)) {
               buyMap[act.ticker].investors.push(act.investor);
               buyMap[act.ticker].actions.push(act);
             }
           });
           [...sellActions, ...exitActions].forEach(act => {
-            if (!sellMap[act.ticker]) sellMap[act.ticker] = { ticker: act.ticker, name: act.name, investors: [], actions: [] };
+            if (!sellMap[act.ticker]) sellMap[act.ticker] = { ticker: act.ticker, name: act.name, nameEn: act.nameEn, investors: [], actions: [] };
             if (!sellMap[act.ticker].investors.find(i => i.id === act.investor.id)) {
               sellMap[act.ticker].investors.push(act.investor);
               sellMap[act.ticker].actions.push(act);
@@ -1337,7 +1338,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               const types = s.actions.map(a => a.type);
               const hasNew = types.includes('new');
               signals.push({
-                ticker: s.ticker, name: s.name, investors: s.investors,
+                ticker: s.ticker, name: s.name, nameEn: s.nameEn, investors: s.investors,
                 direction: 'buy', strength: s.investors.length,
                 label: hasNew
                   ? (L.locale === 'ko' ? '공통 신규 매수' : 'Consensus New Buy')
@@ -1354,7 +1355,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               const types = s.actions.map(a => a.type);
               const hasExit = types.includes('exit');
               signals.push({
-                ticker: s.ticker, name: s.name, investors: s.investors,
+                ticker: s.ticker, name: s.name, nameEn: s.nameEn, investors: s.investors,
                 direction: 'sell', strength: s.investors.length,
                 label: hasExit
                   ? (L.locale === 'ko' ? '공통 전량 매도' : 'Consensus Exit')
@@ -1410,7 +1411,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                             style={{background:`${sig.color}18`, color:sig.color}}>{sig.label}</span>
                         </div>
-                        <span className="text-xs" style={{color:t.textMuted}}>{sig.name?.slice(0, 25)}</span>
+                        <span className="text-xs" style={{color:t.textMuted}}>{L.stockName(sig)?.slice(0, 25)}</span>
                       </div>
                       <div className="text-right">
                         <span className="text-lg font-black" style={{color:sig.color}}>{sig.strength}</span>

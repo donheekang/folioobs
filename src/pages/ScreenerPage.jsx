@@ -43,7 +43,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
       invTickerMap.forEach(h => {
         if (!map.has(h.ticker)) {
           map.set(h.ticker, {
-            ticker: h.ticker, name: h.name, sector: h.sector,
+            ticker: h.ticker, name: h.name, nameEn: h.nameEn, sector: h.sector,
             holders: [], totalValue: 0, avgPct: 0, maxPct: 0,
             actions: [],
           });
@@ -96,7 +96,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
       }
       if (query.trim()) {
         const q = query.toLowerCase();
-        if (!s.ticker.toLowerCase().includes(q) && !s.name.toLowerCase().includes(q)) return false;
+        if (!s.ticker.toLowerCase().includes(q) && !s.name.toLowerCase().includes(q) && !(s.nameEn && s.nameEn.toLowerCase().includes(q))) return false;
       }
       return true;
     });
@@ -277,7 +277,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                     <div className="flex items-center gap-2 min-w-0">
                       <WatchButton active={watchlist.isWatchedTkr(stock.ticker)} onClick={() => watchlist.toggleTicker(stock.ticker)} size={12} />
                       <button className="font-semibold text-sm flex-shrink-0 hover:underline" style={{ color: t.text }} onClick={() => onNavigate("stock", stock.ticker)}>{stock.ticker}</button>
-                      <span className="text-xs truncate" style={{ color: t.textMuted }}>{stock.name}</span>
+                      <span className="text-xs truncate" style={{ color: t.textMuted }}>{L.stockName(stock)}</span>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0 ml-2">
                       {hasNew && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.t('common.new')}</span>}
@@ -365,7 +365,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                       </td>
                       <td className="py-3 px-3 cursor-pointer" onClick={() => onNavigate("stock", stock.ticker)}>
                         <div className="font-semibold hover:underline" style={{ color: t.text }}>{stock.ticker}</div>
-                        <div className="text-xs" style={{ color: t.textMuted }}>{stock.name}</div>
+                        <div className="text-xs" style={{ color: t.textMuted }}>{L.stockName(stock)}</div>
                       </td>
                       <td className="py-3 px-3">
                         {(() => {
@@ -450,7 +450,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <button className="font-bold text-sm hover:underline" style={{ color: t.text }} onClick={() => onNavigate("stock", stock.ticker)}>{stock.ticker}</button>
-                      <span className="text-xs ml-2" style={{ color: t.textMuted }}>{stock.name}</span>
+                      <span className="text-xs ml-2" style={{ color: t.textMuted }}>{L.stockName(stock)}</span>
                     </div>
                     <Badge color={SECTOR_COLORS[stock.sector] || "#64748B"}>{L.sector(stock.sector)}</Badge>
                   </div>
