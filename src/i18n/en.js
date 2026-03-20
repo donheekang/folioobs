@@ -8,6 +8,7 @@ export default {
     compare: "Compare",
     insights: "Insights",
     insider: "Insider",
+    blog: "Blog",
     insiderShort: "Insider",
     home: "Home",
     stocks: "Stocks",

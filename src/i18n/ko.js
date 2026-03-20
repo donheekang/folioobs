@@ -8,6 +8,7 @@ export default {
     compare: "비교",
     insights: "인사이트",
     insider: "내부자거래",
+    blog: "블로그",
     insiderShort: "내부자",
     home: "홈",
     stocks: "종목",

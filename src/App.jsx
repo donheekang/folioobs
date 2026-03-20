@@ -32,6 +32,7 @@ import StockDetailPage from "./pages/StockDetailPage";
 import ArkReportPage from "./pages/ArkReportPage";
 import InsiderTradingPage from "./pages/InsiderTradingPage";
 import FolioMatchPage from "./pages/FolioMatchPage";
+import BlogPage from "./pages/BlogPage";
 
 // ========== MAIN APP ==========
 export default function FolioObs() {
@@ -333,6 +334,7 @@ function FolioObsInner() {
     { id: "watchlist", label: L.t('common.watchlist'), short: L.t('common.watch') },
     { id: "compare", label: L.t('common.compare'), short: L.t('common.compare') },
     { id: "insights", label: L.t('common.insights'), short: L.t('common.analysis') },
+    { id: "blog", label: L.t('common.blog'), short: L.t('common.blog') },
   ];
 
   return (
@@ -613,6 +615,7 @@ function FolioObsInner() {
                 {page === "insider" && <InsiderTradingPage onBack={goHome} onNavigate={navigate} />}
                 {page === "ark-report" && <ArkReportPage onBack={goHome} onNavigate={navigate} />}
                 {page === "foliomatch" && <FolioMatchPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} />}
+                {page === "blog" && <BlogPage onBack={goHome} />}
                 {page === "privacy" && <PrivacyPage onBack={goHome} />}
                 {page === "terms" && <TermsPage onBack={goHome} />}
               </div>
