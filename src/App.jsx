@@ -29,6 +29,7 @@ import TermsPage from "./pages/TermsPage";
 import StockDetailPage from "./pages/StockDetailPage";
 import ArkReportPage from "./pages/ArkReportPage";
 import InsiderTradingPage from "./pages/InsiderTradingPage";
+import FolioMatchPage from "./pages/FolioMatchPage";
 
 // ========== MAIN APP ==========
 export default function FolioObs() {
@@ -181,10 +182,36 @@ function FolioObsInner() {
     return () => window.removeEventListener("popstate", onPop);
   }, [doNavigate]);
 
-  // Search results
+  // 주요 종목 한글명 매핑 (DB name_ko 누락 시 fallback)
+  const KO_NAMES = useMemo(() => ({
+    AAPL:'애플', MSFT:'마이크로소프트', GOOGL:'알파벳(구글)', GOOG:'알파벳(구글)', AMZN:'아마존', META:'메타(페이스북)',
+    NVDA:'엔비디아', TSLA:'테슬라', TSM:'TSMC', AVGO:'브로드컴', BRK:'버크셔해서웨이',
+    JPM:'JP모건', V:'비자', MA:'마스터카드', UNH:'유나이티드헬스', JNJ:'존슨앤드존슨',
+    WMT:'월마트', PG:'P&G', HD:'홈디포', KO:'코카콜라', PEP:'펩시코',
+    COST:'코스트코', ABBV:'애브비', MRK:'머크', PFE:'화이자', TMO:'써모피셔',
+    NFLX:'넷플릭스', DIS:'디즈니', CRM:'세일즈포스', AMD:'AMD', INTC:'인텔',
+    QCOM:'퀄컴', ADBE:'어도비', ORCL:'오라클', NOW:'서비스나우', SHOP:'쇼피파이',
+    SQ:'블록(스퀘어)', COIN:'코인베이스', PLTR:'팔란티어', SNOW:'스노우플레이크', UBER:'우버',
+    NKE:'나이키', SBUX:'스타벅스', MCD:'맥도날드', BA:'보잉', CAT:'캐터필러',
+    GS:'골드만삭스', MS:'모건스탠리', BAC:'뱅크오브아메리카', C:'씨티그룹', WFC:'웰스파고',
+    XOM:'엑슨모빌', CVX:'셰브론', COP:'코노코필립스', OXY:'옥시덴탈페트롤리엄',
+    LLY:'일라이릴리', ISRG:'인튜이티브서지컬', ABT:'애보트', AMGN:'암젠', BMY:'브리스톨마이어스',
+    SPOT:'스포티파이', DASH:'도어대시', ROKU:'로쿠', HOOD:'로빈후드', NET:'클라우드플레어',
+    DDOG:'데이터독', ZS:'지스케일러', CRWD:'크라우드스트라이크', PANW:'팔로알토네트웍스',
+    MU:'마이크론', ARCT:'아크투루스', CRH:'CRH', SCHD:'SCHD', XLF:'금융섹터ETF',
+    SPY:'S&P500 ETF', QQQ:'나스닥100 ETF', VOO:'뱅가드S&P500', VTI:'뱅가드토탈마켓',
+    SOFI:'소파이', ABNB:'에어비앤비', RBLX:'로블록스', U:'유니티', PATH:'유아이패스',
+    ARM:'ARM홀딩스', SMCI:'슈퍼마이크로', MRVL:'마벨테크놀로지', ON:'온세미컨덕터',
+    GE:'GE에어로스페이스', LMT:'록히드마틴', RTX:'RTX', HON:'하니웰',
+    TGT:'타겟', LOW:'로우스', TJX:'TJX', BKNG:'부킹홀딩스', CMG:'치폴레',
+    BLK:'블랙록', SCHW:'찰스슈왑', AXP:'아메리칸익스프레스', COF:'캐피탈원',
+  }), []);
+
+  // Search results (한글 검색 지원)
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return { investors: [], tickers: [] };
     const q = searchQuery.toLowerCase();
+    const isKoreanQ = /[가-힣]/.test(searchQuery);
     const investors = INVESTORS.filter(inv =>
       inv.nameKo.toLowerCase().includes(q) || inv.name.toLowerCase().includes(q) ||
       inv.fundKo.toLowerCase().includes(q) || inv.id.includes(q)
@@ -192,15 +219,23 @@ function FolioObsInner() {
     const allTickers = new Map();
     INVESTORS.forEach(inv => {
       (HOLDINGS[inv.id] || []).forEach(h => {
-        if (h.ticker.toLowerCase().includes(q) || h.name.toLowerCase().includes(q)) {
-          if (!allTickers.has(h.ticker)) allTickers.set(h.ticker, { ...h, investors: [] });
+        const koFallback = KO_NAMES[h.ticker] || '';
+        const matchesTicker = h.ticker.toLowerCase().includes(q);
+        const matchesName = h.name.toLowerCase().includes(q);
+        const matchesNameEn = h.nameEn && h.nameEn.toLowerCase().includes(q);
+        const matchesKoFallback = isKoreanQ && koFallback && koFallback.includes(searchQuery);
+        if (matchesTicker || matchesName || matchesNameEn || matchesKoFallback) {
+          if (!allTickers.has(h.ticker)) {
+            const displayName = (/[가-힣]/.test(h.name)) ? h.name : (koFallback || h.name);
+            allTickers.set(h.ticker, { ...h, name: displayName, investors: [] });
+          }
           const entry = allTickers.get(h.ticker);
           if (!entry.investors.some(i => i.id === inv.id)) entry.investors.push(inv);
         }
       });
     });
     return { investors, tickers: [...allTickers.values()].slice(0, 6) };
-  }, [searchQuery]);
+  }, [searchQuery, KO_NAMES]);
 
   // ===== 핫 종목 TOP 5 (검색 홈에서 표시) =====
   const hotStocks = useMemo(() => {
@@ -562,6 +597,7 @@ function FolioObsInner() {
                 {page === "insights" && <InsightsPage onBack={goHome} onNavigate={navigate} />}
                 {page === "insider" && <InsiderTradingPage onBack={goHome} onNavigate={navigate} />}
                 {page === "ark-report" && <ArkReportPage onBack={goHome} onNavigate={navigate} />}
+                {page === "foliomatch" && <FolioMatchPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} />}
                 {page === "privacy" && <PrivacyPage onBack={goHome} />}
                 {page === "terms" && <TermsPage onBack={goHome} />}
               </div>
