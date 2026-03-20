@@ -1,6 +1,6 @@
 import { useMemo, memo, useState, useEffect, useRef } from "react";
 import {
-  ArrowUpRight, ArrowDownRight, ArrowUpDown, Briefcase, Plus, BarChart3, ChevronDown, TrendingUp, Activity, Trophy, Zap, Target, Layers, DollarSign, Sparkles, Bell, Search, Clock, FileText, Radio
+  ArrowUpRight, ArrowDownRight, ArrowUpDown, Briefcase, Plus, BarChart3, ChevronDown, TrendingUp, Activity, Trophy, Zap, Target, Layers, DollarSign, Bell, Search, Clock, FileText, Radio
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -556,7 +556,10 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               {/* 로고 + 배지 */}
               <div className="flex items-center gap-2.5 mb-3">
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{background:'rgba(129,140,248,0.15)'}}>
-                  <Sparkles size={14} style={{color:'#a78bfa'}} />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="9" cy="12" r="6" stroke="#818cf8" strokeWidth="1.8" fill="rgba(129,140,248,0.1)"/>
+                    <circle cx="15" cy="12" r="6" stroke="#a78bfa" strokeWidth="1.8" fill="rgba(167,139,250,0.1)"/>
+                  </svg>
                 </div>
                 <span className="text-sm font-bold" style={{color:'#a78bfa'}}>FolioMatch</span>
               </div>

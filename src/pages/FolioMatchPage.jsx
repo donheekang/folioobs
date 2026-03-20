@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { ArrowLeft, Search, X, Plus, ArrowUpRight, TrendingUp, Users, Sparkles, Trash2, Check, Bell, BellOff, Share2, Bookmark, AlertTriangle, MinusCircle } from "lucide-react";
+import { ArrowLeft, Search, X, Plus, ArrowUpRight, TrendingUp, Users, Trash2, Check, Bell, BellOff, Share2, Bookmark, AlertTriangle, MinusCircle } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useData } from "../hooks/useDataProvider";
 import { useLocale } from "../hooks/useLocale";
@@ -58,6 +58,7 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
   const [alerts, setAlerts] = useState({
     myStock: true, newEntry: true, exit: true, weeklyDigest: true, commonSignal: false,
   });
+  const [showComingSoon, setShowComingSoon] = useState(false);
 
   // 초기 투자자 전체 선택
   useEffect(() => {
@@ -243,7 +244,10 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
         </button>
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(129,140,248,0.15)' }}>
-            <Sparkles size={14} style={{ color: '#a78bfa' }} />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <circle cx="9" cy="12" r="6" stroke="#818cf8" strokeWidth="1.8" fill="rgba(129,140,248,0.1)"/>
+              <circle cx="15" cy="12" r="6" stroke="#a78bfa" strokeWidth="1.8" fill="rgba(167,139,250,0.1)"/>
+            </svg>
           </div>
           <span className="text-lg font-bold" style={{ color: t.text }}>FolioMatch</span>
         </div>
@@ -564,7 +568,7 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
           <div className="flex justify-center pt-2">
             <button className="px-6 py-2.5 rounded-xl text-sm font-semibold"
               style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white' }}
-              onClick={() => setStep(3)}>
+              onClick={() => setShowComingSoon(true)}>
               {isKo ? '알림 설정' : 'Alert settings'} <ArrowUpRight size={14} className="inline ml-1" />
             </button>
           </div>
@@ -714,6 +718,27 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
           <p className="text-[10px]" style={{ color: t.textMuted }}>
             {isKo ? `${latestQuarter} 13F SEC 공시 기준 · ARK 일일 매매 포함` : `Based on ${latestQuarter} 13F SEC filings · Includes ARK daily trades`}
           </p>
+        </div>
+      )}
+      {/* 추후 서비스 모달 */}
+      {showComingSoon && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{background:'rgba(0,0,0,0.6)'}} onClick={() => setShowComingSoon(false)}>
+          <div className="rounded-2xl p-6 max-w-sm w-full text-center" style={{background:t.name==='dark'?'#1c1c1e':'#fff', border:`1px solid ${t.name==='dark'?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)'}`}} onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{background:'rgba(139,92,246,0.12)'}}>
+              <Bell size={22} style={{color:'#a78bfa'}} />
+            </div>
+            <div className="text-base font-bold mb-1.5" style={{color:t.text}}>
+              {isKo ? '추후 서비스 예정' : 'Coming Soon'}
+            </div>
+            <p className="text-sm mb-4" style={{color:t.textSecondary}}>
+              {isKo ? '알림 기능은 현재 준비 중입니다. 빠르게 찾아뵙겠습니다!' : 'Alert feature is currently being prepared. Stay tuned!'}
+            </p>
+            <button className="px-5 py-2 rounded-xl text-sm font-semibold"
+              style={{background:'rgba(139,92,246,0.15)', color:'#a78bfa'}}
+              onClick={() => setShowComingSoon(false)}>
+              {isKo ? '확인' : 'OK'}
+            </button>
+          </div>
         </div>
       )}
     </div>
