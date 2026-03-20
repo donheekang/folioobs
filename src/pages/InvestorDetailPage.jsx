@@ -13,6 +13,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGri
 // 분기 변동 카테고리 (더보기 토글 포함)
 // ============================================================
 const ChangeCategoryList = ({ cat, onNavigate, theme: t }) => {
+  const L = useLocale();
   const [expanded, setExpanded] = useState(false);
   const LIMIT = 5;
   const shown = expanded ? cat.items : cat.items.slice(0, LIMIT);
