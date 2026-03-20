@@ -84,6 +84,10 @@ const PAGE_SEO = {
     ko: { title: "ARK Invest 리포트 | 캐시 우드 주간·월간 매매 — FolioObs", desc: "캐시 우드 ARK Invest의 주간·월간 매매 리포트. 펀드별 매수·매도 종목 분석." },
     en: { title: "ARK Invest Report | Cathie Wood Weekly/Monthly — FolioObs", desc: "Cathie Wood's ARK Invest weekly and monthly trade reports. Buy/sell analysis by fund." },
   },
+  news: {
+    ko: { title: "FolioObs 뉴스 | 월가 투자자 매매 속보 & 분석", desc: "SEC 13F 공시, 캐시 우드 ARK 일별 매매, 월가 전설 투자자 포트폴리오 변화 뉴스. 데이터 기반 투자 속보." },
+    en: { title: "FolioObs News | Wall Street Investor Trading Updates", desc: "SEC 13F filings, Cathie Wood ARK daily trades, and legendary investor portfolio changes. Data-driven investment news." },
+  },
 };
 
 export default function SEOHead({ page, investorId, ticker, locale }) {

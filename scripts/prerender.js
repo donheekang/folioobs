@@ -88,8 +88,8 @@ const PAGE_SEO = {
   "ark-report": {
     ko: { title: "ARK Invest 리포트 | 캐시 우드 주간·월간 매매 — FolioObs", desc: "캐시 우드 ARK Invest의 주간·월간 매매 리포트. 펀드별 매수·매도 종목 분석." },
   },
-  blog: {
-    ko: { title: "블로그 | 투자 인사이트 & 13F 분석 — FolioObs", desc: "SEC 13F 분석, 투자 전략, 월가 전설 투자자 이야기. FolioObs 블로그에서 투자 인사이트를 만나보세요." },
+  news: {
+    ko: { title: "FolioObs 뉴스 | 월가 투자자 매매 속보 & 분석", desc: "SEC 13F 공시, 캐시 우드 ARK 일별 매매, 월가 전설 투자자 포트폴리오 변화 뉴스. 데이터 기반 투자 속보." },
   },
   privacy: {
     ko: { title: "개인정보처리방침 — FolioObs", desc: "FolioObs 개인정보처리방침" },
@@ -109,7 +109,7 @@ const ROUTES = [
   { path: '/watchlist', page: 'watchlist' },
   { path: '/foliomatch', page: 'foliomatch' },
   { path: '/ark-report', page: 'ark-report' },
-  { path: '/blog', page: 'blog' },
+  { path: '/news', page: 'news' },
   { path: '/privacy', page: 'privacy' },
   { path: '/terms', page: 'terms' },
   // 투자자 페이지
