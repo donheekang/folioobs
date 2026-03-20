@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Eye, Search, X, Clock, TrendingUp, Users, Globe, ArrowUpRight, ArrowDownRight, Flame, Star, ChevronRight } from "lucide-react";
+import { HelmetProvider } from "react-helmet-async";
 
 // Theme & Hooks
 import { THEMES, ThemeContext } from "./hooks/useTheme";
@@ -7,6 +8,7 @@ import { safeGetItem, safeGetJSON, safeSetItem, safeRemoveItem } from "./utils/s
 import { useWatchlist } from "./hooks/useWatchlist";
 import { DataProvider, useData } from "./hooks/useDataProvider";
 import { LocaleContext, createLocaleValue } from "./hooks/useLocale";
+import SEOHead from "./components/SEOHead";
 
 // Data
 import { formatUSD } from "./utils/format";
@@ -34,9 +36,11 @@ import FolioMatchPage from "./pages/FolioMatchPage";
 // ========== MAIN APP ==========
 export default function FolioObs() {
   return (
-    <DataProvider>
-      <FolioObsInner />
-    </DataProvider>
+    <HelmetProvider>
+      <DataProvider>
+        <FolioObsInner />
+      </DataProvider>
+    </HelmetProvider>
   );
 }
 
@@ -145,8 +149,8 @@ function FolioObsInner() {
       else { setSelectedInvestor(null); setSelectedTicker(null); setPage(target); setScrollTarget(null); }
       trackPageView(target, param);
       if (pushState !== false) {
-        const hashParam = param ? '/' + param : '';
-        window.history.pushState({ page: target, param }, "", `#${target}${hashParam}`);
+        const url = target === 'dashboard' ? '/' : `/${target}${param ? '/' + param : ''}`;
+        window.history.pushState({ page: target, param }, "", url);
       }
       window.scrollTo(0, 0);
       setTransitioning(false);
@@ -169,15 +173,26 @@ function FolioObsInner() {
       }
     };
     window.addEventListener("popstate", onPop);
-    // Parse initial hash for deep linking (e.g. #investor/druckenmiller)
-    const initHash = window.location.hash.replace('#', '');
-    if (initHash && initHash !== 'dashboard') {
-      const [initPage, ...rest] = initHash.split('/');
+
+    // 하위호환: 기존 해시 URL(/#investor/buffett) → 경로 URL(/investor/buffett)로 리다이렉트
+    const hash = window.location.hash.replace('#', '');
+    if (hash && hash !== '/' && hash !== 'dashboard') {
+      const [hp, ...hr] = hash.split('/');
+      const hParam = hr.join('/') || null;
+      window.history.replaceState({ page: hp, param: hParam }, "", `/${hp}${hParam ? '/' + hParam : ''}`);
+      doNavigate(hp, hParam, false);
+      return () => window.removeEventListener("popstate", onPop);
+    }
+
+    // Parse path for deep linking (e.g. /investor/druckenmiller)
+    const initPath = window.location.pathname.replace(/^\//, '');
+    if (initPath && initPath !== 'dashboard' && initPath !== '') {
+      const [initPage, ...rest] = initPath.split('/');
       const initParam = rest.join('/') || null;
       doNavigate(initPage, initParam, false);
-      window.history.replaceState({ page: initPage, param: initParam }, "", `#${initHash}`);
+      window.history.replaceState({ page: initPage, param: initParam }, "", `/${initPath}`);
     } else {
-      window.history.replaceState({ page: "dashboard", param: null }, "", "#dashboard");
+      window.history.replaceState({ page: "dashboard", param: null }, "", "/");
     }
     return () => window.removeEventListener("popstate", onPop);
   }, [doNavigate]);
@@ -323,6 +338,7 @@ function FolioObsInner() {
   return (
     <LocaleContext.Provider value={L}>
     <ThemeContext.Provider value={T}>
+      <SEOHead page={page} investorId={selectedInvestor} ticker={selectedTicker} locale={locale} />
       <div className="min-h-screen transition-colors duration-500" style={{ background: T.bg }}>
         {/* Nav */}
         <nav className="sticky top-0 z-50 transition-colors duration-300" role="navigation" aria-label="Main Navigation" style={{ background: T.navBg, backdropFilter: T.glassBlur, WebkitBackdropFilter: T.glassBlur, borderBottom: `1px solid ${T.glassBorder}` }}>
