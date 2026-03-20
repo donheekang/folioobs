@@ -226,8 +226,7 @@ function FolioObsInner() {
         const matchesKoFallback = isKoreanQ && koFallback && koFallback.includes(searchQuery);
         if (matchesTicker || matchesName || matchesNameEn || matchesKoFallback) {
           if (!allTickers.has(h.ticker)) {
-            const displayName = (/[가-힣]/.test(h.name)) ? h.name : (koFallback || h.name);
-            allTickers.set(h.ticker, { ...h, name: displayName, investors: [] });
+            allTickers.set(h.ticker, { ...h, investors: [] });
           }
           const entry = allTickers.get(h.ticker);
           if (!entry.investors.some(i => i.id === inv.id)) entry.investors.push(inv);
@@ -248,7 +247,7 @@ function FolioObsInner() {
       if (!acts.length || !acts[0]?.actions) return;
       acts[0].actions.filter(a => a.type !== 'hold').forEach(a => {
         const key = normalize(a.ticker);
-        if (!map[key]) map[key] = { ticker: key, name: a.name, buyInvestors: [], sellInvestors: [] };
+        if (!map[key]) map[key] = { ticker: key, name: a.name, nameEn: a.nameEn, buyInvestors: [], sellInvestors: [] };
         const list = (a.type === 'buy' || a.type === 'new') ? map[key].buyInvestors : map[key].sellInvestors;
         if (!list.find(i => i.id === inv.id)) list.push(inv);
       });
@@ -435,7 +434,7 @@ function FolioObsInner() {
                           role="option" aria-selected={isActive}>
                           <TickerLogo ticker={tk.ticker} theme={T} />
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium">{tk.ticker} <span className="font-normal text-xs" style={{ color: T.textMuted }}>{tk.name}</span></div>
+                            <div className="text-sm font-medium">{tk.ticker} <span className="font-normal text-xs" style={{ color: T.textMuted }}>{L.stockName(tk)}</span></div>
                             <div className="flex items-center gap-1 mt-0.5">
                               {tk.investors.slice(0, 3).map(inv => (
                                 <span key={inv.id} className="text-xs px-1.5 py-0.5 rounded" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', color: T.textMuted }}>{L.investorName(inv)}</span>
@@ -494,7 +493,7 @@ function FolioObsInner() {
                               <span className="w-5 text-center text-xs font-bold" style={{ color: i < 3 ? T.accent : T.textMuted }}>{i + 1}</span>
                               <TickerLogo ticker={s.ticker} theme={T} />
                               <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium" style={{ color: T.text }}>{s.ticker} <span className="font-normal text-xs" style={{ color: T.textMuted }}>{s.name}</span></div>
+                                <div className="text-sm font-medium" style={{ color: T.text }}>{s.ticker} <span className="font-normal text-xs" style={{ color: T.textMuted }}>{L.stockName(s)}</span></div>
                                 <div className="flex items-center gap-1 mt-0.5">
                                   {s.buyInvestors.slice(0, 2).map(inv => (
                                     <span key={inv.id} className="text-xs" style={{ color: T.green }}>{inv.avatar}</span>
