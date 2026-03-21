@@ -546,7 +546,7 @@ function NPSIllustration({ className }) {
 // 기사별 일러스트 매핑
 const ARTICLE_ILLUSTRATIONS = {
   "buffett-q4-2025-new-buys": BuffettIllustration,
-  "cathie-wood-march-19-trades": CathieWoodIllustration,
+  "cathie-wood-march-20-trades": CathieWoodIllustration,
   "top5-most-bought-q4-2025": Top5Illustration,
   "druckenmiller-q4-major-changes": DruckenmillerIllustration,
   "dalio-q4-all-weather": DalioIllustration,
@@ -563,7 +563,7 @@ const ARTICLE_ILLUSTRATIONS = {
 // AI 생성 이미지 매핑 (있으면 우선 사용, 없으면 SVG 폴백)
 const ARTICLE_IMAGES = {
   "buffett-q4-2025-new-buys": "/news/buffett-q4.png",
-  "cathie-wood-march-19-trades": "/news/cathie-wood-daily.png",
+  "cathie-wood-march-20-trades": "/news/cathie-wood-daily.png",
   "top5-most-bought-q4-2025": "/news/top5-consensus.png",
   "druckenmiller-q4-major-changes": "/news/druckenmiller-rebalance.png",
   "dalio-q4-all-weather": "/news/dalio-all-weather.png",
@@ -671,53 +671,111 @@ AUM: $274.2B across just 41 holdings. The top 5 positions still account for over
 ※ This article is based on SEC 13F filing data and is not investment advice.`,
   },
   {
-    id: "cathie-wood-march-19-trades",
-    date: "2026-03-19",
+    id: "cathie-wood-march-20-trades",
+    date: "2026-03-20",
     category: "일별 매매",
     categoryEn: "DAILY TRADES",
     categoryColor: "green",
-    title: "캐시 우드 3월 19일 매매 — TXG, ARCT 매수",
-    titleEn: "Cathie Wood March 19 Trades — Bought TXG & ARCT",
-    summary: "ARK Invest가 3월 19일 장 마감 후 공개한 매매 내역입니다. 10x Genomics(TXG)와 Arcturus Therapeutics(ARCT)를 매수했습니다.",
-    summaryEn: "ARK Invest's trades disclosed after market close on March 19. Bought 10x Genomics (TXG) and Arcturus Therapeutics (ARCT).",
-    tickers: ["TXG", "ARCT"],
-    readTime: "2 min",
-    content: `캐시 우드가 다시 바이오테크에 베팅했습니다. ARK Invest가 3월 19일 장 마감 후 공개한 매매 내역에서, 유전체학과 mRNA 분야의 핵심 기업 두 곳을 ARKG 펀드에 추가한 것이 확인되었습니다.
+    title: "캐시 우드 3월 20일 매매 — 피그마(FIG) 대량 매수, 크립토 정리",
+    titleEn: "Cathie Wood March 20 Trades — Massive Figma Buy, Crypto Exits",
+    summary: "ARK Invest가 3월 20일 ARKK·ARKW에서 피그마(FIG)를 대량 매수하고, 크립토 관련주 BLSH·CRCL을 매도했습니다. ARKG에서는 TXG·ARCT 매수 지속.",
+    summaryEn: "ARK Invest bought Figma (FIG) heavily across ARKK & ARKW on March 20, while selling crypto plays BLSH & CRCL. ARKG continued buying TXG & ARCT.",
+    tickers: ["FIG", "TXG", "ARCT", "BLSH", "CRCL"],
+    readTime: "4 min",
+    content: `캐시 우드의 3월 20일 매매에서 가장 눈에 띄는 이름은 단연 피그마(FIG)입니다. ARKK와 ARKW 두 펀드에 걸쳐 총 337,381주를 매수하며, 디자인 플랫폼에 대한 강한 확신을 드러냈습니다. 동시에 크립토 관련주를 정리하고, 바이오테크 매수를 이어갔습니다.
 
-■ 매수 종목 분석
+■ 매수 종목
 
-TXG (10x Genomics) — 단일세포 유전체학 분석의 선두주자입니다. 이 회사의 Chromium 플랫폼은 연구자들이 세포 하나하나의 유전자 발현을 분석할 수 있게 해주는 핵심 도구로, 암 연구부터 신약 개발까지 광범위하게 사용됩니다. 최근 주가가 52주 저점 근처에서 거래되고 있어, 캐시 우드의 전형적인 "공포에 매수" 전략으로 읽힙니다.
+FIG (피그마) — ARKK에서 269,652주, ARKW에서 67,729주 매수
+전일 최대 규모 매수입니다. 피그마는 UI/UX 디자인 협업 도구의 글로벌 1위 기업으로, 2024년 IPO 이후 주목받고 있습니다. 어도비의 $20B 인수 시도가 규제로 무산된 후 독자 상장한 이 기업은, 디자인·프로토타이핑·개발자 핸드오프를 하나의 플랫폼에서 해결합니다. 캐시 우드가 두 펀드에 걸쳐 동시 매수한 것은, 피그마를 "파괴적 혁신" 범주의 핵심 종목으로 보고 있다는 강력한 시그널입니다.
 
-ARCT (Arcturus Therapeutics) — mRNA 치료제 개발사로, 모더나·바이오엔텍과 같은 mRNA 기술을 백신이 아닌 희귀질환 치료에 적용하고 있습니다. 특히 자체 개발한 LUNAR® 지질나노입자 기술이 차별점입니다.
+TXG (10x Genomics) — ARKK에서 165,430주, ARKG에서 27,228주 매수
+이틀 연속 매수입니다. 3월 19일에 이어 20일에도 두 펀드에서 대량 매수를 이어갔습니다. 단일세포 유전체학 분석의 선두주자로, 주가가 52주 저점 근처에서 거래 중입니다. 연속 매수는 캐시 우드의 확신이 매우 강하다는 의미입니다.
 
-■ 왜 지금 바이오인가?
+ARCT (Arcturus Therapeutics) — ARKG에서 22,773주 매수
+mRNA 치료제 개발사로, 3월 19일에 이어 연속 매수. 희귀질환 치료에 mRNA 기술을 적용하는 기업입니다.
 
-두 종목 모두 2024~2025년 바이오테크 섹터의 조정기에 크게 하락한 종목입니다. 캐시 우드는 "5년 후 가장 큰 혁신이 일어날 분야"로 꾸준히 유전체학과 정밀의료를 꼽아왔고, 이번 매수는 그 확신이 변하지 않았음을 보여줍니다.
+■ 매도 종목 — 크립토 관련주 정리
 
-ARK의 바이오 펀드(ARKG)는 현재 운용자산 대비 가장 저평가된 펀드이기도 합니다. 이는 역발상 투자의 기회일 수도, 추가 하락의 리스크일 수도 있습니다.
+BLSH (Bullish) — ARKK에서 89,282주, ARKW에서 14,097주 매도
+CRCL (Circle Internet Group) — ARKK에서 39,723주, ARKW에서 6,275주 매도
 
-■ ARK Invest 현황
+두 종목 모두 크립토/블록체인 관련 기업으로, ARKK와 ARKW에서 동시에 매도했습니다. 캐시 우드가 크립토 섹터의 비중을 줄이고, 그 자금을 피그마 같은 SaaS 플랫폼과 바이오테크로 재배분하고 있는 것으로 읽힙니다.
 
-운용자산 $11.7B, 보유 종목 114개. 매일 장 마감 후 매매 내역을 투명하게 공개하는 것이 ARK의 특징입니다. FolioObs 대시보드에서 실시간으로 확인하세요.
+TER (Teradyne) — ARKK에서 19,206주 매도
+반도체 테스트 장비 기업. 소규모 비중 조정.
+
+BFLY (Butterfly Network) — ARKG에서 182,353주 매도
+휴대용 초음파 기기 기업. 가장 큰 규모의 매도로, ARKG 내 헬스케어 포지션 재편의 일환.
+
+GH (Guardant Health) — ARKG에서 9,621주 매도
+액체 생검(Liquid Biopsy) 기업. 비중 축소.
+
+■ 핵심 인사이트 — 캐시 우드의 방향 전환
+
+오늘 매매의 큰 그림은 명확합니다:
+
+첫째, 크립토에서 SaaS로의 자금 이동입니다. BLSH·CRCL을 팔고 피그마를 산 것은, "파괴적 혁신"의 축이 크립토에서 AI 시대의 디자인 인프라로 이동하고 있다는 캐시 우드의 판단을 보여줍니다.
+
+둘째, 바이오테크 확신은 여전합니다. TXG·ARCT 이틀 연속 매수는 단순한 포지션 구축이 아니라, 공격적인 저점 매수 전략입니다.
+
+셋째, 3개 펀드 동시 움직임은 주목해야 합니다. ARKK, ARKW, ARKG가 모두 같은 날 큰 매매를 보여준 것은, ARK 전체의 전략적 리밸런싱이 진행 중임을 시사합니다.
+
+■ 펀드별 요약
+
+ARKK (Innovation) — FIG·TXG 매수 / BLSH·CRCL·TER 매도
+ARKW (Next Gen Internet) — FIG 매수 / BLSH·CRCL 매도
+ARKG (Genomic Revolution) — TXG·ARCT 매수 / BFLY·GH 매도
+
+FolioObs 대시보드에서 캐시 우드의 일별 매매를 실시간으로 확인하세요.
 
 ※ 본 기사는 ARK Invest 공개 데이터 기반이며, 투자 권유가 아닙니다.`,
-    contentEn: `Cathie Wood is doubling down on biotech. ARK Invest's post-market disclosure on March 19 confirmed two new additions to the ARKG fund — both in the genomics and mRNA space.
+    contentEn: `The biggest name in Cathie Wood's March 20 trades is undoubtedly Figma (FIG). With a combined 337,381 shares purchased across ARKK and ARKW, she's sending a strong signal about design platforms. Meanwhile, crypto plays were trimmed and biotech buying continued.
 
-■ Trade Analysis
+■ Buys
 
-TXG (10x Genomics) — The leader in single-cell genomics analysis. Their Chromium platform lets researchers analyze gene expression at the individual cell level, a critical tool used across cancer research and drug development. With the stock trading near its 52-week low, this looks like classic Cathie Wood: buying into fear.
+FIG (Figma) — 269,652 shares in ARKK, 67,729 shares in ARKW
+The day's largest purchase. Figma is the global #1 in UI/UX design collaboration tools, drawing attention since its 2024 IPO. After Adobe's $20B acquisition attempt was blocked by regulators, Figma went public independently. It handles design, prototyping, and developer handoff in a single platform. Buying across two funds simultaneously signals that Wood views Figma as a core "disruptive innovation" holding.
 
-ARCT (Arcturus Therapeutics) — An mRNA therapeutics company applying the same technology behind COVID vaccines to rare disease treatments. Their proprietary LUNAR® lipid nanoparticle technology is a key differentiator from competitors like Moderna and BioNTech.
+TXG (10x Genomics) — 165,430 shares in ARKK, 27,228 shares in ARKG
+Second consecutive day of buying. Following March 19 purchases, Wood continued heavy buying across two funds. The single-cell genomics leader is trading near its 52-week low. Consecutive buying indicates very strong conviction.
 
-■ Why Biotech Now?
+ARCT (Arcturus Therapeutics) — 22,773 shares in ARKG
+mRNA therapeutics developer, bought for the second straight day. Applying mRNA technology to rare disease treatments.
 
-Both stocks were hit hard during the 2024-2025 biotech correction. Wood has consistently named genomics and precision medicine as the areas where "the biggest innovations will happen in 5 years." This purchase confirms her conviction hasn't wavered.
+■ Sells — Crypto Cleanup
 
-ARK's biotech fund (ARKG) is currently its most undervalued fund relative to AUM — which could represent a contrarian opportunity or additional downside risk, depending on your time horizon.
+BLSH (Bullish) — 89,282 shares from ARKK, 14,097 from ARKW
+CRCL (Circle Internet Group) — 39,723 shares from ARKK, 6,275 from ARKW
 
-■ ARK Invest Overview
+Both are crypto/blockchain companies, sold simultaneously across ARKK and ARKW. Wood appears to be reducing crypto sector exposure and reallocating capital toward SaaS platforms like Figma and biotech.
 
-AUM: $11.7B across 114 holdings. ARK is unique in disclosing every trade daily after market close. Track them in real-time on the FolioObs dashboard.
+TER (Teradyne) — 19,206 shares from ARKK
+Semiconductor test equipment company. Minor position adjustment.
+
+BFLY (Butterfly Network) — 182,353 shares from ARKG
+Portable ultrasound device company. The day's largest sell, part of healthcare position restructuring within ARKG.
+
+GH (Guardant Health) — 9,621 shares from ARKG
+Liquid biopsy company. Position reduction.
+
+■ Key Insight — Cathie Wood's Directional Shift
+
+The big picture from today's trades is clear:
+
+First, capital is flowing from crypto to SaaS. Selling BLSH/CRCL and buying Figma suggests Wood sees the "disruptive innovation" axis shifting from crypto toward AI-era design infrastructure.
+
+Second, biotech conviction remains strong. Consecutive TXG/ARCT buying isn't just position building — it's aggressive bottom-fishing.
+
+Third, three-fund simultaneous movement demands attention. ARKK, ARKW, and ARKG all showing major activity on the same day suggests a strategic rebalancing across all of ARK.
+
+■ Fund Summary
+
+ARKK (Innovation) — Bought FIG, TXG / Sold BLSH, CRCL, TER
+ARKW (Next Gen Internet) — Bought FIG / Sold BLSH, CRCL
+ARKG (Genomic Revolution) — Bought TXG, ARCT / Sold BFLY, GH
+
+Track Cathie Wood's daily trades in real-time on the FolioObs dashboard.
 
 ※ This article is based on ARK Invest public data and is not investment advice.`,
   },
