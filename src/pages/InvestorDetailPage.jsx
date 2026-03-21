@@ -195,8 +195,9 @@ const ArkTradeRow = ({ trade, theme: t, onNavigate }) => {
   const isBuy = trade.direction === 'buy';
   const color = isBuy ? t.green : t.red;
   const sharesFmt = Math.abs(trade.sharesChange).toLocaleString();
-  const weightDiff = (trade.weightToday - (trade.weightPrev || 0));
-  const diffStr = weightDiff >= 0 ? `+${weightDiff.toFixed(2)}` : weightDiff.toFixed(2);
+  const hasWeight = trade.weightToday != null && trade.weightPrev != null;
+  const weightDiff = hasWeight ? (trade.weightToday - trade.weightPrev) : null;
+  const diffStr = hasWeight ? (weightDiff >= 0 ? `+${weightDiff.toFixed(2)}` : weightDiff.toFixed(2)) : null;
 
   return (
     <div className="flex items-center justify-between py-1.5 px-2 rounded-lg" style={{background:`${color}06`}}>
@@ -208,9 +209,13 @@ const ArkTradeRow = ({ trade, theme: t, onNavigate }) => {
       </div>
       <div className="flex items-center gap-3 shrink-0">
         <span className="text-xs" style={{color:t.textSecondary}}>{sharesFmt}{L.t('investor.shares_unit')}</span>
-        <span className="text-xs font-medium w-16 text-right" style={{color}}>
-          {diffStr}%p
-        </span>
+        {diffStr != null ? (
+          <span className="text-xs font-medium w-16 text-right" style={{color}}>
+            {diffStr}%p
+          </span>
+        ) : (
+          <span className="text-xs w-16 text-right" style={{color:t.textMuted}}>—</span>
+        )}
       </div>
     </div>
   );
