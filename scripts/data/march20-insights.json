@@ -1,0 +1,34 @@
+[
+  {
+    "title": "FIG 33.7만주 대량 매수 — 피그마, ARK 핵심 종목 부상",
+    "title_en": "FIG 337K Shares Massive Buy — Figma Emerges as Core ARK Holding",
+    "desc": "Figma(FIG)를 ARKK에서 269,652주, ARKW에서 67,729주 총 337,381주 매수. 2개 펀드 동시 대량 매수는 캐시 우드가 피그마를 '파괴적 혁신' 핵심 종목으로 분류했다는 강력한 시그널. 어도비 인수 무산 후 독자 상장한 디자인 플랫폼의 성장 잠재력에 베팅.",
+    "desc_en": "Bought 269,652 shares in ARKK and 67,729 in ARKW, totaling 337,381 shares. Simultaneous heavy buying across 2 funds signals Figma's classification as a core 'disruptive innovation' holding. Betting on growth potential of the design platform that went public after the Adobe acquisition fell through.",
+    "tag": "신규매수",
+    "confidence": 95
+  },
+  {
+    "title": "TXG 이틀 연속 매수 — 19.2만주 추가, 유전체학 확신 강화",
+    "title_en": "TXG Second Consecutive Day Buy — 192K Shares Added",
+    "desc": "10X Genomics(TXG)를 ARKK에서 165,430주, ARKG에서 27,228주 총 192,658주 매수. 3/19에 이어 이틀 연속 2개 펀드에서 대량 매수. 주가가 52주 저점 근처에서 거래되는 가운데 공격적 저점 매수 전략 지속.",
+    "desc_en": "Bought 165,430 shares in ARKK and 27,228 in ARKG, totaling 192,658 shares. Second consecutive day of heavy buying across 2 funds. Aggressive bottom-fishing continues as stock trades near 52-week lows.",
+    "tag": "매수",
+    "confidence": 92
+  },
+  {
+    "title": "크립토 관련주 정리 — BLSH·CRCL 2개 펀드서 동시 매도",
+    "title_en": "Crypto Cleanup — BLSH & CRCL Sold Across 2 Funds",
+    "desc": "Bullish(BLSH) 103,379주와 Circle(CRCL) 45,998주를 ARKK+ARKW 2개 펀드에서 동시 매도. 크립토/블록체인 섹터 비중을 적극적으로 줄이며, 그 자금을 FIG(SaaS)와 TXG(바이오)로 재배분하는 전략적 리밸런싱.",
+    "desc_en": "Sold 103,379 shares of Bullish and 45,998 of Circle across ARKK+ARKW. Active reduction of crypto/blockchain sector weight, strategically reallocating capital toward FIG (SaaS) and TXG (biotech).",
+    "tag": "비중축소",
+    "confidence": 90
+  },
+  {
+    "title": "3개 펀드 동시 리밸런싱 — 크립토→SaaS·바이오 전환",
+    "title_en": "3-Fund Simultaneous Rebalancing — Crypto→SaaS & Biotech Rotation",
+    "desc": "ARKK, ARKW, ARKG 3개 펀드가 같은 날 대규모 매매. 매수 3종목(FIG, TXG, ARCT) vs 매도 5종목(BLSH, CRCL, TER, BFLY, GH). '파괴적 혁신'의 축이 크립토에서 AI 시대 디자인 인프라(FIG)와 유전체학(TXG, ARCT)으로 이동하는 전략적 전환이 뚜렷.",
+    "desc_en": "All 3 funds (ARKK, ARKW, ARKG) showed major activity on the same day. 3 buys (FIG, TXG, ARCT) vs 5 sells (BLSH, CRCL, TER, BFLY, GH). Clear strategic shift: 'disruptive innovation' axis moving from crypto to AI-era design infrastructure (FIG) and genomics (TXG, ARCT).",
+    "tag": "전략",
+    "confidence": 93
+  }
+]

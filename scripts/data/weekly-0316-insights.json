@@ -1,0 +1,34 @@
+[
+  {
+    "title": "FIG 33.7만주 신규 매수 — AI 시대 디자인 인프라 핵심 베팅",
+    "title_en": "FIG 337K New Position — Core Bet on AI-Era Design Infrastructure",
+    "desc": "금요일 단 하루 만에 Figma(FIG) 337,381주를 ARKK+ARKW 2개 펀드에서 동시 매수. 어도비 인수 무산 후 독자 상장한 피그마를 파괴적 혁신 핵심 종목으로 분류한 강력한 시그널. 주간 최대 규모 매수.",
+    "desc_en": "Bought 337,381 Figma shares across ARKK+ARKW in a single day. A powerful signal classifying post-Adobe Figma as a core disruptive innovation holding. Largest buy of the week by far.",
+    "tag": "신규매수",
+    "confidence": 95
+  },
+  {
+    "title": "TXG 이틀 연속 28.5만주 — 유전체학 저점 공격적 매수",
+    "title_en": "TXG 285K Shares Over 2 Days — Aggressive Genomics Bottom-Fishing",
+    "desc": "10X Genomics를 3/19(92,140주)과 3/20(192,658주) 이틀 연속 대량 매수, 주간 합계 284,798주. 52주 저점 근처에서 ARKK+ARKG 2개 펀드에 걸쳐 포지션을 공격적으로 확대하는 확신 매수 패턴.",
+    "desc_en": "Bought 10X Genomics on consecutive days: 92,140 (3/19) and 192,658 (3/20), totaling 284,798 shares. Aggressive position building near 52-week lows across ARKK+ARKG shows high-conviction bottom-fishing.",
+    "tag": "확신매수",
+    "confidence": 93
+  },
+  {
+    "title": "ARCT 3일 연속 매수 6.3만주 — mRNA 장기 테마 확신",
+    "title_en": "ARCT 3-Day Consecutive Buy 63K — Long-Term mRNA Conviction",
+    "desc": "Arcturus Therapeutics를 3/18~3/20 3일 연속 매수, 총 63,542주 누적. ARKG 펀드에서 꾸준히 비중을 늘리며 차세대 mRNA 치료제 플랫폼에 대한 장기적 확신을 보여주는 패턴.",
+    "desc_en": "Bought Arcturus Therapeutics for 3 consecutive days (3/18-3/20), accumulating 63,542 shares in ARKG. Steady position building shows long-term conviction in next-gen mRNA therapeutic platforms.",
+    "tag": "트렌드",
+    "confidence": 90
+  },
+  {
+    "title": "크립토·헬스케어 → SaaS·유전체학 대전환 리밸런싱",
+    "title_en": "Crypto & Healthcare → SaaS & Genomics Major Rotation",
+    "desc": "매도 7종목(BLSH, CRCL, BFLY, GH, TER, LAB, NXDR) vs 매수 3종목(FIG, TXG, ARCT). 크립토(BLSH·CRCL)와 헬스케어 장비(BFLY·GH)를 정리하고 SaaS(FIG)와 유전체학(TXG·ARCT)으로 자금을 재배분하는 전략적 축 이동이 뚜렷한 한 주.",
+    "desc_en": "7 sells (BLSH, CRCL, BFLY, GH, TER, LAB, NXDR) vs 3 buys (FIG, TXG, ARCT). Clear strategic axis shift: liquidating crypto (BLSH/CRCL) and healthcare equipment (BFLY/GH) to reallocate into SaaS (FIG) and genomics (TXG/ARCT).",
+    "tag": "섹터전환",
+    "confidence": 94
+  }
+]
