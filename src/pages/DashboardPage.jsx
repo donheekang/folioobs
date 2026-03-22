@@ -571,29 +571,6 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           );
         })()}
 
-        {/* FolioMatch CTA — 컴팩트 배너 */}
-        <div className="hero-enter hero-enter-5 w-full max-w-lg mx-auto mb-2">
-          <button className="w-full group flex items-center gap-3 rounded-xl px-4 py-3 transition-all hover:scale-[1.01] cursor-pointer"
-            style={{
-              background: t.name==='dark' ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.05)',
-              border: `1px solid ${t.name==='dark' ? 'rgba(129,140,248,0.15)' : 'rgba(99,102,241,0.1)'}`,
-            }}
-            onClick={()=>{trackCtaClick('foliomatch_cta','hero');onNavigate("foliomatch");}}>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{background:'rgba(129,140,248,0.15)'}}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <circle cx="9" cy="12" r="6" stroke="#818cf8" strokeWidth="1.8" fill="rgba(129,140,248,0.1)"/>
-                <circle cx="15" cy="12" r="6" stroke="#a78bfa" strokeWidth="1.8" fill="rgba(167,139,250,0.1)"/>
-              </svg>
-            </div>
-            <div className="flex-1 text-left">
-              <span className="text-sm font-bold" style={{color:'#a78bfa'}}>FolioMatch</span>
-              <span className="text-xs ml-2" style={{color:t.textSecondary}}>
-                {L.locale === 'ko' ? '내 종목 ↔ 레전드 투자자 겹침 분석' : 'Your stocks ↔ Legend investor overlap'}
-              </span>
-            </div>
-            <ArrowUpRight size={14} style={{color:'#a78bfa'}} className="shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </button>
-        </div>
       </div>
 
       {/* ===== 보유종목 수익률 랭킹 (실시간) ===== */}
