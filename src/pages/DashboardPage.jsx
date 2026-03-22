@@ -546,11 +546,13 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   )}
                 </div>
                 )}
-              </button>
-              <button className="mt-2 text-xs font-medium px-3 py-1 rounded-full transition-colors"
-                style={{color:'#f59e0b', background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.15)'}}
-                onClick={(e)=>{e.stopPropagation();onNavigate("ark-report");}}>
-                {L.locale === 'ko' ? '주간·월간 리포트 보기 →' : 'View Weekly/Monthly Report →'}
+                <div className="mt-3 pt-3 text-center" style={{borderTop:'1px solid rgba(245,158,11,0.12)'}}>
+                  <span className="text-xs font-medium cursor-pointer hover:underline"
+                    style={{color:'#f59e0b'}}
+                    onClick={(e)=>{e.stopPropagation();onNavigate("ark-report");}}>
+                    {L.locale === 'ko' ? '주간·월간 리포트 보기 →' : 'View Weekly/Monthly Report →'}
+                  </span>
+                </div>
               </button>
             </div>
           );
