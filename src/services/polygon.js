@@ -223,11 +223,8 @@ function formatDate(d) {
  */
 export function getLogoUrl(brandingUrl) {
   if (!brandingUrl) return null;
-  // Polygon branding URL을 프록시로 리다이렉트
-  const params = new URLSearchParams({
-    path: new URL(brandingUrl).pathname,
-    query: '',
-  });
+  // 이미지 프록시 모드: Polygon branding URL을 서버에서 가져와서 바이너리 반환
+  const params = new URLSearchParams({ imageUrl: brandingUrl });
   return `${PROXY_URL}?${params.toString()}`;
 }
 

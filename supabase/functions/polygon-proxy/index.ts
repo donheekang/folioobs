@@ -1,6 +1,6 @@
 // Supabase Edge Function: polygon-proxy
 // 프론트엔드에서 Polygon API 키 노출을 방지하기 위한 프록시
-// 모든 Polygon API 호출을 서버사이드에서 처리
+// 모든 Polygon API 호출 + 로고 이미지를 서버사이드에서 처리
 
 const POLYGON_API_KEY = Deno.env.get("POLYGON_API_KEY")!;
 const POLYGON_BASE = "https://api.polygon.io";
@@ -14,8 +14,12 @@ const ALLOWED_PATTERNS = [
   /^\/v2\/reference\/news$/,                           // news
 ];
 
+// 로고/브랜딩 이미지 URL 패턴 (별도 처리 — 바이너리 반환)
+const IMAGE_PATTERN = /^https:\/\/api\.polygon\.io\//;
+
 // 인메모리 캐시
 const cache = new Map<string, { data: unknown; ts: number }>();
+const imageCache = new Map<string, { data: ArrayBuffer; contentType: string; ts: number }>();
 const CACHE_TTL: Record<string, number> = {
   "reference/tickers": 24 * 60 * 60 * 1000, // 24h
   "snapshot": 60 * 1000,                      // 1min
@@ -23,6 +27,7 @@ const CACHE_TTL: Record<string, number> = {
   "prev": 60 * 60 * 1000,                    // 1h
   "news": 10 * 60 * 1000,                    // 10min
 };
+const IMAGE_CACHE_TTL = 24 * 60 * 60 * 1000; // 24h for logos
 
 function getCacheTtl(path: string): number {
   for (const [key, ttl] of Object.entries(CACHE_TTL)) {
@@ -31,32 +36,83 @@ function getCacheTtl(path: string): number {
   return 60 * 1000; // default 1min
 }
 
+const CORS_BASE = {
+  "Access-Control-Allow-Origin": "*",
+};
+
 Deno.serve(async (req: Request) => {
   // CORS
   if (req.method === "OPTIONS") {
     return new Response(null, {
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        ...CORS_BASE,
         "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Allow-Headers": "Authorization, Content-Type, apikey",
       },
     });
   }
 
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Content-Type": "application/json",
-  };
+  const corsJson = { ...CORS_BASE, "Content-Type": "application/json" };
 
   try {
     const url = new URL(req.url);
     const path = url.searchParams.get("path");
     const query = url.searchParams.get("query") || "";
+    const imageUrl = url.searchParams.get("imageUrl");
 
+    // ===== 이미지 프록시 모드 =====
+    if (imageUrl) {
+      // 보안: polygon.io 도메인만 허용
+      if (!IMAGE_PATTERN.test(imageUrl)) {
+        return new Response(
+          JSON.stringify({ error: "Image URL not allowed" }),
+          { status: 403, headers: corsJson }
+        );
+      }
+
+      // 이미지 캐시 확인
+      const imgCached = imageCache.get(imageUrl);
+      if (imgCached && Date.now() - imgCached.ts < IMAGE_CACHE_TTL) {
+        return new Response(imgCached.data, {
+          headers: {
+            ...CORS_BASE,
+            "Content-Type": imgCached.contentType,
+            "Cache-Control": "public, max-age=86400",
+          },
+        });
+      }
+
+      // Polygon 이미지 가져오기
+      const separator = imageUrl.includes("?") ? "&" : "?";
+      const imgRes = await fetch(`${imageUrl}${separator}apiKey=${POLYGON_API_KEY}`);
+
+      if (!imgRes.ok) {
+        return new Response(
+          JSON.stringify({ error: `Image fetch ${imgRes.status}` }),
+          { status: imgRes.status, headers: corsJson }
+        );
+      }
+
+      const contentType = imgRes.headers.get("Content-Type") || "image/png";
+      const imgData = await imgRes.arrayBuffer();
+
+      // 캐시 저장
+      imageCache.set(imageUrl, { data: imgData, contentType, ts: Date.now() });
+
+      return new Response(imgData, {
+        headers: {
+          ...CORS_BASE,
+          "Content-Type": contentType,
+          "Cache-Control": "public, max-age=86400",
+        },
+      });
+    }
+
+    // ===== API 프록시 모드 =====
     if (!path) {
       return new Response(
-        JSON.stringify({ error: "Missing 'path' parameter" }),
-        { status: 400, headers: corsHeaders }
+        JSON.stringify({ error: "Missing 'path' or 'imageUrl' parameter" }),
+        { status: 400, headers: corsJson }
       );
     }
 
@@ -65,7 +121,7 @@ Deno.serve(async (req: Request) => {
     if (!isAllowed) {
       return new Response(
         JSON.stringify({ error: "Path not allowed" }),
-        { status: 403, headers: corsHeaders }
+        { status: 403, headers: corsJson }
       );
     }
 
@@ -74,7 +130,7 @@ Deno.serve(async (req: Request) => {
     const ttl = getCacheTtl(path);
     const cached = cache.get(cacheKey);
     if (cached && Date.now() - cached.ts < ttl) {
-      return new Response(JSON.stringify(cached.data), { headers: corsHeaders });
+      return new Response(JSON.stringify(cached.data), { headers: corsJson });
     }
 
     // Polygon API 호출
@@ -85,18 +141,18 @@ Deno.serve(async (req: Request) => {
     if (!res.ok) {
       return new Response(
         JSON.stringify({ error: `Polygon API ${res.status}` }),
-        { status: res.status, headers: corsHeaders }
+        { status: res.status, headers: corsJson }
       );
     }
 
     const data = await res.json();
     cache.set(cacheKey, { data, ts: Date.now() });
 
-    return new Response(JSON.stringify(data), { headers: corsHeaders });
+    return new Response(JSON.stringify(data), { headers: corsJson });
   } catch (err) {
     return new Response(
       JSON.stringify({ error: (err as Error).message }),
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers: corsJson }
     );
   }
 });
