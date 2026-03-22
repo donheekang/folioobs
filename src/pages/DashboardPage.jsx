@@ -407,7 +407,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         </div>
 
         {/* 1차 CTA — 핵심 수치 바로 아래 */}
-        <div className="hero-enter hero-enter-3 flex items-center justify-center gap-3 mb-6">
+        <div className="hero-enter hero-enter-3 flex items-center justify-center gap-3 mb-6 flex-wrap">
           <button
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-blue-500/20 active:scale-95"
             style={{background:t.accent}}
@@ -421,6 +421,13 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             onClick={()=>{trackCtaClick('screener_cta','hero');onNavigate("screener");}}>
             {L.locale === 'ko' ? '종목 스크리너' : 'Stock Screener'}
             <Search size={14} />
+          </button>
+          <button
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all hover:scale-105"
+            style={{background:t.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.05)', color:t.text, border:`1px solid ${t.name==='dark'?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)'}`}}
+            onClick={()=>{trackCtaClick('foliomatch_cta','hero');onNavigate("foliomatch");}}>
+            {L.locale === 'ko' ? '내 종목 겹침 분석' : 'Overlap Analysis'}
+            <Layers size={14} />
           </button>
         </div>
 
@@ -470,29 +477,6 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           </div>
         )}
 
-        {/* FolioMatch CTA — 컴팩트 배너 */}
-        <div className="hero-enter hero-enter-4 w-full max-w-lg mx-auto mb-2">
-          <button className="w-full group flex items-center gap-3 rounded-xl px-4 py-3 transition-all hover:scale-[1.01] cursor-pointer"
-            style={{
-              background: t.name==='dark' ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.05)',
-              border: `1px solid ${t.name==='dark' ? 'rgba(129,140,248,0.15)' : 'rgba(99,102,241,0.1)'}`,
-            }}
-            onClick={()=>{trackCtaClick('foliomatch_cta','hero');onNavigate("foliomatch");}}>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{background:'rgba(129,140,248,0.15)'}}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <circle cx="9" cy="12" r="6" stroke="#818cf8" strokeWidth="1.8" fill="rgba(129,140,248,0.1)"/>
-                <circle cx="15" cy="12" r="6" stroke="#a78bfa" strokeWidth="1.8" fill="rgba(167,139,250,0.1)"/>
-              </svg>
-            </div>
-            <div className="flex-1 text-left">
-              <span className="text-sm font-bold" style={{color:'#a78bfa'}}>FolioMatch</span>
-              <span className="text-xs ml-2" style={{color:t.textSecondary}}>
-                {L.locale === 'ko' ? '내 종목 ↔ 레전드 투자자 겹침 분석' : 'Your stocks ↔ Legend investor overlap'}
-              </span>
-            </div>
-            <ArrowUpRight size={14} style={{color:'#a78bfa'}} className="shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </button>
-        </div>
 
         {/* ARK Today Preview — 캐시 우드 일별 매매 */}
         {arkDailyTrades.length > 0 && (() => {
