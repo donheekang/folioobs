@@ -1,9 +1,10 @@
-// ========== POLYGON.IO API SERVICE ==========
-// $29/mo plan: unlimited calls, 15-min delayed data
+// ========== POLYGON.IO API SERVICE (via Edge Function Proxy) ==========
+// API 키를 서버사이드에서만 사용 — 프론트엔드 노출 방지
 // Docs: https://polygon.io/docs/stocks
 
-const POLYGON_BASE = 'https://api.polygon.io';
-const API_KEY = import.meta.env.VITE_POLYGON_API_KEY || '';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const PROXY_URL = `${SUPABASE_URL}/functions/v1/polygon-proxy`;
 
 // ---- In-memory cache (separate from main api.js) ----
 const cache = new Map();
@@ -25,16 +26,22 @@ function setCache(key, data) {
   cache.set(key, { data, ts: Date.now() });
 }
 
-// ---- Fetch helper ----
-async function polygonFetch(endpoint, cacheTtl = 60000) {
-  const cacheKey = endpoint;
+// ---- Fetch helper (via Supabase Edge Function proxy) ----
+async function polygonFetch(path, query = '', cacheTtl = 60000) {
+  const cacheKey = `${path}?${query}`;
   const cached = getCached(cacheKey, cacheTtl);
   if (cached) return cached;
 
-  const separator = endpoint.includes('?') ? '&' : '?';
-  const url = `${POLYGON_BASE}${endpoint}${separator}apiKey=${API_KEY}`;
+  const params = new URLSearchParams({ path });
+  if (query) params.set('query', query);
 
-  const res = await fetch(url);
+  const res = await fetch(`${PROXY_URL}?${params.toString()}`, {
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+  });
+
   if (!res.ok) {
     const err = new Error(`Polygon ${res.status}: ${res.statusText}`);
     err.status = res.status;
@@ -55,6 +62,7 @@ async function polygonFetch(endpoint, cacheTtl = 60000) {
 export async function getTickerDetails(ticker) {
   const data = await polygonFetch(
     `/v3/reference/tickers/${ticker.toUpperCase()}`,
+    '',
     CACHE_TTL.ticker_details
   );
   return data.results || null;
@@ -67,6 +75,7 @@ export async function getTickerDetails(ticker) {
 export async function getSnapshot(ticker) {
   const data = await polygonFetch(
     `/v2/snapshot/locale/us/markets/stocks/tickers/${ticker.toUpperCase()}`,
+    '',
     CACHE_TTL.snapshot
   );
   return data.ticker || null;
@@ -74,17 +83,11 @@ export async function getSnapshot(ticker) {
 
 /**
  * 차트 데이터 (OHLCV bars)
- * GET /v2/aggs/ticker/{ticker}/range/{multiplier}/{timespan}/{from}/{to}
- * @param {string} ticker - 종목 심볼
- * @param {string} timespan - 'minute' | 'hour' | 'day' | 'week' | 'month'
- * @param {number} multiplier - 타임스팬 배수 (e.g. 5 = 5분봉)
- * @param {string} from - YYYY-MM-DD
- * @param {string} to - YYYY-MM-DD
- * @param {boolean} adjusted - 수정주가 여부
  */
 export async function getAggregates(ticker, timespan = 'day', multiplier = 1, from, to, adjusted = true) {
   const data = await polygonFetch(
-    `/v2/aggs/ticker/${ticker.toUpperCase()}/range/${multiplier}/${timespan}/${from}/${to}?adjusted=${adjusted}&sort=asc&limit=50000`,
+    `/v2/aggs/ticker/${ticker.toUpperCase()}/range/${multiplier}/${timespan}/${from}/${to}`,
+    `adjusted=${adjusted}&sort=asc&limit=50000`,
     CACHE_TTL.aggregates
   );
   return data.results || [];
@@ -92,11 +95,11 @@ export async function getAggregates(ticker, timespan = 'day', multiplier = 1, fr
 
 /**
  * 전일 종가
- * GET /v2/aggs/ticker/{ticker}/prev
  */
 export async function getPreviousClose(ticker) {
   const data = await polygonFetch(
-    `/v2/aggs/ticker/${ticker.toUpperCase()}/prev?adjusted=true`,
+    `/v2/aggs/ticker/${ticker.toUpperCase()}/prev`,
+    'adjusted=true',
     CACHE_TTL.prev_close
   );
   return data.results?.[0] || null;
@@ -104,13 +107,11 @@ export async function getPreviousClose(ticker) {
 
 /**
  * 종목 관련 뉴스
- * GET /v2/reference/news?ticker={ticker}&limit={limit}
- * @param {string} ticker - 종목 심볼
- * @param {number} limit - 가져올 뉴스 수 (기본 5)
  */
 export async function getTickerNews(ticker, limit = 5) {
   const data = await polygonFetch(
-    `/v2/reference/news?ticker=${ticker.toUpperCase()}&limit=${limit}&order=desc&sort=published_utc`,
+    `/v2/reference/news`,
+    `ticker=${ticker.toUpperCase()}&limit=${limit}&order=desc&sort=published_utc`,
     CACHE_TTL.news
   );
   return (data.results || []).map(n => ({
@@ -130,19 +131,14 @@ export async function getTickerNews(ticker, limit = 5) {
 
 /**
  * 기간 프리셋 + 선택적 타임프레임으로 차트 데이터 가져오기
- * @param {string} ticker
- * @param {'1D'|'1W'|'1M'|'3M'|'1Y'|'5Y'} range
- * @param {'15m'|'30m'|'1h'|'1d'|'1w'|null} timeframe - optional, overrides auto timeframe
  */
 export async function getChartData(ticker, range = '1Y', timeframe = null) {
   const now = new Date();
   const to = formatDate(now);
   let from, timespan, multiplier;
 
-  // Determine date range based on period
   switch (range) {
     case '1D': {
-      // Go back 5 days to handle weekends/holidays — filter to last trading day later
       const d = new Date(now);
       d.setDate(d.getDate() - 5);
       from = formatDate(d);
@@ -185,68 +181,28 @@ export async function getChartData(ticker, range = '1Y', timeframe = null) {
     }
   }
 
-  // Determine timeframe (timespan + multiplier)
   if (timeframe) {
-    // Custom timeframe specified
     switch (timeframe) {
-      case '15m':
-        timespan = 'minute';
-        multiplier = 15;
-        break;
-      case '30m':
-        timespan = 'minute';
-        multiplier = 30;
-        break;
-      case '1h':
-        timespan = 'hour';
-        multiplier = 1;
-        break;
-      case '1d':
-        timespan = 'day';
-        multiplier = 1;
-        break;
-      case '1w':
-        timespan = 'week';
-        multiplier = 1;
-        break;
-      default:
-        // Fallback to auto
-        timespan = 'day';
-        multiplier = 1;
+      case '15m': timespan = 'minute'; multiplier = 15; break;
+      case '30m': timespan = 'minute'; multiplier = 30; break;
+      case '1h': timespan = 'hour'; multiplier = 1; break;
+      case '1d': timespan = 'day'; multiplier = 1; break;
+      case '1w': timespan = 'week'; multiplier = 1; break;
+      default: timespan = 'day'; multiplier = 1;
     }
   } else {
-    // Auto timeframe based on range (smart default)
     switch (range) {
-      case '1D':
-        timespan = 'minute';
-        multiplier = 15;
-        break;
-      case '1W':
-        timespan = 'minute';
-        multiplier = 30;
-        break;
-      case '1M':
-        timespan = 'hour';
-        multiplier = 1;
-        break;
-      case '3M':
-      case '1Y':
-        timespan = 'day';
-        multiplier = 1;
-        break;
-      case '5Y':
-        timespan = 'week';
-        multiplier = 1;
-        break;
-      default:
-        timespan = 'day';
-        multiplier = 1;
+      case '1D': timespan = 'minute'; multiplier = 15; break;
+      case '1W': timespan = 'minute'; multiplier = 30; break;
+      case '1M': timespan = 'hour'; multiplier = 1; break;
+      case '3M': case '1Y': timespan = 'day'; multiplier = 1; break;
+      case '5Y': timespan = 'week'; multiplier = 1; break;
+      default: timespan = 'day'; multiplier = 1;
     }
   }
 
   let results = await getAggregates(ticker, timespan, multiplier, from, to);
 
-  // For intraday '1D' range, keep only the last trading day's data
   if (range === '1D' && results.length > 0) {
     const lastTs = results[results.length - 1].t;
     const lastDateStr = new Date(lastTs).toISOString().split('T')[0];
@@ -260,6 +216,21 @@ function formatDate(d) {
   return d.toISOString().split('T')[0];
 }
 
+/**
+ * 로고 URL을 프록시 경유로 가져오기
+ * Polygon branding URL에 직접 apiKey를 붙이는 대신
+ * 서버에서 가져와서 반환
+ */
+export function getLogoUrl(brandingUrl) {
+  if (!brandingUrl) return null;
+  // Polygon branding URL을 프록시로 리다이렉트
+  const params = new URLSearchParams({
+    path: new URL(brandingUrl).pathname,
+    query: '',
+  });
+  return `${PROXY_URL}?${params.toString()}`;
+}
+
 // ========== EXPORT ==========
 const polygon = {
   getTickerDetails,
@@ -268,6 +239,7 @@ const polygon = {
   getPreviousClose,
   getChartData,
   getTickerNews,
+  getLogoUrl,
 };
 
 export default polygon;

@@ -219,17 +219,15 @@ const MA_LINES = [
 function CompanyLogo({ ticker, details, isDark, textSecondary }) {
   const [srcIdx, setSrcIdx] = useState(0);
 
-  const polygonKey = import.meta.env.VITE_POLYGON_API_KEY;
-
-  // Build ordered list of logo source URLs (Polygon only)
+  // Build ordered list of logo source URLs (Polygon via proxy)
   const sources = useMemo(() => {
     const srcs = [];
     // 1. Polygon icon (best quality)
-    if (details?.branding?.icon_url) srcs.push(`${details.branding.icon_url}?apiKey=${polygonKey}`);
+    if (details?.branding?.icon_url) srcs.push(polygon.getLogoUrl(details.branding.icon_url));
     // 2. Polygon logo (fallback)
-    if (details?.branding?.logo_url) srcs.push(`${details.branding.logo_url}?apiKey=${polygonKey}`);
-    return srcs;
-  }, [details, polygonKey]);
+    if (details?.branding?.logo_url) srcs.push(polygon.getLogoUrl(details.branding.logo_url));
+    return srcs.filter(Boolean);
+  }, [details]);
 
   useEffect(() => { setSrcIdx(0); }, [ticker, sources]);
 

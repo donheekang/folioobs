@@ -49,15 +49,14 @@ export default function FolioObs() {
 function TickerLogo({ ticker, theme }) {
   const [src, setSrc] = useState(null);
   const [failed, setFailed] = useState(false);
-  const apiKey = import.meta.env.VITE_POLYGON_API_KEY;
 
   useEffect(() => {
-    if (!ticker || !apiKey) return;
+    if (!ticker) return;
     polygon.getTickerDetails(ticker).then(d => {
       const url = d?.branding?.icon_url || d?.branding?.logo_url;
-      if (url) setSrc(`${url}?apiKey=${apiKey}`);
+      if (url) setSrc(polygon.getLogoUrl(url));
     }).catch(() => {});
-  }, [ticker, apiKey]);
+  }, [ticker]);
 
   if (!src || failed) {
     const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#22c55e', '#06b6d4'];
