@@ -516,44 +516,57 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             : `${dateObj.getMonth()+1}월 ${dateObj.getDate()}일`;
           return (
             <div className="hero-enter hero-enter-5 mb-4 w-full max-w-lg mx-auto">
-              <button className="w-full rounded-2xl p-4 transition-all hover:scale-[1.01] cursor-pointer text-left"
-                style={{background:t.name==='dark'?'rgba(245,158,11,0.08)':'rgba(245,158,11,0.05)', border:'1px solid rgba(245,158,11,0.2)'}}
-                onClick={()=>{trackCtaClick('ark_today_preview','hero');onNavigate("investor","cathie/daily");}}>
-                <div className="flex items-center gap-2 mb-3">
-                  {cathie && <div className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-bold" style={{background:cathie.gradient}}>{cathie.avatar}</div>}
-                  <span className="text-sm font-bold" style={{color:'#f59e0b'}}>{L.t('dashboard.arkTodayLabel')}</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:'rgba(245,158,11,0.15)',color:'#f59e0b'}}>{L.t('dashboard.arkDailyBadge')}</span>
-                  <span className="text-xs font-medium" style={{color:t.textMuted}}>{dateLabel}</span>
-                </div>
-                {isNoTradeDay ? (
-                  <div className="text-center py-1">
-                    <span className="text-sm" style={{color:t.textMuted}}>{L.locale === 'ko' ? '거래 없음' : 'No trades'}</span>
+              <div className="relative rounded-2xl overflow-hidden"
+                style={{background:t.name==='dark'?'rgba(245,158,11,0.06)':'rgba(245,158,11,0.04)', border:'1px solid rgba(245,158,11,0.2)'}}>
+                {/* 글로우 효과 */}
+                <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full pointer-events-none" style={{background:'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%)'}} />
+
+                {/* 메인 카드 영역 — 클릭 시 캐시 우드 상세 */}
+                <button className="w-full p-4 pb-3 transition-all hover:bg-white/[0.02] cursor-pointer text-left relative"
+                  onClick={()=>{trackCtaClick('ark_today_preview','hero');onNavigate("investor","cathie/daily");}}>
+                  <div className="flex items-center gap-2 mb-3">
+                    {cathie && <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg" style={{background:cathie.gradient, boxShadow:'0 2px 8px rgba(245,158,11,0.3)'}}>{cathie.avatar}</div>}
+                    <span className="text-sm font-bold" style={{color:'#f59e0b'}}>{L.t('dashboard.arkTodayLabel')}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{background:'rgba(245,158,11,0.2)',color:'#fbbf24'}}>{L.t('dashboard.arkDailyBadge')}</span>
+                    <span className="text-xs font-medium ml-auto" style={{color:t.textMuted}}>{dateLabel}</span>
                   </div>
-                ) : (
-                <div className="flex items-center gap-4 justify-center flex-wrap">
-                  {buys.length > 0 && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{background:`${t.green}20`,color:t.green}}>{L.t('common.buy')}</span>
-                      {buys.map(tr => <span key={tr.ticker} className="text-sm font-semibold" style={{color:t.text}}>{tr.ticker}</span>)}
+                  {isNoTradeDay ? (
+                    <div className="text-center py-2">
+                      <span className="text-sm" style={{color:t.textMuted}}>{L.locale === 'ko' ? '거래 없음' : 'No trades'}</span>
                     </div>
+                  ) : (
+                  <div className="flex items-start gap-4 justify-center flex-wrap">
+                    {buys.length > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold px-2 py-1 rounded-md" style={{background:`${t.green}18`,color:t.green, border:`1px solid ${t.green}30`}}>{L.t('common.buy')}</span>
+                        <div className="flex items-center gap-1">
+                          {buys.map(tr => <span key={tr.ticker} className="text-sm font-bold px-1.5 py-0.5 rounded" style={{color:t.text, background:'rgba(255,255,255,0.04)'}}>{tr.ticker}</span>)}
+                        </div>
+                      </div>
+                    )}
+                    {sells.length > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold px-2 py-1 rounded-md" style={{background:`${t.red}18`,color:t.red, border:`1px solid ${t.red}30`}}>{L.t('common.sell')}</span>
+                        <div className="flex items-center gap-1">
+                          {sells.map(tr => <span key={tr.ticker} className="text-sm font-bold px-1.5 py-0.5 rounded" style={{color:t.text, background:'rgba(255,255,255,0.04)'}}>{tr.ticker}</span>)}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   )}
-                  {buys.length > 0 && sells.length > 0 && <span style={{color:t.textMuted}}>·</span>}
-                  {sells.length > 0 && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{background:`${t.red}20`,color:t.red}}>{L.t('common.sell')}</span>
-                      {sells.map(tr => <span key={tr.ticker} className="text-sm font-semibold" style={{color:t.text}}>{tr.ticker}</span>)}
-                    </div>
-                  )}
-                </div>
-                )}
-                <div className="mt-3 pt-3 text-center" style={{borderTop:'1px solid rgba(245,158,11,0.12)'}}>
-                  <span className="text-xs font-medium cursor-pointer hover:underline"
-                    style={{color:'#f59e0b'}}
-                    onClick={(e)=>{e.stopPropagation();onNavigate("ark-report");}}>
-                    {L.locale === 'ko' ? '주간·월간 리포트 보기 →' : 'View Weekly/Monthly Report →'}
+                </button>
+
+                {/* 리포트 링크 — 별도 클릭 영역 */}
+                <button className="w-full px-4 py-2.5 text-center transition-all hover:bg-amber-500/[0.06] cursor-pointer flex items-center justify-center gap-1.5"
+                  style={{borderTop:'1px solid rgba(245,158,11,0.12)'}}
+                  onClick={()=>onNavigate("ark-report")}>
+                  <FileText size={12} style={{color:'#f59e0b'}} />
+                  <span className="text-xs font-semibold" style={{color:'#f59e0b'}}>
+                    {L.locale === 'ko' ? '주간·월간 리포트 보기' : 'Weekly/Monthly Report'}
                   </span>
-                </div>
-              </button>
+                  <ArrowUpRight size={11} style={{color:'#f59e0b'}} />
+                </button>
+              </div>
             </div>
           );
         })()}
