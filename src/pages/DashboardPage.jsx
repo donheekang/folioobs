@@ -424,32 +424,49 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           </button>
         </div>
 
-        {/* 실시간 매매 스니펫 — 눈에 띄는 매수/매도 1건씩 pill 형태 */}
-        {tradeSnippets.length > 0 && (
-          <div className="hero-enter hero-enter-3 flex items-center justify-center gap-2 flex-wrap mb-6">
-
-            {tradeSnippets.map((s, i) => {
-              const isBuy = s.type === 'buy';
-              const color = isBuy ? t.green : t.red;
-              const bg = isBuy ? `${t.green}12` : `${t.red}12`;
-              const border = isBuy ? `${t.green}30` : `${t.red}30`;
-              const label = isBuy
-                ? (L.locale === 'ko' ? '매수' : 'Buy')
-                : (L.locale === 'ko' ? '매도' : 'Sell');
-              const pctLabel = s.pctChange > 0 ? `+${Math.round(s.pctChange)}%` : `${Math.round(s.pctChange)}%`;
-              return (
-                <button key={i}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all hover:scale-105 cursor-pointer"
-                  style={{background:bg, border:`1px solid ${border}`, color}}
-                  onClick={() => onNavigate("investor", s.investor.id)}>
-                  <span className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[8px] font-bold" style={{background:s.investor.gradient}}>{s.investor.avatar}</span>
-                  <span style={{color:t.text}}>{L.investorName(s.investor)}</span>
-                  <span className="font-bold">{s.ticker}</span>
-                  <span className="font-bold">{pctLabel}</span>
-                  <span className="text-xs font-semibold px-1 py-0.5 rounded" style={{background:`${color}20`,color}}>{label}</span>
-                </button>
-              );
-            })}
+        {/* Trade Highlights — 이번 분기 핫 종목 (종목 중심 집계) */}
+        {heroHighlights.length > 0 && (
+          <div className="hero-enter hero-enter-3 w-full" style={{maxWidth:'680px', margin:'0 auto 2.5rem'}}>
+            <p className="text-xs font-medium mb-3 text-center" style={{color:t.textMuted}}>{L.t('dashboard.hotStocks')}</p>
+            <div className="hot-stocks-grid">
+              {heroHighlights.map((h, i) => {
+                const isGreen = h.type === 'buy';
+                const isRed = h.type === 'sell';
+                const accentColor = h.color;
+                const glowBg = isGreen
+                  ? 'rgba(34,197,94,0.06)'
+                  : isRed
+                    ? 'rgba(239,68,68,0.06)'
+                    : `${t.accent}08`;
+                const glowBorder = isGreen
+                  ? 'rgba(34,197,94,0.15)'
+                  : isRed
+                    ? 'rgba(239,68,68,0.15)'
+                    : `${t.accent}20`;
+                return (
+                  <div key={i}
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all hover:scale-[1.02] cursor-pointer"
+                    style={{background:glowBg, border:`1px solid ${glowBorder}`}}
+                    onClick={() => onNavigate("stock", h.ticker)}>
+                    <div className="flex -space-x-2 flex-shrink-0">
+                      {h.investors.slice(0, 3).map((inv, j) => (
+                        <div key={inv.id} className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[9px] font-bold ring-2"
+                          style={{background:inv.gradient, zIndex: 3 - j, '--tw-ring-color': t.name==='dark'?'rgb(17,17,17)':'rgb(255,255,255)'}}>{inv.avatar}</div>
+                      ))}
+                      {h.investors.length > 3 && <div className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold ring-2"
+                        style={{background:t.name==='dark'?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)', color:t.textMuted, '--tw-ring-color': t.name==='dark'?'rgb(17,17,17)':'rgb(255,255,255)'}}>+{h.investors.length - 3}</div>}
+                    </div>
+                    <div className="flex-1 text-left min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-sm font-extrabold tracking-tight" style={{color:t.text}}>{h.ticker}</span>
+                        <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full" style={{background:`${accentColor}18`, color:accentColor}}>{h.label}</span>
+                      </div>
+                      <div className="text-xs mt-0.5 truncate" style={{color:t.textMuted}}>{h.investors.slice(0,2).map(inv => L.investorName(inv)).join(', ')}{h.investors.length > 2 ? (L.locale === 'ko' ? ` 외 ${h.investors.length - 2}명` : ` + ${h.investors.length - 2} more`) : ''}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
