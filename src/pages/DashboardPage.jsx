@@ -406,6 +406,24 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           <span className="text-sm" style={{color:t.textMuted}}>{L.t('dashboard.trackedInvestors')} <span className="font-bold" style={{color:t.text}}>{INVESTORS.length}{L.t('common.people')}</span></span>
         </div>
 
+        {/* 1차 CTA — 핵심 수치 바로 아래 */}
+        <div className="hero-enter hero-enter-3 flex items-center justify-center gap-3 mb-6">
+          <button
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-blue-500/20 active:scale-95"
+            style={{background:t.accent}}
+            onClick={()=>{trackCtaClick('portfolio_view','hero');investorGridRef.current?.scrollIntoView({behavior:'smooth',block:'start'});}}>
+            {L.t('dashboard.ctaButton')}
+            <ChevronDown size={16} />
+          </button>
+          <button
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all hover:scale-105"
+            style={{background:t.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.05)', color:t.text, border:`1px solid ${t.name==='dark'?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)'}`}}
+            onClick={()=>{trackCtaClick('screener_cta','hero');onNavigate("screener");}}>
+            {L.locale === 'ko' ? '종목 스크리너' : 'Stock Screener'}
+            <Search size={14} />
+          </button>
+        </div>
+
         {/* 실시간 매매 스니펫 — 눈에 띄는 매수/매도 1건씩 pill 형태 */}
         {tradeSnippets.length > 0 && (
           <div className="hero-enter hero-enter-3 flex items-center justify-center gap-2 flex-wrap mb-6">
@@ -538,134 +556,27 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           );
         })()}
 
-        {/* FolioMatch CTA — 기능 직관 설명형 */}
-        <div className="hero-enter hero-enter-5 w-full max-w-lg mx-auto mb-4">
-          <button className="w-full group relative rounded-2xl p-5 sm:p-6 transition-all hover:scale-[1.01] cursor-pointer text-left overflow-hidden"
+        {/* FolioMatch CTA — 컴팩트 배너 */}
+        <div className="hero-enter hero-enter-5 w-full max-w-lg mx-auto mb-2">
+          <button className="w-full group flex items-center gap-3 rounded-xl px-4 py-3 transition-all hover:scale-[1.01] cursor-pointer"
             style={{
-              background: t.name==='dark'
-                ? 'linear-gradient(145deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.06) 50%, rgba(28,28,30,0.95) 100%)'
-                : 'linear-gradient(145deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.04) 50%, rgba(245,245,247,0.95) 100%)',
-              border: `1px solid ${t.name==='dark' ? 'rgba(129,140,248,0.18)' : 'rgba(99,102,241,0.12)'}`,
+              background: t.name==='dark' ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.05)',
+              border: `1px solid ${t.name==='dark' ? 'rgba(129,140,248,0.15)' : 'rgba(99,102,241,0.1)'}`,
             }}
             onClick={()=>{trackCtaClick('foliomatch_cta','hero');onNavigate("foliomatch");}}>
-
-            {/* 배경 글로우 */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-10 blur-3xl pointer-events-none"
-              style={{background:'radial-gradient(circle, #818cf8 0%, transparent 70%)'}} />
-
-            <div className="relative">
-              {/* 로고 + 배지 */}
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{background:'rgba(129,140,248,0.15)'}}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <circle cx="9" cy="12" r="6" stroke="#818cf8" strokeWidth="1.8" fill="rgba(129,140,248,0.1)"/>
-                    <circle cx="15" cy="12" r="6" stroke="#a78bfa" strokeWidth="1.8" fill="rgba(167,139,250,0.1)"/>
-                  </svg>
-                </div>
-                <span className="text-sm font-bold" style={{color:'#a78bfa'}}>FolioMatch</span>
-              </div>
-
-              {/* 한 줄 설명 */}
-              <p className="text-[13px] sm:text-sm mb-4" style={{color:t.textSecondary, lineHeight:1.5}}>
-                {L.locale === 'ko'
-                  ? '내 종목이 레전드 투자자와 얼마나 겹치는지 확인하세요.'
-                  : 'See how your stocks overlap with legendary investors.'}
-              </p>
-
-              {/* 매칭 데모 — 입력→결과 흐름을 시각적으로 보여줌 */}
-              <div className="rounded-xl overflow-hidden mb-4"
-                style={{background:t.name==='dark'?'rgba(0,0,0,0.25)':'rgba(0,0,0,0.03)', border:'1px solid rgba(129,140,248,0.1)'}}>
-
-                {/* 입력부 */}
-                <div className="flex items-center gap-2 px-3 py-2.5"
-                  style={{borderBottom:`1px solid ${t.name==='dark'?'rgba(129,140,248,0.08)':'rgba(0,0,0,0.05)'}`}}>
-                  <Search size={12} style={{color:t.textMuted}} />
-                  <span className="text-[11px]" style={{color:t.textMuted}}>
-                    {L.locale === 'ko' ? '예: AAPL, TSLA, NVDA ...' : 'e.g. AAPL, TSLA, NVDA ...'}
-                  </span>
-                </div>
-
-                {/* 결과 미리보기 */}
-                <div className="px-3 py-2">
-                  {/* 결과 1 */}
-                  <div className="flex items-center gap-2 py-1.5">
-                    <span className="text-[11px] font-bold shrink-0" style={{color:t.text, width:'36px'}}>AAPL</span>
-                    <div className="flex items-center gap-1">
-                      <div className="w-4 h-4 rounded flex items-center justify-center text-white text-[6px] font-bold"
-                        style={{background:INVESTORS[0]?.gradient}}>{INVESTORS[0]?.avatar}</div>
-                      <div className="w-4 h-4 rounded flex items-center justify-center text-white text-[6px] font-bold"
-                        style={{background:INVESTORS[4]?.gradient}}>{INVESTORS[4]?.avatar}</div>
-                    </div>
-                    <span className="text-[10px]" style={{color:t.textSecondary}}>
-                      {L.locale === 'ko' ? '2명 보유 중' : '2 holding'}
-                    </span>
-                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded ml-auto shrink-0"
-                      style={{background:'rgba(99,102,241,0.12)', color:'#a78bfa'}}>
-                      {L.locale === 'ko' ? '겹침' : 'Match'}
-                    </span>
-                  </div>
-                  {/* 결과 2 */}
-                  <div className="flex items-center gap-2 py-1.5">
-                    <span className="text-[11px] font-bold shrink-0" style={{color:t.text, width:'36px'}}>TSLA</span>
-                    <div className="flex items-center gap-1">
-                      <div className="w-4 h-4 rounded flex items-center justify-center text-white text-[6px] font-bold"
-                        style={{background:INVESTORS[1]?.gradient}}>{INVESTORS[1]?.avatar}</div>
-                    </div>
-                    <span className="text-[10px]" style={{color:t.textSecondary}}>
-                      {L.locale === 'ko' ? '1명 보유 중' : '1 holding'}
-                    </span>
-                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded ml-auto shrink-0"
-                      style={{background:'rgba(48,209,88,0.12)', color:t.green}}>
-                      {L.locale === 'ko' ? '신규 매수' : 'New buy'}
-                    </span>
-                  </div>
-                  {/* 결과 3 — 블러 */}
-                  <div className="flex items-center gap-2 py-1.5" style={{filter:'blur(3px)', userSelect:'none'}}>
-                    <span className="text-[11px] font-bold shrink-0" style={{color:t.text, width:'36px'}}>NVDA</span>
-                    <div className="flex items-center gap-1">
-                      <div className="w-4 h-4 rounded flex items-center justify-center text-white text-[6px] font-bold"
-                        style={{background:INVESTORS[2]?.gradient}}>{INVESTORS[2]?.avatar}</div>
-                      <div className="w-4 h-4 rounded flex items-center justify-center text-white text-[6px] font-bold"
-                        style={{background:INVESTORS[3]?.gradient}}>{INVESTORS[3]?.avatar}</div>
-                      <div className="w-4 h-4 rounded flex items-center justify-center text-white text-[6px] font-bold"
-                        style={{background:INVESTORS[5]?.gradient}}>{INVESTORS[5]?.avatar}</div>
-                    </div>
-                    <span className="text-[10px]" style={{color:t.textSecondary}}>3명 보유 중</span>
-                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded ml-auto shrink-0"
-                      style={{background:'rgba(99,102,241,0.12)', color:'#a78bfa'}}>겹침</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 하단: 투자자 아바타 + CTA */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1">
-                  {INVESTORS.slice(0, 5).map(inv => (
-                    <div key={inv.id} className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[7px] font-bold"
-                      style={{background:inv.gradient}}>{inv.avatar}</div>
-                  ))}
-                  <span className="text-[10px] ml-1" style={{color:t.textMuted}}>
-                    {L.locale === 'ko' ? `+${Math.max(INVESTORS.length - 5, 0)}명` : `+${Math.max(INVESTORS.length - 5, 0)}`}
-                  </span>
-                </div>
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full transition-all group-hover:shadow-lg group-hover:shadow-purple-500/20"
-                  style={{background:'linear-gradient(135deg, #6366f1, #8b5cf6)', color:'white'}}>
-                  {L.locale === 'ko' ? '내 종목 분석하기' : 'Analyze my stocks'}
-                  <ArrowUpRight size={12} />
-                </span>
-              </div>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{background:'rgba(129,140,248,0.15)'}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <circle cx="9" cy="12" r="6" stroke="#818cf8" strokeWidth="1.8" fill="rgba(129,140,248,0.1)"/>
+                <circle cx="15" cy="12" r="6" stroke="#a78bfa" strokeWidth="1.8" fill="rgba(167,139,250,0.1)"/>
+              </svg>
             </div>
-          </button>
-        </div>
-
-        {/* CTA Button */}
-        <div className="hero-enter hero-enter-5">
-          <button
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:shadow-lg active:scale-95"
-            style={{background:t.accent}}
-            onClick={()=>{trackCtaClick('portfolio_view','hero');investorGridRef.current?.scrollIntoView({behavior:'smooth',block:'start'});}}>
-            {L.t('dashboard.ctaButton')}
-            <ChevronDown size={16} />
+            <div className="flex-1 text-left">
+              <span className="text-sm font-bold" style={{color:'#a78bfa'}}>FolioMatch</span>
+              <span className="text-xs ml-2" style={{color:t.textSecondary}}>
+                {L.locale === 'ko' ? '내 종목 ↔ 레전드 투자자 겹침 분석' : 'Your stocks ↔ Legend investor overlap'}
+              </span>
+            </div>
+            <ArrowUpRight size={14} style={{color:'#a78bfa'}} className="shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </button>
         </div>
       </div>

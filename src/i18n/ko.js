@@ -59,7 +59,7 @@ export default {
     subtitle: "워렌 버핏 · 레이 달리오 · 캐시 우드 · 조지 소로스 외 7명",
     title: "지금 무엇을 사고팔고 있을까?",
     description: "SEC 13F 공시 데이터로 월가 전설들의 실제 포트폴리오를 추적합니다.",
-    heroTagline: "실시간 · 무료 · 매일 업데이트",
+    heroTagline: "SEC 13F 공시 기반 · 장중 가격 반영 · 무료",
     heroHook: "월가 전설 {count}명의 SEC 13F 포트폴리오를 실시간으로 추적하세요.",
     arkTodayLabel: "오늘 캐시 우드",
     dataSourceLabel: "13F: {quarter} | ARK: 매일 업데이트",

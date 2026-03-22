@@ -59,7 +59,7 @@ export default {
     subtitle: "Warren Buffett · Ray Dalio · Cathie Wood · George Soros + 7 more",
     title: "What are they buying and selling right now?",
     description: "Track legendary investors' actual portfolios through SEC 13F filing data.",
-    heroTagline: "Real-time · Free · Updated Daily",
+    heroTagline: "SEC 13F Filing Data · Live Market Prices · Free",
     heroHook: "Track SEC 13F portfolios of {count} Wall Street legends in real time.",
     arkTodayLabel: "Cathie Wood today",
     dataSourceLabel: "13F: {quarter} | ARK: Daily Updates",
