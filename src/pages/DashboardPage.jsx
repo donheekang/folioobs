@@ -453,53 +453,29 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           </div>
         )}
 
-        {/* Trade Highlights — 이번 분기 핫 종목 (종목 중심 집계) */}
-        {heroHighlights.length > 0 && (
-          <div className="hero-enter hero-enter-4 w-full" style={{maxWidth:'680px', margin:'0 auto 2.5rem'}}>
-            <p className="text-xs font-medium mb-3 text-center" style={{color:t.textMuted}}>{L.t('dashboard.hotStocks')}</p>
-            {/* 데스크톱: 가로 flex 나란히 / 모바일: 1번 풀너비 + 2,3번 반반 grid */}
-            <div className="hot-stocks-grid">
-              {heroHighlights.map((h, i) => {
-                const isGreen = h.type === 'buy';
-                const isRed = h.type === 'sell';
-                const accentColor = h.color;
-                const glowBg = isGreen
-                  ? 'rgba(34,197,94,0.06)'
-                  : isRed
-                    ? 'rgba(239,68,68,0.06)'
-                    : `${t.accent}08`;
-                const glowBorder = isGreen
-                  ? 'rgba(34,197,94,0.15)'
-                  : isRed
-                    ? 'rgba(239,68,68,0.15)'
-                    : `${t.accent}20`;
-                return (
-                  <div key={i}
-                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all hover:scale-[1.02] cursor-pointer"
-                    style={{background:glowBg, border:`1px solid ${glowBorder}`}}
-                    onClick={() => onNavigate("stock", h.ticker)}>
-                    {/* 투자자 아바타 스택 */}
-                    <div className="flex -space-x-2 flex-shrink-0">
-                      {h.investors.slice(0, 3).map((inv, j) => (
-                        <div key={inv.id} className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[9px] font-bold ring-2"
-                          style={{background:inv.gradient, zIndex: 3 - j, '--tw-ring-color': t.name==='dark'?'rgb(17,17,17)':'rgb(255,255,255)'}}>{inv.avatar}</div>
-                      ))}
-                      {h.investors.length > 3 && <div className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold ring-2"
-                        style={{background:t.name==='dark'?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)', color:t.textMuted, '--tw-ring-color': t.name==='dark'?'rgb(17,17,17)':'rgb(255,255,255)'}}>+{h.investors.length - 3}</div>}
-                    </div>
-                    <div className="flex-1 text-left min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-sm font-extrabold tracking-tight" style={{color:t.text}}>{h.ticker}</span>
-                        <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full" style={{background:`${accentColor}18`, color:accentColor}}>{h.label}</span>
-                      </div>
-                      <div className="text-xs mt-0.5 truncate" style={{color:t.textMuted}}>{h.investors.slice(0,2).map(inv => L.investorName(inv)).join(', ')}{h.investors.length > 2 ? (L.locale === 'ko' ? ` 외 ${h.investors.length - 2}명` : ` + ${h.investors.length - 2} more`) : ''}</div>
-                    </div>
-                  </div>
-                );
-              })}
+        {/* FolioMatch CTA — 컴팩트 배너 */}
+        <div className="hero-enter hero-enter-4 w-full max-w-lg mx-auto mb-2">
+          <button className="w-full group flex items-center gap-3 rounded-xl px-4 py-3 transition-all hover:scale-[1.01] cursor-pointer"
+            style={{
+              background: t.name==='dark' ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.05)',
+              border: `1px solid ${t.name==='dark' ? 'rgba(129,140,248,0.15)' : 'rgba(99,102,241,0.1)'}`,
+            }}
+            onClick={()=>{trackCtaClick('foliomatch_cta','hero');onNavigate("foliomatch");}}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{background:'rgba(129,140,248,0.15)'}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <circle cx="9" cy="12" r="6" stroke="#818cf8" strokeWidth="1.8" fill="rgba(129,140,248,0.1)"/>
+                <circle cx="15" cy="12" r="6" stroke="#a78bfa" strokeWidth="1.8" fill="rgba(167,139,250,0.1)"/>
+              </svg>
             </div>
-          </div>
-        )}
+            <div className="flex-1 text-left">
+              <span className="text-sm font-bold" style={{color:'#a78bfa'}}>FolioMatch</span>
+              <span className="text-xs ml-2" style={{color:t.textSecondary}}>
+                {L.locale === 'ko' ? '내 종목 ↔ 레전드 투자자 겹침 분석' : 'Your stocks ↔ Legend investor overlap'}
+              </span>
+            </div>
+            <ArrowUpRight size={14} style={{color:'#a78bfa'}} className="shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </button>
+        </div>
 
         {/* ARK Today Preview — 캐시 우드 일별 매매 */}
         {arkDailyTrades.length > 0 && (() => {
