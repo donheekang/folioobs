@@ -663,33 +663,42 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 style={{ background: `radial-gradient(circle, ${activeColor}18, transparent 70%)` }} />
 
               {/* 헤더 */}
-              <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2.5">
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{
                     background: `linear-gradient(135deg, ${activeColor}20, ${activeColor}08)`,
                   }}>
                     <Radio size={15} style={{ color: activeColor }} />
                   </div>
-                  <h2 className="text-[17px] font-bold tracking-tight" style={{ color: t.text }}>
-                    {L.locale === 'ko' ? '오늘의 월가 종목' : "Wall St. Today"}
-                  </h2>
+                  <div>
+                    <h2 className="text-[17px] font-bold tracking-tight" style={{ color: t.text }}>
+                      {L.locale === 'ko' ? '오늘의 월가 종목' : "Wall St. Today"}
+                    </h2>
+                    <p className="text-[10px] mt-0.5" style={{ color: t.textMuted }}>
+                      {L.locale === 'ko'
+                        ? `${INVESTORS.length}명 투자자 · 추적 종목 ${seenTickers.size}/${totalTracked || seenTickers.size}개`
+                        : `${INVESTORS.length} investors · ${seenTickers.size}/${totalTracked || seenTickers.size} stocks tracked`}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: activeColor }} />
-                    <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: activeColor }} />
-                  </span>
-                  <span className="text-[10px] font-semibold tracking-widest" style={{ color: activeColor }}>LIVE</span>
-                </div>
-              </div>
-              <p className="text-[11px] mb-5 ml-[38px]" style={{ color: t.textMuted }}>
-                {L.locale === 'ko'
-                  ? `${INVESTORS.length}명 투자자 · 추적 종목 ${seenTickers.size}/${totalTracked || seenTickers.size}개`
-                  : `${INVESTORS.length} investors · ${seenTickers.size}/${totalTracked || seenTickers.size} stocks tracked`}
                 {priceLabel && (
-                  <span style={{ color: t.textMuted, opacity: 0.7 }}> · {priceLabel}</span>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{
+                    background: (marketStatus === 'open' || isExtended)
+                      ? `${isExtended ? extendedColor : activeColor}12`
+                      : `${t.textMuted}10`,
+                  }}>
+                    {(marketStatus === 'open' || isExtended) && (
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: isExtended ? extendedColor : activeColor }} />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: isExtended ? extendedColor : activeColor }} />
+                      </span>
+                    )}
+                    <span className="text-[10px] font-semibold" style={{ color: isExtended ? extendedColor : (marketStatus === 'open' ? activeColor : t.textMuted) }}>
+                      {priceLabel}
+                    </span>
+                  </div>
                 )}
-              </p>
+              </div>
 
               {/* 탭 — 언더라인 스타일 */}
               <div className="flex items-center gap-0 mb-5 ml-[2px]" style={{
