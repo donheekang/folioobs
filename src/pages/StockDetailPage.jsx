@@ -1399,12 +1399,15 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
     const regularChange = prevDayClose > 0 ? regularClose - prevDayClose : 0;
     const regularChangePerc = prevDayClose > 0 ? (regularChange / prevDayClose) * 100 : 0;
 
-    // 애프터마켓 감지: Polygon의 todaysChange(전체 변동)와 정규장 변동 비교
-    // todaysChange = lastTrade.p - prevDay.c (애프터 포함)
-    // regularChange = day.c - prevDay.c (정규장만)
-    // 차이가 있으면 → 애프터마켓 거래 존재
+    // 애프터마켓 감지 (이중 체크 — 더 큰 차이를 사용)
+    // 방법1: todaysChange(전체) vs regularChange(정규장)
     const totalChange = snapshot.todaysChange || 0;
-    const ahDiff = totalChange - regularChange;
+    const ahDiff1 = totalChange - regularChange;
+    // 방법2: lastTrade.p vs day.c (직접 비교)
+    const lastTradeP = snapshot.lastTrade?.p || snapshot.min?.p || 0;
+    const ahDiff2 = lastTradeP > 0 ? lastTradeP - regularClose : 0;
+    // 둘 중 절대값이 큰 쪽 사용 (더 정확한 데이터)
+    const ahDiff = Math.abs(ahDiff1) >= Math.abs(ahDiff2) ? ahDiff1 : ahDiff2;
     const hasAfterHours = Math.abs(ahDiff) > 0.005;
     const ahPrice = hasAfterHours ? regularClose + ahDiff : null;
     const ahChange = hasAfterHours ? ahDiff : null;
