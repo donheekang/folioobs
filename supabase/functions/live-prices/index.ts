@@ -114,16 +114,19 @@ async function fetchSnapshot(tickers: string[]): Promise<{ prices: Record<string
           if (regularClose <= 0) continue;
 
           // 정규장 변동률 (day.c vs prevDay.c)
+          const regularChange = prevClose > 0 ? regularClose - prevClose : 0;
           const regularChangePct = prevClose > 0
             ? ((regularClose - prevClose) / prevClose) * 100 : 0;
 
-          // 마지막 체결가 (애프터마켓 포함)
-          const lastTradePrice = t.lastTrade?.p || 0;
-
-          // 애프터마켓: lastTrade가 regularClose와 다르면 애프터 데이터 존재
-          const hasAfterHours = lastTradePrice > 0 && Math.abs(lastTradePrice - regularClose) > 0.001;
+          // 애프터마켓 감지: todaysChange(전체 변동)와 정규장 변동 비교
+          // todaysChange = lastTrade.p - prevDay.c (애프터 포함)
+          // regularChange = day.c - prevDay.c (정규장만)
+          const totalChange = t.todaysChange || 0;
+          const ahDiff = totalChange - regularChange;
+          const hasAfterHours = Math.abs(ahDiff) > 0.005;
+          const ahPrice = hasAfterHours ? regularClose + ahDiff : 0;
           const ahChangePct = hasAfterHours && regularClose > 0
-            ? ((lastTradePrice - regularClose) / regularClose) * 100 : 0;
+            ? (ahDiff / regularClose) * 100 : 0;
 
           const entry: Record<string, any> = {
             c: Math.round(regularClose * 100) / 100,       // 정규장 종가
@@ -138,8 +141,8 @@ async function fetchSnapshot(tickers: string[]): Promise<{ prices: Record<string
 
           // 애프터마켓 데이터 (존재할 때만)
           if (hasAfterHours) {
-            entry.ah = Math.round(lastTradePrice * 100) / 100;  // 애프터 가격
-            entry.ahCh = Math.round(ahChangePct * 100) / 100;   // 애프터 변동률
+            entry.ah = Math.round(ahPrice * 100) / 100;     // 애프터 가격
+            entry.ahCh = Math.round(ahChangePct * 100) / 100; // 애프터 변동률(정규장 종가 대비)
           }
 
           priceMap[t.ticker] = entry;
