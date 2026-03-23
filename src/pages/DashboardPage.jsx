@@ -824,21 +824,24 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                             )}
 
                             {/* 가격 & 등락률 */}
-                            <div className="text-right flex-shrink-0" style={{ minWidth: i === 0 ? 90 : 80 }}>
+                            <div className="text-right flex-shrink-0" style={{ minWidth: i === 0 ? 100 : 90 }}>
+                              {/* 정규장 */}
                               <div className="font-bold" style={{ color: t.text, fontSize: i === 0 ? 15 : 13 }}>
-                                {stock.afterHoursPrice != null ? `$${stock.afterHoursPrice.toFixed(2)}` : `$${stock.current.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                                ${stock.current.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </div>
-                              <div className="font-extrabold" style={{ color: changeColor, fontSize: i === 0 ? 14 : 12 }}>
-                                {isUp ? '+' : ''}{totalChg.toFixed(2)}%
+                              <div className="font-extrabold" style={{ color: stock.dailyChange > 0 ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted, fontSize: i === 0 ? 14 : 12 }}>
+                                {stock.dailyChange > 0 ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
                               </div>
+                              {/* 애프터/프리마켓 */}
                               {stock.afterHoursPrice != null && (
-                                <div className="flex items-center justify-end gap-1 mt-0.5" style={{ opacity: 0.7 }}>
-                                  <span className="text-[9px]" style={{ color: t.textMuted }}>
-                                    {L.locale === 'ko' ? '정규장' : 'Reg'} {stock.dailyChange >= 0 ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
-                                  </span>
-                                  <span className="text-[9px]" style={{ color: extendedColor }}>
-                                    {marketStatus === 'pre-market' ? 'PM' : 'AH'} {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
-                                  </span>
+                                <div className="mt-1 pt-1" style={{ borderTop: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
+                                  <div className="flex items-center justify-end gap-1">
+                                    <span className="text-[9px] font-semibold" style={{ color: extendedColor }}>{marketStatus === 'pre-market' ? 'PM' : 'AH'}</span>
+                                    <span className="text-[11px] font-bold" style={{ color: t.textSecondary }}>${stock.afterHoursPrice.toFixed(2)}</span>
+                                  </div>
+                                  <div className="text-[10px] font-semibold text-right" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
+                                    {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -914,19 +917,20 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
                       {/* 가격 & 등락률 */}
                       <div className="text-right flex-shrink-0" style={{ minWidth: 80 }}>
+                        {/* 정규장 */}
                         <div className="text-[12px] font-semibold" style={{ color: t.text }}>
-                          {stock.afterHoursPrice != null ? `$${stock.afterHoursPrice.toFixed(2)}` : `$${stock.current.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                          ${stock.current.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
-                        <div className="text-[11px] font-bold" style={{ color: changeColor }}>
-                          {isUp ? '+' : ''}{totalChg.toFixed(2)}%
+                        <div className="text-[11px] font-bold" style={{ color: stock.dailyChange > 0 ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted }}>
+                          {stock.dailyChange > 0 ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
                         </div>
+                        {/* 애프터/프리마켓 */}
                         {stock.afterHoursPrice != null && (
-                          <div className="flex items-center justify-end gap-1 mt-0.5" style={{ opacity: 0.7 }}>
-                            <span className="text-[8px]" style={{ color: t.textMuted }}>
-                              {stock.dailyChange >= 0 ? '+' : ''}{stock.dailyChange?.toFixed(1)}%
-                            </span>
-                            <span className="text-[8px]" style={{ color: extendedColor }}>
-                              {marketStatus === 'pre-market' ? 'PM' : 'AH'} {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(1)}%
+                          <div className="flex items-center justify-end gap-1 mt-0.5">
+                            <span className="text-[8px] font-semibold" style={{ color: extendedColor }}>{marketStatus === 'pre-market' ? 'PM' : 'AH'}</span>
+                            <span className="text-[9px] font-semibold" style={{ color: t.textSecondary }}>${stock.afterHoursPrice.toFixed(2)}</span>
+                            <span className="text-[9px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
+                              {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
                             </span>
                           </div>
                         )}
