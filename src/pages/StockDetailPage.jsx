@@ -1345,7 +1345,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
 
     INVESTORS.forEach(inv => {
       const invHoldings = HOLDINGS[inv.id] || [];
-      const match = invHoldings.filter(h => h.ticker === ticker);
+      const match = invHoldings.filter(h => h.ticker?.toUpperCase() === ticker?.toUpperCase());
       if (match.length > 0) {
         const totalValue = match.reduce((s, h) => s + h.value, 0);
         const totalPct = match.reduce((s, h) => s + h.pct, 0);
@@ -1354,7 +1354,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
         let action = null;
         const acts = QUARTERLY_ACTIVITY[inv.id] || [];
         if (acts.length > 0 && acts[0]?.actions) {
-          action = acts[0].actions.find(a => a.ticker === ticker);
+          action = acts[0].actions.find(a => a.ticker?.toUpperCase() === ticker?.toUpperCase());
         }
 
         holders.push({ investor: inv, value: totalValue, pct: totalPct, shares: totalShares, action });
@@ -1367,7 +1367,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
     if (ARK_TRADES?.length > 0) {
       // 날짜별 그룹을 flat하게 펼침
       const allTrades = ARK_TRADES.flatMap(day => day.trades || []);
-      const tickerTrades = allTrades.filter(t => t.ticker === ticker);
+      const tickerTrades = allTrades.filter(t => t.ticker?.toUpperCase() === ticker?.toUpperCase());
       if (tickerTrades.length > 0) {
         const netShares = tickerTrades.reduce((sum, t) => sum + (t.direction === 'buy' ? (t.sharesChange || 0) : -(t.sharesChange || 0)), 0);
         if (netShares > 0) {
@@ -1410,7 +1410,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
     // holdings에서 한국어 종목명 찾기
     let koName = null;
     for (const inv of INVESTORS) {
-      const h = (HOLDINGS[inv.id] || []).find(h => h.ticker === ticker);
+      const h = (HOLDINGS[inv.id] || []).find(h => h.ticker?.toUpperCase() === ticker?.toUpperCase());
       if (h?.name) { koName = h.name; break; }
     }
     return {

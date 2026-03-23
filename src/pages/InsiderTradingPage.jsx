@@ -100,7 +100,7 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
     const tracked = [];
     const other = [];
     items.forEach(tr => {
-      if (tr.is_tracked_stock || trackedTickers.has(tr.symbol?.toUpperCase())) tracked.push(tr);
+      if (trackedTickers.has(tr.symbol?.toUpperCase())) tracked.push(tr);
       else other.push(tr);
     });
     return { trackedTrades: tracked, otherTrades: other };
