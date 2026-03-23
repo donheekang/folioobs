@@ -26,8 +26,12 @@ async function fetchMarketStatus(): Promise<{ status: string; serverTime: string
     if (res.ok) {
       const data = await res.json();
       // data.market: "open", "closed", "extended-hours"
+      // data.exchanges.nasdaq/nyse: "open", "closed", "extended-hours"
       // data.serverTime: "2026-03-23T16:30:00-04:00"
-      const status = data.market === "open" ? "open" : "closed";
+      let status = "closed";
+      if (data.market === "open") status = "open";
+      else if (data.market === "extended-hours") status = "extended-hours";
+      else if (data.afterHours === true || data.exchanges?.nasdaq === "extended-hours" || data.exchanges?.nyse === "extended-hours") status = "extended-hours";
       const serverTime = data.serverTime || new Date().toISOString();
       marketStatusCache = { status, serverTime, lastTradeDate: "", timestamp: Date.now() };
       return { status, serverTime };
@@ -103,10 +107,18 @@ async function fetchSnapshot(tickers: string[]): Promise<{ prices: Record<string
         for (const t of data.tickers) {
           const day = t.day || {};
           const prevDay = t.prevDay || {};
-          const closePrice = (day.c && day.c > 0) ? day.c : (prevDay.c || 0);
+          // 현재가: lastTrade 우선 (todaysChangePerc와 동일 기준), day.c fallback
+          const lastTradePrice = t.lastTrade?.p || 0;
+          const closePrice = lastTradePrice > 0 ? lastTradePrice : ((day.c && day.c > 0) ? day.c : (prevDay.c || 0));
           if (closePrice <= 0) continue;
-          const prevClose = prevDay.c || day.o || closePrice;
-          const changePct = prevClose > 0 ? ((closePrice - prevClose) / prevClose) * 100 : 0;
+
+          // Polygon이 계산한 todaysChangePerc 사용 (StockDetailPage와 동일 소스)
+          // fallback: 직접 계산
+          let changePct = t.todaysChangePerc;
+          if (changePct == null || changePct === undefined) {
+            const prevClose = prevDay.c || day.o || closePrice;
+            changePct = prevClose > 0 ? ((closePrice - prevClose) / prevClose) * 100 : 0;
+          }
 
           priceMap[t.ticker] = {
             c: Math.round(closePrice * 100) / 100,

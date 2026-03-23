@@ -1296,7 +1296,7 @@ function DailyPriceTable({ ticker, theme, locale }) {
 const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
   const t = useTheme();
   const L = useLocale();
-  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades: ARK_TRADES } = useData();
+  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades: ARK_TRADES, marketStatus } = useData();
 
   const ticker = initialTicker?.toUpperCase();
 
@@ -1529,8 +1529,10 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
                   {priceInfo.change >= 0 ? '+' : ''}{priceInfo.change.toFixed(2)} ({priceInfo.changePerc >= 0 ? '+' : ''}{priceInfo.changePerc.toFixed(2)}%)
                 </span>
               </div>
-              <p className="text-[11px] mt-0.5" style={{ color: t.textMuted }}>
-                {L.locale === 'ko' ? '전일 종가 대비' : 'vs prev close'} · {L.locale === 'ko' ? '15분 지연' : '15min delayed'}
+              <p className="text-[11px] mt-0.5" style={{ color: marketStatus === 'extended-hours' ? '#f59e0b' : t.textMuted }}>
+                {L.locale === 'ko'
+                  ? (marketStatus === 'extended-hours' ? '애프터마켓 · 전일 종가 대비 · 15분 지연' : '전일 종가 대비 · 15분 지연')
+                  : (marketStatus === 'extended-hours' ? 'After-Hours · vs prev close · 15min delayed' : 'vs prev close · 15min delayed')}
               </p>
             </>
           ) : loadingInfo ? (
