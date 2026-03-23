@@ -552,6 +552,13 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
       {/* ===== 오늘의 월가 종목 — 실시간 랭킹 ===== */}
       {!ready ? null : (() => {
+        // 전체 추적 종목 수 (시세 유무 관계없이)
+        const allTickers = new Set();
+        INVESTORS.forEach(inv => {
+          (HOLDINGS[inv.id] || []).forEach(h => allTickers.add(h.ticker));
+        });
+        const totalTracked = allTickers.size;
+
         // 모든 투자자의 보유종목에서 실시간 가격이 있는 것만 수집
         const liveStocks = [];
         const seenTickers = new Set();
@@ -658,8 +665,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               </div>
               <p className="text-[11px] mb-5 ml-[38px]" style={{ color: t.textMuted }}>
                 {L.locale === 'ko'
-                  ? `${INVESTORS.length}명 투자자 · ${seenTickers.size}개 종목`
-                  : `${INVESTORS.length} investors · ${seenTickers.size} stocks`}
+                  ? `${INVESTORS.length}명 투자자 · 추적 종목 ${seenTickers.size}/${totalTracked || seenTickers.size}개`
+                  : `${INVESTORS.length} investors · ${seenTickers.size}/${totalTracked || seenTickers.size} stocks tracked`}
                 {priceLabel && (
                   <span style={{ color: t.textMuted, opacity: 0.7 }}> · {priceLabel}</span>
                 )}
