@@ -816,11 +816,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                                 {isUp ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
                               </div>
                               {stock.afterHoursPrice != null && (
-                                <div className="flex items-center justify-end gap-1 mt-0.5">
-                                  <span className="text-[9px] font-semibold px-1 py-0.5 rounded" style={{ background: '#f59e0b18', color: '#f59e0b' }}>AH</span>
-                                  <span className="text-[10px] font-bold" style={{ color: t.textSecondary }}>${stock.afterHoursPrice.toFixed(2)}</span>
+                                <div className="flex items-center justify-end gap-1 mt-0.5" style={{ color: t.textMuted }}>
+                                  <span className="text-[9px]" style={{ opacity: 0.6 }}>AH</span>
+                                  <span className="text-[10px] font-semibold" style={{ color: t.textSecondary }}>{stock.afterHoursPrice.toFixed(2)}</span>
                                   <span className="text-[10px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
-                                    {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange.toFixed(2)}%
+                                    {stock.afterHoursChange >= 0 ? '\u25B2' : '\u25BC'}{Math.abs(stock.afterHoursChange).toFixed(2)}%
                                   </span>
                                 </div>
                               )}
@@ -903,10 +903,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                           {isUp ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
                         </div>
                         {stock.afterHoursPrice != null && (
-                          <div className="flex items-center justify-end gap-1 mt-0.5">
-                            <span className="text-[8px] font-semibold px-1 rounded" style={{ background: '#f59e0b18', color: '#f59e0b' }}>AH</span>
-                            <span className="text-[10px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
-                              {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange.toFixed(2)}%
+                          <div className="flex items-center justify-end gap-1 mt-0.5" style={{ color: t.textMuted }}>
+                            <span className="text-[8px]" style={{ opacity: 0.6 }}>AH</span>
+                            <span className="text-[9px] font-semibold" style={{ color: t.textSecondary }}>{stock.afterHoursPrice.toFixed(2)}</span>
+                            <span className="text-[9px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
+                              {stock.afterHoursChange >= 0 ? '\u25B2' : '\u25BC'}{Math.abs(stock.afterHoursChange).toFixed(2)}%
                             </span>
                           </div>
                         )}

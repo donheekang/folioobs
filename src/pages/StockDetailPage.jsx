@@ -1551,22 +1551,19 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
               </p>
 
               {/* 애프터마켓 라인 (네이버 스타일) */}
-              {priceInfo.ahPrice != null && (
-                <div className="mt-1.5 pt-1.5" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
-                  <div className="flex items-center justify-end gap-1.5">
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
-                      style={{ background: '#f59e0b18', color: '#f59e0b' }}>
-                      {L.locale === 'ko' ? '애프터' : 'AH'}
-                    </span>
-                    <span className="text-sm font-bold" style={{ color: t.text }}>
-                      ${priceInfo.ahPrice.toFixed(2)}
-                    </span>
-                    <span className="text-xs font-semibold" style={{ color: priceInfo.ahChange >= 0 ? t.green : t.red }}>
-                      {priceInfo.ahChange >= 0 ? '+' : ''}{priceInfo.ahChange.toFixed(2)} ({priceInfo.ahChangePerc >= 0 ? '+' : ''}{priceInfo.ahChangePerc.toFixed(2)}%)
+              {priceInfo.ahPrice != null && (() => {
+                const ahUp = priceInfo.ahChange >= 0;
+                const ahColor = ahUp ? t.green : t.red;
+                return (
+                  <div className="mt-1 text-[12px]" style={{ color: t.textMuted }}>
+                    <span style={{ opacity: 0.7 }}>After Market</span>{' '}
+                    <span className="font-semibold" style={{ color: t.text }}>{priceInfo.ahPrice.toFixed(2)}</span>{' '}
+                    <span className="font-semibold" style={{ color: ahColor }}>
+                      {ahUp ? '\u25B2' : '\u25BC'}{Math.abs(priceInfo.ahChange).toFixed(2)} ({Math.abs(priceInfo.ahChangePerc).toFixed(2)}%)
                     </span>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </>
           ) : loadingInfo ? (
             <div className="w-24 h-10 rounded-lg animate-pulse" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }} />
