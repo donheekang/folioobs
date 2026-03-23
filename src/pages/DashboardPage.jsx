@@ -105,7 +105,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
     if (marketStatus === 'open') {
-      return L.locale === 'ko' ? '실시간 15분 지연' : '15-min delayed';
+      return L.locale === 'ko' ? `장중 · ${formatted} · 15분 지연` : `Live · ${formatted} · 15-min delayed`;
     } else {
       return L.locale === 'ko' ? `장 마감 · ${formatted} 종가` : `Market Closed · ${formatted}`;
     }
