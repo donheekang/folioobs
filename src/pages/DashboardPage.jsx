@@ -836,7 +836,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                               {stock.afterHoursPrice != null && (
                                 <div className="mt-1 pt-1" style={{ borderTop: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
                                   <div className="flex items-center justify-end gap-1">
-                                    <span className="text-[9px] font-semibold" style={{ color: extendedColor }}>{marketStatus === 'pre-market' ? 'PM' : 'AH'}</span>
+                                    <span className="text-[9px] font-semibold" style={{ color: extendedColor }}>{marketStatus === 'pre-market' ? 'Pre-Market' : 'After Market'}</span>
                                     <span className="text-[11px] font-bold" style={{ color: t.textSecondary }}>${stock.afterHoursPrice.toFixed(2)}</span>
                                   </div>
                                   <div className="text-[10px] font-semibold text-right" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
@@ -927,7 +927,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                         {/* 애프터/프리마켓 */}
                         {stock.afterHoursPrice != null && (
                           <div className="flex items-center justify-end gap-1 mt-0.5">
-                            <span className="text-[8px] font-semibold" style={{ color: extendedColor }}>{marketStatus === 'pre-market' ? 'PM' : 'AH'}</span>
+                            <span className="text-[8px] font-semibold" style={{ color: extendedColor }}>{marketStatus === 'pre-market' ? 'Pre-Market' : 'After Market'}</span>
                             <span className="text-[9px] font-semibold" style={{ color: t.textSecondary }}>${stock.afterHoursPrice.toFixed(2)}</span>
                             <span className="text-[9px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
                               {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
