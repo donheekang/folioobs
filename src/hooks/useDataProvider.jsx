@@ -1260,6 +1260,8 @@ export function DataProvider({ children }) {
               live: data.live || false,
               source: data.source || 'unknown',
               dailyChange: live.ch,
+              volume: live.v || 0,
+              vwap: live.vw || 0,
               quarterEnd: quarterEnd,
               quarterEndDate: existing?.quarterEndDate || null,
               sinceFiling: sinceFiling,

@@ -114,6 +114,8 @@ async function fetchSnapshot(tickers: string[]): Promise<{ prices: Record<string
             h: Math.round((day.h || prevDay.h || 0) * 100) / 100,
             l: Math.round((day.l || prevDay.l || 0) * 100) / 100,
             ch: Math.round(changePct * 100) / 100,
+            v: day.v || prevDay.v || 0,           // 거래량
+            vw: day.vw || prevDay.vw || 0,        // 거래량가중평균가(VWAP)
           };
         }
       }

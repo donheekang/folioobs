@@ -550,6 +550,372 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
       </div>
 
+      {/* ===== 오늘의 월가 종목 — 실시간 랭킹 ===== */}
+      {!ready ? null : (() => {
+        // 모든 투자자의 보유종목에서 실시간 가격이 있는 것만 수집
+        const liveStocks = [];
+        const seenTickers = new Set();
+        INVESTORS.forEach(inv => {
+          (HOLDINGS[inv.id] || []).forEach(h => {
+            const sp = stockPrices[h.ticker];
+            if (!sp || !sp.current || sp.current <= 0) return;
+            if (seenTickers.has(h.ticker)) {
+              // 이미 추가된 종목이면 투자자만 추가
+              const existing = liveStocks.find(s => s.ticker === h.ticker);
+              if (existing && !existing.investors.find(i => i.id === inv.id)) {
+                existing.investors.push(inv);
+              }
+              return;
+            }
+            seenTickers.add(h.ticker);
+            liveStocks.push({
+              ticker: h.ticker,
+              name: h.name,
+              nameEn: h.nameEn,
+              sector: h.sector,
+              current: sp.current,
+              dailyChange: sp.dailyChange,
+              volume: sp.volume || 0,
+              vwap: sp.vwap || 0,
+              tradingValue: (sp.volume || 0) * (sp.vwap || sp.current || 0),
+              investors: [inv],
+            });
+          });
+        });
+
+        if (liveStocks.length === 0) return null;
+
+        const TopRankingSection = () => {
+          const [rankTab, setRankTab] = useState('gainers'); // 'gainers' | 'volume' | 'losers'
+          const [rankShowAll, setRankShowAll] = useState(false);
+          const INITIAL_COUNT = 7;
+          const MAX_COUNT = 100;
+
+          const rankedAll = useMemo(() => {
+            const items = liveStocks.filter(s => s.dailyChange !== null && s.dailyChange !== undefined);
+            if (rankTab === 'gainers') return [...items].sort((a, b) => b.dailyChange - a.dailyChange);
+            if (rankTab === 'losers') return [...items].sort((a, b) => a.dailyChange - b.dailyChange);
+            // volume — 거래액 있으면 거래액순, 없으면 보유 투자자 수(인기순)
+            const hasVolume = items.some(s => s.tradingValue > 0);
+            if (hasVolume) return [...items].sort((a, b) => b.tradingValue - a.tradingValue);
+            return [...items].sort((a, b) => b.investors.length - a.investors.length || b.dailyChange - a.dailyChange);
+          }, [rankTab]);
+
+          const ranked = rankShowAll ? rankedAll.slice(0, MAX_COUNT) : rankedAll.slice(0, INITIAL_COUNT);
+
+          const fmtVol = (v) => {
+            if (v >= 1e9) return `$${(v / 1e9).toFixed(1)}B`;
+            if (v >= 1e6) return `$${(v / 1e6).toFixed(1)}M`;
+            if (v >= 1e3) return `$${(v / 1e3).toFixed(0)}K`;
+            return `$${v.toFixed(0)}`;
+          };
+
+          const tabs = [
+            { key: 'gainers', label: L.locale === 'ko' ? '상승률' : 'Gainers' },
+            { key: 'volume', label: L.locale === 'ko' ? '거래액' : 'Volume' },
+            { key: 'losers', label: L.locale === 'ko' ? '하락률' : 'Losers' },
+          ];
+
+          const rankColors = {
+            gainers: '#22c55e',
+            losers: '#ef4444',
+            volume: t.accent,
+          };
+          const activeColor = rankColors[rankTab];
+
+          return (
+            <section className="hero-enter hero-enter-5 relative overflow-hidden" style={{
+              background: t.name === 'dark'
+                ? 'linear-gradient(160deg, rgba(20,20,20,0.95), rgba(12,12,12,0.98))'
+                : 'linear-gradient(160deg, rgba(255,255,255,0.98), rgba(248,248,252,1))',
+              border: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+              borderRadius: '20px',
+              padding: '24px',
+            }}>
+              {/* 배경 글로우 */}
+              <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full opacity-30 blur-3xl pointer-events-none"
+                style={{ background: `radial-gradient(circle, ${activeColor}18, transparent 70%)` }} />
+
+              {/* 헤더 */}
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{
+                    background: `linear-gradient(135deg, ${activeColor}20, ${activeColor}08)`,
+                  }}>
+                    <Radio size={15} style={{ color: activeColor }} />
+                  </div>
+                  <h2 className="text-[17px] font-bold tracking-tight" style={{ color: t.text }}>
+                    {L.locale === 'ko' ? '오늘의 월가 종목' : "Wall St. Today"}
+                  </h2>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: activeColor }} />
+                    <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: activeColor }} />
+                  </span>
+                  <span className="text-[10px] font-semibold tracking-widest" style={{ color: activeColor }}>LIVE</span>
+                </div>
+              </div>
+              <p className="text-[11px] mb-5 ml-[38px]" style={{ color: t.textMuted }}>
+                {L.locale === 'ko'
+                  ? `${INVESTORS.length}명 투자자 · ${seenTickers.size}개 종목`
+                  : `${INVESTORS.length} investors · ${seenTickers.size} stocks`}
+                {priceLabel && (
+                  <span style={{ color: t.textMuted, opacity: 0.7 }}> · {priceLabel}</span>
+                )}
+              </p>
+
+              {/* 탭 — 언더라인 스타일 */}
+              <div className="flex items-center gap-0 mb-5 ml-[2px]" style={{
+                borderBottom: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+              }}>
+                {tabs.map(tab => {
+                  const isActive = rankTab === tab.key;
+                  return (
+                    <button key={tab.key}
+                      onClick={() => { setRankTab(tab.key); setRankShowAll(false); }}
+                      className="relative text-[12px] px-4 pb-2.5 font-semibold transition-all"
+                      style={{ color: isActive ? activeColor : t.textMuted }}>
+                      {tab.label}
+                      {isActive && (
+                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] rounded-full"
+                          style={{ width: '60%', background: activeColor }} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* TOP 3 — 포디움 카드 */}
+              {ranked.length > 0 && (() => {
+                const top3 = ranked.slice(0, 3);
+                const medalLabels = ['1st', '2nd', '3rd'];
+                const medalBgs = [
+                  `linear-gradient(135deg, ${activeColor}14, ${activeColor}06)`,
+                  `linear-gradient(135deg, ${activeColor}0C, ${activeColor}04)`,
+                  `linear-gradient(135deg, ${activeColor}08, ${activeColor}03)`,
+                ];
+                const maxAbsChange = Math.max(...top3.map(s => Math.abs(s.dailyChange || 0)), 0.01);
+
+                return (
+                  <div className="space-y-2 mb-2">
+                    {top3.map((stock, i) => {
+                      const isUp = stock.dailyChange > 0;
+                      const changeColor = isUp ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted;
+                      const barWidth = Math.min(Math.abs(stock.dailyChange || 0) / maxAbsChange * 100, 100);
+                      return (
+                        <div key={stock.ticker}
+                          className="relative rounded-2xl cursor-pointer overflow-hidden group"
+                          style={{
+                            background: medalBgs[i],
+                            border: `1px solid ${activeColor}${i === 0 ? '18' : '0C'}`,
+                            padding: i === 0 ? '16px 18px' : '13px 18px',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onClick={() => onNavigate('stock', stock.ticker)}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = `${activeColor}35`; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = `${activeColor}${i === 0 ? '18' : '0C'}`; e.currentTarget.style.transform = 'translateY(0)'; }}>
+
+                          {/* 퍼센트 바 */}
+                          <div className="absolute left-0 top-0 bottom-0 rounded-2xl"
+                            style={{
+                              width: `${barWidth}%`,
+                              background: `linear-gradient(90deg, ${changeColor}10, transparent)`,
+                              transition: 'width 0.6s ease',
+                            }} />
+
+                          <div className="relative flex items-center gap-3">
+                            {/* 순위 뱃지 */}
+                            <div className="flex-shrink-0 flex items-center justify-center rounded-lg"
+                              style={{
+                                width: i === 0 ? 32 : 28,
+                                height: i === 0 ? 32 : 28,
+                                background: i === 0
+                                  ? `linear-gradient(135deg, ${activeColor}, ${activeColor}BB)`
+                                  : `${activeColor}${i === 1 ? '22' : '15'}`,
+                                color: i === 0 ? '#fff' : activeColor,
+                                fontSize: i === 0 ? 14 : 12,
+                                fontWeight: 800,
+                                letterSpacing: '-0.02em',
+                              }}>
+                              {i + 1}
+                            </div>
+
+                            {/* 투자자 아바타 */}
+                            <div className="flex -space-x-1.5 flex-shrink-0">
+                              {stock.investors.slice(0, 4).map((inv, j) => (
+                                <div key={inv.id} className="rounded-lg flex items-center justify-center text-white font-bold ring-1"
+                                  style={{
+                                    width: i === 0 ? 26 : 22,
+                                    height: i === 0 ? 26 : 22,
+                                    fontSize: i === 0 ? 10 : 8,
+                                    background: inv.gradient,
+                                    zIndex: 4 - j,
+                                    '--tw-ring-color': t.name === 'dark' ? 'rgba(20,20,20,0.8)' : 'rgba(255,255,255,0.8)',
+                                  }}>
+                                  {inv.avatar}
+                                </div>
+                              ))}
+                              {stock.investors.length > 4 && (
+                                <div className="rounded-lg flex items-center justify-center font-bold ring-1"
+                                  style={{
+                                    width: i === 0 ? 26 : 22,
+                                    height: i === 0 ? 26 : 22,
+                                    fontSize: i === 0 ? 10 : 8,
+                                    background: t.name === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                                    color: t.textMuted,
+                                    '--tw-ring-color': t.name === 'dark' ? 'rgba(20,20,20,0.8)' : 'rgba(255,255,255,0.8)',
+                                  }}>
+                                  +{stock.investors.length - 4}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* 종목 정보 */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-extrabold tracking-tight" style={{ color: t.text, fontSize: i === 0 ? 16 : 14 }}>
+                                  {stock.ticker}
+                                </span>
+                                <span className="text-[10px] truncate" style={{ color: t.textMuted }}>
+                                  {stock.investors.length > 1
+                                    ? (L.locale === 'ko' ? `${stock.investors.length}명 보유` : `${stock.investors.length} holders`)
+                                    : L.investorName(stock.investors[0])}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* 거래액 (volume 탭) */}
+                            {rankTab === 'volume' && stock.tradingValue > 0 && (
+                              <span className="text-[11px] font-semibold flex-shrink-0 px-2 py-0.5 rounded-md"
+                                style={{
+                                  color: activeColor,
+                                  background: `${activeColor}12`,
+                                }}>
+                                {fmtVol(stock.tradingValue)}
+                              </span>
+                            )}
+
+                            {/* 가격 & 등락률 */}
+                            <div className="text-right flex-shrink-0" style={{ minWidth: i === 0 ? 90 : 80 }}>
+                              <div className="font-bold" style={{ color: t.text, fontSize: i === 0 ? 15 : 13 }}>
+                                ${stock.current.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </div>
+                              <div className="font-extrabold" style={{ color: changeColor, fontSize: i === 0 ? 14 : 12 }}>
+                                {isUp ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
+              {/* 4위~ 컴팩트 리스트 */}
+              <div className="space-y-[1px]">
+                {ranked.slice(3).map((stock, i) => {
+                  const rank = i + 4;
+                  const isUp = stock.dailyChange > 0;
+                  const changeColor = isUp ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted;
+                  return (
+                    <div key={stock.ticker}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
+                      style={{
+                        background: 'transparent',
+                        borderBottom: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                      }}
+                      onClick={() => onNavigate('stock', stock.ticker)}
+                      onMouseEnter={e => { e.currentTarget.style.background = `${activeColor}08`; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}>
+
+                      {/* 순위 */}
+                      <span className="text-[11px] font-bold w-5 text-center flex-shrink-0" style={{ color: t.textMuted, opacity: 0.5 }}>
+                        {rank}
+                      </span>
+
+                      {/* 투자자 아바타 */}
+                      <div className="flex -space-x-1.5 flex-shrink-0">
+                        {stock.investors.slice(0, 3).map((inv, j) => (
+                          <div key={inv.id} className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[8px] font-bold ring-1"
+                            style={{ background: inv.gradient, zIndex: 3 - j, '--tw-ring-color': t.name === 'dark' ? 'rgba(20,20,20,0.8)' : 'rgba(255,255,255,0.8)' }}>
+                            {inv.avatar}
+                          </div>
+                        ))}
+                        {stock.investors.length > 3 && (
+                          <div className="w-5 h-5 rounded-md flex items-center justify-center text-[8px] font-bold ring-1"
+                            style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)', color: t.textMuted, '--tw-ring-color': t.name === 'dark' ? 'rgba(20,20,20,0.8)' : 'rgba(255,255,255,0.8)' }}>
+                            +{stock.investors.length - 3}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 종목 정보 */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[13px] font-bold" style={{ color: t.text }}>{stock.ticker}</span>
+                          <span className="text-[10px] truncate" style={{ color: t.textMuted, opacity: 0.7 }}>
+                            {stock.investors.length > 1
+                              ? (L.locale === 'ko' ? `${stock.investors.length}명 보유` : `${stock.investors.length} holders`)
+                              : L.investorName(stock.investors[0])}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 거래액 (volume 탭일 때만, 값이 있을 때) */}
+                      {rankTab === 'volume' && stock.tradingValue > 0 && (
+                        <span className="text-[11px] font-semibold flex-shrink-0 px-2 py-0.5 rounded-md"
+                          style={{
+                            color: activeColor,
+                            background: `${activeColor}12`,
+                          }}>
+                          {fmtVol(stock.tradingValue)}
+                        </span>
+                      )}
+
+                      {/* 가격 & 등락률 */}
+                      <div className="text-right flex-shrink-0" style={{ minWidth: 80 }}>
+                        <div className="text-[12px] font-semibold" style={{ color: t.text }}>
+                          ${stock.current.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-[11px] font-bold" style={{ color: changeColor }}>
+                          {isUp ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 더보기 / 접기 */}
+              {rankedAll.length > INITIAL_COUNT && (
+                <div className="text-center mt-4">
+                  <button
+                    onClick={() => setRankShowAll(!rankShowAll)}
+                    className="px-6 py-2 rounded-xl text-[11px] font-semibold transition-all"
+                    style={{
+                      color: activeColor,
+                      background: `${activeColor}0A`,
+                      border: `1px solid ${activeColor}18`,
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = `${activeColor}15`; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = `${activeColor}0A`; }}>
+                    {rankShowAll
+                      ? (L.locale === 'ko' ? '접기' : 'Show less')
+                      : (L.locale === 'ko'
+                          ? `더보기 (${Math.min(rankedAll.length, MAX_COUNT) - INITIAL_COUNT}개)`
+                          : `Show more (${Math.min(rankedAll.length, MAX_COUNT) - INITIAL_COUNT})`)}
+                  </button>
+                </div>
+              )}
+            </section>
+          );
+        };
+
+        return <TopRankingSection />;
+      })()}
+
       {/* ===== 보유종목 수익률 랭킹 (실시간) ===== */}
       {!ready ? null : (performanceRanking.all || []).length > 0 && (
         <section id="perf-ranking" className="hero-enter hero-enter-5">
