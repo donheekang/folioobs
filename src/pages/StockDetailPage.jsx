@@ -1554,13 +1554,15 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
                 {L.locale === 'ko' ? '전일 종가 대비 · 15분 지연' : 'vs prev close · 15min delayed'}
               </p>
 
-              {/* 애프터마켓 라인 (네이버 스타일) */}
+              {/* 프리마켓/애프터마켓 라인 (네이버 스타일) */}
               {priceInfo.ahPrice != null && (() => {
                 const ahUp = priceInfo.ahChange >= 0;
                 const ahColor = ahUp ? t.green : t.red;
+                const isPre = marketStatus === 'pre-market';
+                const labelColor = isPre ? '#8b5cf6' : '#f59e0b';
                 return (
                   <div className="mt-1 text-[12px]" style={{ color: t.textMuted }}>
-                    <span style={{ opacity: 0.7 }}>After Market</span>{' '}
+                    <span style={{ color: labelColor, fontWeight: 600, opacity: 0.9 }}>{isPre ? 'Pre-Market' : 'After Market'}</span>{' '}
                     <span className="font-semibold" style={{ color: t.text }}>{priceInfo.ahPrice.toFixed(2)}</span>{' '}
                     <span className="font-semibold" style={{ color: ahColor }}>
                       {ahUp ? '\u25B2' : '\u25BC'}{Math.abs(priceInfo.ahChange).toFixed(2)} ({Math.abs(priceInfo.ahChangePerc).toFixed(2)}%)

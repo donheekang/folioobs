@@ -686,7 +686,7 @@ export function DataProvider({ children }) {
   const [arkDailyTrades, setArkDailyTrades] = useState([]);
   const [aiInsights, setAiInsights] = useState({});
   const [stockPrices, setStockPrices] = useState({});  // { ticker: { current, quarterEnd, changePct } }
-  const [marketStatus, setMarketStatus] = useState('unknown'); // 'open' | 'closed' | 'unknown'
+  const [marketStatus, setMarketStatus] = useState('unknown'); // 'open' | 'closed' | 'pre-market' | 'after-hours' | 'unknown'
   const [lastTradeDate, setLastTradeDate] = useState(null); // 'YYYY-MM-DD'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

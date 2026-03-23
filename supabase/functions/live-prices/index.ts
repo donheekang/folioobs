@@ -26,12 +26,16 @@ async function fetchMarketStatus(): Promise<{ status: string; serverTime: string
     if (res.ok) {
       const data = await res.json();
       // data.market: "open", "closed", "extended-hours"
-      // data.exchanges.nasdaq/nyse: "open", "closed", "extended-hours"
+      // data.earlyHours: true (프리마켓 4AM~9:30AM ET)
+      // data.afterHours: true (애프터마켓 4PM~8PM ET)
       // data.serverTime: "2026-03-23T16:30:00-04:00"
       let status = "closed";
-      if (data.market === "open") status = "open";
-      else if (data.market === "extended-hours") status = "extended-hours";
-      else if (data.afterHours === true || data.exchanges?.nasdaq === "extended-hours" || data.exchanges?.nyse === "extended-hours") status = "extended-hours";
+      if (data.market === "open") {
+        status = "open";
+      } else if (data.market === "extended-hours" || data.earlyHours === true || data.afterHours === true) {
+        // 프리마켓 vs 애프터마켓 구분
+        status = data.earlyHours === true ? "pre-market" : "after-hours";
+      }
       const serverTime = data.serverTime || new Date().toISOString();
       marketStatusCache = { status, serverTime, lastTradeDate: "", timestamp: Date.now() };
       return { status, serverTime };
