@@ -74,8 +74,9 @@ function getLastTradingDate(): string {
   let m = et.getUTCMonth();
   let day = et.getUTCDate();
 
-  // 장 마감(17:00 ET) 전이면 전일, 새벽(0-4시)이면 당일
-  if (hour >= 4 && hour < 17) {
+  // 장 마감(16:00 ET) 전이면 전일 종가 기준, 장 마감 후에는 당일
+  // 새벽 0-4시: 아직 전날 영업일의 after-hours이므로 당일(=전 영업일) 유지
+  if (hour >= 4 && hour < 16) {
     day -= 1;
   }
 
