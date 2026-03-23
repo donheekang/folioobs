@@ -1,19 +1,85 @@
 // Supabase Edge Function: live-prices
 // Polygon.io Snapshot API로 15분 지연 실시간 시세 반환
 // Snapshot 실패 시 Grouped Daily로 fallback
-// DB 저장 없이 프록시 역할 → 무제한 호출 가능
+// 장 상태 및 마지막 거래일은 Polygon API에서 직접 가져옴
 
 const POLYGON_API_KEY = Deno.env.get("POLYGON_API_KEY")!;
 
 // 인메모리 캐시 (1분)
-let cache: { data: Record<string, any>; timestamp: number; source: string } | null = null;
+let cache: { data: Record<string, any>; timestamp: number; source: string; lastTradeDate: string; marketStatus: string } | null = null;
 const CACHE_TTL = 60 * 1000;
 
-// Polygon Snapshot API (15분 지연 실시간)
-async function fetchSnapshot(tickers: string[]): Promise<Record<string, any> | null> {
+// 장 상태 캐시 (5분 — 자주 안 바뀌니까)
+let marketStatusCache: { status: string; serverTime: string; lastTradeDate: string; timestamp: number } | null = null;
+const MARKET_STATUS_TTL = 5 * 60 * 1000;
+
+// ===== Polygon Market Status API =====
+// 직접 시간 계산 대신 Polygon이 알려주는 장 상태를 사용
+async function fetchMarketStatus(): Promise<{ status: string; serverTime: string }> {
+  // 캐시 확인
+  if (marketStatusCache && (Date.now() - marketStatusCache.timestamp) < MARKET_STATUS_TTL) {
+    return { status: marketStatusCache.status, serverTime: marketStatusCache.serverTime };
+  }
+
   try {
-    // 티커 100개씩 배치 처리 (URL 길이 제한)
+    const res = await fetch(`https://api.polygon.io/v1/marketstatus/now?apiKey=${POLYGON_API_KEY}`);
+    if (res.ok) {
+      const data = await res.json();
+      // data.market: "open", "closed", "extended-hours"
+      // data.serverTime: "2026-03-23T16:30:00-04:00"
+      const status = data.market === "open" ? "open" : "closed";
+      const serverTime = data.serverTime || new Date().toISOString();
+      marketStatusCache = { status, serverTime, lastTradeDate: "", timestamp: Date.now() };
+      return { status, serverTime };
+    }
+  } catch (e) {
+    console.warn("Market status API failed:", e);
+  }
+
+  // fallback: 기본값
+  return { status: "closed", serverTime: new Date().toISOString() };
+}
+
+// ===== Snapshot API에서 마지막 거래일 추출 =====
+// Snapshot 응답의 updated 타임스탬프에서 실제 거래 날짜를 가져옴
+function extractTradeDateFromSnapshot(tickers: any[]): string | null {
+  for (const t of tickers) {
+    // updated는 나노초 Unix timestamp
+    if (t.updated) {
+      const ms = typeof t.updated === 'number' && t.updated > 1e15
+        ? Math.floor(t.updated / 1e6) // 나노초 → 밀리초
+        : t.updated;
+      const d = new Date(ms);
+      // ET로 변환해서 날짜 추출
+      const etStr = d.toLocaleString("en-US", { timeZone: "America/New_York" });
+      const etDate = new Date(etStr);
+      const y = etDate.getFullYear();
+      const m = String(etDate.getMonth() + 1).padStart(2, '0');
+      const day = String(etDate.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+    // lastTrade 타임스탬프도 활용
+    if (t.lastTrade?.t) {
+      const ms = typeof t.lastTrade.t === 'number' && t.lastTrade.t > 1e15
+        ? Math.floor(t.lastTrade.t / 1e6)
+        : t.lastTrade.t;
+      const d = new Date(ms);
+      const etStr = d.toLocaleString("en-US", { timeZone: "America/New_York" });
+      const etDate = new Date(etStr);
+      const y = etDate.getFullYear();
+      const m = String(etDate.getMonth() + 1).padStart(2, '0');
+      const day = String(etDate.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+  }
+  return null;
+}
+
+// ===== Polygon Snapshot API (15분 지연 실시간) =====
+async function fetchSnapshot(tickers: string[]): Promise<{ prices: Record<string, any>; lastTradeDate: string | null } | null> {
+  try {
     const priceMap: Record<string, any> = {};
+    let detectedDate: string | null = null;
     const BATCH = 100;
 
     for (let i = 0; i < tickers.length; i += BATCH) {
@@ -24,17 +90,21 @@ async function fetchSnapshot(tickers: string[]): Promise<Record<string, any> | n
 
       if (!res.ok) {
         console.warn(`Snapshot API ${res.status} for batch ${i}`);
-        return null; // Snapshot 미지원 → fallback
+        return null;
       }
 
       const data = await res.json();
       if (data.tickers) {
+        // 첫 번째 배치에서 거래일 추출
+        if (!detectedDate && data.tickers.length > 0) {
+          detectedDate = extractTradeDateFromSnapshot(data.tickers);
+        }
+
         for (const t of data.tickers) {
           const day = t.day || {};
           const prevDay = t.prevDay || {};
-          // day.c가 0이면 장 미개장(주말/공휴일) → prevDay.c 사용
           const closePrice = (day.c && day.c > 0) ? day.c : (prevDay.c || 0);
-          if (closePrice <= 0) continue; // 가격 데이터 없으면 건너뛰기
+          if (closePrice <= 0) continue;
           const prevClose = prevDay.c || day.o || closePrice;
           const changePct = prevClose > 0 ? ((closePrice - prevClose) / prevClose) * 100 : 0;
 
@@ -49,61 +119,15 @@ async function fetchSnapshot(tickers: string[]): Promise<Record<string, any> | n
       }
     }
 
-    return Object.keys(priceMap).length > 0 ? priceMap : null;
+    if (Object.keys(priceMap).length === 0) return null;
+    return { prices: priceMap, lastTradeDate: detectedDate };
   } catch (e) {
     console.warn("Snapshot failed:", e);
     return null;
   }
 }
 
-// Fallback: Grouped Daily (장 마감 후 데이터)
-// Deno Deploy에서 toLocaleString timezone이 불안정하므로 UTC 기반 수동 계산
-function getLastTradingDate(): string {
-  const now = new Date();
-  const utcMonth = now.getUTCMonth(); // 0-11
-  // DST 간이 판정: 3월~10월 EDT(UTC-4), 11월~2월 EST(UTC-5)
-  const isDST = utcMonth >= 2 && utcMonth <= 10;
-  const offsetHours = isDST ? 4 : 5;
-
-  // UTC → ET 변환
-  const etMs = now.getTime() - offsetHours * 3600000;
-  const et = new Date(etMs);
-  const hour = et.getUTCHours();
-
-  let y = et.getUTCFullYear();
-  let m = et.getUTCMonth();
-  let day = et.getUTCDate();
-
-  // 장 마감(16:00 ET) 전이면 전일 종가 기준, 장 마감 후에는 당일
-  // 새벽 0-4시: 아직 전날 영업일의 after-hours이므로 당일(=전 영업일) 유지
-  if (hour >= 4 && hour < 16) {
-    day -= 1;
-  }
-
-  let d = new Date(Date.UTC(y, m, day));
-
-  // 주말 건너뛰기
-  while (d.getUTCDay() === 0 || d.getUTCDay() === 6) {
-    d.setUTCDate(d.getUTCDate() - 1);
-  }
-
-  const fy = d.getUTCFullYear();
-  const fm = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const fd = String(d.getUTCDate()).padStart(2, '0');
-  return `${fy}-${fm}-${fd}`;
-}
-
-// UTC 기반 ET 시간 계산 헬퍼
-function getETNow(): { hour: number; min: number; day: number } {
-  const now = new Date();
-  const utcMonth = now.getUTCMonth();
-  const isDST = utcMonth >= 2 && utcMonth <= 10;
-  const offsetHours = isDST ? 4 : 5;
-  const etMs = now.getTime() - offsetHours * 3600000;
-  const et = new Date(etMs);
-  return { hour: et.getUTCHours(), min: et.getUTCMinutes(), day: et.getUTCDay() };
-}
-
+// ===== Fallback: Grouped Daily =====
 async function fetchGroupedDaily(date: string): Promise<Record<string, any>> {
   const url = `https://api.polygon.io/v2/aggs/grouped/locale/us/market/stocks/${date}?adjusted=true&apiKey=${POLYGON_API_KEY}`;
   const res = await fetch(url);
@@ -112,7 +136,7 @@ async function fetchGroupedDaily(date: string): Promise<Record<string, any>> {
 
   const priceMap: Record<string, any> = {};
   for (const item of (data.results || [])) {
-    if (!item.c || item.c <= 0) continue; // 비정상 가격 건너뛰기
+    if (!item.c || item.c <= 0) continue;
     const prevClose = item.o || item.c;
     const changePct = prevClose > 0 ? ((item.c - prevClose) / prevClose) * 100 : 0;
     priceMap[item.T] = {
@@ -126,6 +150,29 @@ async function fetchGroupedDaily(date: string): Promise<Record<string, any>> {
   return priceMap;
 }
 
+// ===== Fallback 전용: 마지막 거래일 찾기 =====
+// Polygon /v2/aggs/prev 로 아무 유명 종목의 전일 종가를 가져와서 날짜 추출
+async function fetchLastTradeDateFromPrev(): Promise<string> {
+  try {
+    const res = await fetch(`https://api.polygon.io/v2/aggs/ticker/AAPL/prev?adjusted=true&apiKey=${POLYGON_API_KEY}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.results?.[0]?.t) {
+        const d = new Date(data.results[0].t);
+        const etStr = d.toLocaleString("en-US", { timeZone: "America/New_York" });
+        const etDate = new Date(etStr);
+        return `${etDate.getFullYear()}-${String(etDate.getMonth() + 1).padStart(2, '0')}-${String(etDate.getDate()).padStart(2, '0')}`;
+      }
+    }
+  } catch (e) {
+    console.warn("Prev close date fetch failed:", e);
+  }
+  // 최후의 fallback: UTC 기준 오늘
+  const now = new Date();
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`;
+}
+
+// ===== Main Handler =====
 Deno.serve(async (req) => {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -157,18 +204,16 @@ Deno.serve(async (req) => {
         ? Object.fromEntries(Object.entries(cache.data).filter(([k]) => requestedSet.has(k)))
         : cache.data;
 
-      // 캐시 응답에도 장 상태 추가
-      const etNowC = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
-      const etHrC = etNowC.getHours(), etMnC = etNowC.getMinutes(), etDyC = etNowC.getDay();
-      const isOpenC = etDyC >= 1 && etDyC <= 5 && ((etHrC === 9 && etMnC >= 30) || (etHrC >= 10 && etHrC < 16));
+      // 장 상태는 Polygon API에서 가져오기
+      const ms = await fetchMarketStatus();
 
       return new Response(JSON.stringify({
         count: Object.keys(filtered).length,
         source: cache.source,
         cached: true,
         live: cache.source === 'snapshot',
-        marketStatus: isOpenC ? "open" : "closed",
-        lastTradeDate: getLastTradingDate(),
+        marketStatus: ms.status,
+        lastTradeDate: cache.lastTradeDate,
         prices: filtered,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -177,22 +222,26 @@ Deno.serve(async (req) => {
 
     let priceMap: Record<string, any> = {};
     let source = "grouped";
+    let lastTradeDate = "";
 
     // 1차: Snapshot API 시도 (15분 지연 실시간)
     if (requestedTickers.length > 0) {
       const snapshot = await fetchSnapshot(requestedTickers);
       if (snapshot) {
-        priceMap = snapshot;
+        priceMap = snapshot.prices;
+        lastTradeDate = snapshot.lastTradeDate || "";
         source = "snapshot";
       }
     }
 
     // 2차: Snapshot 실패 또는 티커 미지정 → Grouped Daily fallback
     if (Object.keys(priceMap).length === 0) {
-      const tradeDate = getLastTradingDate();
+      // Polygon prev close에서 마지막 거래일 가져오기
+      const tradeDate = await fetchLastTradeDateFromPrev();
       console.log(`Snapshot 미사용, Grouped Daily fallback: ${tradeDate}`);
-      const grouped = await fetchGroupedDaily(tradeDate);
+      lastTradeDate = tradeDate;
 
+      const grouped = await fetchGroupedDaily(tradeDate);
       if (requestedSet) {
         for (const [k, v] of Object.entries(grouped)) {
           if (requestedSet.has(k)) priceMap[k] = v;
@@ -202,21 +251,22 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 캐시 업데이트
-    cache = { data: { ...cache?.data, ...priceMap }, timestamp: now, source };
+    // lastTradeDate가 아직 비어있으면 Polygon prev에서 가져오기
+    if (!lastTradeDate) {
+      lastTradeDate = await fetchLastTradeDateFromPrev();
+    }
 
-    // 장 상태 메타데이터 계산 (UTC 기반 ET 계산)
-    const etNow = getETNow();
-    const isWeekday = etNow.day >= 1 && etNow.day <= 5;
-    const isMarketHours = isWeekday && ((etNow.hour === 9 && etNow.min >= 30) || (etNow.hour >= 10 && etNow.hour < 16));
-    const marketStatus = isMarketHours ? "open" : "closed";
-    const lastTradeDate = getLastTradingDate();
+    // 장 상태는 Polygon Market Status API에서 가져오기
+    const ms = await fetchMarketStatus();
+
+    // 캐시 업데이트
+    cache = { data: { ...cache?.data, ...priceMap }, timestamp: now, source, lastTradeDate };
 
     return new Response(JSON.stringify({
       count: Object.keys(priceMap).length,
       source,
       live: source === "snapshot",
-      marketStatus,
+      marketStatus: ms.status,
       lastTradeDate,
       prices: priceMap,
     }), {
