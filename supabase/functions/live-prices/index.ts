@@ -107,28 +107,42 @@ async function fetchSnapshot(tickers: string[]): Promise<{ prices: Record<string
         for (const t of data.tickers) {
           const day = t.day || {};
           const prevDay = t.prevDay || {};
-          // 현재가: lastTrade 우선 (todaysChangePerc와 동일 기준), day.c fallback
+          const prevClose = prevDay.c || 0;
+
+          // 정규장 종가 (day.c)
+          const regularClose = (day.c && day.c > 0) ? day.c : prevClose;
+          if (regularClose <= 0) continue;
+
+          // 정규장 변동률 (day.c vs prevDay.c)
+          const regularChangePct = prevClose > 0
+            ? ((regularClose - prevClose) / prevClose) * 100 : 0;
+
+          // 마지막 체결가 (애프터마켓 포함)
           const lastTradePrice = t.lastTrade?.p || 0;
-          const closePrice = lastTradePrice > 0 ? lastTradePrice : ((day.c && day.c > 0) ? day.c : (prevDay.c || 0));
-          if (closePrice <= 0) continue;
 
-          // Polygon이 계산한 todaysChangePerc 사용 (StockDetailPage와 동일 소스)
-          // fallback: 직접 계산
-          let changePct = t.todaysChangePerc;
-          if (changePct == null || changePct === undefined) {
-            const prevClose = prevDay.c || day.o || closePrice;
-            changePct = prevClose > 0 ? ((closePrice - prevClose) / prevClose) * 100 : 0;
-          }
+          // 애프터마켓: lastTrade가 regularClose와 다르면 애프터 데이터 존재
+          const hasAfterHours = lastTradePrice > 0 && Math.abs(lastTradePrice - regularClose) > 0.001;
+          const ahChangePct = hasAfterHours && regularClose > 0
+            ? ((lastTradePrice - regularClose) / regularClose) * 100 : 0;
 
-          priceMap[t.ticker] = {
-            c: Math.round(closePrice * 100) / 100,
+          const entry: Record<string, any> = {
+            c: Math.round(regularClose * 100) / 100,       // 정규장 종가
+            pc: Math.round(prevClose * 100) / 100,          // 전일 종가
             o: Math.round((day.o || prevDay.o || 0) * 100) / 100,
             h: Math.round((day.h || prevDay.h || 0) * 100) / 100,
             l: Math.round((day.l || prevDay.l || 0) * 100) / 100,
-            ch: Math.round(changePct * 100) / 100,
-            v: day.v || prevDay.v || 0,           // 거래량
-            vw: day.vw || prevDay.vw || 0,        // 거래량가중평균가(VWAP)
+            ch: Math.round(regularChangePct * 100) / 100,   // 정규장 변동률
+            v: day.v || prevDay.v || 0,
+            vw: day.vw || prevDay.vw || 0,
           };
+
+          // 애프터마켓 데이터 (존재할 때만)
+          if (hasAfterHours) {
+            entry.ah = Math.round(lastTradePrice * 100) / 100;  // 애프터 가격
+            entry.ahCh = Math.round(ahChangePct * 100) / 100;   // 애프터 변동률
+          }
+
+          priceMap[t.ticker] = entry;
         }
       }
     }

@@ -1393,15 +1393,31 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
   // ---- Price info ----
   const priceInfo = useMemo(() => {
     if (!snapshot) return null;
-    const price = snapshot.day?.c || snapshot.prevDay?.c || snapshot.lastTrade?.p || 0;
-    const todaysChange = snapshot.todaysChange || 0;
-    const todaysChangePerc = snapshot.todaysChangePerc || 0;
+    const prevDayClose = snapshot.prevDay?.c || 0;
+    // 정규장 종가 (day.c 우선)
+    const regularClose = snapshot.day?.c || prevDayClose || 0;
+    const regularChange = prevDayClose > 0 ? regularClose - prevDayClose : 0;
+    const regularChangePerc = prevDayClose > 0 ? (regularChange / prevDayClose) * 100 : 0;
+
+    // 애프터마켓 (lastTrade.p가 regularClose와 다르면)
+    const lastTradeP = snapshot.lastTrade?.p || 0;
+    const hasAfterHours = lastTradeP > 0 && Math.abs(lastTradeP - regularClose) > 0.001;
+    const ahPrice = hasAfterHours ? lastTradeP : null;
+    const ahChange = hasAfterHours ? lastTradeP - regularClose : null;
+    const ahChangePerc = hasAfterHours && regularClose > 0 ? (ahChange / regularClose) * 100 : null;
+
     const dayVolume = snapshot.day?.v || 0;
     const dayOpen = snapshot.day?.o || 0;
     const dayHigh = snapshot.day?.h || 0;
     const dayLow = snapshot.day?.l || 0;
-    const prevDayClose = snapshot.prevDay?.c || 0;
-    return { price, change: todaysChange, changePerc: todaysChangePerc, volume: dayVolume, open: dayOpen, high: dayHigh, low: dayLow, prevClose: prevDayClose };
+    return {
+      price: regularClose,
+      change: regularChange,
+      changePerc: regularChangePerc,
+      volume: dayVolume, open: dayOpen, high: dayHigh, low: dayLow, prevClose: prevDayClose,
+      // 애프터마켓
+      ahPrice, ahChange, ahChangePerc,
+    };
   }, [snapshot]);
 
   // ---- Company details ----
@@ -1518,6 +1534,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
         <div className="text-right flex-shrink-0">
           {priceInfo ? (
             <>
+              {/* 정규장 가격 */}
               <div className="text-2xl font-bold tracking-tight" style={{ color: t.text }}>
                 ${priceInfo.price.toFixed(2)}
               </div>
@@ -1529,11 +1546,27 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
                   {priceInfo.change >= 0 ? '+' : ''}{priceInfo.change.toFixed(2)} ({priceInfo.changePerc >= 0 ? '+' : ''}{priceInfo.changePerc.toFixed(2)}%)
                 </span>
               </div>
-              <p className="text-[11px] mt-0.5" style={{ color: marketStatus === 'extended-hours' ? '#f59e0b' : t.textMuted }}>
-                {L.locale === 'ko'
-                  ? (marketStatus === 'extended-hours' ? '애프터마켓 · 전일 종가 대비 · 15분 지연' : '전일 종가 대비 · 15분 지연')
-                  : (marketStatus === 'extended-hours' ? 'After-Hours · vs prev close · 15min delayed' : 'vs prev close · 15min delayed')}
+              <p className="text-[11px] mt-0.5" style={{ color: t.textMuted }}>
+                {L.locale === 'ko' ? '전일 종가 대비 · 15분 지연' : 'vs prev close · 15min delayed'}
               </p>
+
+              {/* 애프터마켓 라인 (네이버 스타일) */}
+              {priceInfo.ahPrice != null && (
+                <div className="mt-1.5 pt-1.5" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
+                  <div className="flex items-center justify-end gap-1.5">
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
+                      style={{ background: '#f59e0b18', color: '#f59e0b' }}>
+                      {L.locale === 'ko' ? '애프터' : 'AH'}
+                    </span>
+                    <span className="text-sm font-bold" style={{ color: t.text }}>
+                      ${priceInfo.ahPrice.toFixed(2)}
+                    </span>
+                    <span className="text-xs font-semibold" style={{ color: priceInfo.ahChange >= 0 ? t.green : t.red }}>
+                      {priceInfo.ahChange >= 0 ? '+' : ''}{priceInfo.ahChange.toFixed(2)} ({priceInfo.ahChangePerc >= 0 ? '+' : ''}{priceInfo.ahChangePerc.toFixed(2)}%)
+                    </span>
+                  </div>
+                </div>
+              )}
             </>
           ) : loadingInfo ? (
             <div className="w-24 h-10 rounded-lg animate-pulse" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }} />

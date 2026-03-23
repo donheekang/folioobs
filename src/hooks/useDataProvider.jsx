@@ -1262,6 +1262,10 @@ export function DataProvider({ children }) {
               dailyChange: live.ch,
               volume: live.v || 0,
               vwap: live.vw || 0,
+              prevClose: live.pc || 0,
+              // 애프터마켓 데이터 (있을 때만)
+              afterHoursPrice: live.ah || null,
+              afterHoursChange: live.ahCh || null,
               quarterEnd: quarterEnd,
               quarterEndDate: existing?.quarterEndDate || null,
               sinceFiling: sinceFiling,

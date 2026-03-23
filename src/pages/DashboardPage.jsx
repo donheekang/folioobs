@@ -587,6 +587,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               volume: sp.volume || 0,
               vwap: sp.vwap || 0,
               tradingValue: (sp.volume || 0) * (sp.vwap || sp.current || 0),
+              afterHoursPrice: sp.afterHoursPrice || null,
+              afterHoursChange: sp.afterHoursChange || null,
               investors: [inv],
             });
           });
@@ -813,6 +815,15 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                               <div className="font-extrabold" style={{ color: changeColor, fontSize: i === 0 ? 14 : 12 }}>
                                 {isUp ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
                               </div>
+                              {stock.afterHoursPrice != null && (
+                                <div className="flex items-center justify-end gap-1 mt-0.5">
+                                  <span className="text-[9px] font-semibold px-1 py-0.5 rounded" style={{ background: '#f59e0b18', color: '#f59e0b' }}>AH</span>
+                                  <span className="text-[10px] font-bold" style={{ color: t.textSecondary }}>${stock.afterHoursPrice.toFixed(2)}</span>
+                                  <span className="text-[10px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
+                                    {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange.toFixed(2)}%
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -891,6 +902,14 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                         <div className="text-[11px] font-bold" style={{ color: changeColor }}>
                           {isUp ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
                         </div>
+                        {stock.afterHoursPrice != null && (
+                          <div className="flex items-center justify-end gap-1 mt-0.5">
+                            <span className="text-[8px] font-semibold px-1 rounded" style={{ background: '#f59e0b18', color: '#f59e0b' }}>AH</span>
+                            <span className="text-[10px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
+                              {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange.toFixed(2)}%
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
