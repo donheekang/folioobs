@@ -608,14 +608,23 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           const INITIAL_COUNT = 7;
           const MAX_COUNT = 100;
 
+          // 장외시간: 총 변동률(정규장 + AH/PM) 기준 정렬으로 실시간 랭킹
+          const getTotalChange = (s) => {
+            const base = s.dailyChange || 0;
+            if (!isExtended || s.afterHoursChange == null) return base;
+            // 정규장 변동률 + 애프터/프리마켓 변동률 (복리 합산)
+            const ahPct = s.afterHoursChange || 0;
+            return base + ahPct;
+          };
+
           const rankedAll = useMemo(() => {
             const items = liveStocks.filter(s => s.dailyChange !== null && s.dailyChange !== undefined);
-            if (rankTab === 'gainers') return [...items].sort((a, b) => b.dailyChange - a.dailyChange);
-            if (rankTab === 'losers') return [...items].sort((a, b) => a.dailyChange - b.dailyChange);
+            if (rankTab === 'gainers') return [...items].sort((a, b) => getTotalChange(b) - getTotalChange(a));
+            if (rankTab === 'losers') return [...items].sort((a, b) => getTotalChange(a) - getTotalChange(b));
             // volume — 거래액 있으면 거래액순, 없으면 보유 투자자 수(인기순)
             const hasVolume = items.some(s => s.tradingValue > 0);
             if (hasVolume) return [...items].sort((a, b) => b.tradingValue - a.tradingValue);
-            return [...items].sort((a, b) => b.investors.length - a.investors.length || b.dailyChange - a.dailyChange);
+            return [...items].sort((a, b) => b.investors.length - a.investors.length || getTotalChange(b) - getTotalChange(a));
           }, [rankTab]);
 
           const ranked = rankShowAll ? rankedAll.slice(0, MAX_COUNT) : rankedAll.slice(0, INITIAL_COUNT);
@@ -712,14 +721,15 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   `linear-gradient(135deg, ${activeColor}0C, ${activeColor}04)`,
                   `linear-gradient(135deg, ${activeColor}08, ${activeColor}03)`,
                 ];
-                const maxAbsChange = Math.max(...top3.map(s => Math.abs(s.dailyChange || 0)), 0.01);
+                const maxAbsChange = Math.max(...top3.map(s => Math.abs(getTotalChange(s))), 0.01);
 
                 return (
                   <div className="space-y-2 mb-2">
                     {top3.map((stock, i) => {
-                      const isUp = stock.dailyChange > 0;
-                      const changeColor = isUp ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted;
-                      const barWidth = Math.min(Math.abs(stock.dailyChange || 0) / maxAbsChange * 100, 100);
+                      const totalChg = getTotalChange(stock);
+                      const isUp = totalChg > 0;
+                      const changeColor = isUp ? '#22c55e' : totalChg < 0 ? '#ef4444' : t.textMuted;
+                      const barWidth = Math.min(Math.abs(totalChg) / maxAbsChange * 100, 100);
                       return (
                         <div key={stock.ticker}
                           className="relative rounded-2xl cursor-pointer overflow-hidden group"
@@ -816,17 +826,18 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                             {/* 가격 & 등락률 */}
                             <div className="text-right flex-shrink-0" style={{ minWidth: i === 0 ? 90 : 80 }}>
                               <div className="font-bold" style={{ color: t.text, fontSize: i === 0 ? 15 : 13 }}>
-                                ${stock.current.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                {stock.afterHoursPrice != null ? `$${stock.afterHoursPrice.toFixed(2)}` : `$${stock.current.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               </div>
                               <div className="font-extrabold" style={{ color: changeColor, fontSize: i === 0 ? 14 : 12 }}>
-                                {isUp ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
+                                {isUp ? '+' : ''}{totalChg.toFixed(2)}%
                               </div>
                               {stock.afterHoursPrice != null && (
-                                <div className="flex items-center justify-end gap-1 mt-0.5" style={{ color: t.textMuted }}>
-                                  <span className="text-[9px] font-semibold" style={{ color: extendedColor, opacity: 0.8 }}>{marketStatus === 'pre-market' ? 'PM' : 'AH'}</span>
-                                  <span className="text-[10px] font-semibold" style={{ color: t.textSecondary }}>{stock.afterHoursPrice.toFixed(2)}</span>
-                                  <span className="text-[10px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
-                                    {stock.afterHoursChange >= 0 ? '\u25B2' : '\u25BC'}{Math.abs(stock.afterHoursChange).toFixed(2)}%
+                                <div className="flex items-center justify-end gap-1 mt-0.5" style={{ opacity: 0.7 }}>
+                                  <span className="text-[9px]" style={{ color: t.textMuted }}>
+                                    {L.locale === 'ko' ? '정규장' : 'Reg'} {stock.dailyChange >= 0 ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
+                                  </span>
+                                  <span className="text-[9px]" style={{ color: extendedColor }}>
+                                    {marketStatus === 'pre-market' ? 'PM' : 'AH'} {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
                                   </span>
                                 </div>
                               )}
@@ -843,8 +854,9 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <div className="space-y-[1px]">
                 {ranked.slice(3).map((stock, i) => {
                   const rank = i + 4;
-                  const isUp = stock.dailyChange > 0;
-                  const changeColor = isUp ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted;
+                  const totalChg = getTotalChange(stock);
+                  const isUp = totalChg > 0;
+                  const changeColor = isUp ? '#22c55e' : totalChg < 0 ? '#ef4444' : t.textMuted;
                   return (
                     <div key={stock.ticker}
                       className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
@@ -903,17 +915,18 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                       {/* 가격 & 등락률 */}
                       <div className="text-right flex-shrink-0" style={{ minWidth: 80 }}>
                         <div className="text-[12px] font-semibold" style={{ color: t.text }}>
-                          ${stock.current.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {stock.afterHoursPrice != null ? `$${stock.afterHoursPrice.toFixed(2)}` : `$${stock.current.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                         </div>
                         <div className="text-[11px] font-bold" style={{ color: changeColor }}>
-                          {isUp ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
+                          {isUp ? '+' : ''}{totalChg.toFixed(2)}%
                         </div>
                         {stock.afterHoursPrice != null && (
-                          <div className="flex items-center justify-end gap-1 mt-0.5" style={{ color: t.textMuted }}>
-                            <span className="text-[8px] font-semibold" style={{ color: extendedColor, opacity: 0.8 }}>{marketStatus === 'pre-market' ? 'PM' : 'AH'}</span>
-                            <span className="text-[9px] font-semibold" style={{ color: t.textSecondary }}>{stock.afterHoursPrice.toFixed(2)}</span>
-                            <span className="text-[9px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
-                              {stock.afterHoursChange >= 0 ? '\u25B2' : '\u25BC'}{Math.abs(stock.afterHoursChange).toFixed(2)}%
+                          <div className="flex items-center justify-end gap-1 mt-0.5" style={{ opacity: 0.7 }}>
+                            <span className="text-[8px]" style={{ color: t.textMuted }}>
+                              {stock.dailyChange >= 0 ? '+' : ''}{stock.dailyChange?.toFixed(1)}%
+                            </span>
+                            <span className="text-[8px]" style={{ color: extendedColor }}>
+                              {marketStatus === 'pre-market' ? 'PM' : 'AH'} {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(1)}%
                             </span>
                           </div>
                         )}
