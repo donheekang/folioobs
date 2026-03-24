@@ -610,6 +610,57 @@ function ArticleVisual({ articleId, className }) {
 // ========== FolioObs 뉴스 기사 데이터 ==========
 const NEWS_ARTICLES = [
   {
+    id: "cathie-wood-march-23-trades",
+    date: "2026-03-23",
+    category: "일별 매매",
+    categoryEn: "DAILY TRADES",
+    categoryColor: "green",
+    title: "캐시 우드 3월 23일 매매 — TXG 9.8만주 매수, BLSH 연속 매도",
+    titleEn: "Cathie Wood March 23 Trades — TXG 98K Shares Buy, BLSH Consecutive Sell",
+    summary: "ARK Invest가 3월 23일 10X Genomics(TXG)를 2개 펀드에서 총 9.8만주 매수하고, Bullish(BLSH)를 3.9만주 추가 매도했습니다. 크립토→유전체학 리밸런싱 3일 연속.",
+    summaryEn: "ARK Invest bought 98K shares of 10X Genomics (TXG) across 2 funds on March 23, while selling another 39K shares of Bullish (BLSH). Crypto→Genomics rebalancing continues for the 3rd day.",
+    tickers: ["TXG", "BLSH"],
+    readTime: "3 min",
+    content: `캐시 우드가 3월 23일에도 유전체학 베팅을 이어갔습니다. 10X Genomics(TXG)를 ARKK와 ARKG 두 펀드에 걸쳐 총 98,722주 매수하며 바닥권 공격적 저점매수를 지속했습니다. 동시에 크립토 관련주 Bullish(BLSH)를 3.9만주 추가 매도했습니다.
+
+■ 매수 종목
+
+TXG (10X Genomics) — ARKK 84,342주 (비중 0.0261%) + ARKG 14,380주 (비중 0.0269%)
+3/20에 이어 연속 매수이며, 최근 2주간 매수·매도를 반복하며 물량을 확보하는 전략입니다. TXG는 단일세포 유전체 분석 분야의 글로벌 리더로, 52주 저점 근처에서 거래되고 있습니다. 캐시 우드는 유전체학 기술이 AI와 결합하여 정밀의료 혁명을 이끌 것으로 보고 있으며, 지금이 매수 적기라고 판단하는 것으로 보입니다.
+
+■ 매도 종목
+
+BLSH (Bullish) — ARKK 31,154주 (비중 0.0195%) + ARKW 8,208주 (비중 0.0203%)
+3/20(10.3만주), 3/23(3.9만주)으로 이틀 연속 대량 매도. 크립토 거래소 Bullish에 대한 비중을 적극적으로 줄이고 있습니다. 현재 포트폴리오 비중 약 1.93%에서 더 낮아질 전망입니다.
+
+■ 핵심 인사이트: 크립토→유전체학 전환 가속
+
+3/19, 3/20, 3/23 3일 연속으로 "BLSH 매도 + TXG 매수" 패턴이 반복되고 있습니다. 이는 우연이 아닌 체계적인 섹터 리밸런싱입니다. 캐시 우드가 크립토/블록체인 수익 실현 자금을 유전체학 저점매수에 재배분하는 중기 전략이 뚜렷해졌습니다.
+
+ARK의 '파괴적 혁신' 테마 내에서 유전체학의 비중을 높이려는 전략은, AI 기반 신약 개발과 정밀의료가 2026년 하반기부터 본격적인 상용화 단계에 진입할 것이라는 캐시 우드의 확신을 반영합니다.
+
+※ 본 기사는 ARK Invest 공개 매매 데이터 기반이며, 투자 권유가 아닙니다.`,
+    contentEn: `Cathie Wood continued her genomics bet on March 23. She bought a total of 98,722 shares of 10X Genomics (TXG) across ARKK and ARKG, continuing aggressive bottom-fishing. Meanwhile, she sold another 39,362 shares of crypto play Bullish (BLSH).
+
+■ Buy
+
+TXG (10X Genomics) — ARKK 84,342 shares (0.0261%) + ARKG 14,380 shares (0.0269%)
+Consecutive buy after 3/20, alternating between buying and selling over the past 2 weeks to accumulate shares. TXG is the global leader in single-cell genomic analysis, trading near 52-week lows. Cathie Wood believes genomics technology combined with AI will lead the precision medicine revolution, and now is the time to buy.
+
+■ Sell
+
+BLSH (Bullish) — ARKK 31,154 shares (0.0195%) + ARKW 8,208 shares (0.0203%)
+Heavy selling for the 2nd consecutive day: 103K shares on 3/20 and 39K on 3/23. Actively reducing exposure to crypto exchange Bullish. Currently at ~1.93% portfolio weight, expected to decrease further.
+
+■ Key Insight: Crypto→Genomics Rotation Accelerates
+
+For the 3rd consecutive day (3/19, 3/20, 3/23), the "sell BLSH + buy TXG" pattern repeats. This is not coincidence but systematic sector rebalancing. Cathie Wood's medium-term strategy of reallocating crypto/blockchain profits into genomics bottom-fishing has become unmistakable.
+
+The strategy to increase genomics weight within ARK's 'disruptive innovation' theme reflects Cathie Wood's conviction that AI-powered drug development and precision medicine will enter commercial deployment in H2 2026.
+
+※ This article is based on publicly available ARK Invest trade data and is not investment advice.`,
+  },
+  {
     id: "buffett-q4-2025-new-buys",
     date: "2026-03-20",
     category: "속보",
