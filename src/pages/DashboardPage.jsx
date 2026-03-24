@@ -600,7 +600,68 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           });
         });
 
-        if (liveStocks.length === 0) return null;
+        // 실시간 시세 아직 미도착(marketStatus unknown) → 스켈레톤 표시
+        if (liveStocks.length === 0 || marketStatus === 'unknown') {
+          return (
+            <section className="hero-enter hero-enter-5 relative overflow-hidden" style={{
+              background: t.name === 'dark'
+                ? 'linear-gradient(160deg, rgba(20,20,20,0.95), rgba(12,12,12,0.98))'
+                : 'linear-gradient(160deg, rgba(255,255,255,0.98), rgba(248,248,252,1))',
+              border: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+              borderRadius: '20px',
+              padding: '24px',
+            }}>
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{
+                  background: `linear-gradient(135deg, ${t.accent}20, ${t.accent}08)`,
+                }}>
+                  <Radio size={15} style={{ color: t.accent }} />
+                </div>
+                <div>
+                  <h2 className="text-[17px] font-bold tracking-tight" style={{ color: t.text }}>
+                    {L.locale === 'ko' ? '오늘의 월가 종목' : "Wall St. Today"}
+                  </h2>
+                  <p className="text-[10px] mt-0.5" style={{ color: t.textMuted }}>
+                    {L.locale === 'ko' ? '실시간 시세 불러오는 중...' : 'Loading live prices...'}
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {[1,2,3].map(i => (
+                  <div key={i} className="rounded-2xl p-4" style={{
+                    background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                  }}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="skeleton w-8 h-8 rounded-full" />
+                        <div className="space-y-1.5">
+                          <div className="skeleton h-4 w-16 rounded" />
+                          <div className="skeleton h-3 w-24 rounded" />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5 text-right">
+                        <div className="skeleton h-4 w-16 rounded ml-auto" />
+                        <div className="skeleton h-3 w-12 rounded ml-auto" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {[4,5,6,7].map(i => (
+                  <div key={i} className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-2">
+                      <div className="skeleton w-5 h-5 rounded-full" />
+                      <div className="skeleton h-3.5 w-14 rounded" />
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="skeleton h-3.5 w-14 rounded" />
+                      <div className="skeleton h-3 w-12 rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        }
 
         const TopRankingSection = () => {
           const [rankTab, setRankTab] = useState('gainers'); // 'gainers' | 'volume' | 'losers'
