@@ -166,6 +166,115 @@ async function fetchSnapshot(tickers: string[]): Promise<{ prices: Record<string
   }
 }
 
+// ===== Yahoo Finance: AH/PM 보조 데이터 =====
+// Polygon에서 AH 데이터가 없는 종목들의 after-hours/pre-market 가격을 Yahoo에서 보충
+async function fetchYahooExtendedHours(tickers: string[]): Promise<Record<string, { ah?: number; ahCh?: number; pm?: number; pmCh?: number }>> {
+  if (tickers.length === 0) return {};
+  const result: Record<string, { ah?: number; ahCh?: number; pm?: number; pmCh?: number }> = {};
+
+  try {
+    // Yahoo Finance v8 quote API — 한번에 여러 종목 조회 가능
+    const symbols = tickers.join(",");
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbols}?range=1d&interval=1d&includePrePost=true`;
+
+    // 개별 조회 방식 (v8 chart는 단일 종목만) → v7 quote 사용
+    const quoteUrl = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&fields=regularMarketPrice,regularMarketPreviousClose,postMarketPrice,postMarketChange,postMarketChangePercent,preMarketPrice,preMarketChange,preMarketChangePercent`;
+    const res = await fetch(quoteUrl, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
+
+    if (!res.ok) {
+      console.warn(`Yahoo Finance API ${res.status}`);
+      // v7 실패 시 개별 v8 chart로 fallback
+      return await fetchYahooIndividual(tickers);
+    }
+
+    const data = await res.json();
+    const quotes = data?.quoteResponse?.result || [];
+
+    for (const q of quotes) {
+      const ticker = q.symbol;
+      if (!ticker) continue;
+
+      const regularClose = q.regularMarketPrice || 0;
+      if (regularClose <= 0) continue;
+
+      const entry: { ah?: number; ahCh?: number; pm?: number; pmCh?: number } = {};
+
+      // After-hours
+      if (q.postMarketPrice && q.postMarketPrice > 0) {
+        entry.ah = Math.round(q.postMarketPrice * 100) / 100;
+        entry.ahCh = q.postMarketChangePercent != null
+          ? Math.round(q.postMarketChangePercent * 100) / 100
+          : Math.round(((q.postMarketPrice - regularClose) / regularClose) * 10000) / 100;
+      }
+
+      // Pre-market
+      if (q.preMarketPrice && q.preMarketPrice > 0) {
+        entry.pm = Math.round(q.preMarketPrice * 100) / 100;
+        entry.pmCh = q.preMarketChangePercent != null
+          ? Math.round(q.preMarketChangePercent * 100) / 100
+          : Math.round(((q.preMarketPrice - regularClose) / regularClose) * 10000) / 100;
+      }
+
+      if (entry.ah || entry.pm) {
+        result[ticker] = entry;
+      }
+    }
+  } catch (e) {
+    console.warn("Yahoo Finance quote failed:", e);
+    return await fetchYahooIndividual(tickers);
+  }
+
+  return result;
+}
+
+// Yahoo v8 chart 개별 조회 (v7 실패 시 fallback)
+async function fetchYahooIndividual(tickers: string[]): Promise<Record<string, { ah?: number; ahCh?: number; pm?: number; pmCh?: number }>> {
+  const result: Record<string, { ah?: number; ahCh?: number; pm?: number; pmCh?: number }> = {};
+  // 병렬 처리 (최대 10개씩)
+  const BATCH = 10;
+  for (let i = 0; i < tickers.length; i += BATCH) {
+    const batch = tickers.slice(i, i + BATCH);
+    const promises = batch.map(async (ticker) => {
+      try {
+        const url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?range=1d&interval=1m&includePrePost=true`;
+        const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const meta = data?.chart?.result?.[0]?.meta;
+        if (!meta) return;
+
+        const regularClose = meta.regularMarketPrice || 0;
+        if (regularClose <= 0) return;
+
+        const entry: { ah?: number; ahCh?: number; pm?: number; pmCh?: number } = {};
+
+        if (meta.postMarketPrice && meta.postMarketPrice > 0 && meta.postMarketPrice !== regularClose) {
+          entry.ah = Math.round(meta.postMarketPrice * 100) / 100;
+          const diff = meta.postMarketPrice - regularClose;
+          entry.ahCh = Math.round((diff / regularClose) * 10000) / 100;
+        }
+
+        if (meta.preMarketPrice && meta.preMarketPrice > 0 && meta.preMarketPrice !== regularClose) {
+          entry.pm = Math.round(meta.preMarketPrice * 100) / 100;
+          const diff = meta.preMarketPrice - regularClose;
+          entry.pmCh = Math.round((diff / regularClose) * 10000) / 100;
+        }
+
+        if (entry.ah || entry.pm) {
+          result[ticker] = entry;
+        }
+      } catch (e) {
+        // 개별 종목 실패는 무시
+      }
+    });
+    await Promise.all(promises);
+  }
+  return result;
+}
+
 // ===== Fallback: Grouped Daily =====
 async function fetchGroupedDaily(date: string): Promise<Record<string, any>> {
   const url = `https://api.polygon.io/v2/aggs/grouped/locale/us/market/stocks/${date}?adjusted=true&apiKey=${POLYGON_API_KEY}`;
@@ -297,6 +406,42 @@ Deno.serve(async (req) => {
 
     // 장 상태는 Polygon Market Status API에서 가져오기
     const ms = await fetchMarketStatus();
+
+    // 3차: Yahoo Finance로 AH/PM 데이터 보충 (장외 시간일 때만)
+    if (ms.status === "after-hours" || ms.status === "pre-market") {
+      // Polygon에서 AH 데이터 없는 종목 추출
+      const tickersWithoutAH = Object.entries(priceMap)
+        .filter(([_, v]) => !v.ah)
+        .map(([k]) => k);
+
+      if (tickersWithoutAH.length > 0) {
+        console.log(`[Yahoo] AH 데이터 없는 ${tickersWithoutAH.length}개 종목 Yahoo에서 보충 시도`);
+        try {
+          const yahooData = await fetchYahooExtendedHours(tickersWithoutAH);
+          let filled = 0;
+          for (const [ticker, yData] of Object.entries(yahooData)) {
+            if (priceMap[ticker]) {
+              // 애프터마켓
+              if (yData.ah && !priceMap[ticker].ah) {
+                priceMap[ticker].ah = yData.ah;
+                priceMap[ticker].ahCh = yData.ahCh || 0;
+                filled++;
+              }
+              // 프리마켓
+              if (yData.pm && !priceMap[ticker].ah) {
+                // PM 시간에는 pm 데이터를 ah 필드에 넣어서 프론트엔드 호환
+                priceMap[ticker].ah = yData.pm;
+                priceMap[ticker].ahCh = yData.pmCh || 0;
+                filled++;
+              }
+            }
+          }
+          console.log(`[Yahoo] ${filled}개 종목 AH/PM 데이터 보충 완료`);
+        } catch (e) {
+          console.warn("[Yahoo] 보충 실패 (Polygon 데이터만 사용):", e);
+        }
+      }
+    }
 
     // 캐시 업데이트
     cache = { data: { ...cache?.data, ...priceMap }, timestamp: now, source, lastTradeDate };
