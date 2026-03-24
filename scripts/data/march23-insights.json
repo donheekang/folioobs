@@ -1,26 +1,26 @@
 [
   {
-    "title": "TXG 9.8만주 매수 — 바닥권 공격적 저점매수 지속",
-    "title_en": "TXG 98K Shares Buy — Aggressive Bottom-Fishing Continues",
-    "desc": "10X Genomics(TXG)를 ARKK에서 84,342주, ARKG에서 14,380주 총 98,722주 매수. 3/20에 이어 연속 매수이며 2개 펀드 동시 투입. 최근 2주간 TXG를 매수와 매도를 반복하며 물량을 확보하는 전략으로, 유전체학 섹터에 대한 강한 확신을 보여줌.",
-    "desc_en": "Bought 84,342 shares in ARKK and 14,380 in ARKG, totaling 98,722 shares. Consecutive buy after 3/20, deployed across 2 funds simultaneously. Over the past 2 weeks, alternating between buying and selling TXG to accumulate shares, showing strong conviction in the genomics sector.",
-    "tag": "매수",
-    "confidence": 93
+    "title": "TXG 누적 49만주 돌파 — 3일간 5개 펀드서 집중 매집",
+    "title_en": "TXG Cumulative 490K+ Shares — Concentrated Buying Across 5 Fund Entries in 3 Days",
+    "desc": "10X Genomics(TXG) 3/23 추가 98,722주 매수(ARKK 84,342 + ARKG 14,380). 3/19~3/23 3일간 누적 매수 약 49만주로 ARK 전체 TXG 보유량이 급증. 3/20 대비 차이점: 단순 '저점매수 지속'이 아니라 누적 규모가 ARK 포트폴리오 내 TXG 비중을 유의미하게 끌어올리는 수준에 도달. 캐시 우드가 현재 주가($5~6대)를 '구조적 저평가'로 판단하고 있음을 시사.",
+    "desc_en": "Added 98,722 TXG shares on 3/23 (ARKK 84,342 + ARKG 14,380). Cumulative ~490K shares bought across 3/19-3/23, significantly increasing TXG's weight in ARK portfolios. Unlike the 3/20 'bottom-fishing continues' narrative, the cumulative scale now materially shifts TXG's portfolio weight — suggesting Cathie Wood views the $5-6 range as structurally undervalued.",
+    "tag": "핵심매수",
+    "confidence": 95
   },
   {
-    "title": "BLSH 3.9만주 추가 매도 — 크립토 비중 축소 지속",
-    "title_en": "BLSH 39K Shares Sold — Continued Crypto Weight Reduction",
-    "desc": "Bullish(BLSH)를 ARKK에서 31,154주, ARKW에서 8,208주 총 39,362주 매도. 3/20(10.3만주 매도)에 이어 연속 매도로 크립토 익스포저를 지속적으로 줄이는 중. BLSH는 현재 포트폴리오 비중 1.93%에서 더 낮아질 전망.",
-    "desc_en": "Sold 31,154 shares in ARKK and 8,208 in ARKW, totaling 39,362 shares. Consecutive sell after 3/20 (103K shares sold), continuing to reduce crypto exposure. BLSH currently at 1.93% portfolio weight, expected to decrease further.",
+    "title": "BLSH 포트폴리오 비중 2.5%→1.5%대 급감 — 크립토 엑싯 가속",
+    "title_en": "BLSH Portfolio Weight Drops from ~2.5% to ~1.5% — Crypto Exit Accelerating",
+    "desc": "Bullish(BLSH) 3/23 추가 39,362주 매도(ARKK 31,154 + ARKW 8,208). 3/20 대규모 매도(10.3만주)에 이어 연속 매도. 2주간 총 14만주+ 매도로 BLSH 포트폴리오 비중이 약 2.5%에서 1.5%대로 급감. 3/20에는 CRCL도 동시 매도했으나 3/23은 BLSH 단독 매도로, 크립토 섹터 내에서도 선별적 정리가 진행 중.",
+    "desc_en": "Sold 39,362 BLSH shares on 3/23 (ARKK 31,154 + ARKW 8,208). Following the massive 103K-share sell on 3/20, total 140K+ shares sold over 2 weeks, dropping BLSH portfolio weight from ~2.5% to ~1.5%. Unlike 3/20 which also dumped CRCL, 3/23 is BLSH-only — indicating selective liquidation within the crypto sector.",
     "tag": "비중축소",
-    "confidence": 91
+    "confidence": 92
   },
   {
-    "title": "크립토→유전체학 리밸런싱 패턴 3일 연속 확인",
-    "title_en": "Crypto→Genomics Rebalancing Pattern Confirmed for 3rd Consecutive Day",
-    "desc": "3/19, 3/20, 3/23 3일 연속으로 BLSH(크립토) 매도 + TXG(유전체학) 매수 패턴이 반복. 캐시 우드가 크립토/블록체인 수익 실현 자금을 바이오테크 저점매수에 체계적으로 재배분하는 전략이 더욱 뚜렷해짐. 이는 ARK의 '파괴적 혁신' 테마 내에서 유전체학의 비중을 높이려는 중기 전략.",
-    "desc_en": "For the 3rd consecutive day (3/19, 3/20, 3/23), the BLSH sell + TXG buy pattern repeats. Cathie Wood's systematic reallocation of crypto/blockchain profits into biotech bottom-fishing becomes increasingly clear. This represents a medium-term strategy to increase genomics weight within ARK's 'disruptive innovation' theme.",
-    "tag": "전략",
-    "confidence": 94
+    "title": "BLSH→TXG 자금이동 3일 연속 — 단기 트레이딩 아닌 중기 전략 확정",
+    "title_en": "BLSH→TXG Capital Rotation 3 Days Running — Medium-Term Strategy Confirmed",
+    "desc": "3/19, 3/20, 3/23 연속으로 동일한 'BLSH 매도 + TXG 매수' 패턴 반복. 3/20 인사이트에서 '크립토→SaaS·바이오 전환'을 짚었다면, 3일 연속 확인은 이것이 일회성 리밸런싱이 아닌 확정된 중기 포트폴리오 재편 전략임을 증명. 특히 FIG(SaaS) 매수 없이 TXG(유전체학) 단독 매수만 지속되어, 자금 흐름의 최종 목적지가 유전체학임이 명확해짐.",
+    "desc_en": "The identical 'sell BLSH + buy TXG' pattern repeated for the 3rd consecutive day (3/19, 3/20, 3/23). While the 3/20 insight noted a 'crypto→SaaS & biotech rotation,' 3 consecutive days confirms this is not one-off rebalancing but a committed medium-term portfolio restructuring. Notably, with no FIG (SaaS) buying on 3/23, only TXG (genomics) — clarifying that genomics is the ultimate destination for these capital flows.",
+    "tag": "전략확정",
+    "confidence": 96
   }
 ]

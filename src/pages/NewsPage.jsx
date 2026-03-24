@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Clock, ChevronRight, ArrowLeft, TrendingUp, TrendingDown, Zap, AlertCircle, BarChart3, Activity, ExternalLink } from "lucide-react";
 import { useLocale } from "../hooks/useLocale";
+import { supabase } from "../lib/supabase";
 
 // ========== SVG 일러스트 컴포넌트 (Bloomberg Terminal v2) ==========
 const F = "monospace"; // font shorthand
@@ -562,6 +563,7 @@ const ARTICLE_ILLUSTRATIONS = {
 
 // AI 생성 이미지 매핑 (있으면 우선 사용, 없으면 SVG 폴백)
 const ARTICLE_IMAGES = {
+  "cathie-wood-march-23-trades": "/news/cathie-wood-daily.png",
   "buffett-q4-2025-new-buys": "/news/buffett-q4.png",
   "cathie-wood-march-20-trades": "/news/cathie-wood-daily.png",
   "top5-most-bought-q4-2025": "/news/top5-consensus.png",
@@ -1689,27 +1691,82 @@ function TickerTape() {
   );
 }
 
+// Supabase → camelCase 변환
+function mapArticle(row) {
+  return {
+    id: row.id,
+    date: row.date,
+    category: row.category,
+    categoryEn: row.category_en,
+    categoryColor: row.category_color,
+    title: row.title,
+    titleEn: row.title_en,
+    summary: row.summary,
+    summaryEn: row.summary_en,
+    tickers: row.tickers || [],
+    readTime: row.read_time,
+    content: row.content,
+    contentEn: row.content_en,
+    imageUrl: row.image_url,
+  };
+}
+
 // ========== 뉴스 메인 (Bloomberg Terminal Style) ==========
 export default function NewsPage() {
   const L = useLocale();
   const isEn = L.locale === 'en';
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Supabase에서 뉴스 불러오기
+  useEffect(() => {
+    async function fetchNews() {
+      const { data, error } = await supabase
+        .from('news_articles')
+        .select('*')
+        .order('date', { ascending: false });
+      if (!error && data) {
+        setArticles(data.map(mapArticle));
+      }
+      setLoading(false);
+    }
+    fetchNews();
+  }, []);
 
   const categories = useMemo(() => {
-    const cats = [...new Set(NEWS_ARTICLES.map(p => isEn ? p.categoryEn : p.category))];
+    const cats = [...new Set(articles.map(p => isEn ? p.categoryEn : p.category))];
     return ['all', ...cats];
-  }, [isEn]);
+  }, [isEn, articles]);
 
   const filteredArticles = useMemo(() => {
-    if (selectedCategory === 'all') return NEWS_ARTICLES;
-    return NEWS_ARTICLES.filter(p =>
+    if (selectedCategory === 'all') return articles;
+    return articles.filter(p =>
       (isEn ? p.categoryEn : p.category) === selectedCategory
     );
-  }, [selectedCategory, isEn]);
+  }, [selectedCategory, isEn, articles]);
 
   if (selectedArticle) {
     return <NewsArticleView article={selectedArticle} onBack={() => setSelectedArticle(null)} L={L} />;
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto">
+        <div className="flex items-center gap-3 mb-6">
+          <Activity className="text-amber-400" size={20} />
+          <h1 className="text-lg font-bold font-mono tracking-tight text-white">
+            FOLIOBS <span className="text-amber-400">TERMINAL</span>
+          </h1>
+        </div>
+        <div className="space-y-4">
+          {[1,2,3].map(i => (
+            <div key={i} className="h-32 bg-gray-900 rounded-lg animate-pulse border border-gray-800" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   const headline = filteredArticles[0];
@@ -1751,7 +1808,7 @@ export default function NewsPage() {
       {/* ===== Category Filter ===== */}
       <div className="flex gap-2 mb-6 flex-wrap">
         {categories.map(cat => {
-          const article = NEWS_ARTICLES.find(a => (isEn ? a.categoryEn : a.category) === cat);
+          const article = articles.find(a => (isEn ? a.categoryEn : a.category) === cat);
           const isActive = selectedCategory === cat;
           return (
             <button
