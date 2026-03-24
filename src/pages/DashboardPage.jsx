@@ -902,8 +902,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                               <div className="font-extrabold" style={{ color: stock.dailyChange > 0 ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted, fontSize: i === 0 ? 14 : 12 }}>
                                 {stock.dailyChange > 0 ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
                               </div>
-                              {/* 애프터/프리마켓 */}
-                              {stock.afterHoursPrice != null && (
+                              {/* 애프터/프리마켓 (장외 시간에만 표시) */}
+                              {isExtended && stock.afterHoursPrice != null && (
                                 <div className="mt-1 pt-1" style={{ borderTop: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
                                   <div className="flex items-center justify-end gap-1">
                                     <span className="text-[9px] font-semibold" style={{ color: extendedColor }}>{marketStatus === 'pre-market' ? 'Pre-Market' : 'After Market'}</span>
@@ -994,8 +994,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                         <div className="text-[11px] font-bold" style={{ color: stock.dailyChange > 0 ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted }}>
                           {stock.dailyChange > 0 ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
                         </div>
-                        {/* 애프터/프리마켓 */}
-                        {stock.afterHoursPrice != null && (
+                        {/* 애프터/프리마켓 (장외 시간에만 표시) */}
+                        {isExtended && stock.afterHoursPrice != null && (
                           <div className="flex items-center justify-end gap-1 mt-0.5">
                             <span className="text-[8px] font-semibold" style={{ color: extendedColor }}>{marketStatus === 'pre-market' ? 'Pre-Market' : 'After Market'}</span>
                             <span className="text-[9px] font-semibold" style={{ color: t.textSecondary }}>${stock.afterHoursPrice.toFixed(2)}</span>

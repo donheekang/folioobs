@@ -1557,8 +1557,8 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
                 {L.locale === 'ko' ? '전일 종가 대비 · 15분 지연' : 'vs prev close · 15min delayed'}
               </p>
 
-              {/* 프리마켓/애프터마켓 라인 (네이버 스타일) */}
-              {priceInfo.ahPrice != null && (() => {
+              {/* 프리마켓/애프터마켓 라인 (장외 시간에만 표시) */}
+              {(marketStatus === 'pre-market' || marketStatus === 'after-hours') && priceInfo.ahPrice != null && (() => {
                 const ahUp = priceInfo.ahChange >= 0;
                 const ahColor = ahUp ? t.green : t.red;
                 const isPre = marketStatus === 'pre-market';
