@@ -60,6 +60,15 @@ export function createLocaleValue(locale) {
     // 분기 포맷 — 짧은 형태 (대시보드 카드 등에서 줄바꿈 방지)
     quarter: (q) => {
       if (!q) return '';
+      // 202601-0324 형태 (일별 AI 인사이트: YYYYQQ-MMDD)
+      const m0 = q.match(/^(\d{4})(\d{2})-(\d{2})(\d{2})$/);
+      if (m0) {
+        const yr = m0[1].slice(2);
+        const qNum = parseInt(m0[2]);
+        const mm = parseInt(m0[3]);
+        const dd = parseInt(m0[4]);
+        return `Q${qNum}'${yr} (${mm}/${dd})`;
+      }
       // Q1'24 형태
       const m1 = q.match(/^Q(\d)'(\d{2})$/);
       if (m1) return locale === 'ko' ? `'${m1[2]} Q${m1[1]}` : `Q${m1[1]} '${m1[2]}`;

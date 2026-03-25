@@ -28,6 +28,9 @@ function formatQuarterLabel(q) {
   // 일별 인사이트 형식: 2026Q1-0306 → "Q1'26 (3/6)"
   const daily = q.match(/^(\d{4})Q(\d)-(\d{2})(\d{2})$/);
   if (daily) return `Q${daily[2]}'${daily[1].slice(2)} (${parseInt(daily[3])}/${parseInt(daily[4])})`;
+  // 일별 인사이트 형식 (Q 없음): 202601-0324 → "Q1'26 (3/24)"
+  const daily2 = q.match(/^(\d{4})(\d{2})-(\d{2})(\d{2})$/);
+  if (daily2) return `Q${parseInt(daily2[2])}'${daily2[1].slice(2)} (${parseInt(daily2[3])}/${parseInt(daily2[4])})`;
   // 분기별 형식: 2026Q1 → "Q1'26"
   const m = q.match(/^(\d{4})Q(\d)$/);
   if (!m) return q;

@@ -650,7 +650,8 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
           const mm = String(d.getMonth()+1).padStart(2,'0');
           const dd = String(d.getDate()).padStart(2,'0');
           const qKey = `${d.getFullYear()}Q${q}-${mm}${dd}`;
-          aiData = invInsights[qKey] || null;
+          const qKeyAlt = `${d.getFullYear()}${String(q).padStart(2,'0')}-${mm}${dd}`;
+          aiData = invInsights[qKey] || invInsights[qKeyAlt] || null;
         }
         if (!aiData && !isSelectedNoTradeDay) aiData = invInsights._latest || null;
         // 거래 없음 날짜에는 인사이트 섹션 전체 숨김

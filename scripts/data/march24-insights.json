@@ -1,0 +1,26 @@
+[
+  {
+    "title": "CRCL 16만주 '반전 매수' — 4일 전 매도에서 3개 펀드 동시 매수로 전환",
+    "title_en": "CRCL 161K Shares 'Reversal Buy' — From Selling 4 Days Ago to Buying Across 3 Funds",
+    "desc": "Circle(CRCL)을 ARKK(116,123주) + ARKW(30,123주) + ARKF(15,267주) 3개 펀드에서 총 161,513주 매수. 불과 4일 전(3/20) CRCL을 매도했던 캐시 우드가 급반전. 3개 펀드 동시 매수는 단순 리밸런싱이 아닌 전략적 판단 변경을 의미. 스테이블코인 규제 진전이나 IPO 이후 밸류에이션 재평가가 배경으로 추정.",
+    "desc_en": "Bought 161,513 CRCL shares across ARKK (116,123) + ARKW (30,123) + ARKF (15,267). Just 4 days after selling CRCL on 3/20, Cathie Wood reverses course. Simultaneous buying across 3 funds signals a strategic reassessment, not simple rebalancing. Likely driven by stablecoin regulatory progress or post-IPO valuation recalculation.",
+    "tag": "반전매수",
+    "confidence": 96
+  },
+  {
+    "title": "ROKU·TWST 대량 매도 — 스트리밍·합성생물 비중 급축소",
+    "title_en": "ROKU & TWST Massive Sells — Streaming & Synthetic Biology Weight Slashed",
+    "desc": "ROKU를 3개 펀드(ARKK+ARKW+ARKF)에서 총 54,640주, TWST를 ARKK에서 190,100주 대량 매도. ROKU는 최근 주가 반등 구간에서 차익실현, TWST는 합성생물학 섹터 비중을 대폭 축소. 매도 자금의 상당 부분이 CRCL 매수에 투입된 것으로 보이며, '바이오→핀테크' 자금 이동이 새롭게 포착됨.",
+    "desc_en": "Sold ROKU across 3 funds totaling 54,640 shares and TWST 190,100 shares from ARKK. ROKU profit-taking during recent price recovery; TWST significantly reduces synthetic biology exposure. Sale proceeds appear directed toward CRCL purchase, revealing a new 'biotech→fintech' capital flow.",
+    "tag": "대량매도",
+    "confidence": 93
+  },
+  {
+    "title": "4일 연속 'BLSH 매도 + TXG 매수' — 크립토→유전체학 전환 고착화",
+    "title_en": "4th Consecutive Day of BLSH Sell + TXG Buy — Crypto→Genomics Rotation Solidified",
+    "desc": "BLSH 41,064주 매도(4개 펀드) + TXG 22,538주 매수(ARKK+ARKG). 3/19부터 4일 연속 동일 패턴. 다만 CRCL 대량 매수로 '크립토 전면 철수'가 아닌 '크립토 내 종목 교체(BLSH→CRCL)'임이 확인됨. 캐시 우드의 크립토 전략이 거래소(BLSH)에서 인프라(CRCL/스테이블코인)로 이동 중.",
+    "desc_en": "BLSH sold 41,064 shares + TXG bought 22,538 shares. 4th consecutive day of same pattern. However, massive CRCL buying reveals this isn't a full crypto exit but an intra-crypto rotation (BLSH→CRCL). Cathie Wood's crypto strategy shifting from exchange (BLSH) to infrastructure (CRCL/stablecoins).",
+    "tag": "전략심화",
+    "confidence": 97
+  }
+]
