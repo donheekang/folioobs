@@ -6,15 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FolioObs — 워렌 버핏 · 캐시 우드 · 드러켄밀러 포트폴리오 실시간 추적 | SEC 13F</title>
     <meta name="description" content="워렌 버핏, 캐시 우드, 드러켄밀러, 레이 달리오 등 월가 전설 10명의 SEC 13F 포트폴리오 변화를 실시간 추적. 캐시 우드 ARK 일별 매매 내역, 종목 스크리너, AI 인사이트까지 무료로 제공합니다." />
-    <meta name="keywords" content="13F, SEC, 포트폴리오, 워렌 버핏, 워렌버핏 포트폴리오, 캐시우드, 캐시우드 매매, 캐시 우드 ARK, 드러켄밀러, 레이 달리오, 빌 애크먼, 조지 소로스, 데이비드 테퍼, ARK Invest, 매매 일지, portfolio tracker, 13F filing, hedge fund portfolio, Warren Buffett portfolio, Cathie Wood ARK daily trades, SEC 13F tracker, 미국주식 포트폴리오" />
+    <meta name="keywords" content="13F, SEC, portfolio tracker, 13F filing, hedge fund portfolio, Warren Buffett portfolio, Cathie Wood ARK daily trades, SEC 13F tracker, Ray Dalio Bridgewater, Druckenmiller portfolio, Bill Ackman holdings, George Soros fund, superinvestor portfolio, whale tracking, institutional holdings, 포트폴리오, 워렌 버핏, 캐시우드 매매, 드러켄밀러, 레이 달리오, 빌 애크먼, ARK Invest, 미국주식 포트폴리오" />
     <link rel="canonical" href="https://folioobs.com/" />
     <meta name="theme-color" content="#000000" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <meta name="googlebot" content="index, follow" />
     <meta name="author" content="FolioObs" />
 
-    <!-- Google Search Console 인증 (발급 후 content 값 교체) -->
-    <!-- <meta name="google-site-verification" content="YOUR_GOOGLE_VERIFICATION_CODE" /> -->
+    <!-- Google Search Console 인증 — https://search.google.com/search-console 에서 발급 후 content 교체 -->
+    <meta name="google-site-verification" content="YOUR_GOOGLE_VERIFICATION_CODE" />
+    <!-- Bing Webmaster Tools 인증 -->
+    <meta name="msvalidate.01" content="YOUR_BING_VERIFICATION_CODE" />
     <!-- 네이버 서치어드바이저 인증 -->
     <meta name="naver-site-verification" content="c58ff86995b4568a77339133a06cfe9f032b328a" />
     <link rel="alternate" hreflang="ko" href="https://folioobs.com/" />
@@ -24,8 +26,8 @@
     <!-- Open Graph (카카오톡, 슬랙 등 미리보기) -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://folioobs.com/" />
-    <meta property="og:title" content="FolioObs — 워렌 버핏 · 캐시 우드 포트폴리오 실시간 추적" />
-    <meta property="og:description" content="SEC 13F 분기 공시 + 캐시 우드 일별 매매. 월가 전설 10명의 포트폴리오 변화를 실시간으로 추적하세요. 무료." />
+    <meta property="og:title" content="FolioObs — Track Buffett, Cathie Wood & 11 Legendary Investors' Portfolios" />
+    <meta property="og:description" content="Free real-time SEC 13F portfolio tracker. Follow Warren Buffett, Cathie Wood ARK daily trades, Ray Dalio & more. AI insights, stock screener, investor comparison." />
     <meta property="og:image" content="https://folioobs.com/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -35,8 +37,8 @@
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="FolioObs — 워렌 버핏 · 캐시 우드 포트폴리오 실시간 추적" />
-    <meta name="twitter:description" content="SEC 13F 분기 공시 + 캐시 우드 일별 매매. 월가 전설 10명의 포트폴리오 변화를 실시간으로 추적하세요." />
+    <meta name="twitter:title" content="FolioObs — Track Buffett, Cathie Wood & Legendary Investors" />
+    <meta name="twitter:description" content="Free SEC 13F portfolio tracker. Follow 11 legendary Wall Street investors in real-time. ARK daily trades, AI insights & stock screener." />
     <meta name="twitter:image" content="https://folioobs.com/og-image.png" />
 
     <!-- JSON-LD 구조화 데이터: WebApplication -->
@@ -45,12 +47,15 @@
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "FolioObs",
-      "alternateName": "폴리오옵스",
+      "alternateName": ["폴리오옵스", "FolioObs — Wall Street's Eye"],
       "url": "https://folioobs.com",
-      "description": "워렌 버핏, 캐시 우드, 드러켄밀러 등 월가 전설 투자자들의 SEC 13F 포트폴리오 변화와 일별 매매를 실시간 추적하는 무료 대시보드",
+      "description": "Track SEC 13F portfolios of 11 legendary Wall Street investors including Warren Buffett, Cathie Wood, and Ray Dalio in real-time. Free bilingual dashboard with daily ARK trades, AI insights, and stock screener.",
       "applicationCategory": "FinanceApplication",
       "operatingSystem": "Web",
-      "inLanguage": ["ko", "en"],
+      "availableLanguage": [
+        {"@type": "Language", "name": "Korean", "alternateName": "ko"},
+        {"@type": "Language", "name": "English", "alternateName": "en"}
+      ],
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -63,17 +68,17 @@
       },
       "screenshot": "https://folioobs.com/og-image.png",
       "featureList": [
-        "SEC 13F 포트폴리오 실시간 추적",
-        "캐시 우드 ARK 일별 매매 내역",
-        "실시간 주가 반영",
-        "AI 포트폴리오 인사이트",
-        "종목 스크리너",
-        "투자자 비교 도구"
+        "Real-time SEC 13F portfolio tracking",
+        "Cathie Wood ARK Invest daily trades",
+        "Live stock prices (15-min delay)",
+        "AI-powered portfolio insights",
+        "Stock screener — search 1,300+ stocks by investor",
+        "Investor comparison & overlap analysis"
       ]
     }
     </script>
 
-    <!-- JSON-LD: FAQPage — 구글 검색 FAQ 리치 스니펫 -->
+    <!-- JSON-LD: FAQPage — 구글 검색 FAQ 리치 스니펫 (영문 — 글로벌 검색용) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -81,41 +86,49 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "SEC 13F란 무엇인가요?",
+          "name": "What is an SEC 13F filing?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "SEC 13F는 미국 증권거래위원회(SEC)에 제출하는 분기별 보유 주식 보고서입니다. 운용자산 1억 달러 이상의 기관투자자는 매 분기 종료 후 45일 이내에 공시해야 합니다. FolioObs는 이 공시 데이터를 분석하여 월가 전설 투자자들의 포트폴리오 변화를 추적합니다."
+            "text": "SEC 13F is a quarterly report filed with the U.S. Securities and Exchange Commission by institutional investment managers with over $100 million in assets. It must be filed within 45 days after each quarter ends. FolioObs analyzes these filings to track portfolio changes of legendary Wall Street investors."
           }
         },
         {
           "@type": "Question",
-          "name": "캐시 우드 ARK 일별 매매는 어떻게 확인하나요?",
+          "name": "How can I track Cathie Wood's ARK daily trades?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "ARK Invest는 자체적으로 일별 매매 내역을 공개합니다. FolioObs는 이 데이터를 매일 업데이트하여 대시보드에서 실시간으로 캐시 우드의 매수·매도 종목을 확인할 수 있습니다."
+            "text": "ARK Invest publicly discloses its daily trades. FolioObs updates this data daily so you can see Cathie Wood's buys and sells in real-time on the dashboard."
           }
         },
         {
           "@type": "Question",
-          "name": "FolioObs에서 추적하는 투자자는 누구인가요?",
+          "name": "Which investors does FolioObs track?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "워렌 버핏(버크셔 해서웨이), 캐시 우드(ARK Invest), 스탠리 드러켄밀러(듀케인), 레이 달리오(브리지워터), 빌 애크먼(퍼싱스퀘어), 조지 소로스, 데이비드 테퍼(아팔루사), 데이비드 아인혼(그린라이트), 댄 로엡(서드포인트), 레온 쿠퍼만 등 월가 전설 10명의 포트폴리오를 추적합니다."
+            "text": "FolioObs tracks 11 legendary investors: Warren Buffett (Berkshire Hathaway), Cathie Wood (ARK Invest), Stanley Druckenmiller (Duquesne), Ray Dalio (Bridgewater), Bill Ackman (Pershing Square), George Soros, David Tepper (Appaloosa), Chase Coleman (Tiger Global), Dan Loeb (Third Point), Seth Klarman (Baupost), and Korea's National Pension Service (NPS)."
           }
         },
         {
           "@type": "Question",
-          "name": "포트폴리오 데이터는 얼마나 자주 업데이트되나요?",
+          "name": "How often is the portfolio data updated?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "SEC 13F 데이터는 분기별로 업데이트되며, 캐시 우드 ARK 일별 매매는 매일 장 마감 후 업데이트됩니다. 주가는 실시간(15분 지연)으로 반영됩니다."
+            "text": "SEC 13F data is updated quarterly. Cathie Wood's ARK daily trades are updated every trading day after market close. Stock prices are reflected in real-time with a 15-minute delay."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is FolioObs free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, FolioObs is completely free. It provides real-time SEC 13F portfolio tracking, AI-powered insights, stock screener, and investor comparison tools in both Korean and English at no cost."
           }
         }
       ]
     }
     </script>
 
-    <!-- JSON-LD: BreadcrumbList -->
+    <!-- JSON-LD: BreadcrumbList (영문) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -124,19 +137,19 @@
         {
           "@type": "ListItem",
           "position": 1,
-          "name": "대시보드",
+          "name": "Dashboard",
           "item": "https://folioobs.com/"
         },
         {
           "@type": "ListItem",
           "position": 2,
-          "name": "스크리너",
+          "name": "Screener",
           "item": "https://folioobs.com/screener"
         },
         {
           "@type": "ListItem",
           "position": 3,
-          "name": "인사이트",
+          "name": "Insights",
           "item": "https://folioobs.com/insights"
         }
       ]
@@ -158,33 +171,34 @@
   <body>
     <div id="root"></div>
 
-    <!-- SEO: 크롤러용 콘텐츠 (SPA라서 JS 없이는 빈 페이지) -->
+    <!-- SEO: 크롤러용 콘텐츠 (SPA라서 JS 없이는 빈 페이지) — 한국어 + 영문 -->
     <noscript>
-      <h1>FolioObs — 월가 전설 투자자 포트폴리오 추적</h1>
-      <p>워렌 버핏, 캐시 우드, 드러켄밀러, 레이 달리오 등 월가 전설 10명의 SEC 13F 포트폴리오를 실시간 추적하세요.</p>
-      <h2>추적 투자자</h2>
+      <h1>FolioObs — Track Legendary Wall Street Investors' Portfolios</h1>
+      <p>Track SEC 13F portfolios of 11 legendary investors including Warren Buffett, Cathie Wood, Ray Dalio, and more in real-time. Free bilingual (Korean &amp; English) service.</p>
+      <h2>Tracked Investors</h2>
       <ul>
-        <li><a href="/investor/buffett">워렌 버핏 — 버크셔 해서웨이 포트폴리오</a></li>
-        <li><a href="/investor/cathie">캐시 우드 — ARK Invest 일별 매매</a></li>
-        <li><a href="/investor/druckenmiller">스탠리 드러켄밀러 — 듀케인 패밀리 오피스</a></li>
-        <li><a href="/investor/dalio">레이 달리오 — 브리지워터 어소시에이츠</a></li>
-        <li><a href="/investor/soros">조지 소로스 — 소로스 펀드 매니지먼트</a></li>
-        <li><a href="/investor/ackman">빌 애크먼 — 퍼싱 스퀘어</a></li>
-        <li><a href="/investor/tepper">데이비드 테퍼 — 아팔루사 매니지먼트</a></li>
-        <li><a href="/investor/einhorn">데이비드 아인혼 — 그린라이트 캐피탈</a></li>
-        <li><a href="/investor/loeb">댄 로엡 — 서드 포인트</a></li>
-        <li><a href="/investor/cooperman">레온 쿠퍼만 — 오메가 어드바이저스</a></li>
+        <li><a href="/investor/buffett">Warren Buffett — Berkshire Hathaway Portfolio</a></li>
+        <li><a href="/investor/cathie">Cathie Wood — ARK Invest Daily Trades</a></li>
+        <li><a href="/investor/druckenmiller">Stanley Druckenmiller — Duquesne Family Office</a></li>
+        <li><a href="/investor/dalio">Ray Dalio — Bridgewater Associates</a></li>
+        <li><a href="/investor/soros">George Soros — Soros Fund Management</a></li>
+        <li><a href="/investor/ackman">Bill Ackman — Pershing Square</a></li>
+        <li><a href="/investor/tepper">David Tepper — Appaloosa Management</a></li>
+        <li><a href="/investor/coleman">Chase Coleman — Tiger Global Management</a></li>
+        <li><a href="/investor/loeb">Dan Loeb — Third Point</a></li>
+        <li><a href="/investor/klarman">Seth Klarman — Baupost Group</a></li>
+        <li><a href="/investor/nps">National Pension Service (NPS) — Korea's Sovereign Fund</a></li>
       </ul>
-      <h2>주요 기능</h2>
+      <h2>Key Features</h2>
       <ul>
-        <li>SEC 13F 분기 공시 기반 포트폴리오 추적</li>
-        <li>캐시 우드 ARK Invest 일별 매수·매도 내역</li>
-        <li>실시간 주가 반영 (15분 지연)</li>
-        <li>AI 포트폴리오 인사이트</li>
-        <li>종목 스크리너 — 월가 전설들이 보유한 종목 검색</li>
-        <li>투자자 비교 도구</li>
+        <li>Real-time SEC 13F portfolio tracking</li>
+        <li>Cathie Wood ARK Invest daily buys &amp; sells</li>
+        <li>Live stock prices (15-minute delay)</li>
+        <li>AI-powered portfolio insights</li>
+        <li>Stock screener — search 1,300+ stocks by investor</li>
+        <li>Investor comparison &amp; overlap analysis</li>
       </ul>
-      <p>이 사이트를 이용하려면 JavaScript를 활성화해 주세요.</p>
+      <p>Please enable JavaScript to use this site.</p>
     </noscript>
 
     <script type="module" src="/src/main.jsx"></script>

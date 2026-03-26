@@ -107,11 +107,12 @@ function FolioObsInner() {
   const T = THEMES[theme];
   const L = useMemo(() => createLocaleValue(locale), [locale]);
 
-  // 브라우저 탭 제목 locale에 따라 변경
+  // 브라우저 탭 제목 + html lang 속성을 locale에 따라 변경
   useEffect(() => {
     document.title = locale === 'en'
       ? "FolioObs — Wall Street's Eye"
       : "FolioObs — 월가의 눈";
+    document.documentElement.lang = locale;
   }, [locale]);
 
   const toggleTheme = useCallback(() => setTheme(p => p === "dark" ? "light" : "dark"), []);
