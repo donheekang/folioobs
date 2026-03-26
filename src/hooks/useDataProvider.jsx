@@ -594,14 +594,20 @@ function mapInvestor(dbInv, metrics, holdingsAum) {
   // metrics에서 실제 값 가져오기
   const m = metrics[dbInv.id] || {};
 
-  // AUM: holdings 데이터에서 직접 계산
+  // AUM: holdings 데이터에서 직접 계산 (없으면 investor_metrics fallback)
   // SEC 13F filing에 따라 value가 $1000 단위 또는 실제 달러 단위일 수 있음
   // 합산값이 10억($1000 단위로 $1T) 이상이면 실제 달러 단위로 판단
   const aumFromHoldings = holdingsAum[dbInv.id] || 0;
-  const isActualDollars = aumFromHoldings > 1_000_000_000;
-  const aumB = isActualDollars
-    ? aumFromHoldings / 1_000_000_000  // 실제 달러 → $B
-    : aumFromHoldings / 1_000_000;     // $1000 단위 → $B
+  let aumB;
+  if (aumFromHoldings > 0) {
+    const isActualDollars = aumFromHoldings > 1_000_000_000;
+    aumB = isActualDollars
+      ? aumFromHoldings / 1_000_000_000  // 실제 달러 → $B
+      : aumFromHoldings / 1_000_000;     // $1000 단위 → $B
+  } else {
+    // Phase A 렌더링: holdings 로드 전 metrics AUM 사용
+    aumB = m.total_aum || 0;
+  }
 
   return {
     id: slug,
@@ -691,7 +697,8 @@ export function DataProvider({ children }) {
   const [stockPrices, setStockPrices] = useState({});  // { ticker: { current, quarterEnd, changePct } }
   const [marketStatus, setMarketStatus] = useState('unknown'); // 'open' | 'closed' | 'pre-market' | 'after-hours' | 'unknown'
   const [lastTradeDate, setLastTradeDate] = useState(null); // 'YYYY-MM-DD'
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);        // Phase A: 코어 데이터 로딩
+  const [detailLoading, setDetailLoading] = useState(true); // Phase B: 디테일 데이터 로딩
   const [error, setError] = useState(null);
   const [usingMock, setUsingMock] = useState(false);
 
@@ -699,15 +706,20 @@ export function DataProvider({ children }) {
     let cancelled = false;
     async function loadData() {
       try {
-        // 1. 투자자 목록
-        const { data: dbInvestors, error: invErr } = await supabase
-          .from('investors')
-          .select('*')
-          .eq('is_active', true)
-          .order('id');
+        // ========== PHASE A: 코어 데이터 (3개 API 병렬) ==========
+        console.time('[DataProvider] Phase A');
+        const [invRes, metRes, filRes] = await Promise.all([
+          supabase.from('investors').select('*').eq('is_active', true).order('id'),
+          supabase.from('investor_metrics').select('*').order('quarter', { ascending: true }),
+          supabase.from('filings').select('id, investor_id, quarter, parsed_at, accession_no').order('report_date', { ascending: false }),
+        ]);
+
+        const dbInvestors = invRes.data;
+        const dbMetrics = metRes.data;
+        const allFilings = filRes.data;
 
         if (cancelled) return;
-        if (invErr) throw invErr;
+        if (invRes.error) throw invRes.error;
         if (!dbInvestors || dbInvestors.length === 0) throw new Error('No investors');
 
         // ID → slug 맵 미리 구축
@@ -716,24 +728,11 @@ export function DataProvider({ children }) {
           idToSlug[inv.id] = investorSlug(inv.name);
         });
 
-        // 2. investor_metrics (전체 분기)
-        const { data: dbMetrics } = await supabase
-          .from('investor_metrics')
-          .select('*')
-          .order('quarter', { ascending: true });
-
         // 투자자별 최신 메트릭만 추출
         const metricsMap = {};
         (dbMetrics || []).forEach(m => {
           metricsMap[m.investor_id] = m; // 오름차순이므로 마지막이 최신
         });
-
-        if (cancelled) return;
-        // 3. 모든 투자자의 최신 holdings
-        const { data: allFilings } = await supabase
-          .from('filings')
-          .select('id, investor_id, quarter, parsed_at, accession_no')
-          .order('report_date', { ascending: false });
 
         const latestFilingByInvestor = {};
         let maxQuarter = '';
@@ -751,7 +750,46 @@ export function DataProvider({ children }) {
         setLatestQuarter(maxQuarter);
         setLastUpdatedAt(maxParsedAt);
 
-        // 투자자별로 개별 holdings 쿼리 (Supabase 1000행 기본 제한 우회)
+        // Phase A 투자자 매핑 (metrics AUM 사용 — holdings 로드 전 임시)
+        const coreInvestors = dbInvestors.map(inv => mapInvestor(inv, metricsMap, {}));
+
+        // Quarterly History 빌드 (metrics에서 — 추가 API 불필요)
+        const qHistoryRaw = {};
+        (dbMetrics || []).forEach(m => {
+          const slug = idToSlug[m.investor_id];
+          if (!slug || !m.total_aum) return;
+          if (!qHistoryRaw[slug]) qHistoryRaw[slug] = [];
+          // 분기별로 개별 단위 감지: total_aum이 10억 이상이면 실제 달러
+          const isActual = m.total_aum > 1_000_000_000;
+          const divisor = isActual ? 1_000_000_000 : 1_000_000;
+          qHistoryRaw[slug].push({
+            q: formatQuarterLabel(m.quarter),
+            value: Math.round(m.total_aum / divisor * 10) / 10, // → $B
+          });
+        });
+        const qHistory = {};
+        Object.entries(qHistoryRaw).forEach(([slug, arr]) => {
+          if (arr.length < 3) { qHistory[slug] = arr; return; }
+          const sorted = arr.map(a => a.value).sort((a, b) => a - b);
+          const median = sorted[Math.floor(sorted.length / 2)];
+          const lowThreshold = median * 0.1;
+          const highThreshold = median * 3;
+          qHistory[slug] = arr.filter(a => a.value >= lowThreshold && a.value <= highThreshold);
+        });
+
+        if (cancelled) return;
+
+        // ★ Phase A 완료 — 즉시 렌더링!
+        setInvestors(coreInvestors);
+        setQuarterlyHistory(qHistory);
+        setLoading(false);
+        console.timeEnd('[DataProvider] Phase A');
+        console.log(`[DataProvider] Phase A 완료: ${coreInvestors.length}명 투자자 렌더링`);
+
+        // ========== PHASE B: 디테일 데이터 (백그라운드) ==========
+        console.time('[DataProvider] Phase B');
+
+        // B1. 투자자별로 개별 holdings 쿼리 (Supabase 1000행 기본 제한 우회)
         const allDbHoldings = [];
         const holdingsAum = {};
         const investorDollarUnit = {}; // 투자자별 단위 감지
@@ -834,63 +872,63 @@ export function DataProvider({ children }) {
           }
         });
 
-        // 6. QUARTERLY_HISTORY 빌드 (investor_metrics에서)
-        // Step 1: 투자자별로 raw 값 수집
-        const qHistoryRaw = {};
-        (dbMetrics || []).forEach(m => {
-          const slug = idToSlug[m.investor_id];
-          if (!slug || !m.total_aum) return;
-          if (!qHistoryRaw[slug]) qHistoryRaw[slug] = [];
-          // 분기별로 개별 단위 감지: total_aum이 10억 이상이면 실제 달러
-          const isActual = m.total_aum > 1_000_000_000;
-          const divisor = isActual ? 1_000_000_000 : 1_000_000;
-          qHistoryRaw[slug].push({
-            q: formatQuarterLabel(m.quarter),
-            value: Math.round(m.total_aum / divisor * 10) / 10, // → $B
-          });
-        });
-        // Step 2: 이상치 필터 — 중앙값 대비 너무 작거나(10% 미만) 너무 큰(300% 초과) 값 제거
-        const qHistory = {};
-        Object.keys(qHistoryRaw).forEach(slug => {
-          const arr = qHistoryRaw[slug];
-          if (arr.length < 3) { qHistory[slug] = arr; return; }
-          const sorted = [...arr].map(a => a.value).sort((a, b) => a - b);
-          const median = sorted[Math.floor(sorted.length / 2)];
-          const lowThreshold = median * 0.1;
-          const highThreshold = median * 3;
-          qHistory[slug] = arr.filter(a => a.value >= lowThreshold && a.value <= highThreshold);
-        });
+        // ★ Phase B1 완료 — holdings 기반 AUM으로 투자자 업데이트
+        if (cancelled) return;
+        setInvestors(mappedInvestors);
+        setHoldings(mappedHoldings);
+        console.log('[DataProvider] Phase B1 완료: holdings 로드 + 투자자 AUM 업데이트');
 
-        // 7. QUARTERLY_ACTIVITY 빌드 (holding_changes에서 — 투자자별 페이지네이션 쿼리)
+        // (Quarterly History는 Phase A에서 이미 빌드 완료)
+
+        // B2. QUARTERLY_ACTIVITY 빌드 (holding_changes — RPC 1회 호출로 전체 조회)
         let dbChanges = [];
-        const PAGE_SIZE = 1000;
-        for (const inv of dbInvestors) {
-          let allInvChanges = [];
-          let offset = 0;
-          let hasMore = true;
-          while (hasMore) {
-            const { data: page, error: chErr } = await supabase
-              .from('holding_changes')
-              .select(`
-                investor_id, quarter, change_type, pct_change,
-                securities (ticker, name, name_ko)
-              `)
-              .eq('investor_id', inv.id)
-              .order('quarter', { ascending: false })
-              .range(offset, offset + PAGE_SIZE - 1);
-
-            if (chErr) { console.warn(`holding_changes 실패 (${inv.name}):`, chErr.message); hasMore = false; continue; }
-            if (page?.length) {
-              allInvChanges.push(...page);
-              offset += page.length;
-              hasMore = page.length === PAGE_SIZE;
-            } else {
-              hasMore = false;
-            }
+        try {
+          // Supabase RPC도 기본 1000행 제한 → 페이지네이션 필요
+          const RPC_PAGE = 1000;
+          let rpcOffset = 0;
+          let allRpcChanges = [];
+          while (true) {
+            const { data: page, error: rpcErr } = await supabase
+              .rpc('get_all_holding_changes')
+              .range(rpcOffset, rpcOffset + RPC_PAGE - 1);
+            if (rpcErr) throw rpcErr;
+            allRpcChanges.push(...(page || []));
+            if (!page || page.length < RPC_PAGE) break;
+            rpcOffset += RPC_PAGE;
           }
-          if (allInvChanges.length) {
-            dbChanges.push(...allInvChanges);
-            console.log(`[DataProvider] ${inv.name}: ${allInvChanges.length}개 변동 기록`);
+          // RPC 결과를 기존 코드 호환 형태로 변환
+          dbChanges = allRpcChanges.map(r => ({
+            investor_id: r.investor_id,
+            quarter: r.quarter,
+            change_type: r.change_type,
+            pct_change: r.pct_change,
+            securities: {
+              ticker: r.ticker,
+              name: r.sec_name,
+              name_ko: r.sec_name_ko,
+            },
+          }));
+          console.log(`[DataProvider] holding_changes RPC: ${dbChanges.length}건 로드`);
+        } catch (e) {
+          console.warn('holding_changes RPC 실패, fallback 시도:', e.message);
+          // Fallback: 기존 per-investor 방식
+          const CH_PAGE_SIZE = 1000;
+          for (const inv of dbInvestors) {
+            let allInvChanges = [];
+            let offset = 0;
+            let hasMore = true;
+            while (hasMore) {
+              const { data: page, error: chErr } = await supabase
+                .from('holding_changes')
+                .select(`investor_id, quarter, change_type, pct_change, securities (ticker, name, name_ko)`)
+                .eq('investor_id', inv.id)
+                .order('quarter', { ascending: false })
+                .range(offset, offset + CH_PAGE_SIZE - 1);
+              if (chErr) { hasMore = false; continue; }
+              if (page?.length) { allInvChanges.push(...page); offset += page.length; hasMore = page.length === CH_PAGE_SIZE; }
+              else { hasMore = false; }
+            }
+            if (allInvChanges.length) dbChanges.push(...allInvChanges);
           }
         }
 
@@ -979,7 +1017,13 @@ export function DataProvider({ children }) {
           });
         });
 
-        // 8. ARK 일별 매매 내역 로드 (최근 90일)
+        // ★ Phase B2 완료 — 분기 활동 + holdings change 업데이트
+        if (cancelled) return;
+        setQuarterlyActivity(qActivityFormatted);
+        setHoldings({ ...mappedHoldings }); // change 값 주입된 holdings 반영
+        console.log('[DataProvider] Phase B2 완료: quarterlyActivity + holdings change 업데이트');
+
+        // B3. ARK 일별 매매 내역 로드 (최근 90일)
         let arkTrades = [];
         try {
           const { data: rawTrades, error: arkErr } = await supabase
@@ -1075,7 +1119,7 @@ export function DataProvider({ children }) {
           console.warn('AI 인사이트 로드 실패:', e.message);
         }
 
-        // ===== stock_prices: 공시 후 성과 계산 =====
+        // ===== stock_prices: 공시 후 성과 계산 (Phase 3B: RPC 1회 호출) =====
         let stockPricesMap = {};
         try {
           // 최신 분기 말 날짜 계산
@@ -1101,96 +1145,123 @@ export function DataProvider({ children }) {
             const allTickers = new Set();
             Object.values(mappedHoldings).forEach(arr => arr.forEach(h => allTickers.add(h.ticker)));
 
-            if (allTickers.size > 0 && qEndDate) {
-              // 최신 시세 (가장 최근 날짜) — Supabase 1000행 제한 우회를 위해 pagination
-              const latestPrices = [];
-              {
-                let from = 0;
-                const PAGE = 1000;
-                while (true) {
-                  const { data: page } = await supabase
-                    .from('stock_prices')
-                    .select('ticker, close_price, price_date, change_pct')
-                    .order('price_date', { ascending: false })
-                    .range(from, from + PAGE - 1);
-                  latestPrices.push(...(page || []));
-                  if (!page || page.length < PAGE) break;
-                  from += PAGE;
-                }
-              }
-
-              // 분기 말 시세
-              // 분기 말 당일 or ±3일 이내 가장 가까운 날짜
+            const tickerArr = [...allTickers];
+            if (tickerArr.length > 0 && qEndDate) {
+              // 분기 말 날짜 범위
               const qDateFrom = (() => { const d = new Date(qEndDate); d.setDate(d.getDate() - 5); return d.toISOString().split('T')[0]; })();
               const qDateTo = (() => { const d = new Date(qEndDate); d.setDate(d.getDate() + 3); return d.toISOString().split('T')[0]; })();
-              const quarterPrices = [];
-              {
-                let from = 0;
-                const PAGE = 1000;
+
+              let rpcSuccess = false;
+              try {
+                // Phase 3B: RPC 호출로 최신 시세 + 분기말 시세 동시 조회 (페이지네이션)
+                const SP_PAGE = 1000;
+                let spOffset = 0;
+                let allRpcPrices = [];
                 while (true) {
-                  const { data: page } = await supabase
-                    .from('stock_prices')
-                    .select('ticker, close_price, price_date')
-                    .gte('price_date', qDateFrom)
-                    .lte('price_date', qDateTo)
-                    .order('price_date', { ascending: false })
-                    .range(from, from + PAGE - 1);
-                  quarterPrices.push(...(page || []));
-                  if (!page || page.length < PAGE) break;
-                  from += PAGE;
+                  const { data: page, error: rpcErr } = await supabase
+                    .rpc('get_stock_prices_for_tickers', {
+                      p_tickers: tickerArr,
+                      p_quarter_start: qDateFrom,
+                      p_quarter_end: qDateTo,
+                    })
+                    .range(spOffset, spOffset + SP_PAGE - 1);
+                  if (rpcErr) throw rpcErr;
+                  allRpcPrices.push(...(page || []));
+                  if (!page || page.length < SP_PAGE) break;
+                  spOffset += SP_PAGE;
                 }
+
+                // RPC 결과를 currentMap / quarterMap으로 분리
+                const currentMap = {};
+                const quarterMap = {};
+                allRpcPrices.forEach(p => {
+                  if (p.price_type === 'latest' && !currentMap[p.ticker]) {
+                    currentMap[p.ticker] = p;
+                  } else if (p.price_type === 'quarter_end' && !quarterMap[p.ticker]) {
+                    quarterMap[p.ticker] = p;
+                  }
+                });
+
+                // 공시 후 성과 계산
+                for (const ticker of allTickers) {
+                  const curr = currentMap[ticker];
+                  const qEnd = quarterMap[ticker];
+                  if (curr) {
+                    const currentPrice = parseFloat(curr.close_price);
+                    const quarterEndPrice = qEnd ? parseFloat(qEnd.close_price) : null;
+                    const sinceFiling = quarterEndPrice && quarterEndPrice > 0
+                      ? ((currentPrice - quarterEndPrice) / quarterEndPrice) * 100
+                      : null;
+
+                    stockPricesMap[ticker] = {
+                      current: currentPrice,
+                      date: curr.price_date,
+                      dailyChange: curr.change_pct ? parseFloat(curr.change_pct) : null,
+                      quarterEnd: quarterEndPrice,
+                      quarterEndDate: qEnd?.price_date || null,
+                      sinceFiling: sinceFiling !== null ? Math.round(sinceFiling * 100) / 100 : null,
+                    };
+                  }
+                }
+                rpcSuccess = true;
+                console.log(`[DataProvider] stock_prices RPC: ${Object.keys(stockPricesMap).length}개 종목`);
+              } catch (rpcE) {
+                console.warn('stock_prices RPC 실패, fallback:', rpcE.message);
               }
 
-              // 티커별 최신 시세 매핑
-              const currentMap = {};
-              (latestPrices || []).forEach(p => {
-                if (!currentMap[p.ticker]) currentMap[p.ticker] = p;
-              });
-
-              // 티커별 분기 말 시세 매핑
-              const quarterMap = {};
-              (quarterPrices || []).forEach(p => {
-                if (!quarterMap[p.ticker]) quarterMap[p.ticker] = p;
-              });
-
-              // 공시 후 성과 계산
-              for (const ticker of allTickers) {
-                const curr = currentMap[ticker];
-                const qEnd = quarterMap[ticker];
-                if (curr) {
-                  const currentPrice = parseFloat(curr.close_price);
-                  const quarterEndPrice = qEnd ? parseFloat(qEnd.close_price) : null;
-                  const sinceFiling = quarterEndPrice && quarterEndPrice > 0
-                    ? ((currentPrice - quarterEndPrice) / quarterEndPrice) * 100
-                    : null;
-
-                  stockPricesMap[ticker] = {
-                    current: currentPrice,
-                    date: curr.price_date,
-                    dailyChange: curr.change_pct ? parseFloat(curr.change_pct) : null,
-                    quarterEnd: quarterEndPrice,
-                    quarterEndDate: qEnd?.price_date || null,
-                    sinceFiling: sinceFiling !== null ? Math.round(sinceFiling * 100) / 100 : null,
-                  };
+              // Fallback: RPC 실패 시 기존 배치 방식
+              if (!rpcSuccess) {
+                const BATCH_SIZE = 200;
+                const tickerBatches = [];
+                for (let i = 0; i < tickerArr.length; i += BATCH_SIZE) {
+                  tickerBatches.push(tickerArr.slice(i, i + BATCH_SIZE));
                 }
+                const latestPrices = [];
+                for (const batch of tickerBatches) {
+                  let from = 0; const PAGE = 1000;
+                  while (true) {
+                    const { data: page } = await supabase.from('stock_prices').select('ticker, close_price, price_date, change_pct').in('ticker', batch).order('price_date', { ascending: false }).range(from, from + PAGE - 1);
+                    latestPrices.push(...(page || []));
+                    if (!page || page.length < PAGE) break; from += PAGE;
+                  }
+                }
+                const quarterPrices = [];
+                for (const batch of tickerBatches) {
+                  let from = 0; const PAGE = 1000;
+                  while (true) {
+                    const { data: page } = await supabase.from('stock_prices').select('ticker, close_price, price_date').in('ticker', batch).gte('price_date', qDateFrom).lte('price_date', qDateTo).order('price_date', { ascending: false }).range(from, from + PAGE - 1);
+                    quarterPrices.push(...(page || []));
+                    if (!page || page.length < PAGE) break; from += PAGE;
+                  }
+                }
+                const currentMap = {}; (latestPrices || []).forEach(p => { if (!currentMap[p.ticker]) currentMap[p.ticker] = p; });
+                const quarterMap = {}; (quarterPrices || []).forEach(p => { if (!quarterMap[p.ticker]) quarterMap[p.ticker] = p; });
+                for (const ticker of allTickers) {
+                  const curr = currentMap[ticker]; const qEnd = quarterMap[ticker];
+                  if (curr) {
+                    const currentPrice = parseFloat(curr.close_price);
+                    const quarterEndPrice = qEnd ? parseFloat(qEnd.close_price) : null;
+                    const sinceFiling = quarterEndPrice && quarterEndPrice > 0 ? ((currentPrice - quarterEndPrice) / quarterEndPrice) * 100 : null;
+                    stockPricesMap[ticker] = { current: currentPrice, date: curr.price_date, dailyChange: curr.change_pct ? parseFloat(curr.change_pct) : null, quarterEnd: quarterEndPrice, quarterEndDate: qEnd?.price_date || null, sinceFiling: sinceFiling !== null ? Math.round(sinceFiling * 100) / 100 : null };
+                  }
+                }
+                console.log(`[DataProvider] stock_prices fallback: ${Object.keys(stockPricesMap).length}개 종목`);
               }
-              console.log(`[DataProvider] 시세 데이터: ${Object.keys(stockPricesMap).length}개 종목`);
             }
           }
         } catch (e) {
           console.warn('시세 데이터 로드 실패:', e.message);
         }
 
+        // ★ Phase B 완료 — 모든 디테일 데이터 최종 반영
         if (cancelled) return;
-        setInvestors(mappedInvestors);
-        setHoldings(mappedHoldings);
-        setQuarterlyHistory(qHistory);
-        setQuarterlyActivity(qActivityFormatted);
         setArkDailyTrades(arkTrades);
         setAiInsights(aiInsightsMap);
         setStockPrices(stockPricesMap);
         setUsingMock(false);
-        setLoading(false);
+        setDetailLoading(false);
+        console.timeEnd('[DataProvider] Phase B');
+        console.log('[DataProvider] 전체 로드 완료');
 
       } catch (err) {
         if (cancelled) return;
@@ -1204,6 +1275,7 @@ export function DataProvider({ children }) {
         setError(err.message);
         setUsingMock(true);
         setLoading(false);
+        setDetailLoading(false);
       }
     }
 
@@ -1213,7 +1285,7 @@ export function DataProvider({ children }) {
 
   // 실시간 시세 업데이트 (live-prices Edge Function)
   useEffect(() => {
-    if (loading || !investors.length || Object.keys(holdings).length === 0) return;
+    if (loading || !investors?.length || !holdings || Object.keys(holdings).length === 0) return;
 
     // 모든 보유 종목 티커 수집
     const allTickers = new Set();
@@ -1309,10 +1381,11 @@ export function DataProvider({ children }) {
     latestQuarter,
     lastUpdatedAt,
     loading,
+    detailLoading,
     error,
     usingMock,
     getDbId: (slug) => SLUG_TO_DBID[slug] || null,
-  }), [investors, holdings, quarterlyHistory, quarterlyActivity, arkDailyTrades, aiInsights, stockPrices, marketStatus, lastTradeDate, latestQuarter, lastUpdatedAt, loading, error, usingMock]);
+  }), [investors, holdings, quarterlyHistory, quarterlyActivity, arkDailyTrades, aiInsights, stockPrices, marketStatus, lastTradeDate, latestQuarter, lastUpdatedAt, loading, detailLoading, error, usingMock]);
 
   return (
     <DataContext.Provider value={value}>
