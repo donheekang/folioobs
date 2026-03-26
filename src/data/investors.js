@@ -1,4 +1,5 @@
 // ========== INVESTOR DATA ==========
+// Updated: 2026-03-27 - Color scheme refresh
 export const INVESTORS = [
   {
     id: "buffett", name: "Warren Buffett", nameKo: "워렌 버핏",
