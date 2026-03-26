@@ -30,7 +30,7 @@ export const INVESTORS = [
   {
     id: "dalio", name: "Ray Dalio", nameKo: "레이 달리오",
     fund: "Bridgewater Associates", fundKo: "브릿지워터 어소시에이츠",
-    style: "분산투자", color: "#10B981", gradient: "linear-gradient(135deg, #10B981, #34D399)",
+    style: "분산투자", color: "#EC4899", gradient: "linear-gradient(135deg, #EC4899, #F472B6)",
     aum: 196, bio: "세계 최대 헤지펀드 창립자. '올웨더' 포트폴리오 전략으로 유명하며, 리스크 패리티 투자의 선구자입니다.",
     bioEn: "Founder of the world's largest hedge fund. Known for the 'All Weather' portfolio strategy and a pioneer of risk parity investing.",
     founded: 1975, avatar: "RD",
@@ -84,7 +84,7 @@ export const INVESTORS = [
   {
     id: "klarman", name: "Seth Klarman", nameKo: "세스 클라먼",
     fund: "Baupost Group", fundKo: "바우포스트 그룹",
-    style: "가치투자", color: "#14B8A6", gradient: "linear-gradient(135deg, #14B8A6, #2DD4BF)",
+    style: "가치투자", color: "#64748B", gradient: "linear-gradient(135deg, #64748B, #94A3B8)",
     aum: 25, bio: "워렌 버핏의 후계자로 불리는 가치투자 대가. 저서 '안전마진(Margin of Safety)'은 절판 후 수백만원에 거래되는 투자 바이블입니다. 극도로 보수적이며 현금 비중이 높은 것으로 유명합니다.",
     bioEn: "Often called the successor to Warren Buffett. His book 'Margin of Safety' trades for thousands of dollars out of print. Known for extremely conservative investing with high cash allocations.",
     founded: 1982, avatar: "SK",
