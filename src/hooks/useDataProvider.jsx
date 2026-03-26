@@ -880,246 +880,218 @@ export function DataProvider({ children }) {
 
         // (Quarterly History는 Phase A에서 이미 빌드 완료)
 
-        // B2. QUARTERLY_ACTIVITY 빌드 (holding_changes — RPC 1회 호출로 전체 조회)
-        let dbChanges = [];
-        try {
-          // Supabase RPC도 기본 1000행 제한 → 페이지네이션 필요
-          const RPC_PAGE = 1000;
-          let rpcOffset = 0;
-          let allRpcChanges = [];
-          while (true) {
-            const { data: page, error: rpcErr } = await supabase
-              .rpc('get_all_holding_changes')
-              .range(rpcOffset, rpcOffset + RPC_PAGE - 1);
-            if (rpcErr) throw rpcErr;
-            allRpcChanges.push(...(page || []));
-            if (!page || page.length < RPC_PAGE) break;
-            rpcOffset += RPC_PAGE;
-          }
-          // RPC 결과를 기존 코드 호환 형태로 변환
-          dbChanges = allRpcChanges.map(r => ({
-            investor_id: r.investor_id,
-            quarter: r.quarter,
-            change_type: r.change_type,
-            pct_change: r.pct_change,
-            securities: {
-              ticker: r.ticker,
-              name: r.sec_name,
-              name_ko: r.sec_name_ko,
-            },
-          }));
-          console.log(`[DataProvider] holding_changes RPC: ${dbChanges.length}건 로드`);
-        } catch (e) {
-          console.warn('holding_changes RPC 실패, fallback 시도:', e.message);
-          // Fallback: 기존 per-investor 방식
-          const CH_PAGE_SIZE = 1000;
-          for (const inv of dbInvestors) {
-            let allInvChanges = [];
-            let offset = 0;
-            let hasMore = true;
-            while (hasMore) {
-              const { data: page, error: chErr } = await supabase
-                .from('holding_changes')
-                .select(`investor_id, quarter, change_type, pct_change, securities (ticker, name, name_ko)`)
-                .eq('investor_id', inv.id)
-                .order('quarter', { ascending: false })
-                .range(offset, offset + CH_PAGE_SIZE - 1);
-              if (chErr) { hasMore = false; continue; }
-              if (page?.length) { allInvChanges.push(...page); offset += page.length; hasMore = page.length === CH_PAGE_SIZE; }
-              else { hasMore = false; }
+        // ========== B2 + B3 + B4 병렬 실행 (서로 의존성 없음) ==========
+        console.time('[DataProvider] Phase B2-B4 병렬');
+
+        // --- Task 1: holding_changes RPC + quarterlyActivity 빌드 ---
+        const taskHoldingChanges = (async () => {
+          let dbChanges = [];
+          try {
+            const RPC_PAGE = 1000;
+            let rpcOffset = 0;
+            let allRpcChanges = [];
+            while (true) {
+              const { data: page, error: rpcErr } = await supabase
+                .rpc('get_all_holding_changes')
+                .range(rpcOffset, rpcOffset + RPC_PAGE - 1);
+              if (rpcErr) throw rpcErr;
+              allRpcChanges.push(...(page || []));
+              if (!page || page.length < RPC_PAGE) break;
+              rpcOffset += RPC_PAGE;
             }
-            if (allInvChanges.length) dbChanges.push(...allInvChanges);
-          }
-        }
-
-        const qActivity = {};
-        (dbChanges || []).forEach(c => {
-          const slug = idToSlug[c.investor_id];
-          if (!slug) return;
-          if (!qActivity[slug]) qActivity[slug] = {};
-          const qLabel = formatQuarterLabel(c.quarter);
-          if (!qActivity[slug][qLabel]) qActivity[slug][qLabel] = [];
-
-          const sec = c.securities || {};
-          let ticker = sec.ticker || '';
-          if (!ticker || /^\d{5,}/.test(ticker)) {
-            ticker = (sec.name || '').replace(/[^A-Za-z]/g, '').slice(0, 4).toUpperCase() || 'N/A';
-          }
-
-          // 같은 분기 내 동일 ticker 중복 방지 (share class 통합)
-          const existing = qActivity[slug][qLabel].find(a => a.ticker === ticker);
-          if (existing) {
-            // pctChange가 더 큰 쪽 유지
-            if (Math.abs(c.pct_change || 0) > Math.abs(existing.pctChange)) {
-              existing.pctChange = c.pct_change || 0;
-              existing.type = c.change_type;
-            }
-          } else {
-            qActivity[slug][qLabel].push({
-              ticker,
-              name: decodeHtmlEntities(
-                sec.name_ko && /[가-힣]/.test(sec.name_ko)
-                  ? sec.name_ko
-                  : (KO_NAME_FALLBACK[ticker] || sec.name_ko || sec.name || 'Unknown')
-              ),
-              nameEn: decodeHtmlEntities(sec.name || 'Unknown'),
-              type: c.change_type, // 'new', 'buy', 'sell', 'exit'
-              pctChange: c.pct_change || 0,
-            });
-          }
-        });
-
-        // 포맷 변환: { slug: { "Q1'24": [...] } } → { slug: [{ q, actions }] }
-        const qActivityFormatted = {};
-        Object.keys(qActivity).forEach(slug => {
-          qActivityFormatted[slug] = Object.entries(qActivity[slug])
-            .map(([q, actions]) => ({
-              q,
-              actions: actions.sort((a, b) => Math.abs(b.pctChange) - Math.abs(a.pctChange)),
+            dbChanges = allRpcChanges.map(r => ({
+              investor_id: r.investor_id,
+              quarter: r.quarter,
+              change_type: r.change_type,
+              pct_change: r.pct_change,
+              securities: { ticker: r.ticker, name: r.sec_name, name_ko: r.sec_name_ko },
             }));
-        });
-
-        // 7-1. 보유 종목의 change 필드 채우기 (최신 분기 holding_changes 데이터 활용)
-        // holding_changes에서 각 투자자의 최신 분기 변동률을 holdings에 매핑
-        const latestChangeByInvestor = {};  // { slug: { ticker: pctChange } }
-        (dbChanges || []).forEach(c => {
-          const slug = idToSlug[c.investor_id];
-          if (!slug) return;
-          const sec = c.securities || {};
-          let ticker = sec.ticker || '';
-          if (!ticker || /^\d{5,}/.test(ticker)) return;
-          const qLabel = formatQuarterLabel(c.quarter);
-
-          if (!latestChangeByInvestor[slug]) latestChangeByInvestor[slug] = { q: '', changes: {} };
-          const inv = latestChangeByInvestor[slug];
-          // 최신 분기만 유지
-          if (qLabel > inv.q) {
-            inv.q = qLabel;
-            inv.changes = {};
-          }
-          if (qLabel === inv.q) {
-            // 같은 ticker 중 더 큰 변동 유지
-            if (!inv.changes[ticker] || Math.abs(c.pct_change || 0) > Math.abs(inv.changes[ticker])) {
-              inv.changes[ticker] = c.pct_change || 0;
+            console.log(`[DataProvider] holding_changes RPC: ${dbChanges.length}건 로드`);
+          } catch (e) {
+            console.warn('holding_changes RPC 실패, fallback:', e.message);
+            const CH_PAGE_SIZE = 1000;
+            for (const inv of dbInvestors) {
+              let allInvChanges = [];
+              let offset = 0;
+              let hasMore = true;
+              while (hasMore) {
+                const { data: page, error: chErr } = await supabase
+                  .from('holding_changes')
+                  .select(`investor_id, quarter, change_type, pct_change, securities (ticker, name, name_ko)`)
+                  .eq('investor_id', inv.id)
+                  .order('quarter', { ascending: false })
+                  .range(offset, offset + CH_PAGE_SIZE - 1);
+                if (chErr) { hasMore = false; continue; }
+                if (page?.length) { allInvChanges.push(...page); offset += page.length; hasMore = page.length === CH_PAGE_SIZE; }
+                else { hasMore = false; }
+              }
+              if (allInvChanges.length) dbChanges.push(...allInvChanges);
             }
           }
-        });
 
-        // mappedHoldings에 change 값 주입
-        Object.entries(mappedHoldings).forEach(([invId, holdings]) => {
-          const inv = mappedInvestors.find(i => i.id === invId);
-          const slug = inv?.id;
-          const changeMap = latestChangeByInvestor[slug]?.changes || {};
-          holdings.forEach(h => {
-            if (changeMap[h.ticker] !== undefined) {
-              h.change = changeMap[h.ticker];
+          // quarterlyActivity 빌드
+          const qActivity = {};
+          (dbChanges || []).forEach(c => {
+            const slug = idToSlug[c.investor_id];
+            if (!slug) return;
+            if (!qActivity[slug]) qActivity[slug] = {};
+            const qLabel = formatQuarterLabel(c.quarter);
+            if (!qActivity[slug][qLabel]) qActivity[slug][qLabel] = [];
+            const sec = c.securities || {};
+            let ticker = sec.ticker || '';
+            if (!ticker || /^\d{5,}/.test(ticker)) {
+              ticker = (sec.name || '').replace(/[^A-Za-z]/g, '').slice(0, 4).toUpperCase() || 'N/A';
+            }
+            const existing = qActivity[slug][qLabel].find(a => a.ticker === ticker);
+            if (existing) {
+              if (Math.abs(c.pct_change || 0) > Math.abs(existing.pctChange)) {
+                existing.pctChange = c.pct_change || 0;
+                existing.type = c.change_type;
+              }
+            } else {
+              qActivity[slug][qLabel].push({
+                ticker,
+                name: decodeHtmlEntities(
+                  sec.name_ko && /[가-힣]/.test(sec.name_ko)
+                    ? sec.name_ko
+                    : (KO_NAME_FALLBACK[ticker] || sec.name_ko || sec.name || 'Unknown')
+                ),
+                nameEn: decodeHtmlEntities(sec.name || 'Unknown'),
+                type: c.change_type,
+                pctChange: c.pct_change || 0,
+              });
             }
           });
-        });
 
-        // ★ Phase B2 완료 — 분기 활동 + holdings change 업데이트
-        if (cancelled) return;
-        setQuarterlyActivity(qActivityFormatted);
-        setHoldings({ ...mappedHoldings }); // change 값 주입된 holdings 반영
-        console.log('[DataProvider] Phase B2 완료: quarterlyActivity + holdings change 업데이트');
-
-        // B3. ARK 일별 매매 내역 로드 (최근 90일)
-        let arkTrades = [];
-        try {
-          const { data: rawTrades, error: arkErr } = await supabase
-            .from('ark_daily_trades')
-            .select('*')
-            .order('trade_date', { ascending: false })
-            .limit(500);
-
-          if (!arkErr && rawTrades?.length) {
-            // ARK 매매 ticker들의 sector 정보를 securities 테이블에서 조회
-            const arkTickers = [...new Set(rawTrades.map(t => t.ticker))];
-            let sectorMap = {};
-            try {
-              const { data: secData } = await supabase
-                .from('securities')
-                .select('ticker, sector, sector_ko')
-                .in('ticker', arkTickers);
-              if (secData) {
-                secData.forEach(s => {
-                  sectorMap[s.ticker] = (s.sector_ko && s.sector_ko.trim()) || (s.sector && s.sector.trim()) || '';
-                });
-              }
-            } catch (e) { console.warn('ARK sector lookup 실패:', e.message); }
-
-            // 날짜별 그룹핑
-            const byDate = {};
-            rawTrades.forEach(t => {
-              const d = t.trade_date;
-              if (!byDate[d]) byDate[d] = [];
-              byDate[d].push({
-                ticker: t.ticker,
-                company: t.company,
-                direction: t.direction,
-                sharesChange: t.shares_change,
-                weightToday: t.weight_today,
-                weightPrev: t.weight_prev,
-                funds: t.funds,
-                isNew: t.is_new,
-                isExit: t.is_exit,
-                sector: sectorMap[t.ticker] || '',
-              });
-            });
-            // 날짜 내림차순 배열로 변환
-            arkTrades = Object.entries(byDate)
-              .sort((a, b) => b[0].localeCompare(a[0]))
-              .map(([date, trades]) => ({
-                date,
-                trades: trades.sort((a, b) => Math.abs(b.sharesChange) - Math.abs(a.sharesChange)),
+          const qActivityFormatted = {};
+          Object.keys(qActivity).forEach(slug => {
+            qActivityFormatted[slug] = Object.entries(qActivity[slug])
+              .map(([q, actions]) => ({
+                q,
+                actions: actions.sort((a, b) => Math.abs(b.pctChange) - Math.abs(a.pctChange)),
               }));
-            console.log(`[DataProvider] ARK 일별 매매: ${rawTrades.length}건 (${arkTrades.length}일)`);
-          }
-        } catch (e) {
-          console.warn('ARK 일별 매매 로드 실패:', e.message);
-        }
+          });
 
-        // 9. AI 인사이트 로드 — 투자자별 모든 날짜/분기 저장
-        let aiInsightsMap = {};
-        try {
-          const { data: rawInsights, error: aiErr } = await supabase
-            .from('ai_insights')
-            .select('investor_id, quarter, insights, generated_at')
-            .order('generated_at', { ascending: false });
-
-          if (!aiErr && rawInsights?.length) {
-            rawInsights.forEach(row => {
-              const slug = idToSlug[row.investor_id];
-              if (!slug) return;
-              if (!aiInsightsMap[slug]) aiInsightsMap[slug] = {};
-              // quarter 키별로 저장 (예: "2026Q1-0309", "2025Q4")
-              const qKey = row.quarter;
-              if (!aiInsightsMap[slug][qKey]) {
-                aiInsightsMap[slug][qKey] = {
-                  quarter: formatQuarterLabel(row.quarter),
-                  quarterRaw: row.quarter,
-                  insights: row.insights || [],
-                  generatedAt: row.generated_at,
-                };
+          // holdings에 change 값 주입
+          const latestChangeByInvestor = {};
+          (dbChanges || []).forEach(c => {
+            const slug = idToSlug[c.investor_id];
+            if (!slug) return;
+            const sec = c.securities || {};
+            let ticker = sec.ticker || '';
+            if (!ticker || /^\d{5,}/.test(ticker)) return;
+            const qLabel = formatQuarterLabel(c.quarter);
+            if (!latestChangeByInvestor[slug]) latestChangeByInvestor[slug] = { q: '', changes: {} };
+            const inv = latestChangeByInvestor[slug];
+            if (qLabel > inv.q) { inv.q = qLabel; inv.changes = {}; }
+            if (qLabel === inv.q) {
+              if (!inv.changes[ticker] || Math.abs(c.pct_change || 0) > Math.abs(inv.changes[ticker])) {
+                inv.changes[ticker] = c.pct_change || 0;
               }
-            });
-            // 각 투자자별 최신 인사이트를 _latest에 저장
-            Object.keys(aiInsightsMap).forEach(slug => {
-              const entries = Object.values(aiInsightsMap[slug]);
-              if (entries.length) {
-                const latest = entries.sort((a, b) =>
-                  new Date(b.generatedAt) - new Date(a.generatedAt)
-                )[0];
-                aiInsightsMap[slug]._latest = latest;
-              }
-            });
-            console.log(`[DataProvider] AI 인사이트: ${Object.keys(aiInsightsMap).length}명 로드`);
-          }
-        } catch (e) {
-          console.warn('AI 인사이트 로드 실패:', e.message);
-        }
+            }
+          });
 
-        // ===== stock_prices: 공시 후 성과 계산 (Phase 3B: RPC 1회 호출) =====
+          Object.entries(mappedHoldings).forEach(([invId, holdings]) => {
+            const inv = mappedInvestors.find(i => i.id === invId);
+            const slug = inv?.id;
+            const changeMap = latestChangeByInvestor[slug]?.changes || {};
+            holdings.forEach(h => {
+              if (changeMap[h.ticker] !== undefined) h.change = changeMap[h.ticker];
+            });
+          });
+
+          return { qActivityFormatted, dbChanges };
+        })();
+
+        // --- Task 2: ARK 일별 매매 + AI 인사이트 (소량 API 2개) ---
+        const taskArkAndAI = (async () => {
+          // ARK trades
+          let arkTrades = [];
+          try {
+            const { data: rawTrades, error: arkErr } = await supabase
+              .from('ark_daily_trades')
+              .select('*')
+              .order('trade_date', { ascending: false })
+              .limit(500);
+
+            if (!arkErr && rawTrades?.length) {
+              const arkTickers = [...new Set(rawTrades.map(t => t.ticker))];
+              let sectorMap = {};
+              try {
+                const { data: secData } = await supabase
+                  .from('securities')
+                  .select('ticker, sector, sector_ko')
+                  .in('ticker', arkTickers);
+                if (secData) {
+                  secData.forEach(s => {
+                    sectorMap[s.ticker] = (s.sector_ko && s.sector_ko.trim()) || (s.sector && s.sector.trim()) || '';
+                  });
+                }
+              } catch (e) { console.warn('ARK sector lookup 실패:', e.message); }
+
+              const byDate = {};
+              rawTrades.forEach(t => {
+                const d = t.trade_date;
+                if (!byDate[d]) byDate[d] = [];
+                byDate[d].push({
+                  ticker: t.ticker, company: t.company, direction: t.direction,
+                  sharesChange: t.shares_change, weightToday: t.weight_today,
+                  weightPrev: t.weight_prev, funds: t.funds,
+                  isNew: t.is_new, isExit: t.is_exit, sector: sectorMap[t.ticker] || '',
+                });
+              });
+              arkTrades = Object.entries(byDate)
+                .sort((a, b) => b[0].localeCompare(a[0]))
+                .map(([date, trades]) => ({
+                  date,
+                  trades: trades.sort((a, b) => Math.abs(b.sharesChange) - Math.abs(a.sharesChange)),
+                }));
+              console.log(`[DataProvider] ARK 일별 매매: ${rawTrades.length}건 (${arkTrades.length}일)`);
+            }
+          } catch (e) { console.warn('ARK 일별 매매 로드 실패:', e.message); }
+
+          // AI insights
+          let aiInsightsMap = {};
+          try {
+            const { data: rawInsights, error: aiErr } = await supabase
+              .from('ai_insights')
+              .select('investor_id, quarter, insights, generated_at')
+              .order('generated_at', { ascending: false });
+
+            if (!aiErr && rawInsights?.length) {
+              rawInsights.forEach(row => {
+                const slug = idToSlug[row.investor_id];
+                if (!slug) return;
+                if (!aiInsightsMap[slug]) aiInsightsMap[slug] = {};
+                const qKey = row.quarter;
+                if (!aiInsightsMap[slug][qKey]) {
+                  aiInsightsMap[slug][qKey] = {
+                    quarter: formatQuarterLabel(row.quarter),
+                    quarterRaw: row.quarter,
+                    insights: row.insights || [],
+                    generatedAt: row.generated_at,
+                  };
+                }
+              });
+              Object.keys(aiInsightsMap).forEach(slug => {
+                const entries = Object.values(aiInsightsMap[slug]);
+                if (entries.length) {
+                  const latest = entries.sort((a, b) =>
+                    new Date(b.generatedAt) - new Date(a.generatedAt)
+                  )[0];
+                  aiInsightsMap[slug]._latest = latest;
+                }
+              });
+              console.log(`[DataProvider] AI 인사이트: ${Object.keys(aiInsightsMap).length}명 로드`);
+            }
+          } catch (e) { console.warn('AI 인사이트 로드 실패:', e.message); }
+
+          return { arkTrades, aiInsightsMap };
+        })();
+
+        // --- Task 3: stock_prices RPC ---
+        const taskStockPrices = (async () => {
+          // ===== stock_prices: 공시 후 성과 계산 (Phase 3B: RPC 1회 호출) =====
         let stockPricesMap = {};
         try {
           // 최신 분기 말 날짜 계산
@@ -1249,19 +1221,27 @@ export function DataProvider({ children }) {
               }
             }
           }
-        } catch (e) {
-          console.warn('시세 데이터 로드 실패:', e.message);
-        }
+          } catch (e) {
+            console.warn('시세 데이터 로드 실패:', e.message);
+          }
+          return stockPricesMap;
+        })();
+
+        // ★ B2+B3+B4 병렬 대기
+        const [changesResult, arkAiResult, stockResult] = await Promise.all([
+          taskHoldingChanges, taskArkAndAI, taskStockPrices,
+        ]);
+        console.timeEnd('[DataProvider] Phase B2-B4 병렬');
 
         // ★ Phase B 완료 — 모든 디테일 데이터 최종 반영
         if (cancelled) return;
-        setArkDailyTrades(arkTrades);
-        setAiInsights(aiInsightsMap);
-        setStockPrices(stockPricesMap);
+        setQuarterlyActivity(changesResult.qActivityFormatted);
+        setArkDailyTrades(arkAiResult.arkTrades);
+        setAiInsights(arkAiResult.aiInsightsMap);
+        setStockPrices(stockResult);
         setUsingMock(false);
         setDetailLoading(false);
-        console.timeEnd('[DataProvider] Phase B');
-        console.log('[DataProvider] 전체 로드 완료');
+        console.log('[DataProvider] Phase B 완료 — 전체 로드 완료');
 
       } catch (err) {
         if (cancelled) return;
