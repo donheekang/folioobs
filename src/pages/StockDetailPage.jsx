@@ -1453,10 +1453,27 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
     if (yearlyBars.length === 0 || !priceInfo) return null;
     const currentPrice = priceInfo.price;
 
+    // Filter out old company data for recycled tickers.
+    // If price drops/jumps >85% day-over-day, assume ticker changed hands.
+    // Only use bars AFTER the last such discontinuity.
+    let validBars = yearlyBars;
+    if (yearlyBars.length > 1) {
+      let lastBreak = -1;
+      for (let i = 1; i < yearlyBars.length; i++) {
+        const prevClose = yearlyBars[i - 1].c;
+        const curOpen = yearlyBars[i].o;
+        if (prevClose > 0 && curOpen > 0) {
+          const change = Math.abs(curOpen - prevClose) / prevClose;
+          if (change > 0.85) lastBreak = i;
+        }
+      }
+      if (lastBreak > 0) validBars = yearlyBars.slice(lastBreak);
+    }
+
     // 52W high / low
     let high52 = { price: -Infinity, date: null };
     let low52 = { price: Infinity, date: null };
-    yearlyBars.forEach(bar => {
+    validBars.forEach(bar => {
       if (bar.h > high52.price) { high52 = { price: bar.h, date: new Date(bar.t) }; }
       if (bar.l < low52.price) { low52 = { price: bar.l, date: new Date(bar.t) }; }
     });
@@ -1468,15 +1485,15 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
     const range52 = high52.price - low52.price;
     const position52 = range52 > 0 ? ((currentPrice - low52.price) / range52 * 100) : 50;
 
-    // Period returns: find bar closest to N days ago
+    // Period returns: find bar closest to N days ago (using validBars only)
     const getReturn = (daysAgo) => {
-      if (yearlyBars.length === 0) return null;
+      if (validBars.length === 0) return null;
       const targetDate = new Date();
       targetDate.setDate(targetDate.getDate() - daysAgo);
       const targetTs = targetDate.getTime();
-      let closest = yearlyBars[0];
+      let closest = validBars[0];
       let minDiff = Infinity;
-      for (const bar of yearlyBars) {
+      for (const bar of validBars) {
         const diff = Math.abs(bar.t - targetTs);
         if (diff < minDiff) { minDiff = diff; closest = bar; }
       }
