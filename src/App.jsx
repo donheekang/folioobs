@@ -347,7 +347,7 @@ function FolioObsInner() {
           <div className="max-w-5xl mx-auto px-4 h-11 flex items-center justify-between">
             <button onClick={goHome} className="flex items-center gap-2 hover:opacity-70 transition" aria-label="Home">
               <Eye size={18} style={{ color: T.text }} />
-              <span className="font-semibold text-sm hidden sm:inline" style={{ color: T.text }}>Folio<span style={{ color: '#10B981' }}>Obs</span></span>
+              <span className="font-semibold text-sm" style={{ color: T.text }}>Folio<span style={{ color: '#10B981' }}>Obs</span></span>
             </button>
             <div className="flex items-center gap-0.5 sm:gap-1" role="tablist">
               {navItems.map(item => {
