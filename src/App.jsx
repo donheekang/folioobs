@@ -344,28 +344,34 @@ function FolioObsInner() {
       <div className="min-h-screen transition-colors duration-500" style={{ background: T.bg }}>
         {/* Nav */}
         <nav className="sticky top-0 z-50 transition-colors duration-300" role="navigation" aria-label="Main Navigation" style={{ background: T.navBg, backdropFilter: T.glassBlur, WebkitBackdropFilter: T.glassBlur, borderBottom: `1px solid ${T.glassBorder}` }}>
-          <div className="max-w-5xl mx-auto px-4 h-11 flex items-center justify-between">
-            <button onClick={goHome} className="flex items-center gap-2 hover:opacity-70 transition" aria-label="Home">
+          <div className="max-w-5xl mx-auto px-4 h-11 flex items-center gap-2">
+            {/* Brand - fixed left */}
+            <button onClick={goHome} className="flex items-center gap-1.5 shrink-0 hover:opacity-70 transition" aria-label="Home">
               <Eye size={18} style={{ color: T.text }} />
               <span className="font-semibold text-sm" style={{ color: T.text }}>Folio<span style={{ color: '#10B981' }}>Obs</span></span>
             </button>
-            <div className="flex items-center gap-0.5 sm:gap-1" role="tablist">
-              {navItems.map(item => {
-                const active = page === item.id || (item.id === "dashboard" && page === "investor") || (item.id === "screener" && page === "stock");
-                return (
-                  <button key={item.id} onClick={() => item.id === "dashboard" ? goHome() : navigate(item.id)}
-                    className="px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition-all"
-                    style={{ color: active ? T.text : T.textMuted }}
-                    role="tab" aria-selected={active}>
-                    <span className="hidden sm:inline">{item.label}</span>
-                    <span className="sm:hidden">{item.short}</span>
-                    {item.id === "watchlist" && watchCount > 0 && (
-                      <span className="ml-0.5 text-xs" style={{color:T.red}}>{watchCount}</span>
-                    )}
-                  </button>
-                );
-              })}
-              <div className="w-px h-4 mx-0.5 sm:mx-1" style={{background:T.glassBorder}} />
+            {/* Nav items - scrollable on mobile */}
+            <div className="flex-1 overflow-x-auto scrollbar-hide min-w-0" role="tablist" style={{ WebkitOverflowScrolling: 'touch', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+              <div className="flex items-center gap-0.5 sm:gap-1 w-max">
+                {navItems.map(item => {
+                  const active = page === item.id || (item.id === "dashboard" && page === "investor") || (item.id === "screener" && page === "stock");
+                  return (
+                    <button key={item.id} onClick={() => item.id === "dashboard" ? goHome() : navigate(item.id)}
+                      className="px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap"
+                      style={{ color: active ? T.text : T.textMuted }}
+                      role="tab" aria-selected={active}>
+                      <span className="hidden sm:inline">{item.label}</span>
+                      <span className="sm:hidden">{item.short}</span>
+                      {item.id === "watchlist" && watchCount > 0 && (
+                        <span className="ml-0.5 text-xs" style={{color:T.red}}>{watchCount}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {/* Right actions - fixed right */}
+            <div className="flex items-center shrink-0">
               <button onClick={() => { setSearchOpen(true); setSearchQuery(""); setSearchIdx(-1); }}
                 className="flex items-center gap-1.5 px-2 py-1 rounded-lg transition hover:opacity-70"
                 style={{ color: T.textMuted }}>

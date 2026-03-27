@@ -41,6 +41,15 @@ body {
   background: rgba(0, 0, 0, 0.3);
 }
 
+/* Hide scrollbar for nav horizontal scroll */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .recharts-legend-item-text {
   font-size: 12px !important;
 }
