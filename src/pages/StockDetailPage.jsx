@@ -1454,7 +1454,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
     const currentPrice = priceInfo.price;
 
     // Filter out old company data for recycled tickers.
-    // If price drops/jumps >85% day-over-day, assume ticker changed hands.
+    // Detect price discontinuity: >70% day-over-day gap = ticker changed hands.
     // Only use bars AFTER the last such discontinuity.
     let validBars = yearlyBars;
     if (yearlyBars.length > 1) {
@@ -1464,7 +1464,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
         const curOpen = yearlyBars[i].o;
         if (prevClose > 0 && curOpen > 0) {
           const change = Math.abs(curOpen - prevClose) / prevClose;
-          if (change > 0.85) lastBreak = i;
+          if (change > 0.70) lastBreak = i;
         }
       }
       if (lastBreak > 0) validBars = yearlyBars.slice(lastBreak);
