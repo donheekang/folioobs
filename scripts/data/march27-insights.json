@@ -1,0 +1,26 @@
+[
+  {
+    "title": "NVDA 연속 매도 — 이틀간 21.3만주 처분, AI 반도체 비중 급감",
+    "title_en": "NVDA Consecutive Sell — 213K Shares Dumped in 2 Days, AI Semiconductor Weight Drops",
+    "desc": "3/26 15.5만주에 이어 3/27에도 5.8만주를 3개 펀드(ARKK·ARKW·ARKF)에서 추가 매도. 이틀간 총 21.3만주 처분. AMD도 1.9만주 동시 매도하며 반도체 섹터 전방위 축소 지속. 단, 유일한 매수가 mRNA 치료제 업체 ARCT라는 점에서 '반도체→바이오' 섹터 전환이 가속화되는 모습.",
+    "desc_en": "Following 155K shares on 3/26, another 58K NVDA shares sold across ARKK, ARKW, ARKF on 3/27. Total 213K shares in 2 days. AMD also sold 19K shares simultaneously. However, the sole buy being ARCT (mRNA therapeutics) signals accelerating 'semiconductor→biotech' sector rotation.",
+    "tag": "반도체매도",
+    "confidence": 96
+  },
+  {
+    "title": "ARCT 4.9만주 매수 — mRNA 치료제에 단독 베팅",
+    "title_en": "ARCT 49K Shares Buy — Solo Bet on mRNA Therapeutics",
+    "desc": "8종목 매매 중 유일한 매수가 Arcturus Therapeutics(ARCT) 48,659주(ARKG). 자가증폭 mRNA(saRNA) 플랫폼 기반의 차세대 백신·치료제 전문기업으로, ARK가 유전체학·mRNA 분야에 대한 확신을 재확인. 3/26 TEM(AI 헬스케어) 매수에 이어 바이오·헬스케어 섹터 연속 매수로, 빅테크 매도 자금이 바이오로 흘러가는 패턴이 명확해짐.",
+    "desc_en": "The only buy among 8 trades: Arcturus Therapeutics (ARCT) 48,659 shares in ARKG. ARCT specializes in self-amplifying mRNA (saRNA) platform for next-gen vaccines and therapeutics. Following TEM (AI healthcare) buy on 3/26, the pattern of big tech sell proceeds flowing into biotech is now clear.",
+    "tag": "바이오매수",
+    "confidence": 94
+  },
+  {
+    "title": "BLSH 연일 매도 — 4일 연속 크립토 비중 축소",
+    "title_en": "BLSH Daily Sell Continues — 4th Consecutive Day of Crypto Reduction",
+    "desc": "Bullish(BLSH)를 3개 펀드에서 3.8만주 추가 매도. 3/20부터 4거래일 연속 매도로 누적 처분량이 37만주 돌파. 3/26 ARKB(비트코인 ETF) 49.5만주 대량 매도와 합치면, 캐시 우드의 크립토 포지션 정리가 단기 전술이 아닌 중기 전략임이 확실해짐.",
+    "desc_en": "Sold BLSH 38K shares across 3 funds. 4th consecutive trading day of selling since 3/20, with cumulative disposal exceeding 370K shares. Combined with 3/26's ARKB 495K share sell-off, Cathie Wood's crypto position unwinding is clearly a medium-term strategy, not a short-term tactic.",
+    "tag": "크립토매도",
+    "confidence": 93
+  }
+]

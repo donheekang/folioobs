@@ -563,6 +563,7 @@ const ARTICLE_ILLUSTRATIONS = {
 
 // AI 생성 이미지 매핑 (있으면 우선 사용, 없으면 SVG 폴백)
 const ARTICLE_IMAGES = {
+  "cathie-wood-march-27-trades": "/news/cathie-wood-daily.png",
   "cathie-wood-march-26-trades": "/news/cathie-wood-daily.png",
   "cathie-wood-march-25-trades": "/news/cathie-wood-daily.png",
   "cathie-wood-march-24-trades": "/news/cathie-wood-daily.png",
@@ -614,6 +615,93 @@ function ArticleVisual({ articleId, className }) {
 
 // ========== FolioObs 뉴스 기사 데이터 ==========
 const NEWS_ARTICLES = [
+  {
+    id: "cathie-wood-march-27-trades",
+    date: "2026-03-27",
+    category: "일별 매매",
+    categoryEn: "DAILY TRADES",
+    categoryColor: "green",
+    title: "캐시 우드 3월 27일 매매 — NVDA 이틀 연속 대량 매도, ARCT 단독 매수",
+    titleEn: "Cathie Wood March 27 Trades — NVDA Massive Sell 2nd Day, ARCT Solo Buy",
+    summary: "ARK Invest가 3월 27일 NVDA 5.8만주를 포함해 7종목을 매도하고, mRNA 치료제 업체 Arcturus(ARCT)만 4.9만주 매수했습니다. 빅테크→바이오 섹터 전환이 가속화되고 있습니다.",
+    summaryEn: "ARK Invest sold 7 tickers including 58K NVDA shares on March 27, buying only Arcturus Therapeutics (ARCT) at 49K shares. The big tech → biotech sector rotation is accelerating.",
+    tickers: ["NVDA", "ARCT", "META", "AMD", "TSLA", "BLSH", "TER", "ROKU"],
+    readTime: "3 min",
+    content: `캐시 우드가 3월 27일에도 대규모 매도를 이어갔습니다. 8종목 거래 중 매수는 단 1종목(ARCT), 나머지 7종목은 모두 매도입니다. 전일(3/26)의 역대급 31종목 매도에 이어 이틀 연속 공격적 포지션 축소가 진행되고 있습니다.
+
+■ 매수 종목
+
+ARCT (Arcturus Therapeutics) — ARKG 48,659주 (비중 0.0311%)
+자가증폭 mRNA(saRNA) 플랫폼 기반의 차세대 백신·치료제 전문기업입니다. ARK의 유전체학·mRNA 분야에 대한 확신을 재확인하는 매수로, 3/26 TEM(AI 헬스케어) 매수에 이어 바이오·헬스케어 섹터 연속 매수입니다.
+
+■ 매도 종목
+
+NVDA (엔비디아) — ARKK 44,728주 + ARKW 12,954주 + ARKF 437주 = 총 58,119주
+이틀 연속 대량 매도. 3/26 15.5만주에 이어 5.8만주 추가 처분으로 이틀간 총 21.3만주를 매도했습니다. AI 반도체 랠리에서의 체계적 차익실현이 계속되고 있습니다.
+
+META (메타 플랫폼스) — ARKK 9,194주 + ARKF 1,306주 = 총 10,500주
+전일 7.6만주에 이어 추가 매도. 빅테크 노출 축소 지속.
+
+AMD (AMD) — ARKK 14,699주 + ARKW 4,427주 = 총 19,126주
+전일 3.8만주에 이어 추가 매도. 반도체 전방위 축소.
+
+TSLA (테슬라) — ARKW 4,221주 (비중 0.1013%)
+캐시 우드의 핵심 보유 종목 테슬라도 소량 매도. 의미있는 비중 변화는 아니지만, 전방위 매도 분위기를 반영.
+
+BLSH (Bullish) — ARKK 31,853주 + ARKW 3,998주 + ARKF 2,025주 = 총 37,876주
+4거래일 연속 매도. 3/20부터 누적 37만주 이상 처분하며 크립토 비중 축소 가속.
+
+TER (테라다인) — ARKK 17,092주 (비중 0.0870%)
+이틀 연속 매도. 반도체 테스트 장비 업체로 AI 반도체 서플라이체인 전반적 비중 축소.
+
+ROKU (로쿠) — ARKK 6,729주 + ARKW 1,689주 + ARKF 856주 = 총 9,274주
+연일 소량 매도 지속. 스트리밍 플랫폼 비중 점진적 축소.
+
+■ 핵심 인사이트: 반도체→바이오 대전환 가속
+
+이틀 연속 패턴이 명확합니다. 3/26에는 TEM(AI 헬스케어), 3/27에는 ARCT(mRNA 치료제)가 유일한 매수 종목이며, 매도는 NVDA·META·AMD 등 빅테크/반도체에 집중. 캐시 우드가 AI 하드웨어 사이클의 고점을 판단하고, 수익을 바이오·헬스케어 혁신 기업으로 재배분하는 중기 전략이 확실해졌습니다.
+
+특히 ARCT는 자가증폭 mRNA 기술로 기존 mRNA 대비 더 적은 용량으로 더 강한 면역반응을 유도하는 차세대 플랫폼을 보유하고 있어, ARK의 '파괴적 혁신' 투자 철학과 정확히 부합합니다.
+
+※ 본 기사는 ARK Invest 공개 매매 데이터 기반이며, 투자 권유가 아닙니다.`,
+    contentEn: `Cathie Wood continued massive selling on March 27. Out of 8 trades, only 1 was a buy (ARCT), while all other 7 were sells. Following the historic 31-ticker sell-off on 3/26, aggressive position reduction continues for the second straight day.
+
+■ Buy
+
+ARCT (Arcturus Therapeutics) — ARKG 48,659 shares (0.0311%)
+A next-generation vaccine and therapeutics company based on self-amplifying mRNA (saRNA) platform. This buy reaffirms ARK's conviction in genomics and mRNA, following the TEM (AI healthcare) purchase on 3/26 — consecutive biotech/healthcare sector buys.
+
+■ Sells
+
+NVDA (NVIDIA) — ARKK 44,728 + ARKW 12,954 + ARKF 437 = 58,119 shares total
+Second consecutive day of massive selling. Combined with 155K shares on 3/26, total disposal reaches 213K shares in 2 days. Systematic profit-taking from the AI semiconductor rally continues.
+
+META (Meta Platforms) — ARKK 9,194 + ARKF 1,306 = 10,500 shares
+Additional sell after 76K shares on 3/26. Big tech exposure reduction continues.
+
+AMD (Advanced Micro Devices) — ARKK 14,699 + ARKW 4,427 = 19,126 shares
+Additional sell after 38K shares on 3/26. Broad semiconductor reduction.
+
+TSLA (Tesla) — ARKW 4,221 shares (0.1013%)
+Even Cathie Wood's core holding Tesla sees a small sell. Not a significant weight change, but reflects the across-the-board selling sentiment.
+
+BLSH (Bullish) — ARKK 31,853 + ARKW 3,998 + ARKF 2,025 = 37,876 shares
+4th consecutive trading day of selling. Over 370K cumulative shares disposed since 3/20.
+
+TER (Teradyne) — ARKK 17,092 shares (0.0870%)
+Second consecutive day of selling. Semiconductor test equipment maker, reflecting broad AI semiconductor supply chain weight reduction.
+
+ROKU (Roku) — ARKK 6,729 + ARKW 1,689 + ARKF 856 = 9,274 shares
+Continued small daily sells. Gradual streaming platform weight reduction.
+
+■ Key Insight: Semiconductor→Biotech Major Rotation Accelerates
+
+The two-day pattern is unmistakable. On 3/26, TEM (AI healthcare) was the sole buy; on 3/27, ARCT (mRNA therapeutics) is the sole buy — while sells concentrate on big tech/semiconductors like NVDA, META, and AMD. Cathie Wood appears to have called the top of the AI hardware cycle, reallocating profits into biotech/healthcare innovation companies as a clear medium-term strategy.
+
+ARCT's self-amplifying mRNA technology, which induces stronger immune responses with lower doses compared to conventional mRNA, perfectly aligns with ARK's 'disruptive innovation' investment philosophy.
+
+※ This article is based on publicly available ARK Invest trade data and is not investment advice.`,
+  },
   {
     id: "cathie-wood-march-23-trades",
     date: "2026-03-23",
