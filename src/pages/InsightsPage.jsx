@@ -74,11 +74,13 @@ const InsightsPage = ({ onBack, onNavigate }) => {
 
   // quarter key → 표시용 라벨 변환
   const formatPeriodLabel = (qKey, locale, full = false) => {
-    // "weekly-0308" → 주간
+    // "weekly-0327" → 일별과 동일 포맷 (마지막 거래일 기준)
     if (qKey.startsWith('weekly-')) {
-      const mmdd = qKey.split('-')[1]; // "0308"
+      const mmdd = qKey.split('-')[1]; // "0327"
       const mm = parseInt(mmdd.slice(0, 2));
       const dd = parseInt(mmdd.slice(2));
+      const qNum = Math.ceil(mm / 3);
+      const yr = new Date().getFullYear().toString().slice(2);
       if (full) {
         return locale === 'ko' ? `주간 리포트 ${mm}월 ${dd}일` : `Weekly Report ${mm}/${dd}`;
       }

@@ -270,9 +270,11 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
 
                   {/* ── 인사이트 (DB 우선, 없으면 규칙 기반 폴백) ── */}
                   {(() => {
-                    // DB에서 주간 인사이트 찾기: "weekly-MMDD" 형식 키
-                    const weekStart = mode === 'weekly' ? report.start : null;
-                    const weekKey = weekStart ? `weekly-${weekStart.slice(5).replace('-', '')}` : null;
+                    // DB에서 주간 인사이트 찾기: "weekly-MMDD" 형식 키 (마지막 거래일 기준)
+                    const sortedDays = mode === 'weekly' && report.days.length > 0
+                      ? [...report.days].sort((a, b) => a.date.localeCompare(b.date)) : [];
+                    const lastTradeDay = sortedDays.length > 0 ? sortedDays[sortedDays.length - 1].date : null;
+                    const weekKey = lastTradeDay ? `weekly-${lastTradeDay.slice(5).replace('-', '')}` : null;
                     const cathieInsights = aiInsights?.cathie || {};
                     const dbInsights = weekKey && cathieInsights[weekKey]?.insights;
 
