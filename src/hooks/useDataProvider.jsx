@@ -596,7 +596,7 @@ const KO_NAME_FALLBACK = {
   ABSI:'앱사이', NRIX:'누릭스 테라퓨틱스', WRD:'위라이드',
   CMPS:'컴파스 패스웨이즈', BYDDY:'BYD', BFLY:'버터플라이 네트워크',
   PRME:'프라임 메디신', GENI:'지니어스 스포츠', ATAI:'아타이벡클리',
-  DSY:'디스커버리', 'ETHQ/U':'3iQ 이더 스테이킹 ETF', LY:'LY',
+  DSY:'디스커버리', 'ETHQ/U':'3iQ 이더 스테이킹 ETF', LY:'LY Corp', '4689':'LY Corp',
   MASS:'908 디바이시스', KSPI:'카스피', SLMT:'브레라 홀딩스',
   'SOLQ/U':'3iQ 솔라나 스테이킹 ETF', QSI:'퀀텀-Si', GENB:'제너레이트 바이오메디슨',
   NXDR:'넥스트도어',
@@ -860,16 +860,21 @@ export function DataProvider({ children }) {
           if (inv) rawMappedHoldings[inv.id].push(mapHolding(h, h._isActualDollars));
         });
 
+        const TICKER_GROUPS = { 'GOOGL': 'GOOG', 'BRK.B': 'BRK.A', 'BRK/B': 'BRK/A', 'LY': '4689' };
         const mappedHoldings = {};
         Object.entries(rawMappedHoldings).forEach(([invId, holdings]) => {
           const dedupMap = new Map();
           holdings.forEach(h => {
+            const normTicker = TICKER_GROUPS[h.ticker] || h.ticker;
+            h.ticker = normTicker;
             if (dedupMap.has(h.ticker)) {
               const ex = dedupMap.get(h.ticker);
               ex.value += h.value;
               ex.shares += h.shares;
               ex.pct = Math.round((ex.pct + h.pct) * 100) / 100;
               if (h.change && h.change !== 0) ex.change = h.change;
+              // 통합 시 더 긴(상세한) company name 유지
+              if (h.company && (!ex.company || h.company.length > ex.company.length)) ex.company = h.company;
             } else {
               dedupMap.set(h.ticker, { ...h });
             }

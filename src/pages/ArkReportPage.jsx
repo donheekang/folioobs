@@ -62,10 +62,14 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
     const newPositions = allTrades.filter(t => t.isNew);
     const exits = allTrades.filter(t => t.isExit);
 
+    const TICKER_GROUPS = { 'GOOGL': 'GOOG', 'BRK.B': 'BRK.A', 'BRK/B': 'BRK/A', 'LY': '4689' };
+    const normalizeTicker = (t) => TICKER_GROUPS[t] || t;
+
     const tickerMap = {};
     allTrades.forEach(tr => {
-      if (!tickerMap[tr.ticker]) tickerMap[tr.ticker] = { ticker: tr.ticker, company: tr.company, buyShares: 0, sellShares: 0, buyCount: 0, sellCount: 0, isNew: false, isExit: false, latestWeight: 0 };
-      const entry = tickerMap[tr.ticker];
+      const tk = normalizeTicker(tr.ticker);
+      if (!tickerMap[tk]) tickerMap[tk] = { ticker: tk, company: tr.company, buyShares: 0, sellShares: 0, buyCount: 0, sellCount: 0, isNew: false, isExit: false, latestWeight: 0 };
+      const entry = tickerMap[tk];
       if (tr.direction === 'buy') { entry.buyShares += Math.abs(tr.sharesChange); entry.buyCount++; }
       else { entry.sellShares += Math.abs(tr.sharesChange); entry.sellCount++; }
       if (tr.isNew) entry.isNew = true;
@@ -197,19 +201,25 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
 
           {/* 주간/월간 토글 */}
           <div className="flex rounded-xl overflow-hidden" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }}>
-            {['weekly', 'monthly'].map(m => (
-              <button key={m} className="px-5 py-2 text-xs font-semibold transition-all"
-                style={{
-                  background: mode === m ? t.accent : 'transparent',
-                  color: mode === m ? '#fff' : t.textMuted,
-                  borderRadius: mode === m ? '0.75rem' : '0',
-                }}
-                onClick={() => { setMode(m); setExpandedIdx(0); }}>
-                {m === 'weekly' ? (isKo ? '주간' : 'Weekly') : (isKo ? '월간' : 'Monthly')}
-              </button>
-            ))}
+            {['weekly', 'monthly'].map(m => {
+              const modeColor = m === 'weekly' ? '#3B82F6' : '#8B5CF6';
+              return (
+                <button key={m} className="px-5 py-2 text-xs font-semibold transition-all"
+                  style={{
+                    background: mode === m ? modeColor : 'transparent',
+                    color: mode === m ? '#fff' : t.textMuted,
+                    borderRadius: mode === m ? '0.75rem' : '0',
+                  }}
+                  onClick={() => { setMode(m); setExpandedIdx(0); }}>
+                  {m === 'weekly' ? (isKo ? '주간' : 'Weekly') : (isKo ? '월간' : 'Monthly')}
+                </button>
+              );
+            })}
           </div>
         </div>
+
+        {/* ── 컨텍스트 바 ── */}
+        <div className="mt-3 h-[2px] rounded-full" style={{ background: mode === 'weekly' ? 'rgba(59,130,246,0.3)' : 'rgba(139,92,246,0.3)' }} />
       </div>
 
       {/* ── 리포트 목록 ── */}
@@ -224,8 +234,8 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
               {/* 리포트 헤더 */}
               <button className="w-full flex items-center justify-between" onClick={() => setExpandedIdx(isOpen ? -1 : idx)}>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl" style={{ background: `${t.accent}12` }}>
-                    {mode === 'weekly' ? <Calendar size={18} style={{ color: t.accent }} /> : <FileText size={18} style={{ color: t.accent }} />}
+                  <div className="p-2 rounded-xl" style={{ background: mode === 'weekly' ? 'rgba(59,130,246,0.1)' : 'rgba(139,92,246,0.1)' }}>
+                    {mode === 'weekly' ? <Calendar size={18} style={{ color: '#3B82F6' }} /> : <BarChart3 size={18} style={{ color: '#8B5CF6' }} />}
                   </div>
                   <div className="text-left">
                     <div className="flex items-center gap-2">

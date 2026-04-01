@@ -254,7 +254,7 @@ function FolioObsInner() {
 
   // ===== 핫 종목 TOP 5 (검색 홈에서 표시) =====
   const hotStocks = useMemo(() => {
-    const TICKER_GROUPS = { 'GOOGL': 'GOOG', 'BRK.B': 'BRK.A', 'BRK/B': 'BRK/A' };
+    const TICKER_GROUPS = { 'GOOGL': 'GOOG', 'BRK.B': 'BRK.A', 'BRK/B': 'BRK/A', 'LY': '4689' };
     const normalize = (ticker) => TICKER_GROUPS[ticker] || ticker;
     const map = {};
     INVESTORS.forEach(inv => {
