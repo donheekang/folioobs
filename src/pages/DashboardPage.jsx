@@ -1,6 +1,6 @@
 import { useMemo, memo, useState, useEffect, useRef } from "react";
 import {
-  ArrowUpRight, ArrowDownRight, ArrowUpDown, Briefcase, Plus, BarChart3, ChevronDown, TrendingUp, Activity, Trophy, Zap, Target, Layers, DollarSign, Bell, Search, Clock, FileText, Radio
+  ArrowUpRight, ArrowDownRight, ArrowUpDown, Briefcase, Plus, BarChart3, ChevronDown, TrendingUp, Activity, Trophy, Zap, Target, Layers, DollarSign, Bell, Search, Clock, FileText, Radio, Sparkles, Calendar
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -485,6 +485,101 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           </div>
         )}
 
+
+        {/* ARK 월간 리포트 하이라이트 카드 */}
+        {arkDailyTrades.length > 0 && (() => {
+          // 최신 거래일 기준으로 월을 판단
+          const latestMonth = arkDailyTrades[0]?.date?.slice(0, 7); // "2026-03"
+          if (!latestMonth) return null;
+          const monthNum = parseInt(latestMonth.slice(5));
+          const yearStr = latestMonth.slice(2, 4);
+          // 해당 월의 모든 거래 집계
+          const monthTrades = arkDailyTrades.filter(d => d.date?.startsWith(latestMonth));
+          const allTrades = monthTrades.flatMap(d => d.trades.filter(tr => tr.ticker !== 'NO_TRADES'));
+          const totalBuys = allTrades.filter(tr => tr.direction?.toLowerCase() === 'buy').length;
+          const totalSells = allTrades.filter(tr => tr.direction?.toLowerCase() === 'sell').length;
+          const totalTickers = new Set(allTrades.map(tr => tr.ticker)).size;
+          const tradeDays = monthTrades.length;
+          if (tradeDays < 2) return null; // 데이터 부족 시 미표시
+
+          // 신규 편입 종목 찾기
+          const newTickers = allTrades.filter(tr => tr.isNew).map(tr => tr.ticker);
+          const uniqueNew = [...new Set(newTickers)];
+
+          // 월간 인사이트 첫 번째 제목 가져오기
+          const cathieInsights = window.__monthlyInsightCache || null;
+
+          return (
+            <div className="hero-enter hero-enter-4 mb-3 w-full max-w-lg mx-auto">
+              <button className="w-full relative rounded-2xl overflow-hidden text-left transition-all hover:scale-[1.01]"
+                style={{
+                  background: t.name === 'dark'
+                    ? 'linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.12) 50%, rgba(168,85,247,0.08) 100%)'
+                    : 'linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(139,92,246,0.08) 50%, rgba(168,85,247,0.06) 100%)',
+                  border: `1px solid ${t.name === 'dark' ? 'rgba(139,92,246,0.25)' : 'rgba(139,92,246,0.15)'}`,
+                }}
+                onClick={() => { trackCtaClick('monthly_report_card', 'hero'); onNavigate("ark-report"); }}>
+
+                {/* 배경 글로우 */}
+                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{background:'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)'}} />
+                <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full pointer-events-none" style={{background:'radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%)'}} />
+
+                <div className="relative p-4">
+                  {/* 헤더 */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{background:'rgba(139,92,246,0.2)'}}>
+                        <Calendar size={14} style={{color:'#a78bfa'}} />
+                      </div>
+                      <span className="text-sm font-bold" style={{color:'#a78bfa'}}>
+                        {L.locale === 'ko' ? `${monthNum}월 월간 리포트` : `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][monthNum-1]} Monthly Report`}
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse" style={{background:'rgba(139,92,246,0.2)',color:'#c4b5fd'}}>NEW</span>
+                    </div>
+                    <ArrowUpRight size={14} style={{color:'#a78bfa'}} />
+                  </div>
+
+                  {/* 핵심 수치 */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <TrendingUp size={12} style={{color:t.green}} />
+                        <span className="text-xs" style={{color:t.textMuted}}>{L.locale === 'ko' ? '매수' : 'Buy'}</span>
+                        <span className="text-sm font-bold" style={{color:t.green}}>{totalBuys}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Activity size={12} style={{color:t.red}} />
+                        <span className="text-xs" style={{color:t.textMuted}}>{L.locale === 'ko' ? '매도' : 'Sell'}</span>
+                        <span className="text-sm font-bold" style={{color:t.red}}>{totalSells}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs" style={{color:t.textMuted}}>{tradeDays}{L.locale === 'ko' ? '일' : 'd'}</span>
+                        <span className="text-xs" style={{color:t.textMuted}}>·</span>
+                        <span className="text-xs" style={{color:t.textMuted}}>{totalTickers}{L.locale === 'ko' ? '종목' : ' tickers'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 신규 편입 하이라이트 */}
+                  {uniqueNew.length > 0 && (
+                    <div className="flex items-center gap-2 rounded-lg px-3 py-2" style={{background: t.name === 'dark' ? 'rgba(16,185,129,0.06)' : 'rgba(16,185,129,0.04)', border:'1px solid rgba(16,185,129,0.15)'}}>
+                      <Sparkles size={12} style={{color:'#10b981'}} />
+                      <span className="text-[11px] font-semibold" style={{color:'#10b981'}}>
+                        {L.locale === 'ko' ? '신규 편입' : 'New Addition'}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {uniqueNew.slice(0, 3).map(tk => (
+                          <span key={tk} className="text-xs font-bold px-1.5 py-0.5 rounded" style={{color:'#10b981', background:'rgba(16,185,129,0.1)'}}>{tk}</span>
+                        ))}
+                        {uniqueNew.length > 3 && <span className="text-[10px]" style={{color:t.textMuted}}>+{uniqueNew.length - 3}</span>}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </button>
+            </div>
+          );
+        })()}
 
         {/* ARK Today Preview — 캐시 우드 일별 매매 */}
         {arkDailyTrades.length > 0 && (() => {
