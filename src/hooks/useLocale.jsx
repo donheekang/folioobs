@@ -60,6 +60,14 @@ export function createLocaleValue(locale) {
     // 분기 포맷 — 짧은 형태 (대시보드 카드 등에서 줄바꿈 방지)
     quarter: (q) => {
       if (!q) return '';
+      // mon-2026-03 형태 (월간 인사이트) → "26년 3월" / "Mar '26"
+      const mm = q.match(/^mon-(\d{4})-(\d{2})$/);
+      if (mm) {
+        const yr = mm[1].slice(2);
+        const mon = parseInt(mm[2]);
+        const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return locale === 'ko' ? `${yr}년 ${mon}월` : `${monthNames[mon-1]} '${yr}`;
+      }
       // weekly-0327 형태 (주간 인사이트) → Q1'26 (3/27) 형식으로 통일
       const mw = q.match(/^weekly-(\d{2})(\d{2})$/);
       if (mw) {

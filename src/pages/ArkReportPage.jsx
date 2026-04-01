@@ -270,13 +270,20 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
 
                   {/* ── 인사이트 (DB 우선, 없으면 규칙 기반 폴백) ── */}
                   {(() => {
-                    // DB에서 주간 인사이트 찾기: "weekly-MMDD" 형식 키 (마지막 거래일 기준)
-                    const sortedDays = mode === 'weekly' && report.days.length > 0
+                    // DB에서 주간/월간 인사이트 찾기
+                    const sortedDays = report.days.length > 0
                       ? [...report.days].sort((a, b) => a.date.localeCompare(b.date)) : [];
                     const lastTradeDay = sortedDays.length > 0 ? sortedDays[sortedDays.length - 1].date : null;
-                    const weekKey = lastTradeDay ? `weekly-${lastTradeDay.slice(5).replace('-', '')}` : null;
                     const cathieInsights = aiInsights?.cathie || {};
-                    const dbInsights = weekKey && cathieInsights[weekKey]?.insights;
+                    let dbInsights;
+                    if (mode === 'weekly') {
+                      const weekKey = lastTradeDay ? `weekly-${lastTradeDay.slice(5).replace('-', '')}` : null;
+                      dbInsights = weekKey && cathieInsights[weekKey]?.insights;
+                    } else if (mode === 'monthly' && report.key) {
+                      // monthly key: "YYYY-MM" → DB key: "mon-YYYY-MM"
+                      const monthKey = `mon-${report.key}`;
+                      dbInsights = cathieInsights[monthKey]?.insights;
+                    }
 
                     // DB 인사이트가 있으면 그걸 쓰고, 없으면 규칙 기반
                     const TAG_COLORS = { '섹터전환': '#8b5cf6', '확신매수': '#22c55e', '포지션정리': '#f59e0b', '매수우위': '#22c55e', '매도우위': '#ef4444', '전략': '#3b82f6', '리밸런싱': '#f59e0b', '신규매수': '#10b981', '비중축소': '#ef4444', '트렌드': '#06b6d4', 'Rotation': '#8b5cf6', 'Conviction': '#22c55e', 'Unwinding': '#f59e0b', 'Bullish': '#22c55e', 'Bearish': '#ef4444', 'Strategy': '#3b82f6', 'Rebalancing': '#f59e0b', 'NewBuy': '#10b981', 'Trim': '#ef4444', 'Trend': '#06b6d4' };

@@ -74,6 +74,17 @@ const InsightsPage = ({ onBack, onNavigate }) => {
 
   // quarter key → 표시용 라벨 변환
   const formatPeriodLabel = (qKey, locale, full = false) => {
+    // "mon-2026-03" → 월간
+    if (qKey.startsWith('mon-')) {
+      const parts = qKey.split('-'); // ["mon", "2026", "03"]
+      const yr = parts[1].slice(2);
+      const mon = parseInt(parts[2]);
+      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      if (full) {
+        return locale === 'ko' ? `월간 리포트 ${mon}월` : `Monthly Report ${monthNames[mon-1]}`;
+      }
+      return locale === 'ko' ? `${yr}년 ${mon}월` : `${monthNames[mon-1]} '${yr}`;
+    }
     // "weekly-0327" → 일별과 동일 포맷 (마지막 거래일 기준)
     if (qKey.startsWith('weekly-')) {
       const mmdd = qKey.split('-')[1]; // "0327"

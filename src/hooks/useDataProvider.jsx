@@ -25,6 +25,13 @@ function investorSlug(name) {
 
 // "2024Q1" → "Q1'24" 변환
 function formatQuarterLabel(q) {
+  // 월간 인사이트 형식: mon-2026-03 → "26년 3월"
+  const monthly = q.match(/^mon-(\d{4})-(\d{2})$/);
+  if (monthly) {
+    const yr = monthly[1].slice(2);
+    const mm = parseInt(monthly[2]);
+    return `${yr}년 ${mm}월`;
+  }
   // 주간 인사이트 형식: weekly-0327 → "Q1'26 (3/27)" (일별과 동일 포맷)
   const weekly = q.match(/^weekly-(\d{2})(\d{2})$/);
   if (weekly) {
