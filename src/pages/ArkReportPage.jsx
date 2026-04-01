@@ -9,13 +9,15 @@ import { generateArkReportInsight } from "../utils/insights";
 // ============================================================
 // 캐시우드 ARK 주간/월간 리포트
 // ============================================================
-const ArkReportPage = ({ onBack, onNavigate }) => {
+const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) => {
   const t = useTheme();
   const L = useLocale();
   const { arkDailyTrades, aiInsights } = useData();
   const isKo = L.locale === 'ko';
 
-  const [mode, setMode] = useState('weekly');
+  const [mode, setMode] = useState((initialMode === 'weekly' || initialMode === 'monthly') ? initialMode : 'weekly');
+  // clear initialMode after consuming it
+  React.useEffect(() => { if (initialMode && onInitialModeClear) onInitialModeClear(); }, []);
   const [expandedIdx, setExpandedIdx] = useState(0);
 
   // ── 주간/월간 그룹핑 ──
@@ -298,8 +300,30 @@ const ArkReportPage = ({ onBack, onNavigate }) => {
                         icon: Sparkles,
                         fromDb: true,
                       }));
+                    } else if (idx === 0 && mode === 'weekly') {
+                      // 최신 주간: DB 인사이트 아직 없음 → 진행 중 안내
+                      displayInsights = [];
                     } else {
                       displayInsights = generateArkReportInsight(stats, report.days, isKo);
+                    }
+
+                    // 최신 주간 + 인사이트 없음 → 진행 중 메시지
+                    if (idx === 0 && mode === 'weekly' && displayInsights.length === 0) {
+                      return (
+                        <div className="rounded-xl p-4" style={{ background: t.name === 'dark' ? 'rgba(139,92,246,0.04)' : 'rgba(139,92,246,0.03)', border: `1px solid ${t.name === 'dark' ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.1)'}` }}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Sparkles size={15} style={{ color: '#a78bfa' }} />
+                            <span className="text-sm font-bold" style={{ color: t.text }}>
+                              {isKo ? '주간 인사이트' : 'Weekly Insights'}
+                            </span>
+                          </div>
+                          <p className="text-xs leading-relaxed" style={{ color: t.textMuted }}>
+                            {isKo
+                              ? '이번 주는 아직 진행 중이에요. 금요일 마감 후 인사이트가 업데이트됩니다.'
+                              : 'This week is still in progress. Insights will be updated after Friday close.'}
+                          </p>
+                        </div>
+                      );
                     }
 
                     if (displayInsights.length === 0) return null;

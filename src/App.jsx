@@ -147,7 +147,7 @@ function FolioObsInner() {
       }
       else if (target === "stock") { setSelectedTicker(param); setPage("stock"); setScrollTarget(null); }
       else if (target === "screener") { setScreenerSector(param || null); setPage("screener"); setScrollTarget(null); }
-      else { setSelectedInvestor(null); setSelectedTicker(null); setPage(target); setScrollTarget(null); }
+      else { setSelectedInvestor(null); setSelectedTicker(null); setPage(target); setScrollTarget(param || null); }
       trackPageView(target, param);
       if (pushState !== false) {
         const url = target === 'dashboard' ? '/' : `/${target}${param ? '/' + param : ''}`;
@@ -619,7 +619,7 @@ function FolioObsInner() {
                 {page === "compare" && <ComparePage onBack={goHome} onNavigate={navigate} />}
                 {page === "insights" && <InsightsPage onBack={goHome} onNavigate={navigate} />}
                 {page === "insider" && <InsiderTradingPage onBack={goHome} onNavigate={navigate} />}
-                {page === "ark-report" && <ArkReportPage onBack={goHome} onNavigate={navigate} />}
+                {page === "ark-report" && <ArkReportPage onBack={goHome} onNavigate={navigate} initialMode={scrollTarget} onInitialModeClear={() => setScrollTarget(null)} />}
                 {page === "foliomatch" && <FolioMatchPage onBack={goHome} onNavigate={navigate} watchlist={watchlist} />}
                 {page === "news" && <NewsPage onBack={goHome} />}
                 {page === "privacy" && <PrivacyPage onBack={goHome} />}
