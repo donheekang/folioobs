@@ -563,6 +563,7 @@ const ARTICLE_ILLUSTRATIONS = {
 
 // AI 생성 이미지 매핑 (있으면 우선 사용, 없으면 SVG 폴백)
 const ARTICLE_IMAGES = {
+  "cathie-wood-march-31-trades": "/news/cathie-wood-daily.png",
   "cathie-wood-march-30-trades": "/news/cathie-wood-daily.png",
   "cathie-wood-march-27-trades": "/news/cathie-wood-daily.png",
   "cathie-wood-march-26-trades": "/news/cathie-wood-daily.png",
