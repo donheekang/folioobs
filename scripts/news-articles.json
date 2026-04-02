@@ -1,5 +1,20 @@
 [
   {
+    "id": "cathie-wood-april-01-trades",
+    "date": "2026-04-01",
+    "category": "일별 매매",
+    "category_en": "DAILY TRADES",
+    "category_color": "green",
+    "title": "캐시 우드 4월 1일 매매 — KDK 9.1만주 대량 매수, AI 인프라+바이오 집중",
+    "title_en": "Cathie Wood April 1 Trades — KDK 91K Bulk Buy, AI Infra & Bio Focus",
+    "summary": "4월 첫 거래일, ARK는 5종목 매수·2종목 매도를 단행했습니다. KDK(Kodiak AI) 91,027주가 단일 최대 매수이며, CoreWeave·GeneDx·Oklo·Arcturus 등 AI 인프라와 바이오에 집중. SRTA 7.7만주 연속 매도.",
+    "summary_en": "On April's first trading day, ARK made 5 buys and 2 sells. KDK (Kodiak AI) led with 91K shares, plus CoreWeave, GeneDx, Oklo, and Arcturus — focusing on AI infrastructure and biotech. SRTA sold 77K shares for 2nd straight day.",
+    "tickers": ["KDK", "CRWV", "WGS", "OKLO", "ARCT", "VCYT", "SRTA"],
+    "read_time": "3 min",
+    "content": "캐시 우드가 4월 첫 거래일에 매수 우위의 적극적인 매매를 단행했습니다. 4개 펀드에서 5종목을 매수하고 2종목을 매도했습니다.\n\n■ 매수 종목\n\nKDK (Kodiak AI) — ARKQ 91,027주 (비중 0.0352%)\n자율주행 트럭 AI 기업. 3/31에 이어 이틀 연속 매수로, 캐시 우드가 Tesla 외 자율주행 대안주로 KDK에 대한 확신을 키우고 있습니다.\n\nCRWV (CoreWeave) — ARKK 15,419주 (비중 0.0203%)\nAI 클라우드 인프라 기업. 3/31 첫 편입 이후 이틀 연속 추가 매수. OpenAI 편입에 이어 AI 밸류체인 인프라 확보 전략의 일환.\n\nWGS (GeneDx) — ARKK 5,943주 + ARKG 5,162주 (합산 11,105주)\n유전체 진단 기업. 2개 펀드 동시 매수로 유전체학 테마 지속 강화.\n\nOKLO — ARKQ 11,062주 (비중 0.0304%)\n소형 원자로 기업. AI 데이터센터 전력 수요 증가에 대응하는 차세대 에너지 포지션.\n\nARCT (Arcturus Therapeutics) — ARKG 7,182주 (비중 0.0054%)\nmRNA 치료제 기업. ARKG에서 바이오테크 비중 확대.\n\n■ 매도 종목\n\nSRTA (Strata Critical Medical) — ARKQ 64,690주 + ARKX 12,758주 (합산 77,448주)\n이틀 연속 대량 매도. 의료기기 섹터에서의 포지션을 빠르게 줄이고 있습니다.\n\nVCYT (Veracyte) — ARKK 1,886주 + ARKG 2,729주 (합산 4,615주)\n소량 매도. 진단 섹터 내 종목 간 리밸런싱 성격.\n\n■ 핵심 인사이트: 3월 현금 확보 → 4월 적극 재투자\n\n3월에 NVDA·META·ARKB 등 핵심 보유종목을 대량 매도하며 현금을 확보했던 캐시 우드가, 4월 첫날부터 AI 인프라(KDK·CRWV·OKLO)와 바이오(WGS·ARCT)에 적극 재투자하고 있습니다. '현금 확보 후 저점매수' 전략이 본격 가동되는 신호입니다.\n\n※ 본 기사는 ARK Invest 공개 매매 데이터 기반이며, 투자 권유가 아닙니다.",
+    "content_en": "Cathie Wood made aggressive buy-heavy trades on April's first trading day, with 5 buys and 2 sells across 4 funds.\n\n■ Buys\n\nKDK (Kodiak AI) — ARKQ 91,027 shares (0.0352%)\nAutonomous trucking AI company. Second consecutive day of buying, signaling growing conviction in KDK as an alternative autonomous driving play beyond Tesla.\n\nCRWV (CoreWeave) — ARKK 15,419 shares (0.0203%)\nAI cloud infrastructure. Second consecutive day of buying after first entry on 3/31. Part of AI value chain infrastructure strategy following OpenAI addition.\n\nWGS (GeneDx) — ARKK 5,943 + ARKG 5,162 shares (11,105 total)\nGenomic diagnostics. Simultaneous buying across 2 funds, continuing genomics theme.\n\nOKLO — ARKQ 11,062 shares (0.0304%)\nSmall modular reactor company. Next-gen energy position for AI datacenter power demand.\n\nARCT (Arcturus Therapeutics) — ARKG 7,182 shares (0.0054%)\nmRNA therapeutics. Expanding biotech weight in ARKG.\n\n■ Sells\n\nSRTA (Strata Critical Medical) — ARKQ 64,690 + ARKX 12,758 shares (77,448 total)\nSecond consecutive day of heavy selling. Rapidly reducing medical device exposure.\n\nVCYT (Veracyte) — ARKK 1,886 + ARKG 2,729 shares (4,615 total)\nSmall sell. Intra-sector rebalancing within diagnostics.\n\n■ Key Insight: March Cash Raising → April Aggressive Redeployment\n\nAfter raising cash through heavy selling of NVDA, META, ARKB in March, Cathie Wood is aggressively redeploying into AI infrastructure (KDK, CRWV, OKLO) and biotech (WGS, ARCT) from April's very first day. The 'raise cash then buy the dip' strategy is now fully activated.\n\n※ Based on publicly available ARK Invest trade data. Not investment advice."
+  },
+  {
     "id": "cathie-wood-march-23-trades",
     "date": "2026-03-23",
     "category": "일별 매매",

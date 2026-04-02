@@ -1,0 +1,26 @@
+[
+  {
+    "title": "역대급 대량 매도 — 4개 펀드 합산 32종목 중 31종목 매도",
+    "title_en": "Historic Sell-Off — 31 of 32 Trades Are Sells Across 4 Funds",
+    "desc": "3/26 하루 동안 4개 ARK 펀드(ARKK·ARKW·ARKG·ARKF)에서 단 1종목(TEM) 매수, 31건 매도를 단행. 매도 종목에는 NVDA(15.5만주), META(7.6만주), ARKB(49.5만주) 등 핵심 보유종목이 대거 포함. 이 규모의 일방적 매도는 2026년 들어 가장 공격적인 포지션 축소로, 단순 리밸런싱이 아닌 시장 방어 전략 또는 대규모 현금 확보로 해석됨.",
+    "desc_en": "Across ARKK, ARKW, ARKG, and ARKF, only 1 buy (TEM) vs 31 sell transactions. Major holdings including NVDA (155K shares), META (76K), ARKB (495K) were heavily sold. This is the most aggressive position reduction in 2026, indicating a defensive market posture or significant cash-raising rather than routine rebalancing.",
+    "tag": "대량매도",
+    "confidence": 97
+  },
+  {
+    "title": "NVDA·META·AVGO 빅테크 3총사 동시 매도 — AI 랠리 차익실현",
+    "title_en": "NVDA, META, AVGO Big Tech Trio Simultaneous Sell — AI Rally Profit-Taking",
+    "desc": "NVDA 155,441주(3개 펀드), META 76,622주(3개 펀드), AVGO 8,648주(2개 펀드)를 동시 매도. AMD 38,245주, TSM 15,696주까지 합치면 반도체·빅테크 전방위 축소. 최근 AI 관련주 랠리에서 차익실현하면서도, 유일한 매수가 AI 헬스케어(TEM)라는 점에서 '순수 AI 하드웨어→AI 응용/헬스케어'로의 전환 신호.",
+    "desc_en": "Sold NVDA 155K shares (3 funds), META 76K (3 funds), AVGO 8.6K (2 funds) simultaneously. Combined with AMD 38K and TSM 15.7K, this is a broad semiconductor/big tech drawdown. Profit-taking from the AI rally, while the sole buy being TEM (AI healthcare) signals a pivot from 'pure AI hardware → AI applications/healthcare'.",
+    "tag": "섹터전환",
+    "confidence": 95
+  },
+  {
+    "title": "ARKB 49.5만주 + BLSH 18.6만주 — 크립토 대탈출 가속화",
+    "title_en": "ARKB 495K + BLSH 186K Shares — Crypto Mass Exodus Accelerates",
+    "desc": "비트코인 ETF(ARKB) 495,000주를 ARKW+ARKF에서 대량 매도, BLSH(Bullish) 185,867주도 3개 펀드에서 동시 매도. BLSH는 연일 매도가 이어지는 가운데 ARKB까지 대규모 처분. 캐시 우드의 비트코인 장기 낙관론에도 불구하고 단기 현금 확보를 위해 크립토 비중을 전방위로 축소하고 있으며, 이는 유동성 우선 전략의 신호.",
+    "desc_en": "Sold ARKB (Bitcoin ETF) 495K shares across ARKW+ARKF, plus BLSH 186K shares across 3 funds. Despite Cathie Wood's long-term Bitcoin optimism, this massive crypto reduction signals a liquidity-first strategy. Combined with continued daily BLSH selling, ARK is rapidly de-risking crypto exposure for cash reserves.",
+    "tag": "크립토매도",
+    "confidence": 94
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "title": "4월 첫 거래일 — 매수 5종목 vs 매도 2종목, 바이오·AI 인프라 집중 매수",
+    "title_en": "April Opening — 5 Buys vs 2 Sells, Bio & AI Infra Focused Buying",
+    "desc": "4월 첫 거래일, ARK는 4개 펀드(ARKK·ARKQ·ARKG·ARKX)에서 5종목 매수·2종목 매도를 단행했다. 매수 측에서 KDK(Kodiak AI) 9.1만주가 단일 종목 최대 물량이며, CRWV(CoreWeave), WGS, OKLO, ARCT까지 AI 인프라와 바이오테크에 자금을 집중 배분. 3월의 대규모 매도에서 확보한 현금을 4월 초부터 적극 재투자하는 모습.",
+    "desc_en": "On April's first trading day, ARK executed 5 buys and 2 sells across 4 funds. KDK (Kodiak AI) led with 91K shares, followed by CRWV (CoreWeave), WGS, OKLO, and ARCT — concentrating on AI infrastructure and biotech. Cash raised from March's massive sell-off is being aggressively redeployed from the start of April.",
+    "tag": "적극매수",
+    "confidence": 93
+  },
+  {
+    "title": "KDK(Kodiak AI) 9.1만주 대량 매수 — 자율주행 AI 베팅 확대",
+    "title_en": "KDK (Kodiak AI) 91K Share Bulk Buy — Expanding Autonomous Driving AI Bet",
+    "desc": "ARKQ에서 KDK를 91,027주 매수(비중 0.0352%). Kodiak AI는 자율주행 트럭 기술 기업으로, 3/31에도 매수한 바 있어 이틀 연속 매수. 캐시 우드가 자율주행 상용화 테마에서 Tesla 외 대안 종목으로 KDK에 대한 확신을 키우고 있음을 시사한다.",
+    "desc_en": "Bought 91,027 shares of KDK in ARKQ (0.0352% weight). Kodiak AI, an autonomous trucking company, was also bought on 3/31 — making this a 2-day consecutive buy. This signals Cathie Wood's growing conviction in KDK as an alternative autonomous driving play beyond Tesla.",
+    "tag": "연속매수",
+    "confidence": 91
+  },
+  {
+    "title": "SRTA 7.7만주 매도 — ARKQ+ARKX 동시 축소, 의료기기 비중 조정",
+    "title_en": "SRTA 77K Shares Sold — ARKQ+ARKX Simultaneous Reduction",
+    "desc": "Strata Critical Medical(SRTA)을 ARKQ 64,690주 + ARKX 12,758주, 합산 77,448주 매도. 3/31에도 SRTA를 대량 매도한 바 있어 이틀 연속 포지션 축소. 의료기기 섹터에서의 비중을 줄이고, AI·자율주행·유전체학 쪽으로 자금을 이동시키는 리밸런싱이 뚜렷하다.",
+    "desc_en": "Sold SRTA 64,690 shares (ARKQ) + 12,758 shares (ARKX), totaling 77,448 shares. After selling SRTA heavily on 3/31, this marks a 2nd consecutive day of position reduction. Clear rebalancing away from medical devices toward AI, autonomous driving, and genomics.",
+    "tag": "연속매도",
+    "confidence": 90
+  }
+]

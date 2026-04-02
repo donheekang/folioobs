@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import { ArrowLeft, ArrowUpRight, ArrowDownRight, DollarSign, Briefcase, Target, Activity, Clock, Lightbulb, ChevronDown, ChevronUp, Calendar, TrendingUp, TrendingDown, Plus, Minus, LogOut, PieChart as PieIcon, Star, AlertTriangle, Brain, Zap } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, ArrowDownRight, DollarSign, Briefcase, Target, Activity, Clock, Lightbulb, ChevronDown, ChevronUp, Calendar, TrendingUp, TrendingDown, Plus, Minus, LogOut, PieChart as PieIcon, Star, AlertTriangle, Brain, Zap, FolderOpen } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
 import { useData } from "../hooks/useDataProvider";
@@ -94,12 +94,6 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
 
   return (
     <div>
-      {/* 월 헤더 */}
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-sm font-bold" style={{color:t.text}}>{group.label}</span>
-        <span className="text-xs" style={{color:t.textMuted}}>{group.days.length}{L.t('investor.dayRecord')}</span>
-      </div>
-
       {/* 날짜 버튼들 */}
       <div className="flex flex-wrap gap-1.5 mb-3">
         {group.days.map(day => {
@@ -184,6 +178,66 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
             </div>
           )}
         </div>
+      )}
+    </div>
+  );
+};
+
+// 월별 폴더 탭 네비게이션
+const ArkMonthTabs = ({ months, theme: t, onDateSelect, onNavigate }) => {
+  const L = useLocale();
+  const [activeMonthKey, setActiveMonthKey] = useState(months[0]?.[0] || null);
+
+  const activeGroup = months.find(([key]) => key === activeMonthKey)?.[1] || null;
+
+  return (
+    <div>
+      {/* 월 탭 바 */}
+      <div className="flex gap-1 mb-4" style={{
+        borderBottom: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+        paddingBottom: '0',
+      }}>
+        {months.map(([monthKey, group]) => {
+          const isActive = monthKey === activeMonthKey;
+          const totalTrades = group.days.reduce((sum, day) => {
+            const real = (day.trades || []).filter(tr => tr.ticker !== 'NO_TRADES');
+            return sum + real.length;
+          }, 0);
+
+          return (
+            <button
+              key={monthKey}
+              onClick={() => setActiveMonthKey(monthKey)}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all relative"
+              style={{
+                color: isActive ? t.accent : t.textMuted,
+                background: 'transparent',
+              }}
+            >
+              <FolderOpen size={13} style={{ opacity: isActive ? 1 : 0.5 }} />
+              <span>{group.label}</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{
+                background: isActive ? `${t.accent}15` : (t.name === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                color: isActive ? t.accent : t.textMuted,
+              }}>{totalTrades}</span>
+              {/* 활성 탭 하단 라인 */}
+              {isActive && (
+                <div className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full" style={{ background: t.accent }} />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 선택된 월의 콘텐츠 */}
+      {activeGroup && (
+        <ArkMonthSection
+          key={activeMonthKey}
+          group={activeGroup}
+          theme={t}
+          onDateSelect={onDateSelect}
+          onNavigate={onNavigate}
+        />
       )}
     </div>
   );
@@ -610,11 +664,8 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                 </button>
               </div>
 
-              <div className="space-y-5">
-                {months.map(([monthKey, group]) => (
-                  <ArkMonthSection key={monthKey} group={group} theme={t} onDateSelect={setSelectedArkDate} onNavigate={onNavigate} />
-                ))}
-              </div>
+              {/* 월별 폴더 탭 */}
+              <ArkMonthTabs months={months} theme={t} onDateSelect={setSelectedArkDate} onNavigate={onNavigate} />
             </div>
           </GlassCard>
         );
