@@ -500,10 +500,21 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             ? dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
             : `${dateObj.getMonth()+1}월 ${dateObj.getDate()}일`;
 
-          // 월간 집계
+          // 월간 집계 — 현재 월 거래일 < 2일이면 이전 달로 폴백
           const latestMonth = arkDailyTrades[0]?.date?.slice(0, 7);
-          const monthNum = latestMonth ? parseInt(latestMonth.slice(5)) : 0;
-          const monthTrades = latestMonth ? arkDailyTrades.filter(d => d.date?.startsWith(latestMonth)) : [];
+          const curMonthTrades = latestMonth ? arkDailyTrades.filter(d => d.date?.startsWith(latestMonth)) : [];
+          const curMonthDays = curMonthTrades.length;
+
+          // 이전 달 계산
+          const latestYM = latestMonth ? latestMonth.split('-').map(Number) : [2026, 1];
+          const prevYM = latestYM[1] === 1 ? `${latestYM[0]-1}-12` : `${latestYM[0]}-${String(latestYM[1]-1).padStart(2,'0')}`;
+          const prevMonthTrades = arkDailyTrades.filter(d => d.date?.startsWith(prevYM));
+
+          // 현재 월 2일 이상이면 현재 월, 아니면 이전 달
+          const useCurrentMonth = curMonthDays >= 2;
+          const monthTrades = useCurrentMonth ? curMonthTrades : prevMonthTrades;
+          const displayMonth = useCurrentMonth ? latestMonth : prevYM;
+          const monthNum = parseInt(displayMonth.slice(5));
           const allMonthTrades = monthTrades.flatMap(d => d.trades.filter(tr => tr.ticker !== 'NO_TRADES'));
           const totalBuys = allMonthTrades.filter(tr => tr.direction?.toLowerCase() === 'buy').length;
           const totalSells = allMonthTrades.filter(tr => tr.direction?.toLowerCase() === 'sell').length;
@@ -672,6 +683,39 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                     )}
                   </button>
                 ))}
+
+                {/* ── 리포트 바로가기 링크 ── */}
+                <div className="flex items-center justify-center gap-2 px-5 py-3"
+                  style={{borderTop:`1px solid ${t.name==='dark'?'rgba(245,158,11,0.07)':'rgba(245,158,11,0.08)'}`}}>
+                  <button
+                    className="flex items-center gap-1.5 text-[10px] font-semibold px-3 py-1.5 rounded-full transition-all"
+                    style={{
+                      background: t.name==='dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                      color: t.textMuted,
+                      border: `1px solid ${t.name==='dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = t.name==='dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'; e.currentTarget.style.color = t.text; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = t.name==='dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'; e.currentTarget.style.color = t.textMuted; }}
+                    onClick={() => onNavigate("ark-report","weekly")}>
+                    {L.locale==='ko' ? '주간 리포트' : 'Weekly Report'}
+                    <ArrowUpRight size={10} />
+                  </button>
+                  {showMonthly && (
+                    <button
+                      className="flex items-center gap-1.5 text-[10px] font-semibold px-3 py-1.5 rounded-full transition-all"
+                      style={{
+                        background: t.name==='dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                        color: t.textMuted,
+                        border: `1px solid ${t.name==='dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = t.name==='dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'; e.currentTarget.style.color = t.text; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = t.name==='dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'; e.currentTarget.style.color = t.textMuted; }}
+                      onClick={() => {trackCtaClick('monthly_report_link','hero');onNavigate("ark-report","monthly");}}>
+                      {L.locale==='ko' ? `${monthNum}월 월간 리포트` : `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][monthNum-1]} Report`}
+                      <ArrowUpRight size={10} />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           );
