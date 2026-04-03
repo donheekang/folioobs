@@ -34,6 +34,7 @@ const InsightsPage = ({ onBack, onNavigate }) => {
   const [viewMode, setViewMode] = useState("grouped");
   const [expandedInv, setExpandedInv] = useState(null); // null = 모두 열림
   const [selectedPeriod, setSelectedPeriod] = useState({}); // { investorId: quarterKey }
+  const [selectedMonth, setSelectedMonth] = useState({}); // { investorId: "2026-04" }
   const tagColors = TAG_COLORS_MAP(t);
 
   // 투자자별 사용 가능한 날짜/분기 목록
@@ -59,6 +60,62 @@ const InsightsPage = ({ onBack, onNavigate }) => {
     });
     return result;
   }, [INVESTORS, aiInsights]);
+
+  // 월별 그룹핑 헬퍼: period key → "YYYY-MM" 추출
+  const getMonthKey = (pKey) => {
+    // "2026Q1-0309" → "2026-03"
+    if (pKey.includes('-') && !pKey.startsWith('weekly-') && !pKey.startsWith('mon-')) {
+      const yearQ = pKey.split('-')[0];
+      const mmdd = pKey.split('-')[1];
+      const year = yearQ.slice(0, 4);
+      const mm = mmdd.slice(0, 2);
+      return `${year}-${mm}`;
+    }
+    // "weekly-0327" → "2026-03"
+    if (pKey.startsWith('weekly-')) {
+      const mmdd = pKey.split('-')[1];
+      const mm = mmdd.slice(0, 2);
+      const now = new Date();
+      return `${now.getFullYear()}-${mm}`;
+    }
+    // "mon-2026-03" → "2026-03"
+    if (pKey.startsWith('mon-')) {
+      const parts = pKey.split('-');
+      return `${parts[1]}-${parts[2]}`;
+    }
+    // quarterly "2025Q4" → null (별도 처리)
+    return null;
+  };
+
+  const monthLabel = (monthKey, locale) => {
+    if (!monthKey) return '';
+    const [y, m] = monthKey.split('-');
+    const mon = parseInt(m);
+    const monthNamesEn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const monthNamesKo = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+    return locale === 'ko' ? `${y}년 ${monthNamesKo[mon-1]}` : `${monthNamesEn[mon-1]} ${y}`;
+  };
+
+  // 투자자별 월 그룹 생성
+  const monthGroupsByInvestor = useMemo(() => {
+    const result = {};
+    Object.entries(periodsByInvestor).forEach(([invId, periods]) => {
+      const months = new Map(); // monthKey → period[]
+      const quarterly = []; // 분기별은 별도
+      periods.forEach(pKey => {
+        const mk = getMonthKey(pKey);
+        if (mk) {
+          if (!months.has(mk)) months.set(mk, []);
+          months.get(mk).push(pKey);
+        } else {
+          quarterly.push(pKey);
+        }
+      });
+      // 월 키 기준 내림차순 정렬 (최신 월이 먼저)
+      result[invId] = { months: [...months.entries()].sort((a, b) => b[0].localeCompare(a[0])), quarterly };
+    });
+    return result;
+  }, [periodsByInvestor]);
 
   // 선택된 기간의 인사이트 가져오기
   const getSelectedAiData = (invId) => {
@@ -359,19 +416,21 @@ const InsightsPage = ({ onBack, onNavigate }) => {
                   <div className="flex-1 text-left min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-sm truncate" style={{ color: t.text }}>{L.investorName(inv)}</span>
-                      {/* 일별/분기 업데이트 구분 배지 */}
-                      {group.isAI && currentIsDaily && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium"
-                          style={{ background: '#f59e0b15', color: '#f59e0b' }}>
-                          {L.locale === 'ko' ? '일별' : 'Daily'}
-                        </span>
-                      )}
-                      {group.isAI && !currentIsDaily && currentPeriod && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium"
-                          style={{ background: `${t.accent}15`, color: t.accent }}>
-                          {L.locale === 'ko' ? '분기' : 'Quarterly'}
-                        </span>
-                      )}
+                      {/* 업데이트 유형 배지 */}
+                      {group.isAI && currentPeriod && (() => {
+                        const isWeekly = currentPeriod.startsWith('weekly-');
+                        const isMonthly = currentPeriod.startsWith('mon-');
+                        const isDailyType = currentIsDaily && !isWeekly && !isMonthly;
+                        const lbl = isWeekly ? (L.locale === 'ko' ? '주간' : 'Weekly')
+                          : isMonthly ? (L.locale === 'ko' ? '월간' : 'Monthly')
+                          : isDailyType ? (L.locale === 'ko' ? '일별' : 'Daily')
+                          : (L.locale === 'ko' ? '분기' : 'Quarterly');
+                        const clr = isWeekly ? t.accent : isMonthly ? t.purple : isDailyType ? '#f59e0b' : t.accent;
+                        return (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium"
+                            style={{ background: `${clr}15`, color: clr }}>{lbl}</span>
+                        );
+                      })()}
                     </div>
                     <div className="text-[10px] flex items-center gap-2 mt-0.5" style={{ color: t.textMuted }}>
                       {/* 항상 현재 날짜/분기 표시 */}
@@ -388,31 +447,87 @@ const InsightsPage = ({ onBack, onNavigate }) => {
                   <Badge color={t.purple}>{group.insights.length}{L.t('common.items')}</Badge>
                   {expanded ? <ChevronUp size={16} style={{ color: t.textMuted }} /> : <ChevronDown size={16} style={{ color: t.textMuted }} />}
                 </button>
-                {expanded && (
+                {expanded && (() => {
+                  const mGroups = monthGroupsByInvestor[inv.id] || { months: [], quarterly: [] };
+                  const activeMonth = selectedMonth[inv.id] || (mGroups.months[0] ? mGroups.months[0][0] : null);
+                  const activeDates = mGroups.months.find(([mk]) => mk === activeMonth)?.[1] || [];
+                  return (
                   <div className="mt-3">
-                    {/* 날짜/분기 선택 탭 — 1개여도 표시 */}
-                    {periods.length >= 1 && (
-                      <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+                    {/* 월별 + 분기 탭 (1단계) */}
+                    {(mGroups.months.length > 0 || mGroups.quarterly.length > 0) && (
+                      <div className="flex items-center gap-1.5 mb-2 flex-wrap">
                         <Calendar size={12} style={{ color: t.textMuted }} />
-                        {periods.map((pKey, idx) => {
+                        {mGroups.months.map(([mk], mIdx) => {
+                          const isActiveMonth = mk === activeMonth;
+                          return (
+                            <button key={mk}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedMonth(prev => ({ ...prev, [inv.id]: mk }));
+                                // 월 변경 시 해당 월의 첫 번째 날짜 자동 선택
+                                const monthDates = mGroups.months.find(([m]) => m === mk)?.[1] || [];
+                                if (monthDates.length > 0) {
+                                  setSelectedPeriod(prev => ({ ...prev, [inv.id]: monthDates[0] }));
+                                }
+                              }}
+                              className="text-xs px-3 py-1.5 rounded-lg transition-all font-medium flex items-center gap-1"
+                              style={{
+                                background: isActiveMonth ? `${t.accent}18` : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                                border: isActiveMonth ? `1.5px solid ${t.accent}` : `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                                color: isActiveMonth ? t.accent : t.textMuted,
+                              }}>
+                              {monthLabel(mk, L.locale)}
+                              <span className="text-[9px] opacity-60">({mGroups.months.find(([m]) => m === mk)?.[1]?.length || 0})</span>
+                              {mIdx === 0 && (
+                                <span className="text-[9px] px-1 py-px rounded font-medium"
+                                  style={{ background: `${t.green}15`, color: t.green }}>
+                                  {L.locale === 'ko' ? '최신' : 'Latest'}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                        {mGroups.quarterly.map(qKey => {
+                          const isActive = qKey === currentPeriod;
+                          return (
+                            <button key={qKey}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedMonth(prev => ({ ...prev, [inv.id]: null }));
+                                setSelectedPeriod(prev => ({ ...prev, [inv.id]: qKey }));
+                              }}
+                              className="text-xs px-3 py-1.5 rounded-lg transition-all font-medium"
+                              style={{
+                                background: isActive ? `${t.purple}18` : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                                border: isActive ? `1.5px solid ${t.purple}` : `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                                color: isActive ? t.purple : t.textMuted,
+                              }}>
+                              {formatPeriodLabel(qKey, L.locale)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {/* 날짜 탭 (2단계 — 선택된 월의 일별/주별) */}
+                    {activeDates.length > 1 && (
+                      <div className="flex items-center gap-1 mb-3 flex-wrap pl-5">
+                        {activeDates.map((pKey, idx) => {
                           const isActive = pKey === currentPeriod;
                           const label = formatPeriodLabel(pKey, L.locale);
-                          const isFirst = idx === 0; // 최신
+                          const isFirst = idx === 0;
                           return (
                             <button key={pKey}
                               onClick={(e) => { e.stopPropagation(); setSelectedPeriod(prev => ({ ...prev, [inv.id]: pKey })); }}
-                              className="text-xs px-2.5 py-1 rounded-lg transition-all flex items-center gap-1"
+                              className="text-[11px] px-2 py-1 rounded-md transition-all flex items-center gap-1"
                               style={{
-                                background: isActive ? `${t.accent}20` : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                                border: isActive ? `1.5px solid ${t.accent}` : `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                                background: isActive ? `${t.accent}15` : 'transparent',
+                                border: isActive ? `1px solid ${t.accent}40` : `1px solid transparent`,
                                 color: isActive ? t.accent : t.textMuted,
+                                fontWeight: isActive ? 600 : 400,
                               }}>
                               {label}
                               {isFirst && (
-                                <span className="text-[9px] px-1 py-px rounded font-medium"
-                                  style={{ background: isActive ? `${t.green}20` : `${t.green}10`, color: t.green }}>
-                                  {L.locale === 'ko' ? '최신' : 'Latest'}
-                                </span>
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ background: t.green }} />
                               )}
                             </button>
                           );
@@ -423,7 +538,8 @@ const InsightsPage = ({ onBack, onNavigate }) => {
                       {group.insights.map((ins, i) => <InsightCard key={`${inv.id}-${i}`} ins={ins} />)}
                     </div>
                   </div>
-                )}
+                  );
+                })()}
               </div>
             );
           })}
