@@ -648,7 +648,7 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
                 {alert.desc}
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md" style={{ background: `${alert.tagColor}18`, color: alert.tagColor }}>{alert.tag}</span>
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md" style={{ background: `${alert.tagColor}18`, color: alert.tagColor }}>{L.tag ? L.tag(alert.tag) : alert.tag}</span>
                 <div className="flex ml-auto">
                   {alert.avatars.map(inv => (
                     <div key={inv.id} className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[7px] font-bold -ml-0.5 first:ml-0"

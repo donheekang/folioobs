@@ -330,6 +330,16 @@ export default {
     "포지션정리": "Unwinding",
     "매수우위": "Bullish",
     "매도우위": "Bearish",
+    "대규모매수": "Large Buy",
+    "대량매도": "Mass Sell-Off",
+    "매수": "Buy",
+    "바이오매수": "Biotech Buy",
+    "반도체매도": "Semi Sell",
+    "반전매수": "Reversal Buy",
+    "신규진입": "New Entry",
+    "적극매수": "Aggressive Buy",
+    "전략심화": "Strategy Deep-Dive",
+    "크립토매도": "Crypto Sell",
   },
 
   // ===== Rule-based Insight Texts =====
