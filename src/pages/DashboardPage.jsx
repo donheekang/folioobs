@@ -613,109 +613,141 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   </div>
                 </button>
 
-                {/* ── 행 리스트 ── */}
-                {rows.map((row) => (
-                  <button key={row.key}
-                    className="w-full px-5 py-3.5 transition-all hover:bg-amber-500/[0.04] cursor-pointer text-left"
-                    style={{borderTop:`1px solid ${t.name==='dark'?'rgba(245,158,11,0.07)':'rgba(245,158,11,0.08)'}`}}
-                    onClick={row.onClick}>
-
-                    {/* 1줄: 라벨 + 기간 + 통계 + 화살표 */}
-                    <div className="flex items-center gap-3">
-                      <span className="shrink-0 text-[11px] font-bold" style={{color:'#f59e0b', width:'36px'}}>{row.label}</span>
-                      <span className="text-[13px] font-semibold shrink-0" style={{color:t.text}}>{row.period}</span>
-
-                      {row.key === 'daily' && !isNoTradeDay ? (
-                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                {/* ── 일일 매매 섹션 ── */}
+                <button
+                  className="w-full text-left transition-all hover:bg-amber-500/[0.04] cursor-pointer"
+                  style={{borderTop:`1px solid ${t.name==='dark'?'rgba(245,158,11,0.07)':'rgba(245,158,11,0.08)'}`}}
+                  onClick={()=>{trackCtaClick('ark_today_preview','hero');onNavigate("investor","cathie/daily");}}>
+                  <div className="flex" style={{minHeight:'68px'}}>
+                    <div className="w-[3px] shrink-0 rounded-r-full my-2.5" style={{background:'linear-gradient(180deg, #34d399, #10b981)'}} />
+                    <div className="flex-1 px-4 py-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[10px] font-bold tracking-wider uppercase" style={{color:'#34d399'}}>{L.locale==='ko'?'일일 매매':'DAILY'}</span>
+                        <span className="text-[12px] font-semibold" style={{color:t.text}}>{dateLabel}</span>
+                        {!isNoTradeDay && (
+                          <div className="flex items-center gap-1 ml-auto mr-1">
+                            <span className="text-[9px] font-bold" style={{color:t.green}}>{totalDayBuys}</span>
+                            <span className="text-[8px]" style={{color:t.textMuted}}>/</span>
+                            <span className="text-[9px] font-bold" style={{color:t.red}}>{totalDaySells}</span>
+                          </div>
+                        )}
+                        <ArrowUpRight size={11} className="shrink-0" style={{color:'rgba(52,211,153,0.4)'}} />
+                      </div>
+                      {!isNoTradeDay && (totalDayBuys + totalDaySells) > 0 && (
+                        <div className="flex h-[3px] rounded-full overflow-hidden mb-2.5" style={{background:t.name==='dark'?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.04)'}}>
+                          <div className="h-full rounded-l-full" style={{width:`${(totalDayBuys/(totalDayBuys+totalDaySells))*100}%`,background:'#34d399'}} />
+                          <div className="h-full rounded-r-full" style={{width:`${(totalDaySells/(totalDayBuys+totalDaySells))*100}%`,background:'#f87171'}} />
+                        </div>
+                      )}
+                      {!isNoTradeDay ? (
+                        <div className="flex items-center gap-2 flex-wrap">
                           {buys.length > 0 && (
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{background:`${t.green}12`,color:t.green}}>{L.t('common.buy')}</span>
-                              {buys.map(tr => <span key={tr.ticker} className="text-[11px] font-semibold" style={{color:t.text}}>{tr.ticker}</span>)}
+                            <div className="flex items-center gap-1">
+                              <span className="text-[8px] font-bold px-1 py-px rounded" style={{background:`${t.green}18`,color:t.green}}>{L.t('common.buy')}</span>
+                              {buys.map(tr => <span key={tr.ticker} className="text-[10px] font-bold" style={{color:t.text}}>{tr.ticker}</span>)}
                             </div>
                           )}
                           {sells.length > 0 && (
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{background:`${t.red}12`,color:t.red}}>{L.t('common.sell')}</span>
-                              {sells.map(tr => <span key={tr.ticker} className="text-[11px] font-semibold" style={{color:t.text}}>{tr.ticker}</span>)}
+                            <div className="flex items-center gap-1">
+                              <span className="text-[8px] font-bold px-1 py-px rounded" style={{background:`${t.red}18`,color:t.red}}>{L.t('common.sell')}</span>
+                              {sells.map(tr => <span key={tr.ticker} className="text-[10px] font-bold" style={{color:t.text}}>{tr.ticker}</span>)}
                             </div>
                           )}
                         </div>
-                      ) : row.key === 'daily' && isNoTradeDay ? (
-                        <span className="text-[10px] flex-1" style={{color:t.textMuted}}>{L.locale==='ko'?'거래 없음':'No trades'}</span>
                       ) : (
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <span className="text-[10px]" style={{color:t.textMuted}}>{L.locale==='ko'?'거래 없음':'No trades'}</span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+
+                {/* ── 주간 리포트 섹션 ── */}
+                <button
+                  className="w-full text-left transition-all hover:bg-amber-500/[0.04] cursor-pointer"
+                  style={{borderTop:`1px solid ${t.name==='dark'?'rgba(245,158,11,0.07)':'rgba(245,158,11,0.08)'}`}}
+                  onClick={()=>onNavigate("ark-report","weekly")}>
+                  <div className="flex" style={{minHeight:'62px'}}>
+                    <div className="w-[3px] shrink-0 rounded-r-full my-2.5" style={{background:'linear-gradient(180deg, #f59e0b, #d97706)'}} />
+                    <div className="flex-1 px-4 py-3">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[10px] font-bold tracking-wider uppercase" style={{color:'#f59e0b'}}>{L.locale==='ko'?'주간':'WEEKLY'}</span>
+                        <span className="text-[12px] font-semibold" style={{color:t.text}}>{weekLabel}</span>
+                        <div className="flex items-center gap-1.5 ml-1">
                           <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{background:`${t.green}12`,color:t.green}}>
-                            {L.locale==='ko'?'매수':'B'} {row.buys}
+                            {L.locale==='ko'?'매수':'B'} {weekBuys}
                           </span>
                           <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{background:`${t.red}12`,color:t.red}}>
-                            {L.locale==='ko'?'매도':'S'} {row.sells}
+                            {L.locale==='ko'?'매도':'S'} {weekSells}
                           </span>
-                          {row.extra && <span className="text-[9px]" style={{color:t.textMuted}}>{row.extra}</span>}
+                          <span className="text-[8px]" style={{color:t.textMuted}}>{weekDayCount}{L.locale==='ko'?'일':'d'} · {weekTickerCount}{L.locale==='ko'?'종목':' tkrs'}</span>
+                        </div>
+                        <div className="flex items-center gap-1 ml-auto">
+                          <span className="text-[9px] font-medium" style={{color:'#f59e0b'}}>{L.locale==='ko'?'리포트':'Report'}</span>
+                          <ArrowUpRight size={10} style={{color:'rgba(245,158,11,0.5)'}} />
+                        </div>
+                      </div>
+                      {weekTopTickers?.length > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[8px]" style={{color:t.textMuted}}>{L.locale==='ko'?'핵심':'Top'}</span>
+                          {weekTopTickers.map(tk => (
+                            <span key={`w-${tk}`} className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{background:'rgba(245,158,11,0.10)',color:'#fbbf24'}}>{tk}</span>
+                          ))}
                         </div>
                       )}
-                      <ArrowUpRight size={12} className="shrink-0" style={{color:'rgba(245,158,11,0.3)'}} />
                     </div>
+                  </div>
+                </button>
 
-                    {/* 2줄: 종목 칩 — 라벨 w-[36px] + gap-3 = 48px 들여쓰기 */}
-                    {row.topTickers?.length > 0 && (
-                      <div className="flex items-center gap-1.5 mt-2.5" style={{paddingLeft:'48px'}}>
-                        <span className="text-[9px] shrink-0" style={{color:t.textMuted}}>{L.locale==='ko'?'핵심':'Top'}</span>
-                        {row.topTickers.map(tk => (
-                          <span key={`w-${tk}`} className="text-[10px] font-bold px-2 py-0.5 rounded" style={{background:'rgba(245,158,11,0.12)',color:'#fbbf24'}}>{tk}</span>
-                        ))}
-                      </div>
-                    )}
-                    {row.topBuys?.length > 0 && (
-                      <div className="flex items-center gap-1.5 mt-2.5" style={{paddingLeft:'48px'}}>
-                        <span className="text-[9px] shrink-0" style={{color:t.green}}>{L.locale==='ko'?'반복 매수':'Repeat buy'}</span>
-                        {row.topBuys.map(tk => (
-                          <span key={`b-${tk}`} className="text-[10px] font-bold px-2 py-0.5 rounded" style={{background:`${t.green}15`,color:t.green}}>▲ {tk}</span>
-                        ))}
-                      </div>
-                    )}
-                    {row.topSells?.length > 0 && (
-                      <div className="flex items-center gap-1.5 mt-1.5" style={{paddingLeft:'48px'}}>
-                        <span className="text-[9px] shrink-0" style={{color:t.red}}>{L.locale==='ko'?'반복 매도':'Repeat sell'}</span>
-                        {row.topSells.map(tk => (
-                          <span key={`s-${tk}`} className="text-[10px] font-bold px-2 py-0.5 rounded" style={{background:`${t.red}15`,color:t.red}}>▼ {tk}</span>
-                        ))}
-                      </div>
-                    )}
-                  </button>
-                ))}
-
-                {/* ── 리포트 바로가기 링크 ── */}
-                <div className="flex items-center justify-center gap-2 px-5 py-3"
-                  style={{borderTop:`1px solid ${t.name==='dark'?'rgba(245,158,11,0.07)':'rgba(245,158,11,0.08)'}`}}>
+                {/* ── 월간 리포트 섹션 ── */}
+                {showMonthly && (
                   <button
-                    className="flex items-center gap-1.5 text-[10px] font-semibold px-3 py-1.5 rounded-full transition-all"
-                    style={{
-                      background: t.name==='dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                      color: t.textMuted,
-                      border: `1px solid ${t.name==='dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = t.name==='dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'; e.currentTarget.style.color = t.text; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = t.name==='dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'; e.currentTarget.style.color = t.textMuted; }}
-                    onClick={() => onNavigate("ark-report","weekly")}>
-                    {L.locale==='ko' ? '주간 리포트' : 'Weekly Report'}
-                    <ArrowUpRight size={10} />
+                    className="w-full text-left transition-all hover:bg-amber-500/[0.04] cursor-pointer"
+                    style={{borderTop:`1px solid ${t.name==='dark'?'rgba(245,158,11,0.07)':'rgba(245,158,11,0.08)'}`}}
+                    onClick={()=>{trackCtaClick('monthly_report_banner','hero');onNavigate("ark-report","monthly");}}>
+                    <div className="flex" style={{minHeight:'68px'}}>
+                      <div className="w-[3px] shrink-0 rounded-r-full my-2.5" style={{background:'linear-gradient(180deg, #818cf8, #6366f1)'}} />
+                      <div className="flex-1 px-4 py-3">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-[10px] font-bold tracking-wider uppercase" style={{color:'#818cf8'}}>{L.locale==='ko'?'월간':'MONTHLY'}</span>
+                          <span className="text-[12px] font-semibold" style={{color:t.text}}>
+                            {L.locale==='ko' ? `${monthNum}월` : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][monthNum-1]}
+                          </span>
+                          <div className="flex items-center gap-1.5 ml-1">
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{background:`${t.green}12`,color:t.green}}>
+                              {L.locale==='ko'?'매수':'B'} {totalBuys}
+                            </span>
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{background:`${t.red}12`,color:t.red}}>
+                              {L.locale==='ko'?'매도':'S'} {totalSells}
+                            </span>
+                            <span className="text-[8px]" style={{color:t.textMuted}}>{tradeDays}{L.locale==='ko'?'일':'d'} · {totalTickers}{L.locale==='ko'?'종목':' tkrs'}</span>
+                          </div>
+                          <div className="flex items-center gap-1 ml-auto">
+                            <span className="text-[9px] font-medium" style={{color:'#818cf8'}}>{L.locale==='ko'?'리포트':'Report'}</span>
+                            <ArrowUpRight size={10} style={{color:'rgba(129,140,248,0.5)'}} />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 flex-wrap">
+                          {monthTopBuys?.length > 0 && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-[7px] font-bold" style={{color:t.green}}>▲</span>
+                              {monthTopBuys.map(tk => (
+                                <span key={`b-${tk}`} className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{background:`${t.green}12`,color:t.green}}>{tk}</span>
+                              ))}
+                            </div>
+                          )}
+                          {monthTopSells?.length > 0 && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-[7px] font-bold" style={{color:t.red}}>▼</span>
+                              {monthTopSells.map(tk => (
+                                <span key={`s-${tk}`} className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{background:`${t.red}12`,color:t.red}}>{tk}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </button>
-                  {showMonthly && (
-                    <button
-                      className="flex items-center gap-1.5 text-[10px] font-semibold px-3 py-1.5 rounded-full transition-all"
-                      style={{
-                        background: t.name==='dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                        color: t.textMuted,
-                        border: `1px solid ${t.name==='dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.background = t.name==='dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'; e.currentTarget.style.color = t.text; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = t.name==='dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'; e.currentTarget.style.color = t.textMuted; }}
-                      onClick={() => {trackCtaClick('monthly_report_link','hero');onNavigate("ark-report","monthly");}}>
-                      {L.locale==='ko' ? `${monthNum}월 월간 리포트` : `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][monthNum-1]} Report`}
-                      <ArrowUpRight size={10} />
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           );

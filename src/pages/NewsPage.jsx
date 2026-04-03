@@ -563,6 +563,8 @@ const ARTICLE_ILLUSTRATIONS = {
 
 // AI 생성 이미지 매핑 (있으면 우선 사용, 없으면 SVG 폴백)
 const ARTICLE_IMAGES = {
+  "cathie-wood-april-02-trades": "/news/cathie-wood-daily.png",
+  "cathie-wood-april-01-trades": "/news/cathie-wood-daily.png",
   "cathie-wood-march-31-trades": "/news/cathie-wood-daily.png",
   "cathie-wood-march-30-trades": "/news/cathie-wood-daily.png",
   "cathie-wood-march-27-trades": "/news/cathie-wood-daily.png",
@@ -612,7 +614,10 @@ function ArticleVisual({ articleId, className }) {
     );
   }
 
-  return null;
+  // 이미지/SVG 없을 때 그라데이션 폴백 (헤드라인 영역 높이 확보)
+  return (
+    <div className={className || ''} style={{ minHeight: '200px', background: 'linear-gradient(135deg, #0a1628 0%, #1a1a2e 50%, #16213e 100%)' }} />
+  );
 }
 
 // ========== FolioObs 뉴스 기사 데이터 ==========
