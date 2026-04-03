@@ -1340,7 +1340,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 }}>
                 <option value="all">{L.locale === 'ko' ? '섹터 전체' : 'All Sectors'}</option>
                 {(performanceRanking.sectors || []).map(s => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>{L.sector ? L.sector(s) : s}</option>
                 ))}
               </select>
               <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: perfSector !== 'all' ? t.accent : t.textMuted }} />

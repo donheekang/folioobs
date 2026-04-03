@@ -356,7 +356,7 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold" style={{ color: t.text }}>{ins.title}</span>
-                                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: `${ins.color}12`, color: ins.color }}>{ins.tag}</span>
+                                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: `${ins.color}12`, color: ins.color }}>{L.tag ? L.tag(ins.tag) : ins.tag}</span>
                                   </div>
                                   <p className="text-[11px] mt-0.5 leading-relaxed" style={{ color: t.textSecondary }}>{ins.desc}</p>
                                 </div>

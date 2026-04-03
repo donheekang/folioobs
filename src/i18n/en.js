@@ -322,6 +322,14 @@ export default {
     "전략": "Strategy",
     "매크로": "Macro",
     "밸류에이션": "Valuation",
+    "연속매수": "Consecutive Buy",
+    "연속매도": "Consecutive Sell",
+    "리밸런싱": "Rebalancing",
+    "섹터전환": "Rotation",
+    "확신매수": "Conviction Buy",
+    "포지션정리": "Unwinding",
+    "매수우위": "Bullish",
+    "매도우위": "Bearish",
   },
 
   // ===== Rule-based Insight Texts =====

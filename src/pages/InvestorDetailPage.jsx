@@ -751,7 +751,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                     <div className="p-4"><div className="flex items-start gap-3">
                       <div className="p-2 rounded-xl mt-0.5 flex-shrink-0" style={{background:`${c}15`,border:`1px solid ${c}20`}}><I size={16} style={{color:c}}/></div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1.5 flex-wrap"><Badge color={c}>{ins.tag}</Badge></div>
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap"><Badge color={c}>{L.tag ? L.tag(ins.tag) : ins.tag}</Badge></div>
                         <h4 className="font-bold text-sm mb-1 break-words" style={{color:t.text}}>{ins.title}</h4>
                         <p className="text-xs leading-relaxed break-words" style={{color:t.textSecondary}}>{ins.desc}</p>
                       </div>
