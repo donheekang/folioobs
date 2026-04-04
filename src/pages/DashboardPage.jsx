@@ -5,7 +5,7 @@ import {
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
 import { useData } from "../hooks/useDataProvider";
-import { STYLE_ICONS } from "../data";
+import { STYLE_ICONS, getTodayHoliday } from "../data";
 import { formatUSD } from "../utils/format";
 import { trackCtaClick } from "../utils/analytics";
 import { GlassCard, Badge, MiniChart, WatchButton } from "../components/shared";
@@ -90,6 +90,9 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
   const isExtended = marketStatus === 'pre-market' || marketStatus === 'after-hours';
   const extendedColor = marketStatus === 'pre-market' ? '#8b5cf6' : '#f59e0b'; // 프리: 보라, 애프터: 앰버
 
+  // 오늘 휴장일인지 확인
+  const todayHoliday = useMemo(() => getTodayHoliday(), []);
+
   // 시세 데이터 날짜 라벨 (장 상태 반영)
   const priceLabel = useMemo(() => {
     // 장 상태를 아직 모르면(unknown) 라벨 숨김 — 초기 로드 시 "장 마감" 깜빡임 방지
@@ -114,10 +117,14 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       return L.locale === 'ko' ? `프리마켓 · ${formatted} · 15분 지연` : `Pre-Market · ${formatted} · 15-min delayed`;
     } else if (marketStatus === 'after-hours') {
       return L.locale === 'ko' ? `애프터마켓 · ${formatted} · 15분 지연` : `After-Hours · ${formatted} · 15-min delayed`;
+    } else if (todayHoliday) {
+      // 미국 시장 휴장일
+      const holidayName = L.locale === 'ko' ? todayHoliday.ko : todayHoliday.en;
+      return L.locale === 'ko' ? `🏛️ 휴장 · ${holidayName} · ${formatted} 종가` : `🏛️ Closed · ${holidayName} · ${formatted}`;
     } else {
       return L.locale === 'ko' ? `장 마감 · ${formatted} 종가` : `Market Closed · ${formatted}`;
     }
-  }, [stockPrices, marketStatus, lastTradeDate, L]);
+  }, [stockPrices, marketStatus, lastTradeDate, L, todayHoliday]);
 
   // Aggregate all latest quarterly activities by action type
   const { newPositions, buyActions, sellActions, exitActions } = useMemo(() => {
@@ -861,10 +868,20 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         }
 
         const TopRankingSection = () => {
-          const [rankTab, setRankTab] = useState('gainers'); // 'gainers' | 'volume' | 'losers'
+          const [rankTab, setRankTab] = useState('gainers');
           const [rankShowAll, setRankShowAll] = useState(false);
           const INITIAL_COUNT = 7;
           const MAX_COUNT = 100;
+
+          // 휴장일 감지: 변동률 있는 종목 중 0%가 아닌 종목 비율 확인
+          const isHolidayData = useMemo(() => {
+            if (todayHoliday) return true;
+            // 추가 방어: 80% 이상이 0.00%이고 장이 마감이면 휴장 데이터로 간주
+            const withChange = liveStocks.filter(s => s.dailyChange !== null && s.dailyChange !== undefined);
+            if (withChange.length === 0) return false;
+            const zeroCount = withChange.filter(s => s.dailyChange === 0).length;
+            return marketStatus === 'closed' && zeroCount / withChange.length > 0.8;
+          }, [liveStocks, marketStatus]);
 
           // 장외시간: 총 변동률(정규장 + AH/PM) 기준 정렬으로 실시간 랭킹
           const getTotalChange = (s) => {
@@ -957,6 +974,29 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   </div>
                 )}
               </div>
+
+              {/* 휴장일 안내 배너 */}
+              {isHolidayData && (
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl mb-3" style={{
+                  background: t.name === 'dark' ? 'rgba(245,158,11,0.06)' : 'rgba(245,158,11,0.05)',
+                  border: `1px dashed ${t.name === 'dark' ? 'rgba(245,158,11,0.20)' : 'rgba(245,158,11,0.25)'}`,
+                }}>
+                  <span className="text-[13px]">🏛️</span>
+                  <span className="text-[11px] leading-tight" style={{ color: t.name === 'dark' ? '#fbbf24' : '#d97706' }}>
+                    {(() => {
+                      const ltdLabel = lastTradeDate ? (() => {
+                        const d = new Date(lastTradeDate + 'T00:00:00');
+                        return L.locale === 'ko'
+                          ? `${d.getMonth() + 1}/${d.getDate()}일`
+                          : `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+                      })() : '';
+                      return L.locale === 'ko'
+                        ? `오늘은 미국 시장 휴장일${todayHoliday ? ` (${todayHoliday.ko})` : ''}이에요. 마지막 거래일 종가 기준으로 보여드립니다.${ltdLabel ? ` (${ltdLabel})` : ''}`
+                        : `US markets are closed today${todayHoliday ? ` (${todayHoliday.en})` : ''}. Showing last trading day's closing prices.${ltdLabel ? ` (${ltdLabel})` : ''}`;
+                    })()}
+                  </span>
+                </div>
+              )}
 
               {/* 탭 — 언더라인 스타일 */}
               <div className="flex items-center gap-0 mb-5 ml-[2px]" style={{

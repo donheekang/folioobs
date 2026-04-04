@@ -1,0 +1,34 @@
+[
+  {
+    "title": "OpenAI 34.9만주 신규 매수 — AI 시대 최대 베팅 개시",
+    "title_en": "OpenAI 349K New Position — Biggest AI-Era Bet Begins",
+    "desc": "3/31 단 하루 만에 OpenAI(OPENAI) 348,995주를 신규 매수. IPO 직후 첫 거래일에 대규모 포지션을 구축하며, 캐시 우드가 GPT 생태계를 파괴적 혁신의 핵심으로 분류한 강력한 시그널. 주간 최대 규모 매수이자, ARK 역사상 가장 주목할 신규 포지션 중 하나.",
+    "desc_en": "Bought 348,995 OpenAI shares as a NEW position on 3/31, the first trading day post-IPO. A powerful signal that Cathie Wood classifies the GPT ecosystem as a core disruptive innovation. The largest buy of the week and one of the most notable new positions in ARK history.",
+    "tag": "신규매수",
+    "confidence": 95
+  },
+  {
+    "title": "KDK 4일 연속 23만주 — 자율주행 AI에 올인 확신 매수",
+    "title_en": "KDK 4-Day Consecutive 230K — All-In Conviction on Autonomous AI",
+    "desc": "Kodiak AI(KDK)를 3/31~4/2까지 4거래일 연속 매수, 주간 합계 230,144주. ARKQ 펀드에서 꾸준히 비중을 늘리며 Tesla 외 자율주행 상용화 대안으로 KDK에 대한 확신을 보여주는 패턴. 매일 빠짐없이 매수한 유일한 종목이라는 점에서 주간 최고 확신 베팅.",
+    "desc_en": "Bought Kodiak AI for 4 consecutive trading days (3/31-4/2), totaling 230,144 shares in ARKQ. The only stock bought every single day this week, signaling highest-conviction bet. Steady position building shows Cathie Wood views KDK as a key alternative autonomous driving play beyond Tesla.",
+    "tag": "확신매수",
+    "confidence": 93
+  },
+  {
+    "title": "SRTA 74.5만주 4일 연속 매도 — 의료기기 포지션 전면 정리",
+    "title_en": "SRTA 745K 4-Day Consecutive Sell — Full Medical Device Exit",
+    "desc": "Strata Critical Medical(SRTA)을 ARKQ+ARKX에서 4거래일 연속 매도, 주간 합계 745,067주 대량 처분. 주간 최대 매도 종목으로, 의료기기 섹터 비중을 급격히 줄이는 중. VCYT(Veracyte)도 163,151주 매도하며, 확보된 현금이 OpenAI·KDK·CRWV 등 AI 종목으로 재배분되는 흐름이 뚜렷.",
+    "desc_en": "Sold SRTA for 4 consecutive days across ARKQ+ARKX, dumping 745,067 shares total — the week's largest sell. Combined with VCYT's 163K share reduction, cash from medical device liquidation is clearly being redeployed into AI names like OpenAI, KDK, and CRWV.",
+    "tag": "포지션정리",
+    "confidence": 94
+  },
+  {
+    "title": "의료기기 → AI·자율주행 대전환 — 주간 90만주 리밸런싱",
+    "title_en": "Medical Devices → AI & Autonomous Driving — 900K Share Rebalancing",
+    "desc": "매도 상위(SRTA 74.5만+VCYT 16.3만+LY 5.5만)를 정리하고, 매수 상위(OPENAI 34.9만+KDK 23만+CRWV 8.4만+OKLO 5.6만)로 자금을 재배분. 의료기기·레거시 테크에서 AI 인프라(OpenAI, CoreWeave)·자율주행(KDK)·원자력(OKLO)으로의 전략적 축 이동이 한 주간 집약적으로 나타남.",
+    "desc_en": "Sold SRTA (745K), VCYT (163K), LY Corp (55K) while buying OpenAI (349K), KDK (230K), CRWV (84K), OKLO (56K). A concentrated strategic axis shift from medical devices and legacy tech into AI infrastructure (OpenAI, CoreWeave), autonomous driving (KDK), and nuclear energy (OKLO) in a single week.",
+    "tag": "섹터전환",
+    "confidence": 94
+  }
+]

@@ -3,11 +3,41 @@ import { ArrowLeft, ArrowUpRight, ArrowDownRight, DollarSign, Briefcase, Target,
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
 import { useData } from "../hooks/useDataProvider";
-import { SECTOR_COLORS, STYLE_ICONS, TAG_COLORS_MAP } from "../data";
+import { SECTOR_COLORS, STYLE_ICONS, TAG_COLORS_MAP, US_MARKET_HOLIDAYS } from "../data";
 import { formatUSD, formatShares, formatChange } from "../utils/format";
 import { GlassCard, Badge, ChartTooltip, WatchButton, QuarterlyTimeline } from "../components/shared";
 import { getSectorData, generateInsights } from "../utils/insights";
 import { ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
+
+// US_MARKET_HOLIDAYS는 ../data/constants.js에서 import
+
+// 거래일 사이 빠진 평일 중 휴장일을 찾아서 day 엔트리로 반환
+const getHolidayDays = (tradeDates, monthKey) => {
+  if (!tradeDates.length) return [];
+  const sorted = [...tradeDates].sort();
+  const holidays = [];
+  // 해당 월의 첫날~마지막날 범위에서 빠진 평일(월~금) 중 휴장일 찾기
+  const [year, month] = monthKey.split('-').map(Number);
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month, 0);
+  const dateSet = new Set(tradeDates);
+
+  for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+    const dow = d.getDay();
+    if (dow === 0 || dow === 6) continue; // 주말 제외
+    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    // 해당 날짜에 거래 데이터가 없고, 휴장일 목록에 있으면 추가
+    if (!dateSet.has(ds) && US_MARKET_HOLIDAYS[ds]) {
+      holidays.push({
+        date: ds,
+        trades: [],
+        isHoliday: true,
+        holidayName: US_MARKET_HOLIDAYS[ds],
+      });
+    }
+  }
+  return holidays;
+};
 
 // ============================================================
 // 분기 변동 카테고리 (더보기 토글 포함)
@@ -78,6 +108,7 @@ const ChangeCategoryList = ({ cat, onNavigate, theme: t }) => {
 // ============================================================
 const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
   const L = useLocale();
+  const isKo = L.locale === 'ko';
   const [selectedDate, setSelectedDate] = useState(() => {
     const initDate = group.days[0]?.date || null;
     // 초기 날짜를 부모에게 전달
@@ -87,8 +118,9 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
   const weekdays = L.t('investor.weekdays');
 
   const selectedDay = group.days.find(d => d.date === selectedDate);
-  const trades = (selectedDay?.trades || []).filter(tr => tr.ticker !== 'NO_TRADES');
-  const isNoTradeDay = trades.length === 0 && (selectedDay?.trades || []).some(tr => tr.ticker === 'NO_TRADES');
+  const isSelectedHoliday = selectedDay?.isHoliday;
+  const trades = isSelectedHoliday ? [] : (selectedDay?.trades || []).filter(tr => tr.ticker !== 'NO_TRADES');
+  const isNoTradeDay = !isSelectedHoliday && trades.length === 0 && (selectedDay?.trades || []).some(tr => tr.ticker === 'NO_TRADES');
   const buys = trades.filter(tr => tr.direction === 'buy');
   const sells = trades.filter(tr => tr.direction === 'sell');
 
@@ -101,28 +133,35 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
           const dayNum = d.getDate();
           const weekday = weekdays[d.getDay()];
           const isSelected = day.date === selectedDate;
-          const dayTrades = (day.trades || []).filter(tr => tr.ticker !== 'NO_TRADES');
-          const dayIsNoTrade = dayTrades.length === 0 && (day.trades || []).some(tr => tr.ticker === 'NO_TRADES');
+          const isHoliday = day.isHoliday;
+          const dayTrades = isHoliday ? [] : (day.trades || []).filter(tr => tr.ticker !== 'NO_TRADES');
+          const dayIsNoTrade = !isHoliday && dayTrades.length === 0 && (day.trades || []).some(tr => tr.ticker === 'NO_TRADES');
           const dayBuys = dayTrades.filter(tr => tr.direction === 'buy').length;
           const daySells = dayTrades.filter(tr => tr.direction === 'sell').length;
 
           return (
             <button
               key={day.date}
-              onClick={() => { setSelectedDate(day.date); onDateSelect?.(day.date); }}
+              onClick={() => { setSelectedDate(day.date); if (!isHoliday) onDateSelect?.(day.date); }}
               className="flex flex-col items-center px-2.5 py-1.5 rounded-lg text-xs transition-all"
               style={{
-                background: isSelected ? `${t.accent}20` : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                border: isSelected ? `1.5px solid ${t.accent}` : `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-                color: isSelected ? t.accent : t.textSecondary,
+                background: isHoliday
+                  ? (isSelected ? (t.name === 'dark' ? 'rgba(245,158,11,0.12)' : 'rgba(245,158,11,0.08)') : (t.name === 'dark' ? 'rgba(245,158,11,0.05)' : 'rgba(245,158,11,0.03)'))
+                  : (isSelected ? `${t.accent}20` : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'),
+                border: isHoliday
+                  ? (isSelected ? '1.5px solid rgba(245,158,11,0.5)' : '1px dashed rgba(245,158,11,0.3)')
+                  : (isSelected ? `1.5px solid ${t.accent}` : `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`),
+                color: isHoliday ? '#f59e0b' : (isSelected ? t.accent : t.textSecondary),
+                opacity: isHoliday && !isSelected ? 0.75 : 1,
               }}
             >
               <span className="font-bold text-sm">{dayNum}</span>
-              <span className="text-[10px]" style={{color: isSelected ? t.accent : t.textMuted}}>{weekday}</span>
+              <span className="text-[10px]" style={{color: isHoliday ? '#f59e0b' : (isSelected ? t.accent : t.textMuted)}}>{weekday}</span>
               <div className="flex gap-1 mt-0.5">
-                {dayBuys > 0 && <span className="w-1.5 h-1.5 rounded-full" style={{background:t.green}} />}
-                {daySells > 0 && <span className="w-1.5 h-1.5 rounded-full" style={{background:t.red}} />}
-                {dayIsNoTrade && <span className="w-1.5 h-1.5 rounded-full" style={{background:t.textMuted, opacity:0.5}} />}
+                {isHoliday && <span className="text-[8px] font-bold" style={{color:'#f59e0b'}}>{isKo ? '휴장' : 'OFF'}</span>}
+                {!isHoliday && dayBuys > 0 && <span className="w-1.5 h-1.5 rounded-full" style={{background:t.green}} />}
+                {!isHoliday && daySells > 0 && <span className="w-1.5 h-1.5 rounded-full" style={{background:t.red}} />}
+                {!isHoliday && dayIsNoTrade && <span className="w-1.5 h-1.5 rounded-full" style={{background:t.textMuted, opacity:0.5}} />}
               </div>
             </button>
           );
@@ -136,20 +175,38 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold" style={{color:t.text}}>
-                {(() => { const dd = new Date(selectedDay.date + 'T00:00:00'); return L.locale === 'en' ? dd.toLocaleDateString('en-US', {month:'short',day:'numeric'}) : `${dd.getMonth()+1}월 ${dd.getDate()}일`; })()}
+                {(() => { const dd = new Date(selectedDay.date + 'T00:00:00'); return isKo ? `${dd.getMonth()+1}월 ${dd.getDate()}일` : dd.toLocaleDateString('en-US', {month:'short',day:'numeric'}); })()}
               </span>
               <span className="text-xs" style={{color:t.textMuted}}>
-                ({weekdays[new Date(selectedDay.date + 'T00:00:00').getDay()]}{L.locale === 'ko' ? '요일' : ''})
+                ({weekdays[new Date(selectedDay.date + 'T00:00:00').getDay()]}{isKo ? '요일' : ''})
               </span>
             </div>
             <div className="flex items-center gap-2">
+              {isSelectedHoliday && (
+                <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:'rgba(245,158,11,0.15)',color:'#f59e0b'}}>
+                  {isKo ? '휴장' : 'Market Closed'}
+                </span>
+              )}
               {buys.length > 0 && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:`${t.green}15`,color:t.green}}>{L.t('common.buy')} {buys.length}</span>}
               {sells.length > 0 && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:`${t.red}15`,color:t.red}}>{L.t('common.sell')} {sells.length}</span>}
             </div>
           </div>
 
+          {/* 휴장일 표시 */}
+          {isSelectedHoliday && (
+            <div className="text-center py-5">
+              <div className="text-2xl mb-2">🏛️</div>
+              <div className="text-sm font-semibold mb-1" style={{color:'#f59e0b'}}>
+                {isKo ? selectedDay.holidayName.ko : selectedDay.holidayName.en}
+              </div>
+              <div className="text-xs" style={{color:t.textMuted}}>
+                {isKo ? '미국 증시 휴장일로 매매 내역이 없습니다.' : 'U.S. stock markets are closed. No trades today.'}
+              </div>
+            </div>
+          )}
+
           {/* 매수 목록 */}
-          {buys.length > 0 && (
+          {!isSelectedHoliday && buys.length > 0 && (
             <div className="mb-2">
               <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 px-1" style={{color:t.green}}>{L.t('investor.buySell.buy')}</div>
               <div className="space-y-1">
@@ -161,7 +218,7 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
           )}
 
           {/* 매도 목록 */}
-          {sells.length > 0 && (
+          {!isSelectedHoliday && sells.length > 0 && (
             <div>
               <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5 px-1" style={{color:t.red}}>{L.t('investor.buySell.sell')}</div>
               <div className="space-y-1">
@@ -172,9 +229,9 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
             </div>
           )}
 
-          {trades.length === 0 && (
+          {!isSelectedHoliday && trades.length === 0 && (
             <div className="text-xs text-center py-4" style={{color:t.textMuted}}>
-              {isNoTradeDay ? (L.locale === 'ko' ? '거래 없음' : 'No trades') : L.t('investor.noChange')}
+              {isNoTradeDay ? (isKo ? '거래 없음' : 'No trades') : L.t('investor.noChange')}
             </div>
           )}
         </div>
@@ -647,6 +704,14 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
           if (!monthGroups[monthKey]) monthGroups[monthKey] = { label: monthLabel, days: [] };
           monthGroups[monthKey].days.push(day);
         });
+        // 각 월에 휴장일 삽입
+        Object.entries(monthGroups).forEach(([monthKey, group]) => {
+          const tradeDates = group.days.map(d => d.date);
+          const holidays = getHolidayDays(tradeDates, monthKey);
+          if (holidays.length > 0) {
+            group.days = [...group.days, ...holidays].sort((a, b) => b.date.localeCompare(a.date));
+          }
+        });
         const months = Object.entries(monthGroups).sort((a,b) => b[0].localeCompare(a[0]));
 
         return (
@@ -690,11 +755,12 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
         // 캐시 우드: 선택된 ARK 날짜에 맞는 인사이트 로드
         // 다른 투자자: 최신 인사이트 사용
         let aiData = null;
-        // 캐시 우드: 선택된 날짜가 NO_TRADES인지 확인
+        // 캐시 우드: 선택된 날짜가 NO_TRADES이거나 휴장일인지 확인
         const isSelectedNoTradeDay = investorId === 'cathie' && selectedArkDate && arkDailyTrades.some(day =>
           day.date === selectedArkDate && day.trades.some(tr => tr.ticker === 'NO_TRADES') && day.trades.filter(tr => tr.ticker !== 'NO_TRADES').length === 0
         );
-        if (investorId === 'cathie' && selectedArkDate && !isSelectedNoTradeDay) {
+        const isSelectedHoliday = investorId === 'cathie' && selectedArkDate && US_MARKET_HOLIDAYS[selectedArkDate];
+        if (investorId === 'cathie' && selectedArkDate && !isSelectedNoTradeDay && !isSelectedHoliday) {
           // 날짜를 quarter key로 변환: "2026-03-09" → "2026Q1-0309"
           const d = new Date(selectedArkDate + 'T00:00:00');
           const q = Math.ceil((d.getMonth() + 1) / 3);
@@ -704,9 +770,9 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
           const qKeyAlt = `${d.getFullYear()}${String(q).padStart(2,'0')}-${mm}${dd}`;
           aiData = invInsights[qKey] || invInsights[qKeyAlt] || null;
         }
-        if (!aiData && !isSelectedNoTradeDay) aiData = invInsights._latest || null;
-        // 거래 없음 날짜에는 인사이트 섹션 전체 숨김
-        if (isSelectedNoTradeDay) return null;
+        if (!aiData && !isSelectedNoTradeDay && !isSelectedHoliday) aiData = invInsights._latest || null;
+        // 거래 없음 또는 휴장일에는 인사이트 섹션 전체 숨김
+        if (isSelectedNoTradeDay || isSelectedHoliday) return null;
         const hasAI = aiData && aiData.insights && aiData.insights.length > 0;
         const displayInsights = hasAI ? aiData.insights : insights;
 
