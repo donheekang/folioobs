@@ -104,7 +104,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
           {INVESTORS.map(inv => (
             <div key={inv.id} className="flex flex-col items-center gap-0.5 pb-1 cursor-pointer"
               onClick={() => onNavigate && onNavigate("investor", inv.id)}>
-              <div className={`${isMobile ? 'w-5 h-5 text-[9px]' : 'w-7 h-7 text-xs'} rounded-lg flex items-center justify-center text-white font-bold hover:scale-110 transition-transform`}
+              <div className={`${isMobile ? 'w-5 h-5 text-[9px]' : 'w-7 h-7 text-xs'} rounded flex items-center justify-center text-white font-bold hover:scale-110 transition-transform`}
                 style={{ background: inv.gradient }}>{inv.avatar}</div>
             </div>
           ))}
@@ -136,7 +136,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
                 const hasValue = !isDiag && val > 0;
                 return (
                   <div key={`${rowInv.id}-${colInv.id}`}
-                    className="rounded-lg flex items-center justify-center transition-all"
+                    className="rounded flex items-center justify-center transition-all"
                     style={{
                       width: `${cellSize}px`, height: `${cellSize}px`,
                       background: getColor(val, isDiag),
@@ -191,7 +191,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
         const b = INVESTORS.find(i => i.id === hoveredCell.col);
         const common = commonStocks[hoveredCell.row][hoveredCell.col];
         return (
-          <div className="mt-2 px-3 py-2.5 rounded-xl text-xs"
+          <div className="mt-2 px-3 py-2.5 rounded text-xs"
             style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }}>
             <div className="flex items-center gap-2 mb-1.5">
               <div className="w-5 h-5 rounded-md flex items-center justify-center text-white text-xs font-bold"
@@ -218,7 +218,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
 
       {/* Selected cell detail — expanded common stocks list */}
       {selectedDetail && (
-        <div className="mt-4 rounded-2xl overflow-hidden"
+        <div className="mt-4 rounded-md overflow-hidden"
           style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
           {/* Header */}
           <div className="px-4 py-3 flex items-center justify-between"
@@ -234,7 +234,7 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
               </span>
             </div>
             <button onClick={() => setSelectedCell(null)}
-              className="text-xs px-2 py-1 rounded-lg hover:opacity-80 transition-opacity"
+              className="text-xs px-2 py-1 rounded hover:opacity-80 transition-opacity"
               style={{ color: t.textMuted, background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
               ✕
             </button>

@@ -28,7 +28,7 @@ class ErrorBoundary extends Component {
       return (
         <div className="min-h-[300px] flex items-center justify-center">
           <div className="text-center max-w-sm mx-auto px-4">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            <div className="w-12 h-12 rounded-md flex items-center justify-center mx-auto mb-4"
               style={{ background: `${t.red}15` }}>
               <AlertTriangle size={24} style={{ color: t.red }} />
             </div>
@@ -43,7 +43,7 @@ class ErrorBoundary extends Component {
                 this.setState({ hasError: false, error: null });
                 if (this.props.onReset) this.props.onReset();
               }}
-              className="px-4 py-2 rounded-xl text-sm font-medium transition-all hover:opacity-80"
+              className="px-4 py-2 rounded text-sm font-medium transition-all hover:opacity-80"
               style={{ background: t.accentSolid, color: '#ffffff' }}>
               {strings.common.retry}
             </button>
@@ -52,7 +52,7 @@ class ErrorBoundary extends Component {
                 <summary className="text-xs cursor-pointer" style={{ color: t.textMuted }}>
                   {strings.error.errorDetail}
                 </summary>
-                <pre className="text-xs mt-2 p-3 rounded-lg overflow-x-auto"
+                <pre className="text-xs mt-2 p-3 rounded overflow-x-auto"
                   style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', color: t.textSecondary }}>
                   {this.state.error.toString()}
                 </pre>

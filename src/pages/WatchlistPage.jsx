@@ -22,25 +22,24 @@ const WatchlistPage = ({ onBack, onNavigate, watchlist }) => {
   }).filter(s => s.holders.length > 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       <button onClick={onBack} className="flex items-center gap-1.5 text-sm" style={{ color: t.textMuted }}><ArrowLeft size={16} /> {L.t('common.back')}</button>
       <div className="flex items-center gap-2">
-        <Heart size={22} style={{ color: t.red }} />
-        <h1 className="text-2xl font-bold" style={{ color: t.text }}>{L.t('watchlistPage.title')}</h1>
+        <h1 className="text-2xl font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{L.t('watchlistPage.title')}</h1>
         <span className="text-sm" style={{ color: t.textMuted }}>{watchInvestors.length + watchTickers.length}{L.t('common.items')}</span>
       </div>
 
       {watchInvestors.length === 0 && watchTickers.length === 0 && (
         <div className="text-center py-16">
           <Heart size={40} style={{ color: t.textMuted, opacity: 0.3 }} className="mx-auto mb-4" />
-          <p className="text-sm" style={{ color: t.textMuted }}>{L.t('watchlistPage.emptyMessage')}</p>
+          <p className="text-sm font-semibold" style={{ color: t.textMuted, fontFamily: "'Newsreader', Georgia, serif" }}>{L.t('watchlistPage.emptyMessage')}</p>
           <p className="text-xs mt-1" style={{ color: t.textMuted }}>{L.t('watchlistPage.emptyHint')}</p>
         </div>
       )}
 
       {watchedInvs.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold mb-3" style={{ color: t.textSecondary }}>{L.t('watchlistPage.watchedInvestors')}</h2>
+          <h2 className="text-sm font-semibold mb-6" style={{ color: t.textSecondary, fontFamily: "'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>{L.t('watchlistPage.watchedInvestors')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {watchedInvs.map(inv => {
               const h = HOLDINGS[inv.id] || [];
@@ -54,7 +53,7 @@ const WatchlistPage = ({ onBack, onNavigate, watchlist }) => {
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm" style={{ background: inv.gradient }}>{inv.avatar}</div>
+                        <div className="w-10 h-10 rounded flex items-center justify-center text-white font-bold text-sm" style={{ background: inv.gradient }}>{inv.avatar}</div>
                         <div>
                           <div className="font-semibold text-sm" style={{ color: t.text }}>{L.investorName(inv)}</div>
                           <div className="text-xs" style={{ color: t.textMuted }}>{formatUSD(inv.aum)} · {inv.metrics.holdingCount}{L.t('common.stocks_count')}</div>
@@ -79,8 +78,8 @@ const WatchlistPage = ({ onBack, onNavigate, watchlist }) => {
 
       {watchedStocks.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold mb-3" style={{ color: t.textSecondary }}>{L.t('watchlistPage.watchedStocks')}</h2>
-          <div className="space-y-2">
+          <h2 className="text-sm font-semibold mb-6" style={{ color: t.textSecondary, fontFamily: "'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>{L.t('watchlistPage.watchedStocks')}</h2>
+          <div className="space-y-3">
             {watchedStocks.map(({ ticker, holders }) => (
               <GlassCard key={ticker}>
                 <div className="flex items-center gap-3 p-3.5">

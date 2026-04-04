@@ -9,16 +9,20 @@ import { formatQuarterKo, formatChange } from "../utils/format";
 export const GlassCard = memo(({ children, className = "", glow, onClick, hover = true }) => {
   const t = useTheme();
   const interactive = !!onClick;
+  // Stitch: No-Line Rule — surface hierarchy instead of borders.
+  // Ghost border at 15% opacity as fallback. Ambient shadow: 40px blur, 6% opacity.
+  const isDark = t.name === 'dark';
   return (
-    <div onClick={onClick} className={`rounded-2xl ${interactive ? 'cursor-pointer' : ''} ${className}`}
+    <div onClick={onClick} className={`rounded ${interactive ? 'cursor-pointer' : ''} ${className}`}
       {...(interactive ? { role: 'button', tabIndex: 0, onKeyDown: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } } : {})}
       style={{
-        background: t.name === 'dark' ? t.surface : t.glassBg,
-        border: `1px solid ${t.glassBorder}`,
-        transition: 'all 0.25s ease',
+        background: isDark ? t.surface : t.surfaceLowest || '#ffffff',
+        outline: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.04)',
+        boxShadow: isDark ? '0 2px 40px rgba(0,0,0,0.15)' : '0 2px 40px rgba(0,0,0,0.03)',
+        transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
       }}
-      onMouseEnter={e => { if(hover){e.currentTarget.style.borderColor=t.glassBorderHover;e.currentTarget.style.transform='translateY(-1px)';e.currentTarget.style.boxShadow=t.name==='dark'?'0 4px 16px rgba(0,0,0,0.4)':'0 4px 16px rgba(0,0,0,0.06)';} }}
-      onMouseLeave={e => { if(hover){e.currentTarget.style.borderColor=t.glassBorder;e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow='none';} }}>
+      onMouseEnter={e => { if(hover){e.currentTarget.style.outline=isDark?'1px solid rgba(16,185,129,0.15)':'1px solid rgba(16,185,129,0.12)';e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow=isDark?'0 8px 40px rgba(0,0,0,0.25)':'0 8px 40px rgba(0,0,0,0.06)';} }}
+      onMouseLeave={e => { if(hover){e.currentTarget.style.outline=isDark?'1px solid rgba(255,255,255,0.06)':'1px solid rgba(0,0,0,0.04)';e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow=isDark?'0 2px 40px rgba(0,0,0,0.15)':'0 2px 40px rgba(0,0,0,0.03)';} }}>
       {children}
     </div>
   );
@@ -60,7 +64,7 @@ export const ChartTooltip = ({ active, payload, label }) => {
   const t = useTheme();
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background: t.tooltipBg, border: `1px solid ${t.glassBorder}`, backdropFilter: t.glassBlur, borderRadius: 12, padding: '10px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
+    <div style={{ background: t.tooltipBg, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderRadius: 8, padding: '10px 14px', boxShadow: '0 4px 24px rgba(0,0,0,0.15)', outline: `1px solid ${t.name==='dark'?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)'}` }}>
       <div style={{ color: t.textMuted, fontSize: 11, marginBottom: 4 }}>{label}</div>
       {payload.map((p, i) => (
         <div key={i} style={{ color: p.color || t.text, fontSize: 13, fontWeight: 600 }}>{p.name}: {typeof p.value === 'number' ? p.value.toFixed(1) : p.value}</div>
@@ -139,7 +143,7 @@ export const QuarterlyTimeline = ({ investorId, onNavigate }) => {
                 const cfg = typeConfig[action.type] || typeConfig.hold;
                 const Icon = cfg.icon;
                 return (
-                  <div key={ai} className="flex items-center gap-3 py-1.5 px-2 rounded-lg cursor-pointer transition-colors"
+                  <div key={ai} className="flex items-center gap-3 py-1.5 px-2 rounded cursor-pointer transition-colors"
                     style={{ background: 'transparent' }}
                     onClick={()=>onNavigate?.("stock",action.ticker)}
                     onMouseEnter={e => e.currentTarget.style.background = t.cardRowHover}
@@ -158,7 +162,7 @@ export const QuarterlyTimeline = ({ investorId, onNavigate }) => {
                 );
               })}
               {hiddenActions > 0 && (
-                <button className="w-full text-center py-1.5 text-xs font-medium rounded-lg transition-colors"
+                <button className="w-full text-center py-1.5 text-xs font-medium rounded transition-colors"
                   style={{ color: t.accent, background: 'transparent' }}
                   onMouseEnter={e => e.currentTarget.style.background = t.cardRowHover}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -171,8 +175,8 @@ export const QuarterlyTimeline = ({ investorId, onNavigate }) => {
         );
       })}
       {hiddenCount > 0 && (
-        <button className="w-full text-center py-2.5 text-xs font-medium rounded-xl transition-colors"
-          style={{ color: t.accent, background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${t.cardRowBorder}` }}
+        <button className="w-full text-center py-2.5 text-xs font-medium rounded transition-colors"
+          style={{ color: t.accent, background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}
           onMouseEnter={e => e.currentTarget.style.background = t.cardRowHover}
           onMouseLeave={e => e.currentTarget.style.background = t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}
           onClick={() => setShowAllQuarters(!showAllQuarters)}>

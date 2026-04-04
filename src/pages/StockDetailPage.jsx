@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
-  ArrowLeft, Building2, Globe, Users,
+  ArrowLeft, Building2, Globe,
   ArrowUpRight, ArrowDownRight, ExternalLink, TrendingUp, Calendar,
-  BarChart3, Target, Newspaper
+  Target, Newspaper
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
@@ -242,11 +242,11 @@ function CompanyLogo({ ticker, details, isDark, textSecondary }) {
     const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#22c55e', '#06b6d4', '#ef4444'];
     const colorIdx = ticker.charCodeAt(0) % colors.length;
     return (
-      <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-bold"
+      <div className="w-14 h-14 rounded flex items-center justify-center text-lg font-bold"
         style={{
           background: `${colors[colorIdx]}18`,
           color: colors[colorIdx],
-          border: `1px solid ${colors[colorIdx]}25`,
+          outline: `1px solid ${colors[colorIdx]}10`,
         }}>
         {ticker.slice(0, 2)}
       </div>
@@ -255,7 +255,7 @@ function CompanyLogo({ ticker, details, isDark, textSecondary }) {
 
   return (
     <img src={currentSrc} alt={ticker}
-      className="w-14 h-14 rounded-2xl object-contain"
+      className="w-14 h-14 rounded object-contain"
       style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', padding: '8px' }}
       onError={handleError} />
   );
@@ -1038,7 +1038,7 @@ function StockChart({ ticker, theme }) {
       </div>
 
       {/* Chart container */}
-      <div className="relative w-full rounded-xl overflow-hidden transition-all" style={{ height: chartHeight, background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' }}>
+      <div className="relative w-full rounded overflow-hidden transition-all" style={{ height: chartHeight, background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' }}>
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
             <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'rgba(59,130,246,0.3)', borderTopColor: 'transparent' }} />
@@ -1069,9 +1069,9 @@ function StockChart({ ticker, theme }) {
             return (
               <button key={tf.key}
                 onClick={() => setTimeframe(tf.key)}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                className="px-3 py-1.5 rounded text-xs font-semibold transition-all"
                 style={{
-                  background: active ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'transparent',
+                  background: active ? 'rgba(16,185,129,0.08)' : 'transparent',
                   color: active ? (isDark ? '#fff' : '#000') : (isDark ? '#555' : '#aaa'),
                 }}>
                 {tf.label}
@@ -1089,7 +1089,7 @@ function StockChart({ ticker, theme }) {
             style={{
               background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
               color: isDark ? '#ccc' : '#666',
-              border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}`,
+              outline: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'}`,
             }}>
             {chartMode === 'line' ? 'Line' : 'Candle'}
           </button>
@@ -1101,7 +1101,7 @@ function StockChart({ ticker, theme }) {
             style={{
               background: showBB ? 'rgba(139,92,246,0.2)' : 'transparent',
               color: showBB ? '#a855f7' : (isDark ? '#444' : '#bbb'),
-              border: `1px solid ${showBB ? 'rgba(139,92,246,0.4)' : 'transparent'}`,
+              outline: `1px solid ${showBB ? 'rgba(139,92,246,0.2)' : 'transparent'}`,
             }}>
             BB
           </button>
@@ -1113,7 +1113,7 @@ function StockChart({ ticker, theme }) {
             style={{
               background: showMACD ? 'rgba(59,130,246,0.2)' : 'transparent',
               color: showMACD ? '#3b82f6' : (isDark ? '#444' : '#bbb'),
-              border: `1px solid ${showMACD ? 'rgba(59,130,246,0.4)' : 'transparent'}`,
+              outline: `1px solid ${showMACD ? 'rgba(59,130,246,0.2)' : 'transparent'}`,
             }}>
             MACD
           </button>
@@ -1125,7 +1125,7 @@ function StockChart({ ticker, theme }) {
             style={{
               background: showRSI ? 'rgba(168,85,247,0.2)' : 'transparent',
               color: showRSI ? '#a855f7' : (isDark ? '#444' : '#bbb'),
-              border: `1px solid ${showRSI ? 'rgba(168,85,247,0.4)' : 'transparent'}`,
+              outline: `1px solid ${showRSI ? 'rgba(168,85,247,0.2)' : 'transparent'}`,
             }}>
             RSI
           </button>
@@ -1142,7 +1142,7 @@ function StockChart({ ticker, theme }) {
                 style={{
                   background: active ? `${color}20` : 'transparent',
                   color: active ? color : (isDark ? '#444' : '#bbb'),
-                  border: `1px solid ${active ? `${color}40` : 'transparent'}`,
+                  outline: `1px solid ${active ? `${color}20` : 'transparent'}`,
                 }}>
                 {label}
               </button>
@@ -1209,7 +1209,7 @@ function DailyPriceTable({ ticker, theme, locale }) {
             ].map((h, i) => (
               <th key={i} className="text-left py-2 px-2 font-medium" style={{
                 color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-                borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                outline: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
                 ...(i > 0 ? { textAlign: 'right' } : {}),
               }}>
                 {h}
@@ -1234,43 +1234,47 @@ function DailyPriceTable({ ticker, theme, locale }) {
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                 <td className="py-2 px-2 font-medium" style={{
                   color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                  outline: `1px solid ${isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'}`,
                 }}>
                   {dateStr}
                 </td>
                 <td className="py-2 px-2 text-right font-bold" style={{
                   color: isDark ? '#fff' : '#000',
-                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                  outline: `1px solid ${isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'}`,
+                  fontFamily: "'Newsreader', Georgia, serif",
                 }}>
                   ${bar.c.toFixed(2)}
                 </td>
                 <td className="py-2 px-2 text-right font-bold" style={{
                   color: isUp ? '#22c55e' : '#ef4444',
-                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                  outline: `1px solid ${isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'}`,
                 }}>
                   {prevBar ? `${isUp ? '+' : ''}${changeAbs.toFixed(2)} (${isUp ? '+' : ''}${change.toFixed(2)}%)` : '-'}
                 </td>
                 <td className="py-2 px-2 text-right" style={{
                   color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                  outline: `1px solid ${isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'}`,
+                  fontFamily: "'Newsreader', Georgia, serif",
                 }}>
                   ${bar.o.toFixed(2)}
                 </td>
                 <td className="py-2 px-2 text-right" style={{
                   color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                  outline: `1px solid ${isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'}`,
+                  fontFamily: "'Newsreader', Georgia, serif",
                 }}>
                   ${bar.h.toFixed(2)}
                 </td>
                 <td className="py-2 px-2 text-right" style={{
                   color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                  outline: `1px solid ${isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'}`,
+                  fontFamily: "'Newsreader', Georgia, serif",
                 }}>
                   ${bar.l.toFixed(2)}
                 </td>
                 <td className="py-2 px-2 text-right" style={{
                   color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
+                  outline: `1px solid ${isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'}`,
                 }}>
                   {fmtVolume(bar.v)}
                 </td>
@@ -1280,7 +1284,7 @@ function DailyPriceTable({ ticker, theme, locale }) {
         </tbody>
       </table>
       {data.length > 5 && (
-        <button className="w-full text-center py-2.5 mt-2 text-xs font-medium rounded-lg transition-colors"
+        <button className="w-full text-center py-2.5 mt-2 text-xs font-medium rounded transition-colors"
           style={{ color: isDark ? '#60a5fa' : '#2563eb', background: 'transparent' }}
           onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -1532,7 +1536,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
     <div className="page-enter">
       {/* Back button */}
       <button onClick={onBack}
-        className="flex items-center gap-1.5 mb-4 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:opacity-70"
+        className="flex items-center gap-1.5 mb-4 px-3 py-1.5 rounded text-sm font-medium transition-all hover:opacity-70"
         style={{ color: t.textMuted }}>
         <ArrowLeft size={16} /> {L.t('common.back')}
       </button>
@@ -1543,7 +1547,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: t.text }}>{ticker}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{ticker}</h1>
             {companyInfo?.exchange && (
               <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: t.textMuted }}>
                 {companyInfo.exchange.replace('XNAS', 'NASDAQ').replace('XNYS', 'NYSE')}
@@ -1559,7 +1563,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
           {priceInfo ? (
             <>
               {/* 정규장 가격 */}
-              <div className="text-2xl font-bold tracking-tight" style={{ color: t.text }}>
+              <div className="text-2xl font-bold tracking-tight" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                 ${priceInfo.price.toFixed(2)}
               </div>
               <div className="flex items-center justify-end gap-1 mt-0.5">
@@ -1592,13 +1596,13 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
               })()}
             </>
           ) : loadingInfo ? (
-            <div className="w-24 h-10 rounded-lg animate-pulse" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }} />
+            <div className="w-24 h-10 rounded animate-pulse" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }} />
           ) : null}
         </div>
       </div>
 
       {/* ===== CHART ===== */}
-      <GlassCard hover={false}>
+      <GlassCard hover={false} className="mt-8">
         <div className="p-4 sm:p-5">
           <StockChart ticker={ticker} theme={t.name} />
         </div>
@@ -1606,11 +1610,11 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
 
       {/* ===== KEY STATS ===== */}
       {stats.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-6">
           {stats.map((stat, i) => (
-            <div key={i} className="px-3 py-2.5 rounded-xl" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}` }}>
+            <div key={i} className="px-3 py-2.5 rounded" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', outline: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}>
               <p className="text-[11px]" style={{ color: t.textMuted }}>{stat.label}</p>
-              <p className="text-sm font-bold mt-0.5" style={{ color: t.text }}>{stat.value}</p>
+              <p className="text-sm font-bold mt-0.5" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{stat.value}</p>
             </div>
           ))}
         </div>
@@ -1618,13 +1622,13 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
 
       {/* ===== 52-WEEK RANGE & PERFORMANCE ===== */}
       {priceHighlights && (
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* 52-Week Range Card */}
           <GlassCard hover={false}>
             <div className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Target size={14} style={{ color: t.accent }} />
-                <span className="text-xs font-bold" style={{ color: t.text }}>
+                <span className="text-xs font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                   {L.locale === 'ko' ? '52주 가격 범위' : '52-Week Range'}
                 </span>
               </div>
@@ -1659,21 +1663,21 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
 
               {/* High / Low details */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="px-2.5 py-2 rounded-lg" style={{ background: isDark ? 'rgba(239,68,68,0.06)' : 'rgba(239,68,68,0.04)' }}>
-                  <p className="text-[10px] font-medium" style={{ color: t.red }}>
+                <div className="px-2.5 py-2 rounded" style={{ background: isDark ? 'rgba(239,68,68,0.06)' : 'rgba(239,68,68,0.04)' }}>
+                  <p className="text-[10px] font-medium" style={{ color: t.red, fontFamily: "'Newsreader', Georgia, serif" }}>
                     {L.locale === 'ko' ? '52주 최저' : '52W Low'}
                   </p>
-                  <p className="text-sm font-bold mt-0.5" style={{ color: t.text }}>{fmtPrice(priceHighlights.low52.price)}</p>
+                  <p className="text-sm font-bold mt-0.5" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{fmtPrice(priceHighlights.low52.price)}</p>
                   <p className="text-[10px] mt-0.5" style={{ color: t.green }}>
                     +{priceHighlights.fromLow.toFixed(1)}%
                     <span style={{ color: t.textMuted }}> · {priceHighlights.low52.date?.toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
                   </p>
                 </div>
-                <div className="px-2.5 py-2 rounded-lg" style={{ background: isDark ? 'rgba(34,197,94,0.06)' : 'rgba(34,197,94,0.04)' }}>
-                  <p className="text-[10px] font-medium" style={{ color: t.green }}>
+                <div className="px-2.5 py-2 rounded" style={{ background: isDark ? 'rgba(34,197,94,0.06)' : 'rgba(34,197,94,0.04)' }}>
+                  <p className="text-[10px] font-medium" style={{ color: t.green, fontFamily: "'Newsreader', Georgia, serif" }}>
                     {L.locale === 'ko' ? '52주 최고' : '52W High'}
                   </p>
-                  <p className="text-sm font-bold mt-0.5" style={{ color: t.text }}>{fmtPrice(priceHighlights.high52.price)}</p>
+                  <p className="text-sm font-bold mt-0.5" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{fmtPrice(priceHighlights.high52.price)}</p>
                   <p className="text-[10px] mt-0.5" style={{ color: t.red }}>
                     {priceHighlights.fromHigh.toFixed(1)}%
                     <span style={{ color: t.textMuted }}> · {priceHighlights.high52.date?.toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
@@ -1687,8 +1691,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
           <GlassCard hover={false}>
             <div className="p-4">
               <div className="flex items-center gap-2 mb-3">
-                <BarChart3 size={14} style={{ color: t.accent }} />
-                <span className="text-xs font-bold" style={{ color: t.text }}>
+                <span className="text-xs font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                   {L.locale === 'ko' ? '기간별 수익률' : 'Period Returns'}
                 </span>
               </div>
@@ -1715,7 +1718,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
                           }} />
                       </div>
                       <span className="text-xs font-bold w-16 text-right flex-shrink-0"
-                        style={{ color: isUp ? t.green : t.red }}>
+                        style={{ color: isUp ? t.green : t.red, fontFamily: "'Newsreader', Georgia, serif" }}>
                         {isUp ? '+' : ''}{ret.toFixed(2)}%
                       </span>
                     </div>
@@ -1728,12 +1731,12 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
       )}
 
       {/* ===== DAILY PRICE TABLE (일별 시세) ===== */}
-      <div className="mt-6">
+      <div className="mt-8">
         <GlassCard hover={false}>
           <div className="p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-4">
               <Calendar size={16} style={{ color: t.accent }} />
-              <h3 className="text-sm font-bold" style={{ color: t.text }}>
+              <h3 className="text-sm font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                 {L.locale === 'ko' ? '일별 시세' : 'Daily Price History'}
               </h3>
             </div>
@@ -1743,10 +1746,9 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
       </div>
 
       {/* ===== WHO'S HOLDING — FolioObs 핵심 ===== */}
-      <div className="mt-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Users size={18} style={{ color: t.accent }} />
-          <h2 className="text-lg font-bold" style={{ color: t.text }}>
+      <div className="mt-8">
+        <div className="flex items-center gap-2 mb-6" style={{borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>
+          <h2 className="text-lg font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
             {L.locale === 'ko' ? '이 종목을 보유한 투자자' : 'Who\'s Holding This'}
           </h2>
           <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>
@@ -1767,7 +1769,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
             {stockHolders.map(({ investor: inv, value, pct, shares, action }) => (
               <GlassCard key={inv.id} onClick={() => onNavigate('investor', inv.id)}>
                 <div className="p-3 sm:p-4 flex items-center gap-3 cursor-pointer">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                  <div className="w-10 h-10 rounded flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
                     style={{ background: inv.gradient }}>
                     {inv.avatar}
                   </div>
@@ -1814,12 +1816,12 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
 
       {/* ===== NEWS ===== */}
       {(tickerNews.length > 0 || newsLoading) && (
-        <div className="mt-6">
+        <div className="mt-8">
           <GlassCard hover={false}>
             <div className="p-4 sm:p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Newspaper size={16} style={{ color: t.textMuted }} />
-                <h3 className="text-sm font-bold" style={{ color: t.text }}>
+                <h3 className="text-sm font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                   {L.locale === 'ko' ? '관련 뉴스' : 'Related News'}
                 </h3>
               </div>
@@ -1852,7 +1854,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
                     return (
                       <a key={news.id || i} href={news.articleUrl} target="_blank" rel="noopener noreferrer"
                         className="flex gap-3 py-3 transition-colors"
-                        style={{ borderTop: i > 0 ? `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` : 'none' }}
+                        style={{ outlineTop: i > 0 ? `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}` : 'none', borderTop: i > 0 ? `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}` : 'none' }}
                         onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
                         onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
                         <div className="flex-1 min-w-0">
@@ -1866,7 +1868,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
                           </div>
                         </div>
                         {news.imageUrl && (
-                          <div className="w-16 h-16 sm:w-20 sm:h-16 rounded-lg overflow-hidden flex-shrink-0" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
+                          <div className="w-16 h-16 sm:w-20 sm:h-16 rounded overflow-hidden flex-shrink-0" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
                             <img src={news.imageUrl} alt="" className="w-full h-full object-cover"
                               onError={e => { e.target.style.display = 'none'; }} />
                           </div>
@@ -1883,12 +1885,12 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
 
       {/* ===== COMPANY DESCRIPTION ===== */}
       {companyInfo?.description && (
-        <div className="mt-6">
+        <div className="mt-8">
           <GlassCard hover={false}>
             <div className="p-4 sm:p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Building2 size={16} style={{ color: t.textMuted }} />
-                <h3 className="text-sm font-bold" style={{ color: t.text }}>
+                <h3 className="text-sm font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                   {L.locale === 'ko' ? '기업 개요' : 'About'}
                 </h3>
                 {companyInfo.homepageUrl && (

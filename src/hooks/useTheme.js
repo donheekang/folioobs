@@ -1,105 +1,173 @@
 import { createContext, useContext } from "react";
 
+// ========================================
+// FolioObs Design System: "The Intelligence Editorial"
+// Stitch-inspired emerald palette + editorial tone
+// ========================================
+
 export const THEMES = {
   dark: {
     name: "dark",
-    bg: "#000000",
-    surface: "#1c1c1e",
-    surfaceHover: "#2c2c2e",
-    text: "#f5f5f7",
-    textSecondary: "#a1a1a6",
-    textMuted: "#6e6e73",
-    accent: "#2997ff",
-    accentSolid: "#0071e3",
-    accentDeep: "#0077ed",
-    green: "#30d158",
-    red: "#ff453a",
-    amber: "#ffd60a",
-    blue: "#2997ff",
-    purple: "#bf5af2",
-    cyan: "#64d2ff",
-    pink: "#ff375f",
-    glassBg: "rgba(28, 28, 30, 0.8)",
-    glassBorder: "rgba(255,255,255,0.08)",
-    glassBorderHover: "rgba(255,255,255,0.16)",
+    // ── Surfaces ──
+    bg: "#0f1117",
+    surface: "#181a20",
+    surfaceHover: "#22252d",
+    surfaceLow: "#14161c",          // recessed areas
+    surfaceHigh: "#2a2d36",         // elevated (hover, sidebar active)
+    surfaceLowest: "#1e2028",       // primary cards
+
+    // ── Text ──
+    text: "#f0f0f3",
+    textSecondary: "#9ca3af",
+    textMuted: "#6b7280",
+
+    // ── Brand: Emerald ──
+    accent: "#10b981",              // primary emerald
+    accentSolid: "#006c49",         // deep emerald (CTA gradient start)
+    accentDeep: "#059669",          // mid emerald
+    accentGradient: "linear-gradient(180deg, #006c49 0%, #10b981 100%)",
+
+    // ── Semantic ──
+    green: "#10b981",
+    red: "#ef4444",
+    amber: "#f59e0b",
+    blue: "#3b82f6",
+    purple: "#8b5cf6",
+    cyan: "#06b6d4",
+    pink: "#ec4899",
+
+    // ── Glass & Cards ──
+    glassBg: "rgba(24, 26, 32, 0.85)",
+    glassBorder: "rgba(255,255,255,0.06)",
+    glassBorderHover: "rgba(16, 185, 129, 0.25)",
     glassBlur: "blur(20px)",
-    cardRowHover: "rgba(255,255,255,0.04)",
-    cardRowBorder: "rgba(255,255,255,0.06)",
-    tableBorder: "rgba(255,255,255,0.08)",
-    navBg: "rgba(0,0,0,0.72)",
-    heroBg: "#000000",
+
+    // ── Card / Table ──
+    cardRowHover: "rgba(16, 185, 129, 0.04)",
+    cardRowBorder: "rgba(255,255,255,0.05)",
+    tableBorder: "rgba(255,255,255,0.06)",
+
+    // ── Nav ──
+    navBg: "rgba(15, 17, 23, 0.80)",
+
+    // ── Hero ──
+    heroBg: "#0f1117",
     heroOrb1: "transparent",
     heroOrb2: "transparent",
-    statCardBg: "rgba(28, 28, 30, 0.8)",
-    insightBg: "rgba(28, 28, 30, 0.6)",
-    compareBg: "rgba(28, 28, 30, 0.6)",
-    compareBorder: "rgba(255,255,255,0.08)",
+
+    // ── Sections ──
+    statCardBg: "rgba(24, 26, 32, 0.8)",
+    insightBg: "rgba(24, 26, 32, 0.6)",
+    compareBg: "rgba(24, 26, 32, 0.6)",
+    compareBorder: "rgba(255,255,255,0.06)",
     compareOrb: "40",
-    selectBg: "#1c1c1e",
-    chartGrid: "rgba(255,255,255,0.06)",
-    scrollThumb: "rgba(255,255,255,0.15)",
-    scrollThumbHover: "rgba(255,255,255,0.25)",
-    tooltipBg: "rgba(28,28,30,0.95)",
+
+    // ── Inputs ──
+    selectBg: "#181a20",
+
+    // ── Charts ──
+    chartGrid: "rgba(255,255,255,0.05)",
+
+    // ── Scrollbar ──
+    scrollThumb: "rgba(255,255,255,0.12)",
+    scrollThumbHover: "rgba(255,255,255,0.2)",
+
+    // ── Tooltip ──
+    tooltipBg: "rgba(24,26,32,0.95)",
+
+    // ── Badges & Buttons ──
     badgeBgAlpha: "18",
     badgeBorderAlpha: "30",
-    activeNavBg: "rgba(255,255,255,0.1)",
-    activeNavBorder: "rgba(255,255,255,0.16)",
-    tagActiveBg: "rgba(255,255,255,0.08)",
-    inactiveBtnBg: "rgba(255,255,255,0.06)",
+    activeNavBg: "rgba(16, 185, 129, 0.08)",
+    activeNavBorder: "rgba(16, 185, 129, 0.2)",
+    tagActiveBg: "rgba(16, 185, 129, 0.1)",
+    inactiveBtnBg: "rgba(255,255,255,0.05)",
     selectedBtnBg: (c) => `${c}20`,
     selectedBtnBorder: (c) => `${c}50`,
     unselectedBtnBg: "rgba(255,255,255,0.04)",
-    unselectedBtnBorder: "rgba(255,255,255,0.08)",
+    unselectedBtnBorder: "rgba(255,255,255,0.06)",
   },
+
   light: {
     name: "light",
-    bg: "#ffffff",
-    surface: "#ffffff",
-    surfaceHover: "#f5f5f7",
-    text: "#1d1d1f",
-    textSecondary: "#6e6e73",
-    textMuted: "#86868b",
-    accent: "#0071e3",
-    accentSolid: "#0066cc",
-    accentDeep: "#004eaa",
-    green: "#28a745",
-    red: "#de3730",
-    amber: "#bf8600",
-    blue: "#0071e3",
-    purple: "#a550c6",
+    // ── Surfaces (Stitch off-white hierarchy) ──
+    bg: "#f9f9fb",                   // base surface
+    surface: "#ffffff",              // primary card surface (surface_container_lowest)
+    surfaceHover: "#f3f3f5",         // surface_container_low
+    surfaceLow: "#f3f3f5",           // recessed areas
+    surfaceHigh: "#e8e8ea",          // active zones, hover
+    surfaceLowest: "#ffffff",        // elevated content
+
+    // ── Text ──
+    text: "#111827",                 // on_surface (slate-900)
+    textSecondary: "#4b5563",        // on_surface_variant (slate-600)
+    textMuted: "#9ca3af",            // muted labels (slate-400)
+
+    // ── Brand: Emerald ──
+    accent: "#10b981",               // primary emerald
+    accentSolid: "#006c49",          // deep emerald
+    accentDeep: "#059669",           // mid emerald
+    accentGradient: "linear-gradient(180deg, #006c49 0%, #10b981 100%)",
+
+    // ── Semantic ──
+    green: "#10b981",
+    red: "#ef4444",
+    amber: "#d97706",
+    blue: "#3b82f6",
+    purple: "#7c3aed",
     cyan: "#0891b2",
-    pink: "#e8356d",
+    pink: "#ec4899",
+
+    // ── Glass & Cards ──
     glassBg: "#ffffff",
-    glassBorder: "rgba(0,0,0,0.08)",
-    glassBorderHover: "rgba(0,0,0,0.16)",
+    glassBorder: "rgba(0,0,0,0.06)",
+    glassBorderHover: "rgba(16, 185, 129, 0.2)",
     glassBlur: "blur(20px)",
-    cardRowHover: "rgba(0,0,0,0.02)",
-    cardRowBorder: "rgba(0,0,0,0.06)",
-    tableBorder: "rgba(0,0,0,0.08)",
-    navBg: "rgba(255,255,255,0.72)",
-    heroBg: "#ffffff",
+
+    // ── Card / Table ──
+    cardRowHover: "rgba(16, 185, 129, 0.03)",
+    cardRowBorder: "rgba(0,0,0,0.05)",
+    tableBorder: "rgba(0,0,0,0.06)",
+
+    // ── Nav ──
+    navBg: "rgba(249, 249, 251, 0.80)",
+
+    // ── Hero ──
+    heroBg: "#f9f9fb",
     heroOrb1: "transparent",
     heroOrb2: "transparent",
-    statCardBg: "#f5f5f7",
-    insightBg: "#f5f5f7",
-    compareBg: "#f5f5f7",
-    compareBorder: "rgba(0,0,0,0.08)",
+
+    // ── Sections ──
+    statCardBg: "#f3f3f5",
+    insightBg: "#f3f3f5",
+    compareBg: "#f3f3f5",
+    compareBorder: "rgba(0,0,0,0.06)",
     compareOrb: "30",
+
+    // ── Inputs ──
     selectBg: "#ffffff",
-    chartGrid: "rgba(0,0,0,0.08)",
-    scrollThumb: "rgba(0,0,0,0.15)",
-    scrollThumbHover: "rgba(0,0,0,0.25)",
+
+    // ── Charts ──
+    chartGrid: "rgba(0,0,0,0.06)",
+
+    // ── Scrollbar ──
+    scrollThumb: "rgba(0,0,0,0.12)",
+    scrollThumbHover: "rgba(0,0,0,0.2)",
+
+    // ── Tooltip ──
     tooltipBg: "rgba(255,255,255,0.95)",
+
+    // ── Badges & Buttons ──
     badgeBgAlpha: "10",
     badgeBorderAlpha: "20",
-    activeNavBg: "rgba(0,0,0,0.06)",
-    activeNavBorder: "rgba(0,0,0,0.1)",
-    tagActiveBg: "rgba(0,0,0,0.05)",
-    inactiveBtnBg: "rgba(0,0,0,0.04)",
+    activeNavBg: "rgba(16, 185, 129, 0.06)",
+    activeNavBorder: "rgba(16, 185, 129, 0.15)",
+    tagActiveBg: "rgba(16, 185, 129, 0.06)",
+    inactiveBtnBg: "rgba(0,0,0,0.03)",
     selectedBtnBg: (c) => `${c}12`,
     selectedBtnBorder: (c) => `${c}30`,
-    unselectedBtnBg: "rgba(0,0,0,0.03)",
-    unselectedBtnBorder: "rgba(0,0,0,0.08)",
+    unselectedBtnBg: "rgba(0,0,0,0.02)",
+    unselectedBtnBorder: "rgba(0,0,0,0.06)",
   }
 };
 

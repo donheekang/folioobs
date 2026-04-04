@@ -243,7 +243,7 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
           <ArrowLeft size={16} style={{ color: t.textSecondary }} />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(129,140,248,0.15)' }}>
+          <div className="w-7 h-7 rounded flex items-center justify-center" style={{ background: 'rgba(129,140,248,0.15)' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <circle cx="9" cy="12" r="6" stroke="#818cf8" strokeWidth="1.8" fill="rgba(129,140,248,0.1)"/>
               <circle cx="15" cy="12" r="6" stroke="#a78bfa" strokeWidth="1.8" fill="rgba(167,139,250,0.1)"/>
@@ -273,9 +273,9 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
       {/* ===== STEP 1: 온보딩 ===== */}
       {step === 1 && (
         <div>
-          <div className="text-center mb-6">
+          <div className="text-center mb-8">
             <p className="text-xs font-semibold mb-1.5" style={{ color: '#a78bfa', letterSpacing: '0.05em' }}>FOLIOMATCH</p>
-            <h1 className="text-xl font-bold mb-1.5" style={{ color: t.text, letterSpacing: '-0.02em' }}>
+            <h1 className="text-xl font-bold mb-1.5" style={{ color: t.text, letterSpacing: '-0.02em', fontFamily: "'Newsreader', Georgia, serif" }}>
               {isKo ? '내 보유 종목, 월가 레전드가 같이 들고 있을까?' : 'Do Wall Street legends hold the same stocks?'}
             </h1>
             <p className="text-xs" style={{ color: t.textMuted }}>
@@ -284,8 +284,8 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
           </div>
 
           {/* 입력 방식 */}
-          <GlassCard className="p-4 mb-3">
-            <div className="text-sm font-semibold mb-1" style={{ color: t.text }}>{isKo ? '입력 방식' : 'Input method'}</div>
+          <GlassCard className="p-4 mb-6">
+            <div className="text-sm font-semibold mb-1" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{isKo ? '입력 방식' : 'Input method'}</div>
             <div className="text-[11px] mb-3" style={{ color: t.textMuted }}>{isKo ? '편한 방법을 선택하세요' : 'Choose your preferred method'}</div>
             <div className="grid grid-cols-2 gap-2">
               {[
@@ -293,16 +293,17 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
                 { id: 'watchlist', icon: <Bookmark size={16} />, color: '#fbbf24', label: isKo ? 'Watchlist 연동' : 'Watchlist sync', desc: (watchlist?.watchTickers?.length > 0) ? (isKo ? `${watchlist.watchTickers.length}개 종목 불러오기` : `Import ${watchlist.watchTickers.length} stocks`) : (isKo ? '워치리스트가 비어있어요' : 'Watchlist is empty') },
               ].map(m => (
                 <button key={m.id}
-                  className="flex flex-col items-center gap-1.5 p-4 rounded-xl text-center transition-all"
+                  className="flex flex-col items-center gap-1.5 p-4 rounded text-center transition-all"
                   style={{
-                    background: inputMethod === m.id ? `rgba(129,140,248,0.06)` : 'transparent',
-                    border: `1px solid ${inputMethod === m.id ? '#a78bfa' : t.glassBorder}`,
+                    background: inputMethod === m.id ? `rgba(16,185,129,0.08)` : 'transparent',
+                    outline: inputMethod === m.id ? '1px solid #10b981' : `1px solid ${t.glassBorder}`,
+                    outlineOffset: '-1px',
                   }}
                   onClick={() => {
                     setInputMethod(m.id);
                     if (m.id === 'watchlist') loadWatchlist();
                   }}>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center"
+                  <div className="w-9 h-9 rounded flex items-center justify-center"
                     style={{ background: `${m.color}15`, color: m.color }}>{m.icon}</div>
                   <div className="text-xs font-semibold" style={{ color: t.text }}>{m.label}</div>
                   <div className="text-[10px]" style={{ color: t.textMuted }}>{m.desc}</div>
@@ -312,11 +313,11 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
           </GlassCard>
 
           {/* 종목 검색 */}
-          <GlassCard className="p-4 mb-3">
-            <div className="text-sm font-semibold mb-2.5" style={{ color: t.text }}>{isKo ? '종목 추가' : 'Add stocks'}</div>
+          <GlassCard className="p-4 mb-6">
+            <div className="text-sm font-semibold mb-2.5" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{isKo ? '종목 추가' : 'Add stocks'}</div>
             <div ref={searchRef} className="relative mb-2">
-              <div className="flex items-center gap-2 rounded-xl px-3 py-2.5"
-                style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', border: `1px solid ${t.glassBorder}` }}>
+              <div className="flex items-center gap-2 rounded px-3 py-2.5"
+                style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', outline: `1px solid ${t.glassBorder}`, outlineOffset: '-1px' }}>
                 <Search size={14} style={{ color: t.textMuted }} />
                 <input ref={inputRef} type="text" value={searchQuery}
                   onChange={e => handleSearch(e.target.value)}
@@ -329,14 +330,14 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
 
               {/* 검색 드롭다운 */}
               {showResults && (searchResults.length > 0 || searching) && (
-                <div className="absolute left-0 right-0 top-full mt-1 rounded-xl overflow-hidden z-50 shadow-xl"
-                  style={{ background: t.name === 'dark' ? '#1c1c1e' : '#fff', border: `1px solid ${t.glassBorder}` }}>
+                <div className="absolute left-0 right-0 top-full mt-1 rounded overflow-hidden z-50 shadow-xl"
+                  style={{ background: t.name === 'dark' ? '#1c1c1e' : '#fff', outline: `1px solid ${t.glassBorder}`, outlineOffset: '-1px' }}>
                   {searching && <div className="px-3 py-2 text-xs" style={{ color: t.textMuted }}>{isKo ? '검색 중...' : 'Searching...'}</div>}
                   {searchResults.map(result => {
                     const added = myTickers.some(tk => tk.ticker === result.ticker);
                     return (
                       <button key={result.ticker} className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors"
-                        style={{ borderBottom: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}
+                        style={{ outline: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`, outlineOffset: '-1px' }}
                         onMouseEnter={e => e.currentTarget.style.background = t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         disabled={added} onClick={() => !added && addTicker(result.ticker, result.name, result.nameEn)}>
@@ -354,8 +355,8 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
             {myTickers.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {myTickers.map(({ ticker }) => (
-                  <span key={ticker} className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg"
-                    style={{ background: 'rgba(129,140,248,0.1)', color: '#a78bfa', border: '1px solid rgba(129,140,248,0.15)' }}>
+                  <span key={ticker} className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded"
+                    style={{ background: 'rgba(129,140,248,0.1)', color: '#a78bfa', outline: '1px solid rgba(129,140,248,0.15)', outlineOffset: '-1px' }}>
                     {ticker}
                     <button onClick={() => removeTicker(ticker)} className="hover:opacity-70"><X size={10} /></button>
                   </span>
@@ -369,14 +370,14 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
 
             {/* 인기 종목 */}
             {myTickers.length === 0 && !dataLoading && (
-              <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${t.glassBorder}` }}>
+              <div className="mt-6 pt-6" style={{ outline: `1px solid ${t.glassBorder}`, outlineOffset: '-1px' }}>
                 <p className="text-[10px] font-medium mb-2" style={{ color: t.textMuted }}>{isKo ? '레전드들이 많이 보유한 종목' : 'Popular among legends'}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {popularTickers.slice(0, 8).map(({ ticker, name, nameEn, count }) => (
-                    <button key={ticker} className="text-[11px] px-2.5 py-1.5 rounded-lg transition-all"
-                      style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', border: `1px solid ${t.glassBorder}`, color: t.text }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(129,140,248,0.3)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = t.glassBorder; }}
+                    <button key={ticker} className="text-[11px] px-2.5 py-1.5 rounded transition-all"
+                      style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', outline: `1px solid ${t.glassBorder}`, outlineOffset: '-1px', color: t.text }}
+                      onMouseEnter={e => { e.currentTarget.style.outlineColor = 'rgba(129,140,248,0.3)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.outlineColor = t.glassBorder; }}
                       onClick={() => addTicker(ticker, name, nameEn)}>
                       <span className="font-semibold" style={{ color: '#a78bfa' }}>{ticker}</span>
                       <span className="ml-1" style={{ color: t.textMuted }}>{count}{isKo ? '명' : ''}</span>
@@ -389,20 +390,21 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
 
           {/* 비교할 투자자 선택 */}
           <GlassCard className="p-4 mb-4">
-            <div className="text-sm font-semibold mb-1" style={{ color: t.text }}>{isKo ? '비교할 투자자' : 'Compare with'}</div>
+            <div className="text-sm font-semibold mb-1" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{isKo ? '비교할 투자자' : 'Compare with'}</div>
             <div className="text-[11px] mb-3" style={{ color: t.textMuted }}>{isKo ? '겹침을 분석할 레전드를 선택하세요 (복수 선택)' : 'Select legends to analyze overlap'}</div>
             <div className="grid grid-cols-2 gap-2">
               {investors.map(inv => {
                 const selected = selectedInvestors.has(inv.id);
                 return (
                   <button key={inv.id}
-                    className="flex items-center gap-2 p-2.5 rounded-xl text-left transition-all"
+                    className="flex items-center gap-2 p-2.5 rounded text-left transition-all"
                     style={{
-                      border: `1px solid ${selected ? '#a78bfa' : t.glassBorder}`,
-                      background: selected ? 'rgba(129,140,248,0.05)' : 'transparent',
+                      outline: `1px solid ${selected ? '#10b981' : t.glassBorder}`,
+                      outlineOffset: '-1px',
+                      background: selected ? 'rgba(16,185,129,0.08)' : 'transparent',
                     }}
                     onClick={() => toggleInvestor(inv.id)}>
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                    <div className="w-8 h-8 rounded flex items-center justify-center text-white text-[10px] font-bold shrink-0"
                       style={{ background: inv.gradient }}>{inv.avatar}</div>
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-semibold truncate" style={{ color: t.text }}>{isKo ? inv.nameKo : inv.name}</div>
@@ -420,9 +422,9 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
 
           {/* 분석 시작 버튼 */}
           <div className="flex gap-2.5 justify-center">
-            <button className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all"
+            <button className="px-6 py-2.5 rounded text-sm font-semibold transition-all"
               style={{
-                background: myTickers.length > 0 ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : t.glassBorder,
+                background: myTickers.length > 0 ? 'linear-gradient(180deg, #006c49 0%, #10b981 100%)' : t.glassBorder,
                 color: myTickers.length > 0 ? 'white' : t.textMuted,
                 opacity: myTickers.length > 0 ? 1 : 0.5,
               }}
@@ -448,8 +450,8 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
               background: `conic-gradient(#a78bfa 0deg, #a78bfa ${matchAnalysis.overlapRate * 3.6}deg, ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} ${matchAnalysis.overlapRate * 3.6}deg)`,
             }}>
               <div className="w-full h-full rounded-full flex flex-col items-center justify-center" style={{ background: t.name === 'dark' ? '#000' : '#fff' }}>
-                <div className="text-3xl font-extrabold" style={{ color: '#a78bfa' }}>{matchAnalysis.overlapRate}%</div>
-                <div className="text-[10px]" style={{ color: t.textMuted }}>{isKo ? '전체 겹침률' : 'Overlap rate'}</div>
+                <div className="text-3xl font-extrabold" style={{ color: '#a78bfa', fontFamily: "'Newsreader', Georgia, serif" }}>{matchAnalysis.overlapRate}%</div>
+                <div className="text-[10px]" style={{ color: t.textMuted, fontFamily: "'Newsreader', Georgia, serif" }}>{isKo ? '전체 겹침률' : 'Overlap rate'}</div>
               </div>
             </div>
             <p className="text-[13px]" style={{ color: t.textSecondary, lineHeight: 1.6 }}>
@@ -463,7 +465,7 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
           <GlassCard className="p-4" hover={false}>
             <div className="flex items-center justify-between mb-3">
               <div>
-                <div className="text-sm font-bold" style={{ color: t.text }}>{isKo ? '투자자별 매칭률' : 'Investor match rate'}</div>
+                <div className="text-sm font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>{isKo ? '투자자별 매칭률' : 'Investor match rate'}</div>
                 <div className="text-[11px]" style={{ color: t.textMuted }}>{isKo ? '내 포트폴리오와 겹치는 비율' : 'Overlap with your portfolio'}</div>
               </div>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(129,140,248,0.12)', color: '#a78bfa' }}>
@@ -475,9 +477,9 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
               return (
                 <button key={investor.id}
                   className="w-full flex items-center gap-3 py-2.5 transition-colors"
-                  style={{ borderBottom: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}
+                  style={{ outline: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`, outlineOffset: '-1px' }}
                   onClick={() => onNavigate("investor", investor.id)}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0"
+                  <div className="w-9 h-9 rounded flex items-center justify-center text-white text-xs font-bold shrink-0"
                     style={{ background: investor.gradient }}>{investor.avatar}</div>
                   <div className="flex-1 min-w-0 text-left">
                     <div className="text-[13px] font-semibold" style={{ color: t.text }}>{isKo ? investor.nameKo : investor.name}</div>
@@ -488,7 +490,7 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
                   <div className="w-20 h-1.5 rounded-full overflow-hidden shrink-0" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
                     <div className="h-full rounded-full" style={{ width: `${matchRate}%`, background: matchRate > 40 ? t.green : matchRate > 20 ? '#a78bfa' : t.accent }} />
                   </div>
-                  <div className="text-sm font-bold w-10 text-right shrink-0" style={{ color: matchRate > 40 ? t.green : matchRate > 20 ? '#a78bfa' : t.accent }}>
+                  <div className="text-sm font-bold w-10 text-right shrink-0" style={{ color: matchRate > 40 ? t.green : matchRate > 20 ? '#a78bfa' : t.accent, fontFamily: "'Newsreader', Georgia, serif" }}>
                     {matchRate}%
                   </div>
                 </button>
@@ -502,11 +504,11 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
           {/* 겹치는 종목 */}
           {matchAnalysis.results.filter(r => r.matchCount > 0).length > 0 && (
             <GlassCard className="p-4" hover={false}>
-              <div className="text-sm font-bold mb-3" style={{ color: t.text }}>{isKo ? '겹치는 종목' : 'Overlapping stocks'}</div>
+              <div className="text-sm font-bold mb-3" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>{isKo ? '겹치는 종목' : 'Overlapping stocks'}</div>
               {matchAnalysis.results.filter(r => r.matchCount > 0).map(({ ticker, name, nameEn, matchedInvestors, recentArk }) => (
                 <button key={ticker}
-                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl mb-2 transition-all text-left"
-                  style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded mb-2 transition-all text-left"
+                  style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', outline: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`, outlineOffset: '-1px' }}
                   onClick={() => onNavigate("stock", ticker)}>
                   <div className="text-[13px] font-bold w-12 shrink-0" style={{ color: t.text }}>{ticker}</div>
                   <div className="text-[11px] flex-1 truncate" style={{ color: t.textSecondary }}>{isKo ? name : nameEn}</div>
@@ -528,12 +530,12 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
           {/* 레전드만 보유한 종목 */}
           {matchAnalysis.legendOnly.length > 0 && (
             <GlassCard className="p-4" hover={false}>
-              <div className="text-sm font-bold mb-0.5" style={{ color: t.text }}>{isKo ? '레전드만 보유한 종목' : 'Legend-only stocks'}</div>
+              <div className="text-sm font-bold mb-0.5" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>{isKo ? '레전드만 보유한 종목' : 'Legend-only stocks'}</div>
               <div className="text-[11px] mb-3" style={{ color: t.textMuted }}>{isKo ? '당신은 없지만 레전드가 주목하는 종목' : 'Stocks legends hold but you don\'t'}</div>
               {matchAnalysis.legendOnly.map(({ ticker, name, nameEn, investors: invs, maxPct }) => (
                 <button key={ticker}
-                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl mb-2 transition-all text-left"
-                  style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', borderLeft: `3px solid #a78bfa`, border: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`, borderLeftWidth: 3, borderLeftColor: '#a78bfa' }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded mb-2 transition-all text-left"
+                  style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', outline: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`, outlineOffset: '-1px', boxShadow: 'inset 3px 0 0 #a78bfa' }}
                   onClick={() => onNavigate("stock", ticker)}>
                   <div className="text-[13px] font-bold w-12 shrink-0" style={{ color: t.text }}>{ticker}</div>
                   <div className="text-[11px] flex-1 truncate" style={{ color: t.textSecondary }}>{isKo ? name : nameEn}</div>
@@ -555,19 +557,19 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
           {/* 겹치지 않는 내 종목 */}
           {matchAnalysis.results.filter(r => r.matchCount === 0).length > 0 && (
             <GlassCard className="p-4" hover={false}>
-              <div className="text-sm font-bold mb-2" style={{ color: t.text }}>{isKo ? '레전드가 보유하지 않는 내 종목' : 'Stocks no legend holds'}</div>
+              <div className="text-sm font-bold mb-2" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{isKo ? '레전드가 보유하지 않는 내 종목' : 'Stocks no legend holds'}</div>
               <div className="flex flex-wrap gap-1.5">
                 {matchAnalysis.results.filter(r => r.matchCount === 0).map(({ ticker }) => (
-                  <span key={ticker} className="text-[11px] font-medium px-2.5 py-1.5 rounded-lg"
-                    style={{ background: `rgba(255,69,58,0.06)`, color: t.red, border: `1px solid rgba(255,69,58,0.1)` }}>{ticker}</span>
+                  <span key={ticker} className="text-[11px] font-medium px-2.5 py-1.5 rounded"
+                    style={{ background: `rgba(255,69,58,0.06)`, color: t.red, outline: `1px solid rgba(255,69,58,0.1)`, outlineOffset: '-1px' }}>{ticker}</span>
                 ))}
               </div>
             </GlassCard>
           )}
 
-          <div className="flex justify-center pt-2">
-            <button className="px-6 py-2.5 rounded-xl text-sm font-semibold"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white' }}
+          <div className="flex justify-center pt-4">
+            <button className="px-6 py-2.5 rounded text-sm font-semibold"
+              style={{ background: 'linear-gradient(180deg, #006c49 0%, #10b981 100%)', color: 'white' }}
               onClick={() => setShowComingSoon(true)}>
               {isKo ? '알림 설정' : 'Alert settings'} <ArrowUpRight size={14} className="inline ml-1" />
             </button>
@@ -578,16 +580,16 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
       {/* ===== STEP 3: 알림 피드 ===== */}
       {step === 3 && (
         <div className="space-y-3">
-          <div>
-            <div className="text-base font-bold" style={{ color: t.text }}>{isKo ? 'FolioMatch 알림' : 'FolioMatch Alerts'}</div>
+          <div className="mb-6">
+            <div className="text-base font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{isKo ? 'FolioMatch 알림' : 'FolioMatch Alerts'}</div>
             <div className="text-xs mb-4" style={{ color: t.textMuted }}>{isKo ? '내 포트폴리오 x 레전드 투자자 변화 추적' : 'Track legend investor changes vs your portfolio'}</div>
           </div>
 
           {/* 주간 다이제스트 미리보기 */}
-          <div className="rounded-2xl p-4" style={{ background: t.surface, border: '1px solid rgba(129,140,248,0.15)' }}>
+          <div className="rounded p-4 mb-6" style={{ background: t.surface, outline: '1px solid rgba(129,140,248,0.15)', outlineOffset: '-1px' }}>
             <div className="flex items-center justify-between mb-3">
               <div>
-                <div className="text-sm font-bold" style={{ color: t.text }}>{isKo ? '주간 다이제스트' : 'Weekly Digest'}</div>
+                <div className="text-sm font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{isKo ? '주간 다이제스트' : 'Weekly Digest'}</div>
                 <div className="text-[11px]" style={{ color: t.textMuted }}>3/14 ~ 3/20</div>
               </div>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(129,140,248,0.12)', color: '#a78bfa' }}>
@@ -633,9 +635,9 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
               avatars: investors.slice(0, 3),
             },
           ].map((alert, i) => (
-            <div key={i} className="rounded-2xl p-4 transition-all" style={{ background: t.surface, border: `1px solid ${t.glassBorder}` }}>
+            <div key={i} className="rounded p-4 transition-all" style={{ background: t.surface, outline: `1px solid ${t.glassBorder}`, outlineOffset: '-1px' }}>
               <div className="flex items-center gap-2.5 mb-2.5">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: alert.iconBg, color: alert.iconColor }}>{alert.icon}</div>
+                <div className="w-8 h-8 rounded flex items-center justify-center shrink-0" style={{ background: alert.iconBg, color: alert.iconColor }}>{alert.icon}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[13px] font-semibold" style={{ color: t.text }}>{alert.title}</span>
@@ -644,7 +646,7 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
                   <div className="text-[10px]" style={{ color: t.textMuted }}>{alert.time}</div>
                 </div>
               </div>
-              <div className="text-xs rounded-lg px-3 py-2.5 mb-2" style={{ color: t.textSecondary, background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', lineHeight: 1.6 }}>
+              <div className="text-xs rounded px-3 py-2.5 mb-2" style={{ color: t.textSecondary, background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', lineHeight: 1.6 }}>
                 {alert.desc}
               </div>
               <div className="flex items-center gap-1.5">
@@ -661,7 +663,7 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
 
           {/* 알림 설정 */}
           <GlassCard className="p-4" hover={false}>
-            <div className="text-sm font-semibold mb-1" style={{ color: t.text }}>{isKo ? '알림 설정' : 'Notification settings'}</div>
+            <div className="text-sm font-semibold mb-1" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{isKo ? '알림 설정' : 'Notification settings'}</div>
             <div className="text-[11px] mb-3" style={{ color: t.textMuted }}>{isKo ? '어떤 변화를 받아볼지 선택' : 'Choose what changes to track'}</div>
             {[
               { key: 'myStock', label: isKo ? '내 종목 변동' : 'My stock changes', desc: isKo ? '레전드가 내 보유종목 매수/매도 시' : 'When legends buy/sell your stocks' },
@@ -671,7 +673,7 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
               { key: 'commonSignal', label: isKo ? '공통 신호' : 'Common signals', desc: isKo ? '3명 이상 동시 매수/매도 시' : 'When 3+ buy/sell simultaneously' },
             ].map(({ key, label, desc }) => (
               <div key={key} className="flex items-center justify-between py-2.5"
-                style={{ borderBottom: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` }}>
+                style={{ outline: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`, outlineOffset: '-1px' }}>
                 <div>
                   <div className="text-xs font-medium" style={{ color: t.text }}>{label}</div>
                   <div className="text-[10px]" style={{ color: t.textMuted }}>{desc}</div>
@@ -687,8 +689,8 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
           </GlassCard>
 
           {/* 회원가입 안내 배너 */}
-          <div className="rounded-2xl p-4 text-center"
-            style={{ background: t.name === 'dark' ? 'rgba(129,140,248,0.06)' : 'rgba(99,102,241,0.04)', border: '1px dashed rgba(129,140,248,0.2)' }}>
+          <div className="rounded p-4 text-center"
+            style={{ background: t.name === 'dark' ? 'rgba(129,140,248,0.06)' : 'rgba(99,102,241,0.04)', outline: '1px dashed rgba(129,140,248,0.2)', outlineOffset: '-1px' }}>
             <Bell size={20} className="mx-auto mb-2" style={{ color: '#a78bfa' }} />
             <p className="text-sm font-semibold mb-1" style={{ color: t.text }}>
               {isKo ? '알림 기능은 추후 서비스 예정입니다' : 'Alert features coming soon'}
@@ -696,8 +698,8 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
             <p className="text-[11px] mb-3" style={{ color: t.textMuted }}>
               {isKo ? '회원가입 후 실시간 알림과 주간 다이제스트를 받아보실 수 있습니다' : 'Sign up to receive real-time alerts and weekly digests'}
             </p>
-            <button className="px-5 py-2 rounded-xl text-xs font-semibold transition-all"
-              style={{ background: 'rgba(129,140,248,0.12)', color: '#a78bfa', border: '1px solid rgba(129,140,248,0.2)' }}>
+            <button className="px-5 py-2 rounded text-xs font-semibold transition-all"
+              style={{ background: 'rgba(129,140,248,0.12)', color: '#a78bfa', outline: '1px solid rgba(129,140,248,0.2)', outlineOffset: '-1px' }}>
               {isKo ? '출시 알림 받기' : 'Notify me at launch'}
             </button>
           </div>
@@ -723,18 +725,18 @@ export default function FolioMatchPage({ onBack, onNavigate, watchlist }) {
       {/* 추후 서비스 모달 */}
       {showComingSoon && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{background:'rgba(0,0,0,0.6)'}} onClick={() => setShowComingSoon(false)}>
-          <div className="rounded-2xl p-6 max-w-sm w-full text-center" style={{background:t.name==='dark'?'#1c1c1e':'#fff', border:`1px solid ${t.name==='dark'?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)'}`}} onClick={e => e.stopPropagation()}>
+          <div className="rounded p-6 max-w-sm w-full text-center" style={{background:t.name==='dark'?'#1c1c1e':'#fff', outline:`1px solid ${t.name==='dark'?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)'}`, outlineOffset: '-1px'}} onClick={e => e.stopPropagation()}>
             <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{background:'rgba(139,92,246,0.12)'}}>
               <Bell size={22} style={{color:'#a78bfa'}} />
             </div>
-            <div className="text-base font-bold mb-1.5" style={{color:t.text}}>
+            <div className="text-base font-bold mb-1.5" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif"}}>
               {isKo ? '추후 서비스 예정' : 'Coming Soon'}
             </div>
-            <p className="text-sm mb-4" style={{color:t.textSecondary}}>
+            <p className="text-sm mb-4" style={{color:t.textSecondary, fontFamily: "'Newsreader', Georgia, serif"}}>
               {isKo ? '알림 기능은 현재 준비 중입니다. 빠르게 찾아뵙겠습니다!' : 'Alert feature is currently being prepared. Stay tuned!'}
             </p>
-            <button className="px-5 py-2 rounded-xl text-sm font-semibold"
-              style={{background:'rgba(139,92,246,0.15)', color:'#a78bfa'}}
+            <button className="px-5 py-2 rounded text-sm font-semibold"
+              style={{background:'rgba(139,92,246,0.15)', color:'#a78bfa', outline: '1px solid rgba(139,92,246,0.3)', outlineOffset: '-1px'}}
               onClick={() => setShowComingSoon(false)}>
               {isKo ? '확인' : 'OK'}
             </button>

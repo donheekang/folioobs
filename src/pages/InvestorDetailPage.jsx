@@ -52,16 +52,16 @@ const ChangeCategoryList = ({ cat, onNavigate, theme: t }) => {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-2 pb-2" style={{borderBottom:`1px solid ${cat.color}20`}}>
+      <div className="flex items-center gap-2 mb-2 pb-2" style={{outline:`1px solid ${cat.color}10`}}>
         <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{background:`${cat.color}15`}}>
           <CatIcon size={13} style={{color: cat.color}} />
         </div>
-        <span className="text-sm font-semibold" style={{color: cat.color}}>{cat.label}</span>
+        <span className="text-sm font-semibold" style={{color: cat.color, fontFamily: "'Newsreader', Georgia, serif"}}>{cat.label}</span>
         <span className="text-xs font-bold px-1.5 py-0.5 rounded-full" style={{background:`${cat.color}12`, color: cat.color}}>{cat.items.length}</span>
       </div>
       <div className="space-y-0.5">
         {shown.map((item, i) => (
-          <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors"
+          <div key={i} className="flex items-center gap-3 px-3 py-2 rounded cursor-pointer transition-colors"
             style={{background:'transparent'}}
             onClick={()=>onNavigate("stock",item.ticker)}
             onMouseEnter={e=>e.currentTarget.style.background=t.cardRowHover}
@@ -90,7 +90,7 @@ const ChangeCategoryList = ({ cat, onNavigate, theme: t }) => {
           </div>
         ))}
         {remaining > 0 && (
-          <button className="w-full text-center py-2 mt-1 rounded-lg text-xs font-medium cursor-pointer transition-colors"
+          <button className="w-full text-center py-2 mt-1 rounded text-xs font-medium cursor-pointer transition-colors"
             style={{color: cat.color, background:'transparent'}}
             onMouseEnter={e=>e.currentTarget.style.background=t.cardRowHover}
             onMouseLeave={e=>e.currentTarget.style.background='transparent'}
@@ -143,14 +143,14 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
             <button
               key={day.date}
               onClick={() => { setSelectedDate(day.date); if (!isHoliday) onDateSelect?.(day.date); }}
-              className="flex flex-col items-center px-2.5 py-1.5 rounded-lg text-xs transition-all"
+              className="flex flex-col items-center px-2.5 py-1.5 rounded text-xs transition-all"
               style={{
                 background: isHoliday
                   ? (isSelected ? (t.name === 'dark' ? 'rgba(245,158,11,0.12)' : 'rgba(245,158,11,0.08)') : (t.name === 'dark' ? 'rgba(245,158,11,0.05)' : 'rgba(245,158,11,0.03)'))
-                  : (isSelected ? `${t.accent}20` : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'),
-                border: isHoliday
-                  ? (isSelected ? '1.5px solid rgba(245,158,11,0.5)' : '1px dashed rgba(245,158,11,0.3)')
-                  : (isSelected ? `1.5px solid ${t.accent}` : `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`),
+                  : (isSelected ? 'rgba(16,185,129,0.08)' : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'),
+                outline: isHoliday
+                  ? (isSelected ? '1.5px solid rgba(245,158,11,0.4)' : '1px dashed rgba(245,158,11,0.2)')
+                  : (isSelected ? `1.5px solid ${t.accent}` : `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`),
                 color: isHoliday ? '#f59e0b' : (isSelected ? t.accent : t.textSecondary),
                 opacity: isHoliday && !isSelected ? 0.75 : 1,
               }}
@@ -170,7 +170,7 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
 
       {/* 선택된 날짜의 매매 내역 */}
       {selectedDay && (
-        <div className="rounded-xl p-3" style={{background: t.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)', border: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`}}>
+        <div className="rounded p-3" style={{background: t.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)', outline: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`}}>
           {/* 날짜 + 요약 */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -195,7 +195,7 @@ const ArkMonthSection = ({ group, theme: t, onDateSelect, onNavigate }) => {
           {/* 휴장일 표시 */}
           {isSelectedHoliday && (
             <div className="text-center py-5">
-              <div className="text-2xl mb-2">🏛️</div>
+              <div className="text-2xl mb-2"></div>
               <div className="text-sm font-semibold mb-1" style={{color:'#f59e0b'}}>
                 {isKo ? selectedDay.holidayName.ko : selectedDay.holidayName.en}
               </div>
@@ -274,7 +274,7 @@ const ArkMonthTabs = ({ months, theme: t, onDateSelect, onNavigate }) => {
               <FolderOpen size={13} style={{ opacity: isActive ? 1 : 0.5 }} />
               <span>{group.label}</span>
               <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{
-                background: isActive ? `${t.accent}15` : (t.name === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                background: isActive ? 'rgba(16,185,129,0.08)' : (t.name === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
                 color: isActive ? t.accent : t.textMuted,
               }}>{totalTrades}</span>
               {/* 활성 탭 하단 라인 */}
@@ -311,7 +311,7 @@ const ArkTradeRow = ({ trade, theme: t, onNavigate }) => {
   const diffStr = hasWeight ? (weightDiff >= 0 ? `+${weightDiff.toFixed(2)}` : weightDiff.toFixed(2)) : null;
 
   return (
-    <div className="flex items-center justify-between py-1.5 px-2 rounded-lg" style={{background:`${color}06`}}>
+    <div className="flex items-center justify-between py-1.5 px-2 rounded" style={{background:`${color}06`}}>
       <div className="flex items-center gap-2 min-w-0">
         {trade.isNew && <span className="text-[10px] font-bold px-1 py-0.5 rounded" style={{background:`${t.accent}15`,color:t.accent}}>{L.t('common.new')}</span>}
         {trade.isExit && <span className="text-[10px] font-bold px-1 py-0.5 rounded" style={{background:`${t.red}15`,color:t.red}}>EXIT</span>}
@@ -413,12 +413,12 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
   const history = QUARTERLY_HISTORY[investorId]||[];
   const insights = useMemo(()=> investor ? generateInsights(investor,holdings,L) : [],[investorId, investor, holdings, L]);
   if(!investor) return (
-    <div className="space-y-6">
+    <div className="space-y-9">
       <button onClick={onBack} className="flex items-center gap-1.5 text-sm hover:opacity-80" style={{color:t.textMuted}}><ArrowLeft size={16}/> {L.t('common.back')}</button>
       <div className="flex flex-col items-center justify-center py-24 gap-4">
         <Briefcase size={36} style={{ color: t.textMuted, opacity: 0.3 }} />
         <p className="text-sm" style={{ color: t.textMuted }}>{L.t('investor.notFound')}</p>
-        <button onClick={onBack} className="px-4 py-2 rounded-xl text-sm font-medium text-white" style={{ background: t.accent }}>{L.t('investor.goBack')}</button>
+        <button onClick={onBack} className="px-4 py-2 rounded text-sm font-medium text-white" style={{ background: t.accent }}>{L.t('investor.goBack')}</button>
       </div>
     </div>
   );
@@ -433,22 +433,22 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
   const tagColors = TAG_COLORS_MAP(t);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-9">
       <button onClick={onBack} className="flex items-center gap-1.5 text-sm hover:opacity-80" style={{color:t.textMuted}}><ArrowLeft size={16}/> {L.t('common.back')}</button>
 
       <GlassCard glow={investor.gradient} hover={false}>
         <div className="p-6">
           <div className="flex items-start gap-3 sm:gap-4 mb-4">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-white font-bold text-lg sm:text-xl flex-shrink-0" style={{background:investor.gradient}}>{investor.avatar}</div>
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded flex items-center justify-center text-white font-bold text-lg sm:text-xl flex-shrink-0" style={{background:investor.gradient}}>{investor.avatar}</div>
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h1 className="text-xl sm:text-2xl font-bold truncate" style={{color:t.text}}>{L.investorName(investor)}</h1>
+                  <h1 className="text-xl sm:text-2xl font-bold truncate" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif"}}>{L.investorName(investor)}</h1>
                   <div className="text-xs sm:text-sm" style={{color:t.textMuted}}>{L.fundName(investor)} · {L.t('investor.founded')} {investor.founded}{L.t('investor.year')}</div>
                 </div>
                 <WatchButton active={watchlist.isWatchedInv(investorId)} onClick={() => watchlist.toggleInvestor(investorId)} size={18} />
               </div>
-              <div className="flex items-center gap-2 mt-2 flex-wrap"><Badge color={investor.color}><SI size={12}/> {L.style(investor.style)}</Badge><Badge color={t.accent}>AUM {formatUSD(investor.aum)}</Badge>{investorId === 'cathie' && <><button className="text-xs font-medium px-3 py-1 rounded-full transition-colors cursor-pointer" style={{color:'#f59e0b', background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.15)'}} onClick={()=>onNavigate("ark-report")}>{L.locale === 'ko' ? '주간·월간 리포트 →' : 'Weekly/Monthly Report →'}</button><button className="text-xs font-medium px-3 py-1 rounded-full transition-colors cursor-pointer" style={{color:'#22d3ee', background:'rgba(34,211,238,0.08)', border:'1px solid rgba(34,211,238,0.15)'}} onClick={()=>dailyTradesRef.current?.scrollIntoView({behavior:'smooth',block:'start'})}>{L.locale === 'ko' ? '일별 매매 내역 →' : 'Daily Trades →'}</button></>}</div>
+              <div className="flex items-center gap-2 mt-2 flex-wrap"><Badge color={investor.color}><SI size={12}/> {L.style(investor.style)}</Badge><Badge color={t.accent}>AUM {formatUSD(investor.aum)}</Badge>{investorId === 'cathie' && <><button className="text-xs font-medium px-3 py-1 rounded-full transition-colors cursor-pointer" style={{color:'#f59e0b', background:'rgba(245,158,11,0.08)', outline:'1px solid rgba(245,158,11,0.06)'}} onClick={()=>onNavigate("ark-report")}>{L.locale === 'ko' ? '주간·월간 리포트 →' : 'Weekly/Monthly Report →'}</button><button className="text-xs font-medium px-3 py-1 rounded-full transition-colors cursor-pointer" style={{color:'#22d3ee', background:'rgba(34,211,238,0.08)', outline:'1px solid rgba(34,211,238,0.06)'}} onClick={()=>dailyTradesRef.current?.scrollIntoView({behavior:'smooth',block:'start'})}>{L.locale === 'ko' ? '일별 매매 내역 →' : 'Daily Trades →'}</button></>}</div>
             </div>
           </div>
           <p className="text-sm leading-relaxed" style={{color:t.textSecondary}}>{L.bio(investor)}</p>
@@ -458,7 +458,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         {[{icon:DollarSign,l:L.t('investor.aum'),v:formatUSD(investor.aum),c:t.blue},{icon:Briefcase,l:L.t('investor.holdingCount'),v:`${holdings.length}`,c:t.green},{icon:Target,l:L.t('investor.maxWeight'),v:`${investor.metrics.topHoldingPct.toFixed(1)}%`,sub:[...holdings].sort((a,b)=>b.pct-a.pct)[0]?.ticker,c:t.amber},{icon:Activity,l:L.t('investor.qoqChange'),v:`${investor.metrics.qoqChange>=0?'+':''}${investor.metrics.qoqChange}%`,c:investor.metrics.qoqChange>=0?t.green:t.red}].map((s,i)=>{
           const I=s.icon;
-          return(<GlassCard key={i} hover={false}><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="p-1.5 rounded-lg" style={{background:`${s.c}15`}}><I size={14} style={{color:s.c}}/></div><span className="text-xs" style={{color:t.textMuted}}>{s.l}</span></div><div className="text-xl font-bold" style={{color:t.text}}>{s.v}</div>{s.sub&&<div className="text-xs mt-0.5" style={{color:s.c}}>{s.sub}</div>}</div></GlassCard>);
+          return(<GlassCard key={i} hover={false}><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="p-1.5 rounded" style={{background:`${s.c}15`}}><I size={14} style={{color:s.c}}/></div><span className="text-xs" style={{color:t.textMuted}}>{s.l}</span></div><div className="text-xl font-bold" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif"}}>{s.v}</div>{s.sub&&<div className="text-xs mt-0.5" style={{color:s.c}}>{s.sub}</div>}</div></GlassCard>);
         })}
       </div>
 
@@ -491,17 +491,17 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
           <GlassCard hover={false}>
             <div className="p-5">
               {/* 헤더 */}
-              <div className="flex items-center gap-2 mb-5">
-                <div className="p-1.5 rounded-lg" style={{background:`${t.amber}20`}}>
+              <div className="flex items-center gap-2 mb-6">
+                <div className="p-1.5 rounded" style={{background:`${t.amber}20`}}>
                   <Zap size={16} style={{color:t.amber}} />
                 </div>
-                <h3 className="font-bold" style={{color:t.text}}>{L.t('investor.quarterlyChangeSummary')}</h3>
+                <h3 className="font-bold" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>{L.t('investor.quarterlyChangeSummary')}</h3>
                 {latestQ && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:`${t.accent}15`, color:t.accent}}>{latestQ.q}</span>}
                 <Badge color={t.amber}>{totalChanges}{L.t('common.stocks_count')}</Badge>
               </div>
 
               {/* 카테고리별 테이블 */}
-              <div className="space-y-5">
+              <div className="space-y-6">
                 {categories.map(cat => (
                   <ChangeCategoryList key={cat.key} cat={cat} onNavigate={onNavigate} theme={t} />
                 ))}
@@ -514,21 +514,21 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <GlassCard hover={false}>
           <div className="p-5">
-            <h3 className="font-bold mb-4" style={{color:t.text}}>{L.t('investor.sectorAllocation')}</h3>
+            <h3 className="font-bold mb-6" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>{L.t('investor.sectorAllocation')}</h3>
             <div role="img" aria-label={`${L.investorName(investor)} ${L.t('investor.sectorAllocation')}. ${sectorData.slice(0,3).map(s => `${s.name} ${s.value.toFixed(1)}%`).join(', ')} 등`}>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart><Pie data={sectorData} cx="50%" cy="50%" innerRadius={55} outerRadius={90} dataKey="value" paddingAngle={3} stroke="none">{sectorData.map((s,i)=><Cell key={i} fill={SECTOR_COLORS[s.name]||"#64748B"}/>)}</Pie><Tooltip content={<ChartTooltip/>}/></PieChart>
             </ResponsiveContainer>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3">
-              {sectorData.map((s,i)=>(<div key={i} className="flex items-center gap-1.5 text-xs"><div className="w-2 h-2 rounded-full" style={{background:SECTOR_COLORS[s.name]||"#64748B"}}/><span style={{color:t.textSecondary}}>{L.sector(s.name)}</span><span className="font-medium" style={{color:t.text}}>{s.value.toFixed(1)}%</span></div>))}
+              {sectorData.map((s,i)=>(<div key={i} className="flex items-center gap-1.5 text-xs"><div className="w-2 h-2 rounded-full" style={{background:SECTOR_COLORS[s.name]||"#64748B"}}/><span style={{color:t.textSecondary}}>{L.sector(s.name)}</span><span className="font-medium" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif"}}>{s.value.toFixed(1)}%</span></div>))}
             </div>
           </div>
         </GlassCard>
 
         <GlassCard hover={false}>
           <div className="p-5">
-            <h3 className="font-bold mb-4" style={{color:t.text}}>{L.t('investor.aumTrend')}</h3>
+            <h3 className="font-bold mb-6" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>{L.t('investor.aumTrend')}</h3>
             {history.length >= 2 ? (
             <>
             <div role="img" aria-label={`${L.investorName(investor)} ${L.t('investor.aumTrend')}`}>
@@ -584,7 +584,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
       {/* Holdings Table */}
       <GlassCard hover={false}>
         <div className="p-4 sm:p-5">
-          <h3 className="font-bold mb-4" style={{color:t.text}}>{L.t('investor.holdings')}</h3>
+          <h3 className="font-bold mb-6" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>{L.t('investor.holdings')}</h3>
           {/* 보유 종목 없음 */}
           {sorted.length === 0 && (
             <div className="text-center py-12">
@@ -596,7 +596,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
           <div className="sm:hidden space-y-2">
             {displayHoldings.map((h,i)=>{
               return (
-              <div key={i} className="rounded-xl cursor-pointer" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)', border: `1px solid ${t.cardRowBorder}` }}
+              <div key={i} className="rounded cursor-pointer" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)', outline: `1px solid ${t.cardRowBorder}04` }}
                 onClick={()=>onNavigate("stock",h.ticker)}>
                 <div className="p-3">
                   <div className="flex items-center justify-between mb-2">
@@ -614,7 +614,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                       <div className="w-14 h-1.5 rounded-full overflow-hidden" style={{background:t.name==='dark'?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.08)'}}>
                         <div className="h-full rounded-full" style={{width:`${Math.min(h.pct*3,100)}%`,background:investor.gradient}}/>
                       </div>
-                      <span className="text-xs font-medium" style={{color:t.text}}>{h.pct.toFixed(1)}%</span>
+                      <span className="text-xs font-medium" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif"}}>{h.pct.toFixed(1)}%</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Badge color={SECTOR_COLORS[h.sector]||"#64748B"}>{L.sector(h.sector)}</Badge>
@@ -629,7 +629,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
           {/* Desktop: Table layout */}
           <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr style={{borderBottom:`1px solid ${t.tableBorder}`}}>
+              <thead><tr style={{outline:`1px solid ${t.tableBorder}04`, outlineOffset: '-1px'}}>
                 {[{k:null,l:""},{k:null,l:L.t('investor.ticker')},{k:"pct",l:L.t('investor.weight')},{k:"value",l:L.t('investor.value')},{k:"shares",l:L.t('investor.shares')},{k:null,l:L.t('investor.sector')},{k:"change",l:L.t('investor.change')}].map((c,i)=>(
                   <th key={i} className={`text-left py-2.5 px-3 text-xs font-medium ${c.k?'cursor-pointer':''}`} style={{color:t.textMuted}} onClick={()=>c.k&&handleSort(c.k)}>
                     <div className="flex items-center gap-1">{c.l}{sortKey===c.k&&(sortDir==="desc"?<ChevronDown size={11}/>:<ChevronUp size={11}/>)}</div>
@@ -638,7 +638,7 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
               </tr></thead>
               <tbody>{displayHoldings.map((h,i)=>{
                 return (<React.Fragment key={h.ticker}>
-                <tr style={{borderBottom: `1px solid ${t.cardRowBorder}`, cursor: 'pointer'}}
+                <tr style={{outline: `1px solid ${t.cardRowBorder}04`, outlineOffset: '-1px', cursor: 'pointer'}}
                   onClick={()=>onNavigate("stock",h.ticker)}
                   onMouseEnter={e=>e.currentTarget.style.background=t.cardRowHover}
                   onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
@@ -660,11 +660,11 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
           {hasMoreHoldings && (
             <div className="mt-4 text-center">
               <button
-                className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer"
+                className="px-6 py-2.5 rounded text-sm font-semibold transition-all cursor-pointer"
                 style={{
                   color: investor.color,
                   background: `${investor.color}10`,
-                  border: `1.5px solid ${investor.color}25`,
+                  outline: `1px solid ${investor.color}10`,
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = `${investor.color}20`; }}
                 onMouseLeave={e => { e.currentTarget.style.background = `${investor.color}10`; }}
@@ -717,13 +717,13 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
         return (
           <GlassCard hover={false}>
             <div className="p-5">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6" style={{borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>
                 <div className="flex items-center gap-2">
                   <Calendar size={18} style={{color:t.accent}} />
-                  <h3 className="font-bold" style={{color:t.text}}>{L.t('investor.dailyTrades')}</h3>
+                  <h3 className="font-bold" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif"}}>{L.t('investor.dailyTrades')}</h3>
                 </div>
                 <button className="text-xs font-medium px-3 py-1.5 rounded-full transition-colors"
-                  style={{color:t.accent, background:`${t.accent}10`, border:`1px solid ${t.accent}20`}}
+                  style={{color:t.accent, background:`${t.accent}10`, outline:`1px solid ${t.accent}06`}}
                   onClick={()=>onNavigate("ark-report")}>
                   {L.locale === 'ko' ? '주간·월간 리포트 →' : 'Weekly/Monthly Report →'}
                 </button>
@@ -740,9 +740,9 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
       {investorId !== 'cathie' && (QUARTERLY_ACTIVITY[investorId] || []).length > 0 && (
         <GlassCard hover={false}>
           <div className="p-5">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-6" style={{borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>
               <Clock size={18} style={{color:t.accent}} />
-              <h3 className="font-bold" style={{color:t.text}}>{L.t('investor.quarterlyTrades')}</h3>
+              <h3 className="font-bold" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif"}}>{L.t('investor.quarterlyTrades')}</h3>
             </div>
             <QuarterlyTimeline investorId={investorId} onNavigate={onNavigate} />
           </div>
@@ -780,9 +780,8 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
 
         return (
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-1.5 rounded-lg" style={{background:`${t.purple}20`}}><Lightbulb size={18} style={{color:t.purple}}/></div>
-              <h3 className="font-bold" style={{color:t.text}}>{L.t('investor.portfolioInsights')}</h3>
+            <div className="flex items-center gap-2 mb-6" style={{borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>
+              <h3 className="font-bold" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif"}}>{L.t('investor.portfolioInsights')}</h3>
               {hasAI && <Badge color={t.accent}>AI</Badge>}
               <Badge color={t.purple}>{displayInsights.length}{L.t('common.items')}</Badge>
               {hasAI && aiData.quarter && <span className="text-xs" style={{color:t.textMuted}}>{L.quarter(aiData.quarter)}</span>}
@@ -797,13 +796,13 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                 return (
                   <GlassCard key={i} className="min-w-0 overflow-hidden" glow={`radial-gradient(circle at top left, ${c}08, transparent)`}>
                     <div className="p-4"><div className="flex items-start gap-3">
-                      <div className="p-2 rounded-xl mt-0.5 flex-shrink-0" style={{background:`${c}15`,border:`1px solid ${c}20`}}><I size={16} style={{color:c}}/></div>
+                      <div className="p-2 rounded mt-0.5 flex-shrink-0" style={{background:`${c}15`, outline:`1px solid ${c}10`}}><I size={16} style={{color:c}}/></div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                           <Badge color={c}>{L.tag ? L.tag(ins.tag) : ins.tag}</Badge>
                           {ins.confidence && <span className="text-xs" style={{color:t.textMuted}}>{L.t('investor.confidence')} {ins.confidence}%</span>}
                         </div>
-                        <h4 className="font-bold text-sm mb-1 break-words" style={{color:t.text}}>{title}</h4>
+                        <h4 className="font-bold text-sm mb-1 break-words" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif"}}>{title}</h4>
                         <p className="text-xs leading-relaxed break-words" style={{color:t.textSecondary}}>{desc}</p>
                       </div>
                     </div></div>
@@ -815,10 +814,10 @@ const InvestorDetailPage = ({ investorId, onBack, onNavigate, watchlist, scrollT
                 return (
                   <GlassCard key={i} className="min-w-0 overflow-hidden" glow={`radial-gradient(circle at top left, ${c}08, transparent)`}>
                     <div className="p-4"><div className="flex items-start gap-3">
-                      <div className="p-2 rounded-xl mt-0.5 flex-shrink-0" style={{background:`${c}15`,border:`1px solid ${c}20`}}><I size={16} style={{color:c}}/></div>
+                      <div className="p-2 rounded mt-0.5 flex-shrink-0" style={{background:`${c}15`, outline:`1px solid ${c}10`}}><I size={16} style={{color:c}}/></div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap"><Badge color={c}>{L.tag ? L.tag(ins.tag) : ins.tag}</Badge></div>
-                        <h4 className="font-bold text-sm mb-1 break-words" style={{color:t.text}}>{ins.title}</h4>
+                        <h4 className="font-bold text-sm mb-1 break-words" style={{color:t.text, fontFamily: "'Newsreader', Georgia, serif"}}>{ins.title}</h4>
                         <p className="text-xs leading-relaxed break-words" style={{color:t.textSecondary}}>{ins.desc}</p>
                       </div>
                     </div></div>

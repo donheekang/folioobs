@@ -155,9 +155,9 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
   // 스타일 헬퍼
   const chip = (active) => ({
     color: active ? t.text : t.textMuted,
-    background: active ? `${t.text}0a` : 'transparent',
+    background: active ? 'rgba(16, 185, 129, 0.08)' : 'transparent',
     borderRadius: 6, padding: '4px 10px', fontSize: 11, fontWeight: 500,
-    cursor: 'pointer', border: active ? `1px solid ${t.text}18` : '1px solid transparent',
+    cursor: 'pointer', border: 'none', outline: active ? '1px solid rgba(16, 185, 129, 0.15)' : 'none',
     transition: 'all .15s',
   });
 
@@ -171,7 +171,7 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-base font-semibold" style={{ color: t.text }}>
+          <h1 className="text-base font-semibold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
             {isKo ? '내부자 거래' : 'Insider Trading'}
           </h1>
           <p className="text-[10px] mt-0.5" style={{ color: t.textMuted }}>SEC Form 4</p>
@@ -189,9 +189,9 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
             {v === 'all' ? (isKo ? '전체' : 'All') : v.toUpperCase()}
           </button>
         ))}
-        <div style={{ width: 1, height: 14, background: t.glassBorder, margin: '0 2px' }} />
+        <div style={{ width: 1, height: 14, background: 'rgba(0, 0, 0, 0.05)', margin: '0 2px' }} />
         <button onClick={() => setShowOnlyBuySell(!showOnlyBuySell)}
-          style={{ ...chip(showOnlyBuySell), color: showOnlyBuySell ? '#3b82f6' : t.textMuted, borderColor: showOnlyBuySell ? '#3b82f620' : 'transparent', background: showOnlyBuySell ? '#3b82f608' : 'transparent' }}>
+          style={{ ...chip(showOnlyBuySell), color: showOnlyBuySell ? '#10b981' : t.textMuted }}>
           {isKo ? '매수·매도만' : 'Buy/Sell only'}
         </button>
         <div className="ml-auto flex items-center gap-3 text-[11px]" style={{ color: t.textMuted }}>
@@ -211,9 +211,9 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
           {/* 추적 투자자 보유종목 내부자 거래 */}
           {/* ============================================ */}
           {trackedGroups.length > 0 && (
-            <div className="mb-8">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-semibold" style={{ color: t.text }}>
+            <div className="mb-12">
+              <div className="flex items-center gap-2 mb-1" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+                <span className="text-xs font-semibold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                   {isKo ? '추적 투자자 보유종목' : 'Tracked Holdings'}
                 </span>
                 <span className="text-[10px]" style={{ color: t.textMuted }}>
@@ -233,8 +233,8 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
                   const invText = investorText(grp);
 
                   return (
-                    <div key={grp.symbol} className="rounded-xl overflow-hidden"
-                      style={{ background: t.glassBg, border: `1px solid ${t.glassBorder}` }}>
+                    <div key={grp.symbol} className="rounded overflow-hidden"
+                      style={{ background: t.glassBg, outline: `1px solid rgba(0, 0, 0, 0.05)` }}>
 
                       {/* 종목 요약 헤더 (클릭으로 접기/펴기) */}
                       <button
@@ -268,7 +268,7 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
 
                         {/* 금액 */}
                         <div className="text-right flex-shrink-0">
-                          <div className="text-sm font-bold" style={{ color: t.text }}>
+                          <div className="text-sm font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                             {fmtVal(totalVal)}
                           </div>
                         </div>
@@ -285,8 +285,8 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
 
                       {/* 개별 거래 (접기/펴기) */}
                       {isExpanded && (
-                        <div className="px-4 pb-3">
-                          <div style={{ height: 1, background: t.glassBorder, marginBottom: 8 }} />
+                        <div className="px-4 pb-3" style={{ background: 'rgba(0, 0, 0, 0.015)' }}>
+                          <div style={{ height: 0, marginBottom: 8 }} />
                           {grp.trades.map((tr, i) => {
                             const cls = classify(tr.transaction_type);
                             return (
@@ -299,6 +299,7 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
                                 </span>
                                 <span className="font-medium flex-shrink-0" style={{
                                   color: cls.isBuy ? '#4ade80' : cls.isSell ? '#f87171' : t.textMuted,
+                                  fontFamily: "'Newsreader', Georgia, serif",
                                 }}>
                                   {cls.isBuy ? '+' : cls.isSell ? '-' : ''}{fmtVal(tr.transaction_value)}
                                 </span>
@@ -321,9 +322,9 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
           {/* 기타 내부자 거래 */}
           {/* ============================================ */}
           {otherTrades.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs font-semibold" style={{ color: t.text }}>
+            <div className="mt-12">
+              <div className="flex items-center gap-2 mb-3" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+                <span className="text-xs font-semibold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                   {isKo ? '기타 내부자 거래' : 'Other Insider Trades'}
                 </span>
                 <span className="text-[10px]" style={{ color: t.textMuted }}>
@@ -336,15 +337,15 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
                 <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: t.textMuted }} />
                 <input type="text" placeholder={isKo ? '종목·이름 검색' : 'Search...'}
                   value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-                  className="pl-7 pr-3 py-1.5 rounded-lg text-[11px] outline-none w-full"
-                  style={{ background: t.glassBg, color: t.text, border: `1px solid ${t.glassBorder}` }} />
+                  className="pl-7 pr-3 py-1.5 rounded text-[11px] outline-none w-full"
+                  style={{ background: t.glassBg, color: t.text, border: 'none', outline: '1px solid rgba(0, 0, 0, 0.05)' }} />
               </div>
 
               <div className="space-y-[2px]">
                 {displayedOther.map((tr, i) => {
                   const cls = classify(tr.transaction_type);
                   return (
-                    <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg"
+                    <div key={i} className="flex items-center gap-3 px-3 py-2 rounded"
                       style={{ background: t.glassBg }}>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
@@ -363,6 +364,7 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
                       <div className="text-right flex-shrink-0">
                         <div className="text-[11px] font-semibold" style={{
                           color: cls.isBuy ? '#4ade80' : cls.isSell ? '#f87171' : t.textMuted,
+                          fontFamily: "'Newsreader', Georgia, serif",
                         }}>
                           {cls.isBuy ? '+' : cls.isSell ? '-' : ''}{fmtVal(tr.transaction_value)}
                         </div>
@@ -377,7 +379,7 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
                 <div className="text-center mt-4">
                   <button onClick={() => setShowCount(s => s + 40)}
                     className="px-5 py-2 rounded-full text-[11px] font-medium transition hover:opacity-70"
-                    style={{ color: t.textMuted, border: `1px solid ${t.glassBorder}` }}>
+                    style={{ color: t.textMuted, border: 'none', outline: '1px solid rgba(0, 0, 0, 0.05)' }}>
                     {isKo ? `더 보기 (${otherTrades.length - showCount}건)` : `More (${otherTrades.length - showCount})`}
                   </button>
                 </div>
@@ -387,7 +389,7 @@ const InsiderTradingPage = ({ onBack, onNavigate }) => {
 
           {trackedGroups.length === 0 && otherTrades.length === 0 && (
             <div className="text-center py-20">
-              <div className="text-2xl mb-2">📭</div>
+              <div className="text-2xl mb-2"></div>
               <div className="text-xs" style={{ color: t.textMuted }}>
                 {isKo ? '해당 조건의 거래가 없습니다' : 'No matching trades'}
               </div>

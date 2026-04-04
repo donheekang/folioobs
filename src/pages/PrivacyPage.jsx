@@ -222,22 +222,22 @@ export default function PrivacyPage({ onBack }) {
         {L.t("common.back")}
       </button>
 
-      {/* Header */}
+      {/* Header — Stitch editorial serif */}
       <div className="flex items-center gap-3 mb-2">
         <Shield size={28} style={{ color: T.accent }} />
-        <h1 className="text-2xl font-bold" style={{ color: T.text }}>
+        <h1 className="text-2xl font-bold" style={{ color: T.text, fontFamily: "'Newsreader', Georgia, serif" }}>
           {content.title}
         </h1>
       </div>
-      <p className="text-sm mb-8" style={{ color: T.textMuted }}>
+      <p className="text-sm mb-10" style={{ color: T.textMuted }}>
         {content.effectiveDate}
       </p>
 
       {/* Sections */}
-      <div className="space-y-8">
+      <div className="space-y-10">
         {content.sections.map((sec, i) => (
           <section key={i}>
-            <h2 className="text-lg font-semibold mb-3" style={{ color: T.text }}>
+            <h2 className="text-lg font-semibold mb-3" style={{ color: T.text, fontFamily: "'Newsreader', Georgia, serif" }}>
               {sec.heading}
             </h2>
             <div

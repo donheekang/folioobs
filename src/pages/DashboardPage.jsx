@@ -13,10 +13,10 @@ import OverlapHeatmap from "../components/OverlapHeatmap";
 
 // Skeleton card placeholder
 const SkeletonCard = () => (
-  <div className="rounded-2xl overflow-hidden" aria-busy="true" aria-label="Loading" style={{ background: 'rgba(128,128,128,0.04)', border: '1px solid rgba(128,128,128,0.06)' }}>
+  <div className="rounded overflow-hidden" aria-busy="true" aria-label="Loading" style={{ background: 'rgba(128,128,128,0.04)', border: '1px solid rgba(128,128,128,0.06)' }}>
     <div className="p-5 space-y-4">
       <div className="flex items-center gap-3">
-        <div className="skeleton w-11 h-11 rounded-xl" />
+        <div className="skeleton w-11 h-11 rounded" />
         <div className="flex-1 space-y-2">
           <div className="skeleton h-4 w-24 rounded" />
           <div className="skeleton h-3 w-32 rounded" />
@@ -57,11 +57,12 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
   const [ready, setReady] = useState(false);
   useEffect(() => { const id = setTimeout(() => setReady(true), 350); return () => clearTimeout(id); }, []);
 
-  // Collapse state for recent quarter changes (show 5 items initially)
+  // Pagination state for recent quarter changes
   const COLLAPSE_LIMIT = 5;
-  const [showAllNew, setShowAllNew] = useState(false);
-  const [showAllBuy, setShowAllBuy] = useState(false);
-  const [showAllSell, setShowAllSell] = useState(false);
+  const PAGE_SIZE = 20;
+  const [showCountNew, setShowCountNew] = useState(COLLAPSE_LIMIT);
+  const [showCountBuy, setShowCountBuy] = useState(COLLAPSE_LIMIT);
+  const [showCountSell, setShowCountSell] = useState(COLLAPSE_LIMIT);
 
   // ===== 공시 후 포트폴리오 성과 계산 (캐시 우드 제외 — ARK는 일별 매매 공개) =====
   const portfolioPerformance = useMemo(() => {
@@ -120,7 +121,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     } else if (todayHoliday) {
       // 미국 시장 휴장일
       const holidayName = L.locale === 'ko' ? todayHoliday.ko : todayHoliday.en;
-      return L.locale === 'ko' ? `🏛️ 휴장 · ${holidayName} · ${formatted} 종가` : `🏛️ Closed · ${holidayName} · ${formatted}`;
+      return L.locale === 'ko' ? `휴장 · ${holidayName} · ${formatted} 종가` : `Closed · ${holidayName} · ${formatted}`;
     } else {
       return L.locale === 'ko' ? `장 마감 · ${formatted} 종가` : `Market Closed · ${formatted}`;
     }
@@ -376,7 +377,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     const defaultBg = t.name==='dark'?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.02)';
     const defaultBorder = t.name==='dark'?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.04)';
     return (
-      <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer transition-colors"
+      <div className="flex items-center gap-2.5 px-3 py-2.5 rounded cursor-pointer transition-colors"
         style={{background:defaultBg, border:`1px solid ${defaultBorder}`}}
         onClick={()=>onNavigate("stock", act.ticker)}
         onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onNavigate("stock", act.ticker);}}}
@@ -396,11 +397,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {/* Hero — 데이터 강조형: 호기심 헤드라인 + 신뢰 배지 + 하이라이트 카드 */}
-      <div className="hero-enter hero-enter-1 text-center py-6 sm:py-10" role="banner">
+      <div className="hero-enter hero-enter-1 text-center py-8 sm:py-14" role="banner">
         <p className="text-sm sm:text-base font-semibold mb-3 tracking-wide" style={{color:t.accent}}>{L.t('dashboard.subtitle')}</p>
-        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-3" style={{color:t.text, letterSpacing:'-0.025em'}}>
+        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-3" style={{color:t.text, letterSpacing:'-0.025em', fontFamily:"'Newsreader', Georgia, serif"}}>
           {L.t('dashboard.title')}
         </h1>
 
@@ -414,7 +415,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
         {/* 핵심 수치 — 한줄 */}
         <div className="hero-enter hero-enter-3 flex items-center justify-center gap-4 sm:gap-6 mb-6 flex-wrap">
-          <span className="text-sm" style={{color:t.textMuted}}>{L.t('dashboard.totalAum')} <span className="font-bold" style={{color:t.text}}>{formatUSD(totalAUM)}</span></span>
+          <span className="text-sm" style={{color:t.textMuted}}>{L.t('dashboard.totalAum')} <span className="font-bold" style={{color:t.text, fontFamily:"'Newsreader', Georgia, serif"}}>{formatUSD(totalAUM)}</span></span>
           <span style={{color:t.textMuted}}>·</span>
           <span className="text-sm" style={{color:t.textMuted}}>{L.t('dashboard.trackedStocks')} <span className="font-bold" style={{color:t.text}}>{totalStocks}{L.t('common.stocks_count')}</span></span>
           <span style={{color:t.textMuted}}>·</span>
@@ -424,8 +425,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         {/* 1차 CTA — 핵심 수치 바로 아래 */}
         <div className="hero-enter hero-enter-3 flex items-center justify-center gap-3 mb-6 flex-wrap">
           <button
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-blue-500/20 active:scale-95"
-            style={{background:t.accent}}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-emerald-500/20 active:scale-95"
+            style={{background:'linear-gradient(180deg, #006c49 0%, #10b981 100%)'}}
             onClick={()=>{trackCtaClick('portfolio_view','hero');investorGridRef.current?.scrollIntoView({behavior:'smooth',block:'start'});}}>
             {L.t('dashboard.ctaButton')}
             <ChevronDown size={16} />
@@ -448,7 +449,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
         {/* Trade Highlights — 이번 분기 핫 종목 (종목 중심 집계) */}
         {heroHighlights.length > 0 && (
-          <div className="hero-enter hero-enter-3 w-full" style={{maxWidth:'680px', margin:'0 auto 2.5rem'}}>
+          <div className="hero-enter hero-enter-3 w-full" style={{maxWidth:'740px', margin:'0 auto 3rem'}}>
             <p className="text-xs font-medium mb-3 text-center" style={{color:t.textMuted}}>{L.t('dashboard.hotStocks')}</p>
             <div className="hot-stocks-grid">
               {heroHighlights.map((h, i) => {
@@ -467,7 +468,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                     : `${t.accent}20`;
                 return (
                   <div key={i}
-                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all hover:scale-[1.02] cursor-pointer"
+                    className="flex items-center gap-3 px-4 py-3.5 rounded transition-all hover:scale-[1.02] cursor-pointer"
                     style={{background:glowBg, border:`1px solid ${glowBorder}`}}
                     onClick={() => onNavigate("stock", h.ticker)}>
                     <div className="flex -space-x-2 flex-shrink-0">
@@ -600,7 +601,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
           return (
             <div className="hero-enter hero-enter-5 mb-4 w-full max-w-2xl mx-auto">
-              <div className="relative rounded-2xl overflow-hidden"
+              <div className="relative rounded overflow-hidden"
                 style={{background:t.name==='dark'?'rgba(245,158,11,0.04)':'rgba(245,158,11,0.03)', border:`1px solid ${t.name==='dark'?'rgba(245,158,11,0.15)':'rgba(245,158,11,0.12)'}`}}>
 
                 {/* ── 헤더 (클릭 → 캐시우드 포트폴리오) ── */}
@@ -609,7 +610,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   onClick={() => onNavigate("investor","cathie")}>
                   <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full pointer-events-none" style={{background:'radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)'}} />
                   <div className="flex items-center gap-2">
-                    {cathie && <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-bold" style={{background:cathie.gradient}}>{cathie.avatar}</div>}
+                    {cathie && <div className="w-7 h-7 rounded flex items-center justify-center text-white text-[10px] font-bold" style={{background:cathie.gradient}}>{cathie.avatar}</div>}
                     <span className="text-[16px] font-bold tracking-tight" style={{color:t.text}}>
                       {L.locale === 'ko' ? '캐시 우드' : 'Cathie Wood'}
                     </span>
@@ -815,24 +816,17 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               borderRadius: '20px',
               padding: '24px',
             }}>
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{
-                  background: `linear-gradient(135deg, ${t.accent}20, ${t.accent}08)`,
-                }}>
-                  <Radio size={15} style={{ color: t.accent }} />
-                </div>
-                <div>
-                  <h2 className="text-[17px] font-bold tracking-tight" style={{ color: t.text }}>
-                    {L.locale === 'ko' ? '오늘의 월가 종목' : "Wall St. Today"}
-                  </h2>
-                  <p className="text-[10px] mt-0.5" style={{ color: t.textMuted }}>
-                    {L.locale === 'ko' ? '실시간 시세 불러오는 중...' : 'Loading live prices...'}
-                  </p>
-                </div>
+              <div className="mb-4" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+                <h2 className="text-[17px] font-bold tracking-tight" style={{ color: t.text, fontFamily:"'Newsreader', Georgia, serif" }}>
+                  {L.locale === 'ko' ? '오늘의 월가 종목' : "Wall St. Today"}
+                </h2>
+                <p className="text-[10px] mt-0.5" style={{ color: t.textMuted }}>
+                  {L.locale === 'ko' ? '실시간 시세 불러오는 중...' : 'Loading live prices...'}
+                </p>
               </div>
               <div className="space-y-3">
                 {[1,2,3].map(i => (
-                  <div key={i} className="rounded-2xl p-4" style={{
+                  <div key={i} className="rounded-md p-4" style={{
                     background: t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
                   }}>
                     <div className="flex items-center justify-between">
@@ -939,22 +933,15 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
               {/* 헤더 */}
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{
-                    background: `linear-gradient(135deg, ${activeColor}20, ${activeColor}08)`,
-                  }}>
-                    <Radio size={15} style={{ color: activeColor }} />
-                  </div>
-                  <div>
-                    <h2 className="text-[17px] font-bold tracking-tight" style={{ color: t.text }}>
-                      {L.locale === 'ko' ? '오늘의 월가 종목' : "Wall St. Today"}
-                    </h2>
-                    <p className="text-[10px] mt-0.5" style={{ color: t.textMuted }}>
-                      {L.locale === 'ko'
-                        ? `${INVESTORS.length}명 투자자 · 추적 종목 ${seenTickers.size}/${totalTracked || seenTickers.size}개`
-                        : `${INVESTORS.length} investors · ${seenTickers.size}/${totalTracked || seenTickers.size} stocks tracked`}
-                    </p>
-                  </div>
+                <div style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+                  <h2 className="text-[17px] font-bold tracking-tight" style={{ color: t.text, fontFamily:"'Newsreader', Georgia, serif" }}>
+                    {L.locale === 'ko' ? '오늘의 월가 종목' : "Wall St. Today"}
+                  </h2>
+                  <p className="text-[10px] mt-0.5" style={{ color: t.textMuted }}>
+                    {L.locale === 'ko'
+                      ? `${INVESTORS.length}명 투자자 · 추적 종목 ${seenTickers.size}/${totalTracked || seenTickers.size}개`
+                      : `${INVESTORS.length} investors · ${seenTickers.size}/${totalTracked || seenTickers.size} stocks tracked`}
+                  </p>
                 </div>
                 {priceLabel && (
                   <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{
@@ -977,11 +964,10 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
               {/* 휴장일 안내 배너 */}
               {isHolidayData && (
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl mb-3" style={{
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded mb-3" style={{
                   background: t.name === 'dark' ? 'rgba(245,158,11,0.06)' : 'rgba(245,158,11,0.05)',
                   border: `1px dashed ${t.name === 'dark' ? 'rgba(245,158,11,0.20)' : 'rgba(245,158,11,0.25)'}`,
                 }}>
-                  <span className="text-[13px]">🏛️</span>
                   <span className="text-[11px] leading-tight" style={{ color: t.name === 'dark' ? '#fbbf24' : '#d97706' }}>
                     {(() => {
                       const ltdLabel = lastTradeDate ? (() => {
@@ -1039,7 +1025,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                       const barWidth = Math.min(Math.abs(totalChg) / maxAbsChange * 100, 100);
                       return (
                         <div key={stock.ticker}
-                          className="relative rounded-2xl cursor-pointer overflow-hidden group"
+                          className="relative rounded-md cursor-pointer overflow-hidden group"
                           style={{
                             background: medalBgs[i],
                             border: `1px solid ${activeColor}${i === 0 ? '18' : '0C'}`,
@@ -1051,7 +1037,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                           onMouseLeave={e => { e.currentTarget.style.borderColor = `${activeColor}${i === 0 ? '18' : '0C'}`; e.currentTarget.style.transform = 'translateY(0)'; }}>
 
                           {/* 퍼센트 바 */}
-                          <div className="absolute left-0 top-0 bottom-0 rounded-2xl"
+                          <div className="absolute left-0 top-0 bottom-0 rounded-md"
                             style={{
                               width: `${barWidth}%`,
                               background: `linear-gradient(90deg, ${changeColor}10, transparent)`,
@@ -1060,7 +1046,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
                           <div className="relative flex items-center gap-3">
                             {/* 순위 뱃지 */}
-                            <div className="flex-shrink-0 flex items-center justify-center rounded-lg"
+                            <div className="flex-shrink-0 flex items-center justify-center rounded"
                               style={{
                                 width: i === 0 ? 32 : 28,
                                 height: i === 0 ? 32 : 28,
@@ -1078,7 +1064,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                             {/* 투자자 아바타 */}
                             <div className="flex -space-x-1.5 flex-shrink-0">
                               {stock.investors.slice(0, 4).map((inv, j) => (
-                                <div key={inv.id} className="rounded-lg flex items-center justify-center text-white font-bold ring-1"
+                                <div key={inv.id} className="rounded flex items-center justify-center text-white font-bold ring-1"
                                   style={{
                                     width: i === 0 ? 26 : 22,
                                     height: i === 0 ? 26 : 22,
@@ -1091,7 +1077,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                                 </div>
                               ))}
                               {stock.investors.length > 4 && (
-                                <div className="rounded-lg flex items-center justify-center font-bold ring-1"
+                                <div className="rounded flex items-center justify-center font-bold ring-1"
                                   style={{
                                     width: i === 0 ? 26 : 22,
                                     height: i === 0 ? 26 : 22,
@@ -1169,7 +1155,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   const changeColor = isUp ? '#22c55e' : totalChg < 0 ? '#ef4444' : t.textMuted;
                   return (
                     <div key={stock.ticker}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded cursor-pointer transition-all"
                       style={{
                         background: 'transparent',
                         borderBottom: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'}`,
@@ -1252,7 +1238,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 <div className="text-center mt-4">
                   <button
                     onClick={() => setRankShowAll(!rankShowAll)}
-                    className="px-6 py-2 rounded-xl text-[11px] font-semibold transition-all"
+                    className="px-6 py-2 rounded text-[11px] font-semibold transition-all"
                     style={{
                       color: activeColor,
                       background: `${activeColor}0A`,
@@ -1279,9 +1265,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       {!ready ? null : (performanceRanking.all || []).length > 0 && (
         <section id="perf-ranking" className="hero-enter hero-enter-5">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Trophy size={18} style={{ color: '#f59e0b' }} />
-              <h2 className="text-lg font-bold" style={{ color: t.text }}>
+            <div className="flex items-center gap-2" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+              <h2 className="text-lg font-bold" style={{ color: t.text, fontFamily:"'Newsreader', Georgia, serif" }}>
                 {L.locale === 'ko' ? '보유종목 수익률 랭킹' : 'Holdings Performance'}
               </h2>
               {latestQuarter && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>}
@@ -1346,7 +1331,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
           {/* 보조 필터 — 섹터, 상승/하락, 정렬, 초기화 */}
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             {/* 투자자 수 세그먼트 */}
-            <div className="flex p-[3px] rounded-lg" style={{ background: segBg }}>
+            <div className="flex p-[3px] rounded" style={{ background: segBg }}>
               {[{v:0, label:'전체', en:'All'}, {v:2, label:'2명', en:'2'}, {v:3, label:'3명', en:'3'}, {v:4, label:'3명이상', en:'3+'}].map(opt => {
                 const isActive = perfMinInvestors === opt.v;
                 return (
@@ -1371,7 +1356,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <select
                 value={perfSector}
                 onChange={e => { setPerfSector(e.target.value); setPerfShowAll(false); }}
-                className="appearance-none text-[11px] font-medium pl-3 pr-6 py-[6px] rounded-lg cursor-pointer outline-none transition-all duration-200"
+                className="appearance-none text-[11px] font-medium pl-3 pr-6 py-[6px] rounded cursor-pointer outline-none transition-all duration-200"
                 style={{
                   background: perfSector !== 'all' ? `${t.accent}12` : dropBg,
                   color: perfSector !== 'all' ? t.accent : t.textMuted,
@@ -1390,7 +1375,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             <div className="w-px h-5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
 
             {/* 오늘 방향 — 세그먼트 컨트롤 */}
-            <div className="flex p-[3px] rounded-lg" style={{ background: segBg }}>
+            <div className="flex p-[3px] rounded" style={{ background: segBg }}>
               {[{v:'all', label:'전체', en:'All'}, {v:'up', label:'상승', en:'↑'}, {v:'down', label:'하락', en:'↓'}].map(opt => {
                 const isActive = perfDailyDir === opt.v;
                 const activeColor = opt.v === 'up' ? t.green : opt.v === 'down' ? t.red : t.text;
@@ -1414,7 +1399,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
             {/* 정렬 토글 */}
             <button onClick={() => { setPerfSortAsc(p => !p); setPerfShowAll(false); }}
-              className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-[5px] rounded-lg transition-all duration-200 hover:opacity-80"
+              className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-[5px] rounded transition-all duration-200 hover:opacity-80"
               style={{ background: segBg, color: t.text }}>
               {perfSortAsc ? <ArrowDownRight size={12} style={{ color: t.red }} /> : <ArrowUpRight size={12} style={{ color: t.green }} />}
               {L.locale === 'ko' ? (perfSortAsc ? '낮은순' : '높은순') : (perfSortAsc ? 'Low→High' : 'High→Low')}
@@ -1423,7 +1408,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             {/* 초기화 */}
             {activeCount > 0 && (
               <button onClick={() => { setPerfSelectedInvestors(new Set()); setPerfMinInvestors(0); setPerfSector('all'); setPerfDailyDir('all'); setPerfShowAll(false); }}
-                className="flex items-center gap-1 text-[10px] font-medium px-2.5 py-[5px] rounded-lg transition-all duration-200 hover:opacity-80"
+                className="flex items-center gap-1 text-[10px] font-medium px-2.5 py-[5px] rounded transition-all duration-200 hover:opacity-80"
                 style={{ color: t.accent, background: `${t.accent}10`, border: `1px solid ${t.accent}20` }}>
                 <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full text-[9px] font-bold" style={{ background: t.accent, color: isDark ? '#000' : '#fff' }}>
                   {activeCount}
@@ -1539,9 +1524,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       {/* ===== TOP 5 매수/매도 랭킹 (히어로 바로 아래) ===== */}
       {!ready ? null : (topBoughtStocks.length > 0 || topSoldStocks.length > 0) && (
         <section className="hero-enter hero-enter-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Zap size={18} style={{ color: t.accent }} />
-            <h2 className="text-lg font-bold" style={{ color: t.text }}>{L.t('dashboard.hotStocksTitle')}</h2>
+          <div className="flex items-center gap-2 mb-4" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+            <h2 className="text-lg font-bold" style={{ color: t.text, fontFamily:"'Newsreader', Georgia, serif" }}>{L.t('dashboard.hotStocksTitle')}</h2>
             {latestQuarter && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1549,7 +1533,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             <GlassCard hover={false}>
               <div className="p-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{background:`${t.green}15`}}>
+                  <div className="w-6 h-6 rounded flex items-center justify-center" style={{background:`${t.green}15`}}>
                     <ArrowUpRight size={14} style={{color:t.green}} />
                   </div>
                   <span className="text-sm font-bold" style={{color:t.text}}>{L.t('dashboard.topBought')}</span>
@@ -1588,7 +1572,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             <GlassCard hover={false}>
               <div className="p-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{background:`${t.red}15`}}>
+                  <div className="w-6 h-6 rounded flex items-center justify-center" style={{background:`${t.red}15`}}>
                     <ArrowDownRight size={14} style={{color:t.red}} />
                   </div>
                   <span className="text-sm font-bold" style={{color:t.text}}>{L.t('dashboard.topSold')}</span>
@@ -1629,7 +1613,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       {/* ===== 데이터 신선도 라벨 (Data Freshness) ===== */}
       {!ready ? null : (
         <section className="hero-enter hero-enter-5">
-          <div className="flex items-center gap-2 flex-wrap px-3 py-2.5 rounded-xl"
+          <div className="flex items-center gap-2 flex-wrap px-3 py-2.5 rounded"
             style={{
               background: t.name==='dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
               border: `1px solid ${t.name==='dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}`,
@@ -1689,8 +1673,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
       {/* Investor Grid */}
       <section ref={investorGridRef} aria-label={L.t('dashboard.investorStatus')}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold" style={{ color: t.text }}>{L.t('dashboard.investorStatus')}</h2>
+        <div className="flex items-center justify-between mb-4" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+          <h2 className="text-lg font-bold" style={{ color: t.text, fontFamily:"'Newsreader', Georgia, serif" }}>{L.t('dashboard.investorStatus')}</h2>
           <span className="text-xs" style={{ color: t.textMuted }}>{L.t('dashboard.sec13fBased')}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1711,7 +1695,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 <div className="p-5">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm" style={{background:inv.gradient}}>{inv.avatar}</div>
+                      <div className="w-11 h-11 rounded flex items-center justify-center text-white font-bold text-sm" style={{background:inv.gradient}}>{inv.avatar}</div>
                       <div><div className="font-bold" style={{color:t.text}}>{L.investorName(inv)}</div><div className="text-xs" style={{color:t.textMuted}}>{L.fundName(inv)}</div></div>
                     </div>
                     <WatchButton active={isWatchedInv(inv.id)} onClick={() => toggleInvestor(inv.id)} size={14} />
@@ -1723,8 +1707,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   </div>
                   <div className="flex items-end justify-between">
                     <div className="grid grid-cols-3 gap-3 flex-1">
-                      {[{l:"AUM",v:formatUSD(inv.aum)},{l:L.t('investor.holdingCount'),v:`${inv.metrics.holdingCount}`},{l:"TOP",v:h[0]?.ticker,c:inv.color}].map((x,j)=>(
-                        <div key={j}><div className="text-xs mb-0.5" style={{color:t.textMuted}}>{x.l}</div><div className="text-sm font-bold" style={{color:x.c||t.text}}>{x.v}</div></div>
+                      {[{l:"AUM",v:formatUSD(inv.aum),serif:true},{l:L.t('investor.holdingCount'),v:`${inv.metrics.holdingCount}`,serif:true},{l:"TOP",v:h[0]?.ticker,c:inv.color}].map((x,j)=>(
+                        <div key={j}><div className="text-xs mb-0.5" style={{color:t.textMuted}}>{x.l}</div><div className="text-sm font-bold" style={{color:x.c||t.text, ...(x.serif?{fontFamily:"'Newsreader', Georgia, serif"}:{})}}>{x.v}</div></div>
                       ))}
                     </div>
                     {hist.length>0 && <MiniChart data={hist} color={inv.color}/>}
@@ -1740,9 +1724,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       {!ready ? null : portfolioPerformance.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <BarChart3 size={18} style={{ color: t.accent }} />
-              <h2 className="text-lg font-bold" style={{ color: t.text }}>{L.t('dashboard.postFilingPerf')}</h2>
+            <div className="flex items-center gap-2" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+              <h2 className="text-lg font-bold" style={{ color: t.text, fontFamily:"'Newsreader', Georgia, serif" }}>{L.t('dashboard.postFilingPerf')}</h2>
               <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>
               <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', color: t.textMuted }}>{L.t('dashboard.returnLabel') || '수익률'}</span>
             </div>
@@ -1759,7 +1742,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   <div key={pp.investor.id} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
                     onClick={() => onNavigate("investor", pp.investor.id)}>
                     <span className="text-xs font-bold w-5 text-center" style={{ color: t.textMuted }}>{i + 1}</span>
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                    <div className="w-8 h-8 rounded flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                       style={{ background: pp.investor.gradient }}>{pp.investor.avatar}</div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between mb-1">
@@ -1804,9 +1787,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
         return (
           <section>
-            <div className="flex items-center gap-2 mb-4">
-              <Activity size={18} style={{ color: t.amber }} />
-              <h2 className="text-lg font-bold" style={{ color: t.text }}>{L.t('dashboard.changeRanking')}</h2>
+            <div className="flex items-center gap-2 mb-4" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+              <h2 className="text-lg font-bold" style={{ color: t.text, fontFamily:"'Newsreader', Georgia, serif" }}>{L.t('dashboard.changeRanking')}</h2>
               {latestQuarter && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>}
               <span className="text-[10px] ml-1" style={{ color: t.textMuted }}>{L.t('dashboard.qoqBasis')}</span>
             </div>
@@ -1817,7 +1799,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   const isPositive = inv.qoq >= 0;
                   const barColor = isPositive ? t.green : t.red;
                   return (
-                    <div key={inv.id} className="flex items-center gap-3 py-2 px-2 rounded-xl cursor-pointer transition-colors"
+                    <div key={inv.id} className="flex items-center gap-3 py-2 px-2 rounded cursor-pointer transition-colors"
                       style={{ background: 'transparent' }}
                       onMouseEnter={e => e.currentTarget.style.background = t.cardRowHover}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -1825,7 +1807,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                       {/* 순위 */}
                       <span className="text-xs font-bold w-5 text-center" style={{ color: i < 3 ? t.amber : t.textMuted }}>{i + 1}</span>
                       {/* 아바타 */}
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: inv.gradient }}>{inv.avatar}</div>
+                      <div className="w-7 h-7 rounded flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: inv.gradient }}>{inv.avatar}</div>
                       {/* 이름 */}
                       <div className="w-24 sm:w-32 flex-shrink-0">
                         <div className="text-sm font-semibold truncate" style={{ color: t.text }}>{L.investorName(inv)}</div>
@@ -1868,9 +1850,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       {/* ===== 투자자 랭킹 보드 (Task 4) ===== */}
       {!ready ? null : investorRankings.length > 0 && (
         <section>
-          <div className="flex items-center gap-2 mb-4">
-            <Trophy size={18} style={{ color: t.amber }} />
-            <h2 className="text-lg font-bold" style={{ color: t.text }}>{L.t('dashboard.investorRanking')}</h2>
+          <div className="flex items-center gap-2 mb-4" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+            <h2 className="text-lg font-bold" style={{ color: t.text, fontFamily:"'Newsreader', Georgia, serif" }}>{L.t('dashboard.investorRanking')}</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {investorRankings.map((rk, i) => {
@@ -1883,7 +1864,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                       <span className="text-xs font-medium" style={{ color: t.textMuted }}>{rk.label}</span>
                     </div>
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                      <div className="w-9 h-9 rounded flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                         style={{ background: rk.investor.gradient }}>{rk.investor.avatar}</div>
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-bold truncate" style={{ color: t.text }}>{L.investorName(rk.investor)}</div>
@@ -1978,10 +1959,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
         return (
           <section className="hero-enter hero-enter-5">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-5 h-5 rounded-lg flex items-center justify-center" style={{background:'rgba(168,85,247,0.15)'}}>
-                <Radio size={13} style={{color:'#a78bfa'}} />
-              </div>
+            <div className="flex items-center gap-2 mb-4" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
               <h2 className="text-lg font-bold" style={{color:t.text}}>
                 {L.locale === 'ko' ? 'Legend Pulse' : 'Legend Pulse'}
               </h2>
@@ -2008,7 +1986,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 const strengthPct = Math.min((sig.strength / INVESTORS.length) * 100, 100);
                 return (
                   <div key={`${sig.ticker}-${sig.direction}`}
-                    className="rounded-xl p-3.5 cursor-pointer transition-all hover:scale-[1.01]"
+                    className="rounded p-3.5 cursor-pointer transition-all hover:scale-[1.01]"
                     style={{background:bgColor, border:`1px solid ${borderColor}`}}
                     onClick={() => onNavigate("stock", sig.ticker)}>
                     <div className="flex items-start justify-between mb-2">
@@ -2062,7 +2040,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         return (
           <section>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-4">
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
                 <h2 className="text-lg font-bold" style={{color:t.text}}>{L.t('dashboard.arkDailyTitle')}</h2>
                 <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{background:'rgba(245,158,11,0.15)',color:'#f59e0b'}}>{L.t('dashboard.arkDailyBadge')}</span>
               </div>
@@ -2082,7 +2060,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                     </div>
                     <div className="space-y-1.5">
                       {buys.slice(0, 5).map((tr, i) => (
-                        <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors"
+                        <div key={i} className="flex items-center justify-between px-3 py-2 rounded cursor-pointer transition-colors"
                           style={{background:t.name==='dark'?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.02)'}}
                           onClick={()=>cathieInv && onNavigate("investor","cathie")}>
                           <div>
@@ -2110,7 +2088,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                     </div>
                     <div className="space-y-1.5">
                       {sells.slice(0, 5).map((tr, i) => (
-                        <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors"
+                        <div key={i} className="flex items-center justify-between px-3 py-2 rounded cursor-pointer transition-colors"
                           style={{background:t.name==='dark'?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.02)'}}
                           onClick={()=>cathieInv && onNavigate("investor","cathie")}>
                           <div>
@@ -2146,8 +2124,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       {/* Visualization: Portfolio Overlap (Full Width) */}
       <GlassCard hover={false}>
         <div className="p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart3 size={18} style={{color:t.accent}} />
+          <div className="flex items-center gap-2 mb-4" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
             <h3 className="font-bold" style={{color:t.text}}>{L.t('dashboard.portfolioOverlap')}</h3>
           </div>
           <div role="img" aria-label={L.t('dashboard.portfolioOverlap')}>
@@ -2158,7 +2135,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
 
       {/* Recent Activity — 3-Column by Action Type */}
       <section aria-label={L.t('dashboard.recentQuarterChanges')}>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
           <h2 className="text-lg font-bold" style={{color:t.text}}>{L.t('dashboard.recentQuarterChanges')}</h2>
           <span className="text-xs" style={{color:t.textMuted}}>{L.quarter(latestQuarter)}</span>
         </div>
@@ -2173,12 +2150,21 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{background:`${t.accent}15`,color:t.accent}}>{newPositions.length}</span>
             </div>
             <div className="space-y-1.5">
-              {(showAllNew ? newPositions : newPositions.slice(0, COLLAPSE_LIMIT)).map((act, i) => <ActivityItem key={i} act={act} label={L.t('common.new')} color={t.accent} />)}
+              {newPositions.slice(0, showCountNew).map((act, i) => <ActivityItem key={i} act={act} label={L.t('common.new')} color={t.accent} />)}
               {newPositions.length === 0 && <div className="text-xs text-center py-4" style={{color:t.textMuted}}>{L.t('common.none')}</div>}
               {newPositions.length > COLLAPSE_LIMIT && (
-                <button onClick={() => setShowAllNew(!showAllNew)} className="w-full text-xs font-medium py-1.5 rounded-lg transition-colors hover:opacity-80" style={{color:t.accent}}>
-                  {showAllNew ? L.t('common.collapse') : `+${newPositions.length - COLLAPSE_LIMIT} ${L.t('common.showMore')}`}
-                </button>
+                <div className="flex items-center gap-2 justify-center mt-1">
+                  {showCountNew < newPositions.length && (
+                    <button onClick={() => setShowCountNew(c => Math.min(c + PAGE_SIZE, newPositions.length))} className="text-xs font-medium py-1.5 px-3 rounded transition-colors hover:opacity-80" style={{color:t.accent}}>
+                      +{Math.min(PAGE_SIZE, newPositions.length - showCountNew)} {L.t('common.showMore')}
+                    </button>
+                  )}
+                  {showCountNew > COLLAPSE_LIMIT && (
+                    <button onClick={() => setShowCountNew(COLLAPSE_LIMIT)} className="text-xs font-medium py-1.5 px-3 rounded transition-colors hover:opacity-80" style={{color:t.textMuted}}>
+                      {L.t('common.collapse')}
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -2194,12 +2180,21 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{background:`${t.green}15`,color:t.green}}>{buyActions.length}</span>
             </div>
             <div className="space-y-1.5">
-              {(showAllBuy ? buyActions : buyActions.slice(0, COLLAPSE_LIMIT)).map((act, i) => <ActivityItem key={i} act={act} label={Math.round(act.pctChange) > 999 ? L.t('common.significantIncrease') : `+${Math.round(act.pctChange)}%`} color={t.green} />)}
+              {buyActions.slice(0, showCountBuy).map((act, i) => <ActivityItem key={i} act={act} label={Math.round(act.pctChange) > 999 ? L.t('common.significantIncrease') : `+${Math.round(act.pctChange)}%`} color={t.green} />)}
               {buyActions.length === 0 && <div className="text-xs text-center py-4" style={{color:t.textMuted}}>{L.t('common.none')}</div>}
               {buyActions.length > COLLAPSE_LIMIT && (
-                <button onClick={() => setShowAllBuy(!showAllBuy)} className="w-full text-xs font-medium py-1.5 rounded-lg transition-colors hover:opacity-80" style={{color:t.accent}}>
-                  {showAllBuy ? L.t('common.collapse') : `+${buyActions.length - COLLAPSE_LIMIT} ${L.t('common.showMore')}`}
-                </button>
+                <div className="flex items-center gap-2 justify-center mt-1">
+                  {showCountBuy < buyActions.length && (
+                    <button onClick={() => setShowCountBuy(c => Math.min(c + PAGE_SIZE, buyActions.length))} className="text-xs font-medium py-1.5 px-3 rounded transition-colors hover:opacity-80" style={{color:t.accent}}>
+                      +{Math.min(PAGE_SIZE, buyActions.length - showCountBuy)} {L.t('common.showMore')}
+                    </button>
+                  )}
+                  {showCountBuy > COLLAPSE_LIMIT && (
+                    <button onClick={() => setShowCountBuy(COLLAPSE_LIMIT)} className="text-xs font-medium py-1.5 px-3 rounded transition-colors hover:opacity-80" style={{color:t.textMuted}}>
+                      {L.t('common.collapse')}
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -2215,12 +2210,21 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{background:`${t.red}15`,color:t.red}}>{sellActions.length}</span>
             </div>
             <div className="space-y-1.5">
-              {(showAllSell ? sellActions : sellActions.slice(0, COLLAPSE_LIMIT)).map((act, i) => <ActivityItem key={i} act={act} label={`${Math.round(act.pctChange)}%`} color={t.red} />)}
+              {sellActions.slice(0, showCountSell).map((act, i) => <ActivityItem key={i} act={act} label={`${Math.round(act.pctChange)}%`} color={t.red} />)}
               {sellActions.length === 0 && <div className="text-xs text-center py-4" style={{color:t.textMuted}}>{L.t('common.none')}</div>}
               {sellActions.length > COLLAPSE_LIMIT && (
-                <button onClick={() => setShowAllSell(!showAllSell)} className="w-full text-xs font-medium py-1.5 rounded-lg transition-colors hover:opacity-80" style={{color:t.accent}}>
-                  {showAllSell ? L.t('common.collapse') : `+${sellActions.length - COLLAPSE_LIMIT} ${L.t('common.showMore')}`}
-                </button>
+                <div className="flex items-center gap-2 justify-center mt-1">
+                  {showCountSell < sellActions.length && (
+                    <button onClick={() => setShowCountSell(c => Math.min(c + PAGE_SIZE, sellActions.length))} className="text-xs font-medium py-1.5 px-3 rounded transition-colors hover:opacity-80" style={{color:t.accent}}>
+                      +{Math.min(PAGE_SIZE, sellActions.length - showCountSell)} {L.t('common.showMore')}
+                    </button>
+                  )}
+                  {showCountSell > COLLAPSE_LIMIT && (
+                    <button onClick={() => setShowCountSell(COLLAPSE_LIMIT)} className="text-xs font-medium py-1.5 px-3 rounded transition-colors hover:opacity-80" style={{color:t.textMuted}}>
+                      {L.t('common.collapse')}
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>

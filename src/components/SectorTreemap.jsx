@@ -219,7 +219,7 @@ const SectorTreemap = memo(({ onNavigate }) => {
       {hoveredSector && (() => {
         const d = sectorData.find(s => s.sector === hoveredSector);
         return d ? (
-          <div className="mt-2 flex items-center gap-3 px-3 py-2 rounded-xl text-xs"
+          <div className="mt-2 flex items-center gap-3 px-3 py-2 rounded text-xs"
             style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }}>
             <div className="w-3 h-3 rounded" style={{ background: SECTOR_COLORS[d.sector] || "#64748B" }} />
             <span className="font-medium" style={{ color: t.text }}>{L.sector(d.sector)}</span>

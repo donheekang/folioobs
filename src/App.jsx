@@ -62,7 +62,7 @@ function TickerLogo({ ticker, theme }) {
     const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#22c55e', '#06b6d4'];
     const c = colors[ticker.charCodeAt(0) % colors.length];
     return (
-      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
+      <div className="w-8 h-8 rounded flex items-center justify-center text-xs font-bold"
         style={{ background: `${c}18`, color: c }}>
         {ticker.slice(0, 2)}
       </div>
@@ -70,7 +70,7 @@ function TickerLogo({ ticker, theme }) {
   }
 
   return (
-    <img src={src} alt={ticker} className="w-8 h-8 rounded-lg object-contain"
+    <img src={src} alt={ticker} className="w-8 h-8 rounded object-contain"
       style={{ background: theme.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}
       onError={() => setFailed(true)} />
   );
@@ -79,7 +79,7 @@ function TickerLogo({ ticker, theme }) {
 // Language Toggle Button
 const LangToggle = ({ locale, onToggle, theme }) => (
   <button onClick={onToggle}
-    className="flex items-center gap-1 px-1.5 py-1 rounded-lg text-xs font-medium transition hover:opacity-70"
+    className="flex items-center gap-1 px-1.5 py-1 rounded text-xs font-medium transition hover:opacity-70"
     style={{ color: theme === 'dark' ? '#f5f5f7' : '#1d1d1f' }}
     aria-label={locale === 'ko' ? 'Switch to English' : '한국어로 전환'}
     title={locale === 'ko' ? 'English' : '한국어'}>
@@ -342,13 +342,13 @@ function FolioObsInner() {
     <ThemeContext.Provider value={T}>
       <SEOHead page={page} investorId={selectedInvestor} ticker={selectedTicker} locale={locale} />
       <div className="min-h-screen transition-colors duration-500" style={{ background: T.bg }}>
-        {/* Nav */}
-        <nav className="sticky top-0 z-50 transition-colors duration-300" role="navigation" aria-label="Main Navigation" style={{ background: T.navBg, backdropFilter: T.glassBlur, WebkitBackdropFilter: T.glassBlur, borderBottom: `1px solid ${T.glassBorder}` }}>
-          <div className="max-w-5xl mx-auto px-4 h-11 flex items-center gap-2">
-            {/* Brand - fixed left */}
-            <button onClick={goHome} className="flex items-center gap-1.5 shrink-0 hover:opacity-70 transition" aria-label="Home">
-              <Eye size={18} style={{ color: T.text }} />
-              <span className="font-semibold text-sm" style={{ color: T.text }}>Folio<span style={{ color: '#10B981' }}>Obs</span></span>
+        {/* Nav — Stitch: No-Line Rule, surface hierarchy instead of border */}
+        <nav className="sticky top-0 z-50 transition-colors duration-300" role="navigation" aria-label="Main Navigation" style={{ background: T.navBg, backdropFilter: T.glassBlur, WebkitBackdropFilter: T.glassBlur, boxShadow: T.name === 'dark' ? '0 1px 0 rgba(255,255,255,0.04)' : '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 h-12 flex items-center gap-3">
+            {/* Brand - editorial serif */}
+            <button onClick={goHome} className="flex items-center gap-2 shrink-0 hover:opacity-70 transition" aria-label="Home">
+              <Eye size={18} style={{ color: T.accent }} />
+              <span className="text-base tracking-tight" style={{ color: T.text, fontFamily: "'Newsreader', Georgia, serif", fontWeight: 700 }}>Folio<span style={{ color: '#10B981' }}>Obs</span></span>
             </button>
             {/* Nav items - scrollable on mobile */}
             <div className="flex-1 overflow-x-auto scrollbar-hide min-w-0" role="tablist" style={{ WebkitOverflowScrolling: 'touch', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
@@ -357,13 +357,13 @@ function FolioObsInner() {
                   const active = page === item.id || (item.id === "dashboard" && page === "investor") || (item.id === "screener" && page === "stock");
                   return (
                     <button key={item.id} onClick={() => item.id === "dashboard" ? goHome() : navigate(item.id)}
-                      className="px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap"
-                      style={{ color: active ? T.text : T.textMuted }}
+                      className="px-2.5 sm:px-3 py-1.5 rounded text-xs transition-all whitespace-nowrap"
+                      style={{ color: active ? T.text : T.textMuted, fontWeight: active ? 600 : 400, background: active ? (T.name === 'dark' ? 'rgba(16,185,129,0.08)' : 'rgba(16,185,129,0.06)') : 'transparent', letterSpacing: '0.01em' }}
                       role="tab" aria-selected={active}>
                       <span className="hidden sm:inline">{item.label}</span>
                       <span className="sm:hidden">{item.short}</span>
                       {item.id === "watchlist" && watchCount > 0 && (
-                        <span className="ml-0.5 text-xs" style={{color:T.red}}>{watchCount}</span>
+                        <span className="ml-1 text-xs font-medium" style={{color:T.accent}}>{watchCount}</span>
                       )}
                     </button>
                   );
@@ -371,10 +371,10 @@ function FolioObsInner() {
               </div>
             </div>
             {/* Right actions - fixed right */}
-            <div className="flex items-center shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               <button onClick={() => { setSearchOpen(true); setSearchQuery(""); setSearchIdx(-1); }}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-lg transition hover:opacity-70"
-                style={{ color: T.textMuted }}>
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded transition hover:opacity-70"
+                style={{ color: T.textMuted, background: T.name==='dark'?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.03)' }}>
                 <Search size={14} />
                 <kbd className="hidden sm:inline text-xs px-1 py-0.5 rounded" style={{background:T.name==='dark'?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.04)', fontSize:'10px'}}>⌘K</kbd>
               </button>
@@ -386,14 +386,14 @@ function FolioObsInner() {
 
         {/* Fullscreen Search */}
         {searchOpen && (
-          <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: T.bg }} role="dialog" aria-modal="true">
-            {/* Search Header */}
-            <div className="flex-shrink-0" style={{ borderBottom: `1px solid ${T.glassBorder}` }}>
-              <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-                <button onClick={() => setSearchOpen(false)} className="p-1 rounded-lg transition hover:opacity-70" style={{ color: T.textMuted }}>
+          <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: T.name === 'dark' ? 'rgba(15,17,23,0.95)' : 'rgba(249,249,251,0.97)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }} role="dialog" aria-modal="true">
+            {/* Search Header — Stitch: no border, surface shift */}
+            <div className="flex-shrink-0" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)' }}>
+              <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
+                <button onClick={() => setSearchOpen(false)} className="p-1.5 rounded transition hover:opacity-70" style={{ color: T.textMuted }}>
                   <X size={20} />
                 </button>
-                <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
+                <div className="flex-1 flex items-center gap-2.5 px-4 py-2.5 rounded" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', boxShadow: T.name === 'dark' ? 'inset 0 1px 2px rgba(0,0,0,0.2)' : 'inset 0 1px 2px rgba(0,0,0,0.04)' }}>
                   <Search size={16} style={{ color: T.textMuted }} />
                   <input ref={searchInputRef} autoFocus value={searchQuery}
                     onChange={e => { setSearchQuery(e.target.value); setSearchIdx(-1); }}
@@ -427,12 +427,12 @@ function FolioObsInner() {
                     {searchResults.investors.map((inv, idx) => {
                       const isActive = searchIdx === idx;
                       return (
-                        <button key={inv.id} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-colors"
+                        <button key={inv.id} className="w-full flex items-center gap-3 px-3 py-3 rounded text-left transition-colors"
                           style={{ color: T.text, background: isActive ? T.cardRowHover : 'transparent' }}
                           onMouseEnter={() => setSearchIdx(idx)}
                           onClick={() => { addRecent(L.investorName(inv), "investor"); navigate("investor", inv.id); setSearchOpen(false); }}
                           role="option" aria-selected={isActive}>
-                          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold" style={{ background: inv.gradient }}>{inv.avatar}</div>
+                          <div className="w-10 h-10 rounded flex items-center justify-center text-white text-xs font-bold" style={{ background: inv.gradient }}>{inv.avatar}</div>
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium">{L.investorName(inv)}</div>
                             <div className="text-xs mt-0.5" style={{ color: T.textMuted }}>{L.fundName(inv)} · {formatUSD(inv.aum)}</div>
@@ -442,7 +442,7 @@ function FolioObsInner() {
                       );
                     })}
                     {searchResults.tickers.length > 0 && (
-                      <div className="px-1 pt-4 pb-2 flex items-center gap-1.5" style={{ borderTop: searchResults.investors.length > 0 ? `1px solid ${T.glassBorder}` : 'none', marginTop: searchResults.investors.length > 0 ? '8px' : 0 }}>
+                      <div className="px-1 pt-5 pb-2 flex items-center gap-1.5" style={{ marginTop: searchResults.investors.length > 0 ? '4px' : 0 }}>
                         <TrendingUp size={12} style={{ color: T.textMuted }} />
                         <span className="text-xs font-medium" style={{ color: T.textMuted }}>{L.t('nav.ticker')}</span>
                       </div>
@@ -451,7 +451,7 @@ function FolioObsInner() {
                       const idx = searchResults.investors.length + i;
                       const isActive = searchIdx === idx;
                       return (
-                        <button key={tk.ticker} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-colors"
+                        <button key={tk.ticker} className="w-full flex items-center gap-3 px-3 py-3 rounded text-left transition-colors"
                           style={{ color: T.text, background: isActive ? T.cardRowHover : 'transparent' }}
                           onMouseEnter={() => setSearchIdx(idx)}
                           onClick={() => { addRecent(tk.ticker, "ticker"); navigate("stock", tk.ticker); setSearchOpen(false); }}
@@ -508,11 +508,11 @@ function FolioObsInner() {
                           </span>
                           {latestQuarter && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: `${T.accent}15`, color: T.accent }}>{latestQuarter}</span>}
                         </div>
-                        <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${T.glassBorder}` }}>
+                        <div className="rounded overflow-hidden" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.03)' : '#ffffff', boxShadow: T.name === 'dark' ? 'none' : '0 1px 3px rgba(0,0,0,0.03)' }}>
                           {hotStocks.map((s, i) => (
                             <button key={s.ticker}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:opacity-80"
-                              style={{ background: 'transparent', borderBottom: i < hotStocks.length - 1 ? `1px solid ${T.glassBorder}` : 'none' }}
+                              className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors hover:opacity-80"
+                              style={{ background: 'transparent' }}
                               onClick={() => { addRecent(s.ticker, "ticker"); navigate("stock", s.ticker); setSearchOpen(false); }}>
                               <span className="w-5 text-center text-xs font-bold" style={{ color: i < 3 ? T.accent : T.textMuted }}>{i + 1}</span>
                               <TickerLogo ticker={s.ticker} theme={T} />
@@ -550,14 +550,14 @@ function FolioObsInner() {
                             {L.locale === 'ko' ? '인기 투자자' : 'Popular Investors'}
                           </span>
                         </div>
-                        <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${T.glassBorder}` }}>
+                        <div className="rounded overflow-hidden" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.03)' : '#ffffff', boxShadow: T.name === 'dark' ? 'none' : '0 1px 3px rgba(0,0,0,0.03)' }}>
                           {popularInvestors.map((inv, i) => (
                             <button key={inv.id}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:opacity-80"
-                              style={{ background: 'transparent', borderBottom: i < popularInvestors.length - 1 ? `1px solid ${T.glassBorder}` : 'none' }}
+                              className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors hover:opacity-80"
+                              style={{ background: 'transparent' }}
                               onClick={() => { addRecent(L.investorName(inv), "investor"); navigate("investor", inv.id); setSearchOpen(false); }}>
                               <span className="w-5 text-center text-xs font-bold" style={{ color: i < 3 ? (T.amber || '#f59e0b') : T.textMuted }}>{i + 1}</span>
-                              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold" style={{ background: inv.gradient }}>{inv.avatar}</div>
+                              <div className="w-10 h-10 rounded flex items-center justify-center text-white text-xs font-bold" style={{ background: inv.gradient }}>{inv.avatar}</div>
                               <div className="flex-1 min-w-0">
                                 <div className="text-sm font-medium" style={{ color: T.text }}>{L.investorName(inv)}</div>
                                 <div className="text-xs mt-0.5" style={{ color: T.textMuted }}>{L.fundName(inv)}</div>
@@ -593,11 +593,11 @@ function FolioObsInner() {
           )}
           {!dataLoading && dataError && INVESTORS.length === 0 && (
             <div className="flex flex-col items-center justify-center py-24 gap-4">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style={{ background: `${T.red}15` }}>⚠️</div>
+              <div className="w-14 h-14 rounded-md flex items-center justify-center text-2xl" style={{ background: `${T.red}15` }}>!</div>
               <p className="text-lg font-bold" style={{ color: T.text }}>{L.t('error.loadFailed')}</p>
               <p className="text-sm text-center max-w-md" style={{ color: T.textMuted }}>{L.t('error.connectionFailed')}</p>
-              <p className="text-xs font-mono px-3 py-1.5 rounded-lg" style={{ background: `${T.red}10`, color: T.red }}>{dataError}</p>
-              <button onClick={() => window.location.reload()} className="px-4 py-2 rounded-xl text-sm font-medium text-white transition-opacity hover:opacity-80" style={{ background: T.accent }}>
+              <p className="text-xs font-mono px-3 py-1.5 rounded" style={{ background: `${T.red}10`, color: T.red }}>{dataError}</p>
+              <button onClick={() => window.location.reload()} className="px-4 py-2 rounded text-sm font-medium text-white transition-opacity hover:opacity-80" style={{ background: T.accent }}>
                 {L.t('common.retry')}
               </button>
             </div>
@@ -605,8 +605,8 @@ function FolioObsInner() {
           {!dataLoading && (dataError ? INVESTORS.length > 0 : true) && (
             <ErrorBoundary onReset={goHome} showDetail={true}>
               {dataError && INVESTORS.length > 0 && (
-                <div className="mb-4 px-4 py-3 rounded-xl flex items-center gap-3" style={{ background: `${T.amber}10`, border: `1px solid ${T.amber}30` }}>
-                  <span className="text-sm">⚠️</span>
+                <div className="mb-4 px-4 py-3 rounded flex items-center gap-3" style={{ background: `${T.amber}10`, border: `1px solid ${T.amber}30` }}>
+                  <span className="text-sm">!</span>
                   <p className="text-xs flex-1" style={{ color: T.amber }}>{L.t('error.partialError')}</p>
                 </div>
               )}
@@ -629,29 +629,30 @@ function FolioObsInner() {
           )}
         </main>
 
-        <footer className="mt-16 py-8 text-center" style={{ borderTop: `1px solid ${T.glassBorder}` }}>
-          <div className="flex items-center justify-center gap-4 mb-3">
+        {/* Footer — Stitch: No-Line Rule, surface hierarchy */}
+        <footer className="mt-20 py-10 text-center" style={{ background: T.name === 'dark' ? 'rgba(255,255,255,0.015)' : T.surfaceLow || '#f3f3f5' }}>
+          <p className="text-lg mb-4" style={{ color: T.textMuted, fontFamily: "'Newsreader', Georgia, serif", fontWeight: 400, opacity: 0.5 }}>FolioObs</p>
+          <div className="flex items-center justify-center gap-6 mb-4">
             <button
               onClick={() => navigate("privacy")}
-              className="text-sm font-semibold hover:underline transition-opacity opacity-80 hover:opacity-100"
+              className="text-xs font-medium hover:underline transition-opacity opacity-70 hover:opacity-100"
               style={{ color: T.textSecondary }}
             >
               {L.t('legal.privacy')}
             </button>
-            <span className="text-sm opacity-30" style={{ color: T.textMuted }}>|</span>
             <button
               onClick={() => navigate("terms")}
-              className="text-sm font-semibold hover:underline transition-opacity opacity-80 hover:opacity-100"
+              className="text-xs font-medium hover:underline transition-opacity opacity-70 hover:opacity-100"
               style={{ color: T.textSecondary }}
             >
               {L.t('legal.terms')}
             </button>
           </div>
-          <p className="text-xs" style={{ color: T.textMuted }}>{L.t('footer')}</p>
-          <p className="text-xs mt-1 opacity-50" style={{ color: T.textMuted }}>
+          <p className="text-xs" style={{ color: T.textMuted, opacity: 0.6 }}>{L.t('footer')}</p>
+          <p className="text-xs mt-1 opacity-40" style={{ color: T.textMuted }}>
             © 2026 PLUSLAB KOREA Co., Ltd.
           </p>
-          <p className="text-xs mt-3 opacity-40 leading-relaxed" style={{ color: T.textMuted }}>
+          <p className="text-xs mt-3 opacity-30 leading-relaxed" style={{ color: T.textMuted }}>
             {L.locale === 'ko'
               ? '주식회사 플러스랩코리아 | 대표이사: 강돈희 | 사업자등록번호: 143-87-03402 | 이메일: support@pluslabkorea.com'
               : 'PLUSLAB KOREA Co., Ltd. | CEO: Donhee Kang | Business Reg. No.: 143-87-03402 | Email: support@pluslabkorea.com'}

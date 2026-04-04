@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, Filter, Search, X, ChevronDown, ChevronUp, Globe, Users } from "lucide-react";
+import { ArrowLeft, Filter, Search, X, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
 import { useData } from "../hooks/useDataProvider";
@@ -128,14 +128,14 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <button onClick={onBack} className="flex items-center gap-1.5 text-sm" style={{ color: t.textMuted }}><ArrowLeft size={16} /> {L.t('common.back')}</button>
       <div>
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="p-1.5 rounded-lg" style={{ background: `${t.accent}20` }}>
+          <div className="p-1.5 rounded" style={{ background: `${t.accent}20` }}>
             <Filter size={20} style={{ color: t.accent }} />
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: t.text }}>{L.t('screener.title')}</h1>
+          <h1 className="text-2xl font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{L.t('screener.title')}</h1>
           <span className="text-sm" style={{ color: t.textMuted }}>{filtered.length} {L.t('common.stocks_count')}</span>
         </div>
         {latestQuarter && (
@@ -147,7 +147,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {[
           { l: L.t('screener.totalStocks'), v: `${allStocks.length}`, c: t.accent },
           { l: L.t('screener.multiHolder'), v: `${allStocks.filter(s => s.holders.length >= 2).length}`, c: t.purple },
@@ -165,9 +165,9 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
 
       {/* Filters */}
       <GlassCard hover={false}>
-        <div className="p-4 space-y-3">
+        <div className="p-6 space-y-4">
           {/* Search */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', border: `1px solid ${t.glassBorder}` }}>
+          <div className="flex items-center gap-2 px-3 py-2 rounded" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', outline: `1px solid rgba(0,0,0,${t.name === 'dark' ? '0.06' : '0.04'})`, outlineOffset: '-1px' }}>
             <Search size={14} style={{ color: t.textMuted }} />
             <input value={query} onChange={e => setQuery(e.target.value)}
               placeholder={L.t('screener.searchPlaceholder')}
@@ -179,8 +179,8 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
             <Filter size={14} style={{ color: t.textMuted }} />
             {/* Sector filter */}
             <select value={filterSector} onChange={e => setFilterSector(e.target.value)}
-              className="text-xs rounded-xl px-3 py-1.5 outline-none"
-              style={{ background: t.selectBg, border: `1px solid ${t.glassBorder}`, color: t.text }}>
+              className="text-xs rounded px-3 py-1.5 outline-none"
+              style={{ background: t.selectBg, outline: `1px solid rgba(0,0,0,${t.name === 'dark' ? '0.06' : '0.04'})`, outlineOffset: '-1px', color: t.text }}>
               <option value="all">{L.t('screener.allSectors')}</option>
               {sectors.map(s => <option key={s} value={s}>{L.sector(s)}</option>)}
             </select>
@@ -200,7 +200,8 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                     style={{
                       background: investorMode === "all" ? `${t.purple}20` : `${t.accent}15`,
                       color: investorMode === "all" ? t.purple : t.accent,
-                      border: `1px solid ${investorMode === "all" ? `${t.purple}40` : `${t.accent}30`}`,
+                      outline: `1px solid ${investorMode === "all" ? `${t.purple}20` : `${t.accent}20`}`,
+                      outlineOffset: '-1px',
                     }}>
                     {investorMode === "all" ? L.t('screener.modeAll') : L.t('screener.modeAny')}
                   </button>
@@ -215,10 +216,11 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                 const isActive = filterInvestors.includes(inv.id);
                 return (
                   <button key={inv.id} onClick={() => toggleInvestorFilter(inv.id)}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs transition-all"
+                    className="flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-all"
                     style={{
-                      background: isActive ? `${inv.color}20` : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                      border: `1.5px solid ${isActive ? inv.color : 'transparent'}`,
+                      background: isActive ? 'rgba(16,185,129,0.08)' : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                      outline: isActive ? `1px solid rgba(16,185,129,0.2)` : 'none',
+                      outlineOffset: isActive ? '-1px' : '0',
                       color: isActive ? t.text : t.textSecondary,
                       opacity: isActive ? 1 : 0.75,
                     }}>
@@ -231,7 +233,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
             </div>
             {/* 교집합 모드일 때 공통 보유 안내 */}
             {filterInvestors.length >= 2 && investorMode === "all" && (
-              <div className="flex items-center gap-1.5 text-xs px-2 py-1 rounded-lg" style={{ background: `${t.purple}08`, border: `1px solid ${t.purple}15` }}>
+              <div className="flex items-center gap-1.5 text-xs px-2 py-1 rounded" style={{ background: `${t.purple}08`, outline: `1px solid ${t.purple}15`, outlineOffset: '-1px' }}>
                 <Users size={12} style={{ color: t.purple }} />
                 <span style={{ color: t.purple }}>
                   {filterInvestors.map(id => L.investorName(INVESTORS.find(i => i.id === id))).join(' + ')}
@@ -248,9 +250,10 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
               <button key={af.id} onClick={() => setFilterAction(af.id)}
                 className="text-xs px-3 py-1.5 rounded-full transition-all"
                 style={{
-                  background: filterAction === af.id ? (af.color || t.accent) : t.inactiveBtnBg,
-                  color: filterAction === af.id ? '#fff' : t.textSecondary,
-                  border: `1px solid ${filterAction === af.id ? 'transparent' : t.glassBorder}`
+                  background: filterAction === af.id ? 'rgba(16,185,129,0.08)' : t.inactiveBtnBg,
+                  color: filterAction === af.id ? (af.color || t.accent) : t.textSecondary,
+                  outline: filterAction === af.id ? `1px solid rgba(16,185,129,0.2)` : 'none',
+                  outlineOffset: filterAction === af.id ? '-1px' : '0'
                 }}>
                 {af.label}
               </button>
@@ -261,17 +264,17 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
 
       {/* Results Table */}
       <GlassCard hover={false}>
-        <div className="p-4 sm:p-5">
+        <div className="p-6 sm:p-6">
           {/* Mobile: Card layout */}
-          <div className="sm:hidden space-y-2">
+          <div className="sm:hidden space-y-3">
             {sorted.map((stock) => {
               const latestActions = stock.actions;
               const hasNew = latestActions.some(a => a.type === 'new');
               const hasBuy = latestActions.some(a => a.type === 'buy');
               const hasSell = latestActions.some(a => a.type === 'sell');
               return (
-                <div key={stock.ticker} className="p-3 rounded-xl transition-colors"
-                  style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)', border: `1px solid ${t.cardRowBorder}` }}>
+                <div key={stock.ticker} className="p-3 rounded transition-colors"
+                  style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)', boxShadow: t.name === 'dark' ? '0 2px 40px rgba(0,0,0,0.15)' : '0 2px 40px rgba(0,0,0,0.03)', outline: `1px solid ${t.cardRowBorder}`, outlineOffset: '-1px' }}>
                   {/* Row 1: Ticker + Name + Action Badges */}
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 min-w-0">
@@ -328,7 +331,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
           <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ borderBottom: `1px solid ${t.tableBorder}` }}>
+                <tr style={{ outlineBottom: `1px solid rgba(0,0,0,${t.name === 'dark' ? '0.06' : '0.04'})` }}>
                   {[
                     { k: null, l: "" },
                     { k: "ticker", l: L.t('screener.colTicker') },
@@ -357,7 +360,7 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
                   const hasSell = latestActions.some(a => a.type === 'sell');
                   return (
                     <tr key={stock.ticker}
-                      style={{ borderBottom: `1px solid ${t.cardRowBorder}` }}
+                      style={{ outlineBottom: `1px solid rgba(0,0,0,${t.name === 'dark' ? '0.06' : '0.04'})` }}
                       onMouseEnter={e => e.currentTarget.style.background = t.cardRowHover}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <td className="py-3 px-1 w-8">
@@ -438,23 +441,22 @@ const ScreenerPage = ({ onBack, onNavigate, watchlist, initialSector }) => {
       {/* Multi-holder stocks highlight */}
       {filterAction === "all" && !query.trim() && filterSector === "all" && filterInvestors.length === 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Globe size={18} style={{ color: t.purple }} />
-            <h3 className="font-bold" style={{ color: t.text }}>{L.t('screener.guruPicks')}</h3>
+          <div className="flex items-center gap-2 mb-6" style={{borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>
+            <h3 className="font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{L.t('screener.guruPicks')}</h3>
             <span className="text-xs" style={{ color: t.textMuted }}>{L.t('screener.multiHolderStocks')}</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {allStocks.filter(s => s.holders.length >= 2).sort((a, b) => b.holders.length - a.holders.length).map(stock => (
               <GlassCard key={stock.ticker}>
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-3">
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-4">
                     <div>
                       <button className="font-bold text-sm hover:underline" style={{ color: t.text }} onClick={() => onNavigate("stock", stock.ticker)}>{stock.ticker}</button>
                       <span className="text-xs ml-2" style={{ color: t.textMuted }}>{L.stockName(stock)}</span>
                     </div>
                     <Badge color={SECTOR_COLORS[stock.sector] || "#64748B"}>{L.sector(stock.sector)}</Badge>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     {stock.holders.sort((a, b) => b.pct - a.pct).map(h => (
                       <div key={h.investor.id} className="flex items-center gap-2 cursor-pointer"
                         onClick={() => onNavigate("investor", h.investor.id)}>

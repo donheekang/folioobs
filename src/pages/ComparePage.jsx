@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, GitCompare, CheckCircle, BarChart3, Users, Swords, Crown, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { ArrowLeft, GitCompare, CheckCircle, Users, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 import { useLocale } from "../hooks/useLocale";
 import { useData } from "../hooks/useDataProvider";
@@ -155,18 +155,18 @@ const ComparePage = ({ onBack, onNavigate }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       <button onClick={onBack} className="flex items-center gap-1.5 text-sm" style={{color:t.textMuted}}><ArrowLeft size={16}/> {L.t('common.back')}</button>
-      <div className="flex items-center gap-2"><div className="p-1.5 rounded-lg" style={{background:`${t.accent}20`}}><GitCompare size={20} style={{color:t.accent}}/></div><h1 className="text-2xl font-bold" style={{color:t.text}}>{L.t('comparePage.title')}</h1></div>
+      <h1 className="text-2xl font-bold" style={{color:t.text,fontFamily:"'Newsreader', Georgia, serif"}}>{L.t('comparePage.title')}</h1>
 
       <GlassCard hover={false}>
         <div className="p-4">
           <div className="text-sm mb-3" style={{color:t.textMuted}}>{L.t('comparePage.selectPrompt')}</div>
           <div className="flex flex-wrap gap-2">
             {INVESTORS.map(inv=>(
-              <button key={inv.id} onClick={()=>toggle(inv.id)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all"
-                style={{background:selected.includes(inv.id)?t.selectedBtnBg(inv.color):t.unselectedBtnBg, border:`1px solid ${selected.includes(inv.id)?t.selectedBtnBorder(inv.color):t.unselectedBtnBorder}`, color:selected.includes(inv.id)?inv.color:t.textSecondary}}>
-                <div className="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{background:inv.gradient}}>{inv.avatar}</div>
+              <button key={inv.id} onClick={()=>toggle(inv.id)} className="flex items-center gap-2 px-3 py-2 rounded text-sm font-medium transition-all"
+                style={{background:selected.includes(inv.id)?'rgba(16,185,129,0.08)':t.unselectedBtnBg, outline:selected.includes(inv.id)?`2px solid ${inv.color}`:'none', outlineOffset:'-1px', color:selected.includes(inv.id)?inv.color:t.textSecondary}}>
+                <div className="w-6 h-6 rounded flex items-center justify-center text-white text-xs font-bold" style={{background:inv.gradient}}>{inv.avatar}</div>
                 {L.investorName(inv)}{selected.includes(inv.id)&&<CheckCircle size={14}/>}
               </button>
             ))}
@@ -175,7 +175,7 @@ const ComparePage = ({ onBack, onNavigate }) => {
       </GlassCard>
 
       {selInvs.length < 2 && (
-        <div className="text-center py-12 px-4 rounded-2xl" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}>
+        <div className="text-center py-12 px-4 rounded" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}>
           <GitCompare size={36} style={{ color: t.textMuted, opacity: 0.3 }} className="mx-auto mb-3" />
           <p className="text-sm break-keep" style={{ color: t.textMuted }}>{L.t('comparePage.selectMin')}</p>
         </div>
@@ -185,9 +185,9 @@ const ComparePage = ({ onBack, onNavigate }) => {
         {/* 핵심 지표 비교 */}
         <GlassCard hover={false}>
           <div className="p-5">
-            <h3 className="font-bold mb-4" style={{color:t.text}}>{L.t('comparePage.keyMetrics')}</h3>
+            <h3 className="font-bold mb-6" style={{color:t.text,fontFamily:"'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>{L.t('comparePage.keyMetrics')}</h3>
             <div className="overflow-x-auto"><table className="w-full text-sm">
-              <thead><tr style={{borderBottom:`1px solid ${t.tableBorder}`}}>
+              <thead><tr style={{outline:`1px solid ${t.tableBorder}`,outlineOffset:'-1px',opacity:0.06}}>
                 <th className="text-left py-2.5 px-3 text-xs font-medium" style={{color:t.textMuted}}>{L.t('comparePage.metrics.style')}</th>
                 {selInvs.map(inv=>(<th key={inv.id} className="text-center py-2.5 px-3"><div className="flex items-center justify-center gap-1.5"><div className="w-5 h-5 rounded-md flex items-center justify-center text-white text-xs" style={{background:inv.gradient}}>{inv.avatar}</div><span className="font-medium" style={{color:t.text}}>{L.investorName(inv)}</span></div></th>))}
               </tr></thead>
@@ -198,7 +198,7 @@ const ComparePage = ({ onBack, onNavigate }) => {
                 {l:L.t('comparePage.metrics.concentration'),fn:inv=>`${((inv.metrics?.concentration ?? 0)*100).toFixed(0)}%`},
                 {l:L.t('comparePage.metrics.maxWeight'),fn:inv=>`${(HOLDINGS[inv.id]||[])[0]?.ticker||'-'} (${inv.metrics.topHoldingPct}%)`},
                 {l:L.t('comparePage.metrics.qoqChange'),fn:inv=><GlowText color={inv.metrics.qoqChange>=0?t.green:t.red}>{inv.metrics.qoqChange>=0?'+':''}{inv.metrics.qoqChange}%</GlowText>},
-              ].map((r,i)=>(<tr key={i} style={{borderBottom:`1px solid ${t.cardRowBorder}`}}><td className="py-3 px-3 font-medium" style={{color:t.textSecondary}}>{r.l}</td>{selInvs.map(inv=><td key={inv.id} className="py-3 px-3 text-center font-medium" style={{color:t.text}}>{r.fn(inv)}</td>)}</tr>))}</tbody>
+              ].map((r,i)=>(<tr key={i} style={{outline:`1px solid ${t.cardRowBorder}`,outlineOffset:'-1px',opacity:0.06}}><td className="py-3 px-3 font-medium" style={{color:t.textSecondary}}>{r.l}</td>{selInvs.map(inv=><td key={inv.id} className="py-3 px-3 text-center font-medium" style={{color:t.text,fontFamily:i===5?"'Newsreader', Georgia, serif":'inherit'}}>{r.fn(inv)}</td>)}</tr>))}</tbody>
             </table></div>
           </div>
         </GlassCard>
@@ -206,9 +206,8 @@ const ComparePage = ({ onBack, onNavigate }) => {
         {/* TOP 10 비중 비교 차트 */}
         <GlassCard hover={false}>
           <div className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Crown size={18} style={{color:t.amber}} />
-              <h3 className="font-bold" style={{color:t.text}}>
+            <div className="flex items-center gap-2 mb-6" style={{borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>
+              <h3 className="font-bold" style={{color:t.text,fontFamily:"'Newsreader', Georgia, serif"}}>
                 {L.locale === 'ko' ? 'TOP 종목 비중 비교' : 'Top Holdings Weight Comparison'}
               </h3>
             </div>
@@ -235,16 +234,15 @@ const ComparePage = ({ onBack, onNavigate }) => {
         {commonHoldings.length > 0 && (
           <GlassCard hover={false}>
             <div className="p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Users size={18} style={{color:t.cyan}} />
-                <h3 className="font-bold" style={{color:t.text}}>
+              <div className="flex items-center gap-2 mb-6" style={{borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>
+                <h3 className="font-bold" style={{color:t.text,fontFamily:"'Newsreader', Georgia, serif"}}>
                   {L.locale === 'ko' ? `공동 보유 종목 (${commonHoldings.length}개)` : `Common Holdings (${commonHoldings.length})`}
                 </h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr style={{borderBottom:`1px solid ${t.tableBorder}`}}>
+                    <tr style={{outline:`1px solid ${t.tableBorder}`,outlineOffset:'-1px',opacity:0.06}}>
                       <th className="text-left py-2.5 px-3 text-xs font-medium" style={{color:t.textMuted}}>
                         {L.locale === 'ko' ? '종목' : 'Stock'}
                       </th>
@@ -268,7 +266,7 @@ const ComparePage = ({ onBack, onNavigate }) => {
                   </thead>
                   <tbody>
                     {commonHoldings.slice(0, 20).map((row, i) => (
-                      <tr key={row.ticker} style={{borderBottom:`1px solid ${t.cardRowBorder}`}}
+                      <tr key={row.ticker} style={{outline:`1px solid ${t.cardRowBorder}`,outlineOffset:'-1px',opacity:0.06}}
                         className="cursor-pointer hover:opacity-80"
                         onClick={() => onNavigate?.('stock', row.ticker)}>
                         <td className="py-2.5 px-3">
@@ -278,7 +276,7 @@ const ComparePage = ({ onBack, onNavigate }) => {
                           </div>
                         </td>
                         {selInvs.map(inv => (
-                          <td key={inv.id} className="text-center py-2.5 px-3 font-medium" style={{color:t.text}}>
+                          <td key={inv.id} className="text-center py-2.5 px-3 font-medium" style={{color:t.text,fontFamily:"'Newsreader', Georgia, serif"}}>
                             {(row[`pct_${inv.id}`] || 0).toFixed(1)}%
                           </td>
                         ))}
@@ -305,9 +303,8 @@ const ComparePage = ({ onBack, onNavigate }) => {
         {(tradeComparison.conflicts.length > 0 || tradeComparison.agreements.length > 0) && (
           <GlassCard hover={false}>
             <div className="p-5">
-              <div className="flex items-center gap-2 mb-5">
-                <Swords size={18} style={{color:t.red}} />
-                <h3 className="font-bold" style={{color:t.text}}>
+              <div className="flex items-center gap-2 mb-6" style={{borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>
+                <h3 className="font-bold" style={{color:t.text,fontFamily:"'Newsreader', Georgia, serif"}}>
                   {L.locale === 'ko' ? '매매 방향 비교' : 'Trade Direction Comparison'}
                 </h3>
               </div>
@@ -327,8 +324,8 @@ const ComparePage = ({ onBack, onNavigate }) => {
                   <div className="space-y-2">
                     {tradeComparison.conflicts.map(item => (
                       <div key={item.ticker}
-                        className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:opacity-80"
-                        style={{background: t.name === 'dark' ? 'rgba(239,68,68,0.06)' : 'rgba(239,68,68,0.04)', border:`1px solid ${t.name === 'dark' ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.1)'}`}}
+                        className="flex items-center gap-3 p-3 rounded cursor-pointer hover:opacity-80"
+                        style={{background: t.name === 'dark' ? 'rgba(239,68,68,0.06)' : 'rgba(239,68,68,0.04)', outline:`1px solid ${t.name === 'dark' ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.1)'}`, outlineOffset:'-1px'}}
                         onClick={() => onNavigate?.('stock', item.ticker)}>
                         <div className="min-w-[80px]">
                           <span className="font-semibold text-sm" style={{color:t.accent}}>{item.ticker}</span>
@@ -365,8 +362,8 @@ const ComparePage = ({ onBack, onNavigate }) => {
                   <div className="space-y-2">
                     {tradeComparison.agreements.map(item => (
                       <div key={item.ticker}
-                        className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:opacity-80"
-                        style={{background: t.name === 'dark' ? 'rgba(34,197,94,0.06)' : 'rgba(34,197,94,0.04)', border:`1px solid ${t.name === 'dark' ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)'}`}}
+                        className="flex items-center gap-3 p-3 rounded cursor-pointer hover:opacity-80"
+                        style={{background: t.name === 'dark' ? 'rgba(34,197,94,0.06)' : 'rgba(34,197,94,0.04)', outline:`1px solid ${t.name === 'dark' ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)'}`, outlineOffset:'-1px'}}
                         onClick={() => onNavigate?.('stock', item.ticker)}>
                         <div className="min-w-[80px]">
                           <span className="font-semibold text-sm" style={{color:t.accent}}>{item.ticker}</span>
@@ -392,8 +389,8 @@ const ComparePage = ({ onBack, onNavigate }) => {
         )}
 
         {/* 스타일 레이더 + 섹터 비교 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <GlassCard hover={false}><div className="p-5"><h3 className="font-bold mb-4" style={{color:t.text}}>{L.t('comparePage.styleRadar')}</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <GlassCard hover={false}><div className="p-5"><h3 className="font-bold mb-6" style={{color:t.text,fontFamily:"'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>{L.t('comparePage.styleRadar')}</h3>
             <ResponsiveContainer width="100%" height={280}>
               <RadarChart data={radarData}><PolarGrid stroke={t.chartGrid}/><PolarAngleAxis dataKey="metric" tick={{fontSize:11,fill:t.textSecondary}}/><PolarRadiusAxis tick={{fontSize:10,fill:t.textMuted}} domain={[0,100]} stroke="transparent"/>
                 {selInvs.map(inv=><Radar key={inv.id} name={L.investorName(inv)} dataKey={L.investorName(inv)} stroke={inv.color} fill={inv.color} fillOpacity={0.12} strokeWidth={2}/>)}
@@ -402,7 +399,7 @@ const ComparePage = ({ onBack, onNavigate }) => {
             </ResponsiveContainer>
           </div></GlassCard>
 
-          <GlassCard hover={false}><div className="p-5"><h3 className="font-bold mb-4" style={{color:t.text}}>{L.t('comparePage.sectorCompare')}</h3>
+          <GlassCard hover={false}><div className="p-5"><h3 className="font-bold mb-6" style={{color:t.text,fontFamily:"'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>{L.t('comparePage.sectorCompare')}</h3>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={sectorCmp} layout="vertical"><CartesianGrid strokeDasharray="3 3" stroke={t.chartGrid}/><XAxis type="number" tick={{fontSize:10,fill:t.textMuted}} stroke="transparent"/><YAxis dataKey="sector" type="category" tick={{fontSize:11,fill:t.textSecondary}} width={70} stroke="transparent"/>
                 {selInvs.map(inv=><Bar key={inv.id} dataKey={L.investorName(inv)} fill={inv.color} barSize={10} radius={[0,4,4,0]} fillOpacity={0.8}/>)}
@@ -413,13 +410,13 @@ const ComparePage = ({ onBack, onNavigate }) => {
         </div>
 
         {/* 비교 분석 요약 */}
-        {cmp&&(<div className="relative overflow-hidden rounded-2xl p-6" style={{background:t.compareBg,border:`1px solid ${t.compareBorder}`}}>
+        {cmp&&(<div className="relative overflow-hidden rounded p-6 mt-6" style={{background:t.compareBg,outline:`1px solid ${t.compareBorder}`,outlineOffset:'-1px'}}>
           <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20" style={{background:`radial-gradient(circle, ${t.purple}${t.compareOrb}, transparent)`,filter:'blur(50px)'}}/>
           <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-4"><BarChart3 size={20} style={{color:t.purple}}/><h3 className="font-bold" style={{color:t.text}}>{L.t('comparePage.comparisonAnalysis')}</h3></div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <h3 className="font-bold" style={{color:t.text,fontFamily:"'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px'}}>{L.t('comparePage.comparisonAnalysis')}</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
               {[{l:L.t('comparePage.commonStocks'),v:`${cmp.commonCount}${L.t('common.items')}`,c:t.accent},{l:L.t('comparePage.overlapRate'),v:`${cmp.overlapPct}%`,c:t.cyan},{l:L.t('comparePage.sectorSimilarity'),v:`${cmp.sectorOverlap}%`,c:t.purple}].map((s,i)=>(
-                <GlassCard key={i} hover={false}><div className="p-3 text-center"><div className="text-xs" style={{color:t.textMuted}}>{s.l}</div><div className="text-2xl font-bold mt-1"><GlowText color={s.c}>{s.v}</GlowText></div></div></GlassCard>
+                <GlassCard key={i} hover={false}><div className="p-3 text-center"><div className="text-xs" style={{color:t.textMuted}}>{s.l}</div><div className="text-2xl font-bold mt-1" style={{fontFamily:"'Newsreader', Georgia, serif"}}><GlowText color={s.c}>{s.v}</GlowText></div></div></GlassCard>
               ))}
             </div>
             {cmp.commonCount>0&&<p className="text-sm leading-relaxed" style={{color:t.textSecondary}}><span className="font-medium" style={{color:t.text}}>{L.t('comparePage.commonHoldings')}:</span> {cmp.commonNames.join(', ')}.{cmp.styleMatch?' '+L.t('comparePage.sameStyle'):' '+L.t('comparePage.diffStyle')}</p>}

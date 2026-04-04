@@ -136,17 +136,17 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
     const barWidth = Math.max(8, (shares / maxShares) * 100);
 
     return (
-      <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all group"
+      <div className="flex items-center gap-3 px-3 py-2.5 rounded cursor-pointer transition-all group"
         style={{ background: 'transparent' }}
         onClick={() => onNavigate("stock", item.ticker)}
         onMouseEnter={e => e.currentTarget.style.background = t.cardRowHover}
         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
         {/* 순위 */}
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold"
+        <div className="w-7 h-7 rounded flex items-center justify-center shrink-0 text-xs font-bold"
           style={{
             background: rank <= 3 ? `${color}15` : 'transparent',
             color: rank <= 3 ? color : t.textMuted,
-            border: rank > 3 ? `1px solid ${t.cardRowBorder}` : 'none',
+            outline: rank > 3 ? `1px solid ${color}0a` : 'none',
           }}>
           {rank}
         </div>
@@ -165,10 +165,10 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
         </div>
         {/* 수량 */}
         <div className="text-right shrink-0 ml-2">
-          <div className="text-sm font-bold tabular-nums" style={{ color }}>
+          <div className="text-sm font-bold tabular-nums" style={{ color, fontFamily: "'Newsreader', Georgia, serif" }}>
             {type === 'buy' ? '+' : '-'}{fmtShares(shares)}
           </div>
-          <div className="text-[10px] tabular-nums" style={{ color: t.textSecondary }}>
+          <div className="text-[10px] tabular-nums" style={{ color: t.textSecondary, fontFamily: "'Newsreader', Georgia, serif" }}>
             {shares.toLocaleString()}{isKo ? '주' : ' shares'}
           </div>
           <div className="text-[10px]" style={{ color: t.textMuted }}>
@@ -180,7 +180,7 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {/* ── 헤더 ── */}
       <div>
         <button onClick={onBack} className="flex items-center gap-1.5 text-sm mb-4" style={{ color: t.textMuted }}>
@@ -188,9 +188,9 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
         </button>
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg, #06B6D4, #22D3EE)' }}>CW</div>
+            <div className="w-11 h-11 rounded flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg, #06B6D4, #22D3EE)' }}>CW</div>
             <div>
-              <h1 className="text-xl font-bold" style={{ color: t.text }}>
+              <h1 className="text-xl font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                 {isKo ? '캐시 우드 매매 리포트' : 'Cathie Wood Trade Report'}
               </h1>
               <p className="text-xs mt-0.5" style={{ color: t.textMuted }}>
@@ -200,15 +200,15 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
           </div>
 
           {/* 주간/월간 토글 */}
-          <div className="flex rounded-xl overflow-hidden" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }}>
+          <div className="flex rounded overflow-hidden" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }}>
             {['weekly', 'monthly'].map(m => {
               const modeColor = m === 'weekly' ? '#3B82F6' : '#8B5CF6';
               return (
                 <button key={m} className="px-5 py-2 text-xs font-semibold transition-all"
                   style={{
-                    background: mode === m ? modeColor : 'transparent',
-                    color: mode === m ? '#fff' : t.textMuted,
-                    borderRadius: mode === m ? '0.75rem' : '0',
+                    background: mode === m ? 'rgba(16,185,129,0.08)' : 'transparent',
+                    color: mode === m ? '#10b981' : t.textMuted,
+                    borderRadius: mode === m ? '0.5rem' : '0',
                   }}
                   onClick={() => { setMode(m); setExpandedIdx(0); }}>
                   {m === 'weekly' ? (isKo ? '주간' : 'Weekly') : (isKo ? '월간' : 'Monthly')}
@@ -219,7 +219,7 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
         </div>
 
         {/* ── 컨텍스트 바 ── */}
-        <div className="mt-3 h-[2px] rounded-full" style={{ background: mode === 'weekly' ? 'rgba(59,130,246,0.3)' : 'rgba(139,92,246,0.3)' }} />
+        <div className="mt-6 h-[1px] rounded-full" style={{ background: mode === 'weekly' ? 'rgba(59,130,246,0.06)' : 'rgba(139,92,246,0.06)' }} />
       </div>
 
       {/* ── 리포트 목록 ── */}
@@ -234,25 +234,25 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
               {/* 리포트 헤더 */}
               <button className="w-full flex items-center justify-between" onClick={() => setExpandedIdx(isOpen ? -1 : idx)}>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl" style={{ background: mode === 'weekly' ? 'rgba(59,130,246,0.1)' : 'rgba(139,92,246,0.1)' }}>
+                  <div className="p-2 rounded" style={{ background: mode === 'weekly' ? 'rgba(59,130,246,0.08)' : 'rgba(139,92,246,0.08)' }}>
                     {mode === 'weekly' ? <Calendar size={18} style={{ color: '#3B82F6' }} /> : <BarChart3 size={18} style={{ color: '#8B5CF6' }} />}
                   </div>
                   <div className="text-left">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-base" style={{ color: t.text }}>{label}</span>
+                      <span className="font-bold text-base" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{label}</span>
                       {idx === 0 && <Badge color={t.accent}>{isKo ? '최신' : 'Latest'}</Badge>}
                     </div>
                     <div className="flex items-center gap-3 mt-0.5">
-                      <span className="text-xs" style={{ color: t.textMuted }}>
+                      <span className="text-xs" style={{ color: t.textMuted, fontFamily: "'Newsreader', Georgia, serif" }}>
                         {stats.tradingDays}{isKo ? '일' : 'd'}
                       </span>
-                      <span className="text-xs font-medium" style={{ color: t.green }}>
+                      <span className="text-xs font-medium" style={{ color: t.green, fontFamily: "'Newsreader', Georgia, serif" }}>
                         {isKo ? '매수' : 'Buy'} {stats.buyCount}
                       </span>
-                      <span className="text-xs font-medium" style={{ color: t.red }}>
+                      <span className="text-xs font-medium" style={{ color: t.red, fontFamily: "'Newsreader', Georgia, serif" }}>
                         {isKo ? '매도' : 'Sell'} {stats.sellCount}
                       </span>
-                      <span className="text-xs" style={{ color: t.textMuted }}>
+                      <span className="text-xs" style={{ color: t.textMuted, fontFamily: "'Newsreader', Georgia, serif" }}>
                         {stats.uniqueTickers}{isKo ? '종목' : ' tickers'}
                       </span>
                     </div>
@@ -262,7 +262,7 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
               </button>
 
               {isOpen && (
-                <div className="mt-6 space-y-6">
+                <div className="mt-7 space-y-7">
                   {/* ── 요약 카드 ── */}
                   <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {[
@@ -271,9 +271,9 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
                     ].map((s, i) => {
                       const I = s.icon;
                       return (
-                        <div key={i} className="rounded-xl px-3 py-3 text-center" style={{ background: `${s.color}06`, border: `1px solid ${s.color}12` }}>
+                        <div key={i} className="rounded px-3 py-3 text-center" style={{ background: `${s.color}08`, outline: `1px solid ${s.color}0a` }}>
                           <I size={16} className="mx-auto mb-1.5" style={{ color: s.value > 0 ? s.color : t.textMuted }} />
-                          <div className="text-xl font-bold" style={{ color: s.value > 0 ? s.color : t.textMuted }}>{s.value}</div>
+                          <div className="text-xl font-bold" style={{ color: s.value > 0 ? s.color : t.textMuted, fontFamily: "'Newsreader', Georgia, serif" }}>{s.value}</div>
                           <div className="text-[10px] mt-0.5" style={{ color: t.textMuted }}>{s.label}</div>
                         </div>
                       );
@@ -320,7 +320,7 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
                     // 최신 주간 + 인사이트 없음 → 진행 중 메시지
                     if (idx === 0 && mode === 'weekly' && displayInsights.length === 0) {
                       return (
-                        <div className="rounded-xl p-4" style={{ background: t.name === 'dark' ? 'rgba(139,92,246,0.04)' : 'rgba(139,92,246,0.03)', border: `1px solid ${t.name === 'dark' ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.1)'}` }}>
+                        <div className="rounded p-4" style={{ background: t.name === 'dark' ? 'rgba(139,92,246,0.04)' : 'rgba(139,92,246,0.03)', outline: `1px solid rgba(139,92,246,0.06)` }}>
                           <div className="flex items-center gap-2 mb-2">
                             <Sparkles size={15} style={{ color: '#a78bfa' }} />
                             <span className="text-sm font-bold" style={{ color: t.text }}>
@@ -338,7 +338,7 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
 
                     if (displayInsights.length === 0) return null;
                     return (
-                      <div className="rounded-xl p-4" style={{ background: t.name === 'dark' ? 'rgba(139,92,246,0.04)' : 'rgba(139,92,246,0.03)', border: `1px solid ${t.name === 'dark' ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.1)'}` }}>
+                      <div className="rounded p-4" style={{ background: t.name === 'dark' ? 'rgba(139,92,246,0.04)' : 'rgba(139,92,246,0.03)', outline: `1px solid rgba(139,92,246,0.06)` }}>
                         <div className="flex items-center gap-2 mb-3">
                           <Sparkles size={15} style={{ color: '#a78bfa' }} />
                           <span className="text-sm font-bold" style={{ color: t.text }}>
@@ -372,18 +372,18 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {/* Top 매수 */}
                     <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: `${t.green}15` }}>
+                      <div className="flex items-center gap-2 mb-6" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+                        <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: `${t.green}15` }}>
                           <TrendingUp size={13} style={{ color: t.green }} />
                         </div>
-                        <span className="text-sm font-bold" style={{ color: t.text }}>
+                        <span className="text-sm font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                           {isKo ? 'Top 매수 종목' : 'Top Buys'}
                         </span>
                         <span className="text-xs" style={{ color: t.textMuted }}>
                           ({isKo ? '주식 수 기준' : 'by shares'})
                         </span>
                       </div>
-                      <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${t.cardRowBorder}` }}>
+                      <div className="rounded overflow-hidden" style={{ outline: `1px solid ${t.cardRowBorder}0a`, background: `${t.name === 'dark' ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)'}` }}>
                         {stats.topBuys.length > 0 ? stats.topBuys.map((item, i) => (
                           <RankItem key={i} item={item} rank={i + 1} type="buy" />
                         )) : (
@@ -394,18 +394,18 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
 
                     {/* Top 매도 */}
                     <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: `${t.red}15` }}>
+                      <div className="flex items-center gap-2 mb-6" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+                        <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: `${t.red}15` }}>
                           <TrendingDown size={13} style={{ color: t.red }} />
                         </div>
-                        <span className="text-sm font-bold" style={{ color: t.text }}>
+                        <span className="text-sm font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                           {isKo ? 'Top 매도 종목' : 'Top Sells'}
                         </span>
                         <span className="text-xs" style={{ color: t.textMuted }}>
                           ({isKo ? '주식 수 기준' : 'by shares'})
                         </span>
                       </div>
-                      <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${t.cardRowBorder}` }}>
+                      <div className="rounded overflow-hidden" style={{ outline: `1px solid ${t.cardRowBorder}0a`, background: `${t.name === 'dark' ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)'}` }}>
                         {stats.topSells.length > 0 ? stats.topSells.map((item, i) => (
                           <RankItem key={i} item={item} rank={i + 1} type="sell" />
                         )) : (
@@ -418,13 +418,13 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
 
                   {/* ── 일별 거래 내역 ── */}
                   <div>
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-6" style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
                       <Activity size={14} style={{ color: t.textSecondary }} />
-                      <span className="text-sm font-bold" style={{ color: t.text }}>
+                      <span className="text-sm font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
                         {isKo ? '일별 거래 내역' : 'Daily Breakdown'}
                       </span>
                     </div>
-                    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${t.cardRowBorder}` }}>
+                    <div className="rounded overflow-hidden" style={{ outline: `1px solid ${t.cardRowBorder}0a`, background: `${t.name === 'dark' ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)'}` }}>
                       {report.days.map((day, di) => {
                         const d = new Date(day.date + 'T00:00:00');
                         const weekday = isKo
@@ -435,7 +435,7 @@ const ArkReportPage = ({ onBack, onNavigate, initialMode, onInitialModeClear }) 
                         const daySells = day.trades.filter(t => t.direction === 'sell');
 
                         return (
-                          <div key={di} className="px-4 py-3" style={{ borderBottom: di < report.days.length - 1 ? `1px solid ${t.cardRowBorder}` : 'none' }}>
+                          <div key={di} className="px-4 py-3" style={{ borderBottom: di < report.days.length - 1 ? `1px solid ${t.cardRowBorder}04` : 'none' }}>
                             {/* 날짜 헤더 */}
                             <div className="flex items-center gap-3 mb-2">
                               <div className="flex items-center gap-1.5">

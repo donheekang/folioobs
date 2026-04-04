@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Clock, ChevronRight, ArrowLeft, TrendingUp, TrendingDown, Zap, AlertCircle, BarChart3, Activity, ExternalLink } from "lucide-react";
 import { useLocale } from "../hooks/useLocale";
+import { useTheme } from "../hooks/useTheme";
 import { supabase } from "../lib/supabase";
 
 // ========== SVG 일러스트 컴포넌트 (Bloomberg Terminal v2) ==========
@@ -944,23 +945,23 @@ Track Cathie Wood's daily trades in real-time on the FolioObs dashboard.
     readTime: "4 min",
     content: `11명의 월가 전설 투자자가 같은 분기에 같은 종목을 샀다면? FolioObs가 2025 Q4 13F 공시 데이터를 교차 분석해, 가장 강한 컨센서스가 형성된 종목 5개를 찾았습니다.
 
-■ 1위. CRH — 5명 동시 매수 🏗️
+■ 1위. CRH — 5명 동시 매수
 
 국민연금, 레이 달리오 등 5명의 투자자가 동시에 포지션을 잡았습니다. CRH는 아일랜드 기반 글로벌 건축자재 기업으로, 미국 인프라 투자법(IIJA)과 반도체법(CHIPS Act)의 직접적 수혜주입니다. 도로, 교량, 데이터센터 건설 붐이 이어지는 한, CRH의 수요는 구조적으로 증가합니다. 5명이 동시에 매수한 것은 이 스토리에 대한 확신이 매우 높다는 의미입니다.
 
-■ 2위. AMZN (아마존) — 5명 매수 ☁️
+■ 2위. AMZN (아마존) — 5명 매수
 
 조지 소로스, 빌 애크먼, 댄 로엡, 세스 클라만을 포함한 5명이 매수했습니다. 아마존은 이커머스뿐 아니라, AWS 클라우드와 AI 인프라 매출이 분기마다 사상 최고를 경신하고 있습니다. 전설 투자자들이 이 가격대에서 동시에 움직인다는 것은, "아직 비싸지 않다"는 판단으로 읽힙니다.
 
-■ 3위. SPOT (스포티파이) — 3명 신규 매수 🎵
+■ 3위. SPOT (스포티파이) — 3명 신규 매수
 
 레이 달리오, 국민연금 등이 새롭게 포트폴리오에 편입했습니다. 스포티파이는 팟캐스트와 오디오북으로 사업을 확장하며, 구독자당 수익(ARPU)이 꾸준히 상승 중입니다. 더 이상 "적자 스트리밍 회사"가 아닌, 수익성이 입증된 플랫폼으로 재평가받고 있습니다.
 
-■ 4위. GOOG (알파벳) — 의견 분열 ⚡
+■ 4위. GOOG (알파벳) — 의견 분열
 
 흥미롭게도 GOOG는 매수와 매도가 동시에 나온 유일한 종목입니다. 빌 애크먼, 세스 클라만 등 4명이 비중을 줄이거나 매도한 반면, 다른 투자자들은 유지했습니다. AI 경쟁 심화, 반독점 소송 리스크에 대한 우려가 반영된 것으로 보입니다. 전설들도 의견이 갈리는 종목 — 이런 종목이야말로 개인 투자자가 자신만의 분석이 필요한 영역입니다.
 
-■ 5위. CPNG (쿠팡) — 4명 매수 🇰🇷
+■ 5위. CPNG (쿠팡) — 4명 매수
 
 조지 소로스, 빌 애크먼 등이 한국 이커머스 대장주에 베팅했습니다. 쿠팡의 로켓배송 인프라와 쿠팡이츠, 쿠팡플레이 등 슈퍼앱 전략이 해외 투자자들의 관심을 끌고 있습니다. 특히 한국 시장에 대한 글로벌 투자자들의 신뢰를 보여주는 상징적 신호입니다.
 
@@ -973,23 +974,23 @@ FolioObs 스크리너에서 "2인 이상 보유" 필터로 직접 확인해보�
 ※ 본 기사는 SEC 13F 공시 데이터 기반이며, 투자 권유가 아닙니다.`,
     contentEn: `When 11 legendary Wall Street investors buy the same stock in the same quarter, it's worth paying attention. FolioObs cross-analyzed Q4 2025 13F filings to find the 5 stocks with the strongest consensus.
 
-■ #1. CRH — Bought by 5 Investors 🏗️
+■ #1. CRH — Bought by 5 Investors
 
 NPS (Korea's National Pension), Ray Dalio, and 3 others all took positions simultaneously. CRH is an Ireland-based global building materials company and a direct beneficiary of the U.S. Infrastructure Investment and Jobs Act (IIJA) and CHIPS Act. As long as roads, bridges, and data centers keep getting built, CRH's demand is structurally growing. Five investors buying at once signals very high conviction in this thesis.
 
-■ #2. AMZN (Amazon) — Bought by 5 Investors ☁️
+■ #2. AMZN (Amazon) — Bought by 5 Investors
 
 George Soros, Bill Ackman, Dan Loeb, and Seth Klarman were among the buyers. Amazon isn't just e-commerce anymore — AWS cloud and AI infrastructure revenue are hitting all-time highs every quarter. When legendary investors move in at these price levels, the message is clear: "It's not expensive yet."
 
-■ #3. SPOT (Spotify) — 3 New Positions 🎵
+■ #3. SPOT (Spotify) — 3 New Positions
 
 Ray Dalio, NPS, and others added Spotify to their portfolios for the first time. Spotify has expanded into podcasts and audiobooks, with average revenue per user (ARPU) steadily climbing. It's being re-rated from "money-losing streaming company" to "proven profitable platform."
 
-■ #4. GOOG (Alphabet) — Divided Opinions ⚡
+■ #4. GOOG (Alphabet) — Divided Opinions
 
 Interestingly, GOOG was the only stock where buying and selling happened simultaneously. Bill Ackman, Seth Klarman, and 2 others reduced or exited positions while other investors held. Concerns about AI competition and antitrust litigation risk seem to be factors. When even legends disagree on a stock — that's exactly where individual investors need to do their own analysis.
 
-■ #5. CPNG (Coupang) — Bought by 4 Investors 🇰🇷
+■ #5. CPNG (Coupang) — Bought by 4 Investors
 
 George Soros and Bill Ackman bet on Korea's dominant e-commerce player. Coupang's Rocket Delivery infrastructure and super-app strategy (Coupang Eats, Coupang Play) are attracting global investor interest. It's a symbolic signal of global investors' confidence in the Korean market.
 
@@ -1643,6 +1644,8 @@ const CATEGORY_DOT = {
 
 // ========== 뉴스 기사 상세 뷰 (Bloomberg style) ==========
 function NewsArticleView({ article, onBack, L }) {
+  const t = useTheme();
+  const isDark = t.name === 'dark';
   const isEn = L.locale === 'en';
   const title = isEn ? article.titleEn : article.title;
   const content = isEn ? article.contentEn : article.content;
@@ -1654,12 +1657,13 @@ function NewsArticleView({ article, onBack, L }) {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-gray-400 hover:text-amber-400 transition-colors text-sm font-mono"
+          className="flex items-center gap-2 hover:text-amber-400 transition-colors text-sm font-mono"
+          style={{ color: t.textMuted }}
         >
           <ArrowLeft size={14} />
           <span className="font-mono uppercase tracking-wider text-xs">{isEn ? 'Back to Terminal' : '터미널로 돌아가기'}</span>
         </button>
-        <div className="flex items-center gap-2 text-xs text-gray-600 font-mono">
+        <div className="flex items-center gap-2 text-xs font-mono" style={{ color: t.textMuted }}>
           <Clock size={12} />
           {article.date}
           {article.readTime && <span className="ml-2">· {article.readTime}</span>}
@@ -1667,26 +1671,26 @@ function NewsArticleView({ article, onBack, L }) {
       </div>
 
       {/* Hero illustration (AI image with SVG fallback) */}
-      <ArticleVisual articleId={article.id} className="rounded-lg overflow-hidden mb-6 border border-gray-800 max-h-[400px]" />
+      <ArticleVisual articleId={article.id} className="rounded overflow-hidden mb-6 max-h-[400px]" style={{ outline: `1px solid ${t.glassBorder}` }} />
 
       {/* Category + Title */}
-      <div className="mb-8">
+      <div className="mb-10">
         <div className="flex items-center gap-3 mb-4">
           <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded ${colorClass}`}>
             {category}
           </span>
           {article.tickers?.length > 0 && (
             <div className="flex gap-1.5">
-              {article.tickers.slice(0, 4).map(t => (
-                <span key={t} className="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-mono font-bold rounded border border-amber-500/20">
-                  {t}
+              {article.tickers.slice(0, 4).map(tick => (
+                <span key={tick} className="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-mono font-bold rounded" style={{ outline: '1px solid rgba(251,191,36,0.15)' }}>
+                  {tick}
                 </span>
               ))}
             </div>
           )}
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold leading-tight text-white mb-3">{title}</h1>
-        <div className="flex items-center gap-4 text-xs text-gray-500 font-mono border-b border-gray-800 pb-4">
+        <h1 className="text-2xl md:text-3xl font-bold leading-tight mb-3" style={{ fontFamily: "'Newsreader', Georgia, serif", color: t.text }}>{title}</h1>
+        <div className="flex items-center gap-4 text-xs font-mono pb-4" style={{ borderBottom: `1px solid ${t.glassBorder}`, color: t.textMuted }}>
           <span>FolioObs Research</span>
           <span>·</span>
           <span>{article.date}</span>
@@ -1696,7 +1700,7 @@ function NewsArticleView({ article, onBack, L }) {
       </div>
 
       {/* Article body */}
-      <article className="space-y-4">
+      <article className="space-y-5">
         {content.split('\n').map((line, i) => {
           const trimmed = line.trim();
           if (!trimmed) return null;
@@ -1706,7 +1710,7 @@ function NewsArticleView({ article, onBack, L }) {
             return (
               <div key={i} className="flex items-start gap-3 pl-4 py-1">
                 <span className="text-amber-400 mt-0.5 text-xs">▸</span>
-                <span className="text-gray-300 leading-relaxed">{formatLine(text)}</span>
+                <span className="leading-relaxed" style={{ color: t.textSecondary }}>{formatLine(text)}</span>
               </div>
             );
           }
@@ -1714,27 +1718,27 @@ function NewsArticleView({ article, onBack, L }) {
             return (
               <div key={i} className="flex items-start gap-3 pl-4 py-1">
                 <span className="text-amber-400 font-bold min-w-[20px] font-mono">{trimmed.match(/^\d+/)[0]}.</span>
-                <span className="text-gray-300 leading-relaxed">{formatLine(trimmed.replace(/^\d+\.\s*/, ''))}</span>
+                <span className="leading-relaxed" style={{ color: t.textSecondary }}>{formatLine(trimmed.replace(/^\d+\.\s*/, ''))}</span>
               </div>
             );
           }
           if (trimmed.startsWith('※')) {
             return (
-              <div key={i} className="mt-8 pt-4 border-t border-gray-800 flex items-start gap-2">
-                <AlertCircle size={14} className="text-gray-600 mt-0.5 flex-shrink-0" />
-                <p className="text-gray-600 text-xs leading-relaxed">{trimmed.slice(1).trim()}</p>
+              <div key={i} className="mt-8 pt-4 flex items-start gap-2" style={{ borderTop: `1px solid ${t.glassBorder}` }}>
+                <AlertCircle size={14} className="mt-0.5 flex-shrink-0" style={{ color: t.textMuted }} />
+                <p className="text-xs leading-relaxed" style={{ color: t.textMuted }}>{trimmed.slice(1).trim()}</p>
               </div>
             );
           }
           if (trimmed.endsWith(':') || trimmed.endsWith(':')) {
-            return <h3 key={i} className="text-amber-400 font-bold mt-6 mb-2 font-mono text-sm uppercase tracking-wide">{trimmed}</h3>;
+            return <h3 key={i} className="font-bold mt-6 mb-2 font-mono text-sm uppercase tracking-wide text-amber-400" style={{ fontFamily: "'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>{trimmed}</h3>;
           }
-          return <p key={i} className="text-gray-300 leading-relaxed">{formatLine(trimmed)}</p>;
+          return <p key={i} className="leading-relaxed" style={{ color: t.textSecondary }}>{formatLine(trimmed)}</p>;
         })}
       </article>
 
       {/* Bottom CTA */}
-      <div className="mt-10 p-4 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+      <div className="mt-10 p-4 rounded" style={{ background: 'rgba(251,191,36,0.05)', outline: '1px solid rgba(251,191,36,0.15)' }}>
         <p className="text-amber-400 text-xs font-mono">
           {isEn
             ? '→ Explore this data live on FolioObs Dashboard'
@@ -1758,6 +1762,7 @@ function formatLine(text) {
 
 // ========== Ticker Tape 컴포넌트 ==========
 function TickerTape() {
+  const t = useTheme();
   const tickers = [
     { symbol: "AAPL", change: "+1.24%" },
     { symbol: "MSFT", change: "+0.87%" },
@@ -1774,13 +1779,13 @@ function TickerTape() {
   ];
 
   return (
-    <div className="overflow-hidden border-y border-gray-800 bg-black/40 py-1.5 mb-6">
+    <div className="overflow-hidden py-1.5 mb-6" style={{ background: 'rgba(0,0,0,0.2)', borderTop: `1px solid ${t.glassBorder}`, borderBottom: `1px solid ${t.glassBorder}` }}>
       <div className="flex animate-scroll-x whitespace-nowrap gap-6">
-        {[...tickers, ...tickers].map((t, i) => (
+        {[...tickers, ...tickers].map((tick, i) => (
           <span key={i} className="flex items-center gap-1.5 text-xs font-mono">
-            <span className="text-gray-400">{t.symbol}</span>
-            <span className={t.change.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}>
-              {t.change}
+            <span style={{ color: t.textMuted }}>{tick.symbol}</span>
+            <span className={tick.change.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}>
+              {tick.change}
             </span>
           </span>
         ))}
@@ -1812,6 +1817,8 @@ function mapArticle(row) {
 // ========== 뉴스 메인 (Bloomberg Terminal Style) ==========
 export default function NewsPage() {
   const L = useLocale();
+  const t = useTheme();
+  const isDark = t.name === 'dark';
   const isEn = L.locale === 'en';
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -1854,13 +1861,13 @@ export default function NewsPage() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <Activity className="text-amber-400" size={20} />
-          <h1 className="text-lg font-bold font-mono tracking-tight text-white">
+          <h1 className="text-lg font-bold font-mono tracking-tight" style={{ color: t.text }}>
             FOLIOBS <span className="text-amber-400">TERMINAL</span>
           </h1>
         </div>
         <div className="space-y-4">
           {[1,2,3].map(i => (
-            <div key={i} className="h-32 bg-gray-900 rounded-lg animate-pulse border border-gray-800" />
+            <div key={i} className="h-32 rounded animate-pulse" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', outline: `1px solid ${t.glassBorder}` }} />
           ))}
         </div>
       </div>
@@ -1877,7 +1884,7 @@ export default function NewsPage() {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <Activity className="text-amber-400" size={20} />
-            <h1 className="text-lg font-bold font-mono tracking-tight text-white">
+            <h1 className="text-lg font-bold font-mono tracking-tight" style={{ fontFamily: "'Newsreader', Georgia, serif", color: t.text }}>
               FOLIOBS <span className="text-amber-400">TERMINAL</span>
             </h1>
           </div>
@@ -1889,12 +1896,12 @@ export default function NewsPage() {
             <span className="text-emerald-400 text-[10px] font-mono uppercase tracking-wider">Live</span>
           </div>
         </div>
-        <div className="text-gray-600 text-[10px] font-mono tracking-wider">
+        <div className="text-[10px] font-mono tracking-wider" style={{ color: t.textMuted }}>
           SEC 13F · ARK DAILY · INSIDER
         </div>
       </div>
 
-      <p className="text-gray-500 text-xs font-mono mb-4 tracking-wide">
+      <p className="text-xs font-mono mb-4 tracking-wide" style={{ color: t.textMuted }}>
         {isEn
           ? 'DATA-DRIVEN INVESTMENT INTELLIGENCE FROM PUBLIC FILINGS'
           : '공시 데이터 기반 투자 인텔리전스'}
@@ -1904,7 +1911,7 @@ export default function NewsPage() {
       <TickerTape />
 
       {/* ===== Category Filter ===== */}
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <div className="flex gap-2 mb-8 flex-wrap">
         {categories.map(cat => {
           const article = articles.find(a => (isEn ? a.categoryEn : a.category) === cat);
           const isActive = selectedCategory === cat;
@@ -1914,9 +1921,14 @@ export default function NewsPage() {
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1 rounded text-[11px] font-mono uppercase tracking-wider font-bold transition-all ${
                 isActive
-                  ? 'bg-amber-400 text-black'
-                  : 'bg-gray-900 text-gray-500 border border-gray-800 hover:border-gray-600 hover:text-gray-300'
+                  ? 'bg-emerald-500/10 text-emerald-400'
+                  : ''
               }`}
+              style={!isActive ? {
+                background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                color: t.textMuted,
+                outline: `1px solid ${t.glassBorder}`
+              } : {}}
             >
               {cat === 'all' ? (isEn ? 'ALL' : '전체') : cat}
             </button>
@@ -1928,7 +1940,10 @@ export default function NewsPage() {
       {headline && (
         <article
           onClick={() => setSelectedArticle(headline)}
-          className="relative rounded-lg overflow-hidden mb-6 cursor-pointer group border border-gray-800 hover:border-amber-500/50 transition-all"
+          className="relative rounded overflow-hidden mb-8 cursor-pointer group transition-all"
+          style={{ outline: `1px solid ${t.glassBorder}` }}
+          onMouseEnter={(e) => e.currentTarget.style.outline = `1px solid ${t.glassBorderHover}`}
+          onMouseLeave={(e) => e.currentTarget.style.outline = `1px solid ${t.glassBorder}`}
         >
           {/* Hero visual (AI image → SVG fallback) */}
           <div className="relative">
@@ -1941,22 +1956,22 @@ export default function NewsPage() {
                 <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded ${CATEGORY_COLORS[headline.categoryColor]}`}>
                   {isEn ? headline.categoryEn : headline.category}
                 </span>
-                <span className="text-gray-400 text-xs font-mono flex items-center gap-1">
+                <span className="text-xs font-mono flex items-center gap-1" style={{ color: t.textMuted }}>
                   <Clock size={11} /> {headline.date}
                 </span>
                 {headline.readTime && (
-                  <span className="text-gray-500 text-xs font-mono">{headline.readTime}</span>
+                  <span className="text-xs font-mono" style={{ color: t.textMuted }}>{headline.readTime}</span>
                 )}
               </div>
-              <h2 className="text-xl md:text-2xl font-bold mb-2 text-white group-hover:text-amber-400 transition-colors leading-snug">
+              <h2 className="text-xl md:text-2xl font-bold mb-2 group-hover:text-amber-400 transition-colors leading-snug" style={{ fontFamily: "'Newsreader', Georgia, serif", color: t.text }}>
                 {isEn ? headline.titleEn : headline.title}
               </h2>
-              <p className="text-gray-400 text-sm leading-relaxed line-clamp-2 mb-3">
+              <p className="text-sm leading-relaxed line-clamp-2 mb-3" style={{ color: t.textSecondary }}>
                 {isEn ? headline.summaryEn : headline.summary}
               </p>
               <div className="flex items-center gap-3">
                 {headline.tickers?.map(t => (
-                  <span key={t} className="px-1.5 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-mono font-bold rounded border border-amber-500/20">
+                  <span key={t} className="px-1.5 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-mono font-bold rounded" style={{ outline: '1px solid rgba(251,191,36,0.15)' }}>
                     {t}
                   </span>
                 ))}
@@ -1976,30 +1991,33 @@ export default function NewsPage() {
             <article
               key={article.id}
               onClick={() => setSelectedArticle(article)}
-              className="rounded-lg overflow-hidden cursor-pointer group border border-gray-800 hover:border-amber-500/40 transition-all bg-gray-950"
+              className="rounded overflow-hidden cursor-pointer group transition-all"
+              style={{ background: t.surface || (isDark ? '#181a20' : '#ffffff'), outline: `1px solid ${t.glassBorder}` }}
+              onMouseEnter={(e) => e.currentTarget.style.outline = `1px solid ${t.glassBorderHover}`}
+              onMouseLeave={(e) => e.currentTarget.style.outline = `1px solid ${t.glassBorder}`}
             >
               {/* Thumbnail (AI image → SVG fallback) */}
               <div className="relative h-36 overflow-hidden">
                 <ArticleVisual articleId={article.id} className="w-full h-full" />
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-transparent opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
               </div>
 
               {/* Text content */}
               <div className="p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <span className={`w-1.5 h-1.5 rounded-full ${CATEGORY_DOT[article.categoryColor] || 'bg-gray-500'}`} />
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500 font-bold">
+                  <span className="text-[10px] font-mono uppercase tracking-wider font-bold" style={{ color: t.textMuted }}>
                     {isEn ? article.categoryEn : article.category}
                   </span>
-                  <span className="text-gray-700 text-[10px] font-mono ml-auto">{article.date}</span>
+                  <span className="text-[10px] font-mono ml-auto" style={{ color: t.textMuted }}>{article.date}</span>
                 </div>
-                <h3 className="text-sm font-bold mb-2 text-white group-hover:text-amber-400 transition-colors leading-snug">
+                <h3 className="text-sm font-bold mb-2 group-hover:text-amber-400 transition-colors leading-snug" style={{ fontFamily: "'Newsreader', Georgia, serif", color: t.text }}>
                   {isEn ? article.titleEn : article.title}
                 </h3>
-                <p className="text-gray-500 text-xs line-clamp-2 leading-relaxed mb-3">
+                <p className="text-xs line-clamp-2 leading-relaxed mb-3" style={{ color: t.textSecondary }}>
                   {isEn ? article.summaryEn : article.summary}
                 </p>
-                <div className="flex items-center gap-2 pt-2 border-t border-gray-800/50">
+                <div className="flex items-center gap-2 pt-2" style={{ borderTop: `1px solid ${t.glassBorder}` }}>
                   {article.tickers?.slice(0, 3).map(t => (
                     <span key={t} className="text-[9px] font-mono text-amber-500/70 font-bold">{t}</span>
                   ))}
@@ -2014,10 +2032,10 @@ export default function NewsPage() {
       </div>
 
       {/* ===== Disclaimer ===== */}
-      <div className="mt-10 py-4 border-t border-gray-800">
+      <div className="mt-10 py-4" style={{ borderTop: `1px solid ${t.glassBorder}` }}>
         <div className="flex items-start gap-3">
-          <AlertCircle size={12} className="text-gray-700 mt-0.5 flex-shrink-0" />
-          <p className="text-gray-700 text-[10px] font-mono leading-relaxed tracking-wide">
+          <AlertCircle size={12} className="mt-0.5 flex-shrink-0" style={{ color: t.textMuted }} />
+          <p className="text-[10px] font-mono leading-relaxed tracking-wide" style={{ color: t.textMuted }}>
             {isEn
               ? 'FOLIOBS TERMINAL — All content is based on publicly available SEC 13F filings and ARK Invest daily trade disclosures. For informational purposes only. Not investment advice. Article illustrations are AI-generated and do not depict real individuals.'
               : 'FOLIOBS TERMINAL — SEC 13F 공시 및 ARK Invest 일별 매매 공개 데이터 기반. 정보 제공 목적이며, 투자 권유가 아닙니다. 기사 내 일러스트는 AI 생성 이미지이며, 실제 인물을 묘사하지 않습니다.'}

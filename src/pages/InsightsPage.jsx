@@ -267,7 +267,7 @@ const InsightsPage = ({ onBack, onNavigate }) => {
         glow={`radial-gradient(circle at top left, ${c}08, transparent)`}>
         <div className="p-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-xl mt-0.5 flex-shrink-0" style={{ background: `${c}15`, border: `1px solid ${c}20` }}>
+            <div className="p-2 rounded mt-0.5 flex-shrink-0" style={{ background: `${c}15` }}>
               <I size={16} style={{ color: c }} />
             </div>
             <div className="flex-1 min-w-0">
@@ -301,7 +301,7 @@ const InsightsPage = ({ onBack, onNavigate }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {/* Header */}
       <button onClick={onBack} className="flex items-center gap-1.5 text-sm hover:opacity-80 transition-opacity" style={{ color: t.textMuted }}>
         <ArrowLeft size={16} /> {L.t('common.back')}
@@ -309,20 +309,17 @@ const InsightsPage = ({ onBack, onNavigate }) => {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg" style={{ background: `${t.purple}20` }}>
-            <Lightbulb size={22} style={{ color: t.purple }} />
-          </div>
-          <h1 className="text-2xl font-bold" style={{ color: t.text }}>{L.t('insightsPage.title')}</h1>
+          <h1 className="text-2xl font-bold" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>{L.t('insightsPage.title')}</h1>
           <Badge color={t.purple}>{filtered.length}{L.t('common.items')}</Badge>
         </div>
         <div className="flex items-center gap-2">
           {aiCount > 0 && (
-            <div className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg" style={{ background: `${t.accent}12`, color: t.accent }}>
+            <div className="flex items-center gap-1 text-xs px-2.5 py-1 rounded" style={{ background: `${t.accent}12`, color: t.accent }}>
               <Sparkles size={12} /> {L.t('insightsPage.aiCount').replace('{count}', aiCount)}
             </div>
           )}
           {ruleCount > 0 && (
-            <div className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg" style={{ background: `${t.textMuted}12`, color: t.textMuted }}>
+            <div className="flex items-center gap-1 text-xs px-2.5 py-1 rounded" style={{ background: `${t.textMuted}12`, color: t.textMuted }}>
               <Activity size={12} /> {L.t('insightsPage.ruleCount').replace('{count}', ruleCount)}
             </div>
           )}
@@ -330,8 +327,8 @@ const InsightsPage = ({ onBack, onNavigate }) => {
       </div>
 
       {/* 섹터 트렌드 차트 */}
-      <div className="relative overflow-hidden rounded-2xl p-5" style={{ background: t.insightBg }}>
-        <h3 className="font-bold mb-3" style={{ color: t.text }}>{L.t('insightsPage.marketPulse')}</h3>
+      <div className="relative overflow-hidden rounded p-5" style={{ background: t.insightBg }}>
+        <h3 className="font-bold mb-3" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif", borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>{L.t('insightsPage.marketPulse')}</h3>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={sectorTrends}>
             <CartesianGrid strokeDasharray="3 3" stroke={t.chartGrid} />
@@ -350,8 +347,8 @@ const InsightsPage = ({ onBack, onNavigate }) => {
         <div className="flex flex-wrap gap-3 items-center">
           <Filter size={14} style={{ color: t.textMuted }} />
           <select value={filterInv} onChange={e => setFilterInv(e.target.value)}
-            className="text-sm rounded-xl px-3 py-1.5 outline-none"
-            style={{ background: t.selectBg, border: `1px solid ${t.glassBorder}`, color: t.text }}>
+            className="text-sm rounded px-3 py-1.5 outline-none"
+            style={{ background: t.selectBg, outline: `1px solid rgba(0,0,0,0.05)`, color: t.text }}>
             <option value="all">{L.t('insightsPage.allInvestors')}</option>
             {INVESTORS.map(inv => <option key={inv.id} value={inv.id}>{L.investorName(inv)}</option>)}
           </select>
@@ -360,9 +357,9 @@ const InsightsPage = ({ onBack, onNavigate }) => {
               <button key={tag} onClick={() => setFilterType(tag)}
                 className="text-xs px-3 py-1.5 rounded-full transition-all"
                 style={{
-                  background: filterType === tag ? (tagColors[tag] || t.accent) : t.inactiveBtnBg,
-                  color: filterType === tag ? '#fff' : t.textSecondary,
-                  border: `1px solid ${filterType === tag ? 'transparent' : t.glassBorder}`,
+                  background: filterType === tag ? 'rgba(16,185,129,0.08)' : t.inactiveBtnBg,
+                  color: filterType === tag ? '#10b981' : t.textSecondary,
+                  outline: filterType === tag ? '1px solid rgba(16,185,129,0.2)' : 'none',
                 }}>
                 {tag === "all" ? L.t('common.all') : (L.tag ? L.tag(tag) : tag)}
               </button>
@@ -371,20 +368,20 @@ const InsightsPage = ({ onBack, onNavigate }) => {
         </div>
         <div className="flex items-center gap-2">
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-            className="text-xs rounded-lg px-2 py-1.5 outline-none"
-            style={{ background: t.selectBg, border: `1px solid ${t.glassBorder}`, color: t.textSecondary }}>
+            className="text-xs rounded px-2 py-1.5 outline-none"
+            style={{ background: t.selectBg, outline: `1px solid rgba(0,0,0,0.05)`, color: t.textSecondary }}>
             <option value="investor">{L.t('insightsPage.sortByInvestor')}</option>
             <option value="confidence">{L.t('insightsPage.sortByConfidence')}</option>
             <option value="tag">{L.t('insightsPage.sortByTag')}</option>
           </select>
-          <div className="flex rounded-lg overflow-hidden" style={{ border: `1px solid ${t.glassBorder}` }}>
+          <div className="flex rounded overflow-hidden" style={{ outline: `1px solid rgba(0,0,0,0.05)` }}>
             <button onClick={() => setViewMode("grouped")} className="p-1.5 transition-colors"
-              style={{ background: viewMode === "grouped" ? `${t.accent}20` : 'transparent' }}>
-              <LayoutGrid size={14} style={{ color: viewMode === "grouped" ? t.accent : t.textMuted }} />
+              style={{ background: viewMode === "grouped" ? 'rgba(16,185,129,0.08)' : 'transparent' }}>
+              <LayoutGrid size={14} style={{ color: viewMode === "grouped" ? '#10b981' : t.textMuted }} />
             </button>
             <button onClick={() => setViewMode("flat")} className="p-1.5 transition-colors"
-              style={{ background: viewMode === "flat" ? `${t.accent}20` : 'transparent' }}>
-              <List size={14} style={{ color: viewMode === "flat" ? t.accent : t.textMuted }} />
+              style={{ background: viewMode === "flat" ? 'rgba(16,185,129,0.08)' : 'transparent' }}>
+              <List size={14} style={{ color: viewMode === "flat" ? '#10b981' : t.textMuted }} />
             </button>
           </div>
         </div>
@@ -392,7 +389,7 @@ const InsightsPage = ({ onBack, onNavigate }) => {
 
       {/* ===== 인사이트 목록 ===== */}
       {viewMode === "grouped" ? (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {groupedByInvestor.map(group => {
             const inv = group.investor;
             const expanded = isExpanded(inv.id);
@@ -407,11 +404,11 @@ const InsightsPage = ({ onBack, onNavigate }) => {
             const isLatestSelected = currentPeriod === periods[0];
 
             return (
-              <div key={inv.id}>
+              <div key={inv.id} className="pt-3">
                 <button onClick={() => toggleInvestor(inv.id)}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:opacity-90"
-                  style={{ background: `${t.surface}90`, border: `1px solid ${t.glassBorder}` }}>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                  className="w-full flex items-center gap-3 p-3 rounded transition-all hover:opacity-90"
+                  style={{ background: `${t.surface}90`, outline: `1px solid rgba(0,0,0,0.04)` }}>
+                  <div className="w-8 h-8 rounded flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
                     style={{ background: inv.gradient }}>{inv.avatar}</div>
                   <div className="flex-1 text-left min-w-0">
                     <div className="flex items-center gap-2">
@@ -470,11 +467,11 @@ const InsightsPage = ({ onBack, onNavigate }) => {
                                   setSelectedPeriod(prev => ({ ...prev, [inv.id]: monthDates[0] }));
                                 }
                               }}
-                              className="text-xs px-3 py-1.5 rounded-lg transition-all font-medium flex items-center gap-1"
+                              className="text-xs px-3 py-1.5 rounded transition-all font-medium flex items-center gap-1"
                               style={{
-                                background: isActiveMonth ? `${t.accent}18` : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                                border: isActiveMonth ? `1.5px solid ${t.accent}` : `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-                                color: isActiveMonth ? t.accent : t.textMuted,
+                                background: isActiveMonth ? 'rgba(16,185,129,0.08)' : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                                outline: isActiveMonth ? '1px solid rgba(16,185,129,0.2)' : 'none',
+                                color: isActiveMonth ? '#10b981' : t.textMuted,
                               }}>
                               {monthLabel(mk, L.locale)}
                               <span className="text-[9px] opacity-60">({mGroups.months.find(([m]) => m === mk)?.[1]?.length || 0})</span>
@@ -496,11 +493,11 @@ const InsightsPage = ({ onBack, onNavigate }) => {
                                 setSelectedMonth(prev => ({ ...prev, [inv.id]: null }));
                                 setSelectedPeriod(prev => ({ ...prev, [inv.id]: qKey }));
                               }}
-                              className="text-xs px-3 py-1.5 rounded-lg transition-all font-medium"
+                              className="text-xs px-3 py-1.5 rounded transition-all font-medium"
                               style={{
-                                background: isActive ? `${t.purple}18` : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                                border: isActive ? `1.5px solid ${t.purple}` : `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-                                color: isActive ? t.purple : t.textMuted,
+                                background: isActive ? 'rgba(16,185,129,0.08)' : t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                                outline: isActive ? '1px solid rgba(16,185,129,0.2)' : 'none',
+                                color: isActive ? '#10b981' : t.textMuted,
                               }}>
                               {formatPeriodLabel(qKey, L.locale)}
                             </button>
@@ -520,9 +517,9 @@ const InsightsPage = ({ onBack, onNavigate }) => {
                               onClick={(e) => { e.stopPropagation(); setSelectedPeriod(prev => ({ ...prev, [inv.id]: pKey })); }}
                               className="text-[11px] px-2 py-1 rounded-md transition-all flex items-center gap-1"
                               style={{
-                                background: isActive ? `${t.accent}15` : 'transparent',
-                                border: isActive ? `1px solid ${t.accent}40` : `1px solid transparent`,
-                                color: isActive ? t.accent : t.textMuted,
+                                background: isActive ? 'rgba(16,185,129,0.08)' : 'transparent',
+                                outline: isActive ? '1px solid rgba(16,185,129,0.15)' : 'none',
+                                color: isActive ? '#10b981' : t.textMuted,
                                 fontWeight: isActive ? 600 : 400,
                               }}>
                               {label}
