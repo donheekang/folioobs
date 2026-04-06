@@ -87,9 +87,14 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     }).filter(Boolean).sort((a, b) => b.performance - a.performance);
   }, [INVESTORS, HOLDINGS, stockPrices]);
 
-  // 장외 거래 (프리마켓 or 애프터마켓) 여부
+  // 장 상태 4단계: 장중 / 애프터마켓 / 데이마켓 / 프리마켓
   const isExtended = marketStatus === 'pre-market' || marketStatus === 'after-hours';
+  const isDayMarket = marketStatus === 'closed' && !isExtended;
   const extendedColor = marketStatus === 'pre-market' ? '#8b5cf6' : '#f59e0b'; // 프리: 보라, 애프터: 앰버
+  const dayMarketColor = '#3b82f6'; // 데이마켓: 블루
+  const extendedLabel = marketStatus === 'pre-market'
+    ? { ko: '프리마켓', en: 'Pre-Mkt' }
+    : { ko: '애프터마켓', en: 'After-Mkt' };
 
   // 오늘 휴장일인지 확인
   const todayHoliday = useMemo(() => getTodayHoliday(), []);
@@ -119,11 +124,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     } else if (marketStatus === 'after-hours') {
       return L.locale === 'ko' ? `애프터마켓 · ${formatted} · 15분 지연` : `After-Hours · ${formatted} · 15-min delayed`;
     } else if (todayHoliday) {
-      // 미국 시장 휴장일
       const holidayName = L.locale === 'ko' ? todayHoliday.ko : todayHoliday.en;
       return L.locale === 'ko' ? `휴장 · ${holidayName} · ${formatted} 종가` : `Closed · ${holidayName} · ${formatted}`;
     } else {
-      return L.locale === 'ko' ? `장 마감 · ${formatted} 종가` : `Market Closed · ${formatted}`;
+      // 데이마켓: 장 마감 상태 (한국 낮 시간)
+      return L.locale === 'ko' ? `데이마켓 · ${formatted} 종가` : `Day Market · ${formatted}`;
     }
   }, [stockPrices, marketStatus, lastTradeDate, L, todayHoliday]);
 
@@ -877,11 +882,10 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             return marketStatus === 'closed' && zeroCount / withChange.length > 0.8;
           }, [liveStocks, marketStatus]);
 
-          // 장외시간: 총 변동률(정규장 + AH/PM) 기준 정렬으로 실시간 랭킹
+          // 장외 데이터 있으면: 총 변동률(정규장 + AH) 기준 정렬
           const getTotalChange = (s) => {
             const base = s.dailyChange || 0;
             if (!isExtended || s.afterHoursChange == null) return base;
-            // 정규장 변동률 + 애프터/프리마켓 변동률 (복리 합산)
             const ahPct = s.afterHoursChange || 0;
             return base + ahPct;
           };
@@ -943,23 +947,25 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                       : `${INVESTORS.length} investors · ${seenTickers.size}/${totalTracked || seenTickers.size} stocks tracked`}
                   </p>
                 </div>
-                {priceLabel && (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{
-                    background: (marketStatus === 'open' || isExtended)
-                      ? `${isExtended ? extendedColor : activeColor}12`
-                      : `${t.textMuted}10`,
-                  }}>
-                    {(marketStatus === 'open' || isExtended) && (
-                      <span className="relative flex h-1.5 w-1.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: isExtended ? extendedColor : activeColor }} />
-                        <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: isExtended ? extendedColor : activeColor }} />
+                {priceLabel && (() => {
+                  const badgeColor = isExtended ? extendedColor : isDayMarket ? dayMarketColor : marketStatus === 'open' ? activeColor : t.textMuted;
+                  const isActive = marketStatus === 'open' || isExtended || isDayMarket;
+                  return (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{
+                      background: isActive ? `${badgeColor}12` : `${t.textMuted}10`,
+                    }}>
+                      {isActive && (
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className={`${isDayMarket ? '' : 'animate-ping '}absolute inline-flex h-full w-full rounded-full opacity-75`} style={{ backgroundColor: badgeColor }} />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: badgeColor }} />
+                        </span>
+                      )}
+                      <span className="text-[10px] font-semibold" style={{ color: badgeColor }}>
+                        {priceLabel}
                       </span>
-                    )}
-                    <span className="text-[10px] font-semibold" style={{ color: isExtended ? extendedColor : (marketStatus === 'open' ? activeColor : t.textMuted) }}>
-                      {priceLabel}
-                    </span>
-                  </div>
-                )}
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* 휴장일 안내 배너 — 제거됨 (불필요한 UX) */}
@@ -1097,24 +1103,42 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                             )}
 
                             {/* 가격 & 등락률 */}
-                            <div className="text-right flex-shrink-0" style={{ minWidth: i === 0 ? 100 : 90 }}>
-                              {/* 정규장 */}
+                            <div className="text-right flex-shrink-0" style={{ minWidth: i === 0 ? 110 : 95 }}>
+                              {/* 현재가 (장외 시간엔 장외가격이 메인) */}
                               <div className="font-bold" style={{ color: t.text, fontSize: i === 0 ? 15 : 13 }}>
-                                ${stock.current.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                ${(isExtended && stock.afterHoursPrice != null ? stock.afterHoursPrice : stock.current).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </div>
-                              <div className="font-extrabold" style={{ color: stock.dailyChange > 0 ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted, fontSize: i === 0 ? 14 : 12 }}>
-                                {stock.dailyChange > 0 ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
-                              </div>
-                              {/* 애프터/프리마켓 (장외 시간에만 표시) */}
-                              {isExtended && stock.afterHoursPrice != null && (
-                                <div className="mt-1 pt-1" style={{ borderTop: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
-                                  <div className="flex items-center justify-end gap-1">
-                                    <span className="text-[9px] font-semibold" style={{ color: extendedColor }}>{marketStatus === 'pre-market' ? 'Pre-Market' : 'After Market'}</span>
-                                    <span className="text-[11px] font-bold" style={{ color: t.textSecondary }}>${stock.afterHoursPrice.toFixed(2)}</span>
+                              {/* 장외 시간: 프리마켓/애프터마켓 라벨 */}
+                              {isExtended && stock.afterHoursPrice != null ? (
+                                <>
+                                  {/* 전일 대비 총 변동률 (메인) */}
+                                  {(() => {
+                                    const totalChgPct = (stock.dailyChange || 0) + (stock.afterHoursChange || 0);
+                                    const ahChgColor = totalChgPct > 0 ? '#22c55e' : totalChgPct < 0 ? '#ef4444' : t.textMuted;
+                                    return (
+                                      <div className="font-extrabold" style={{ color: ahChgColor, fontSize: i === 0 ? 14 : 12 }}>
+                                        {totalChgPct > 0 ? '+' : ''}{totalChgPct.toFixed(2)}%
+                                      </div>
+                                    );
+                                  })()}
+                                  {/* 프리마켓/애프터마켓 라벨 + 장외 변동분 */}
+                                  <div className="flex items-center justify-end gap-1 mt-0.5">
+                                    <span className="text-[9px] font-bold px-1 py-[1px] rounded"
+                                      style={{
+                                        color: extendedColor,
+                                        background: `${extendedColor}15`,
+                                      }}>
+                                      {L.locale === 'ko' ? extendedLabel.ko : extendedLabel.en}
+                                    </span>
+                                    <span className="text-[9px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
+                                      {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
+                                    </span>
                                   </div>
-                                  <div className="text-[10px] font-semibold text-right" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
-                                    {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
-                                  </div>
+                                </>
+                              ) : (
+                                /* 정규장 변동률 */
+                                <div className="font-extrabold" style={{ color: stock.dailyChange > 0 ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted, fontSize: i === 0 ? 14 : 12 }}>
+                                  {stock.dailyChange > 0 ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
                                 </div>
                               )}
                             </div>
@@ -1189,22 +1213,35 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                       )}
 
                       {/* 가격 & 등락률 */}
-                      <div className="text-right flex-shrink-0" style={{ minWidth: 80 }}>
-                        {/* 정규장 */}
+                      <div className="text-right flex-shrink-0" style={{ minWidth: 85 }}>
+                        {/* 현재가 (장외 시간엔 장외가격이 메인) */}
                         <div className="text-[12px] font-semibold" style={{ color: t.text }}>
-                          ${stock.current.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ${(isExtended && stock.afterHoursPrice != null ? stock.afterHoursPrice : stock.current).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
-                        <div className="text-[11px] font-bold" style={{ color: stock.dailyChange > 0 ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted }}>
-                          {stock.dailyChange > 0 ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
-                        </div>
-                        {/* 애프터/프리마켓 (장외 시간에만 표시) */}
-                        {isExtended && stock.afterHoursPrice != null && (
-                          <div className="flex items-center justify-end gap-1 mt-0.5">
-                            <span className="text-[8px] font-semibold" style={{ color: extendedColor }}>{marketStatus === 'pre-market' ? 'Pre-Market' : 'After Market'}</span>
-                            <span className="text-[9px] font-semibold" style={{ color: t.textSecondary }}>${stock.afterHoursPrice.toFixed(2)}</span>
-                            <span className="text-[9px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
-                              {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
-                            </span>
+                        {isExtended && stock.afterHoursPrice != null ? (
+                          <>
+                            {(() => {
+                              const totalChgPct = (stock.dailyChange || 0) + (stock.afterHoursChange || 0);
+                              const chgColor = totalChgPct > 0 ? '#22c55e' : totalChgPct < 0 ? '#ef4444' : t.textMuted;
+                              return (
+                                <div className="text-[11px] font-bold" style={{ color: chgColor }}>
+                                  {totalChgPct > 0 ? '+' : ''}{totalChgPct.toFixed(2)}%
+                                </div>
+                              );
+                            })()}
+                            <div className="flex items-center justify-end gap-1 mt-0.5">
+                              <span className="text-[8px] font-bold px-1 py-[1px] rounded"
+                                style={{ color: extendedColor, background: `${extendedColor}15` }}>
+                                {L.locale === 'ko' ? extendedLabel.ko : extendedLabel.en}
+                              </span>
+                              <span className="text-[9px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
+                                {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-[11px] font-bold" style={{ color: stock.dailyChange > 0 ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted }}>
+                            {stock.dailyChange > 0 ? '+' : ''}{stock.dailyChange?.toFixed(2)}%
                           </div>
                         )}
                       </div>
@@ -1398,7 +1435,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             )}
 
             {/* 실시간/장 마감 라벨 — 필터 줄 오른쪽 끝 */}
-            {priceLabel && <span className="ml-auto text-[11px] whitespace-nowrap" style={{ color: (marketStatus === 'open' || isExtended) ? t.green : t.textMuted }}>{priceLabel}</span>}
+            {priceLabel && <span className="ml-auto text-[11px] whitespace-nowrap" style={{ color: (marketStatus === 'open' || isExtended || isDayMarket) ? (isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green) : t.textMuted }}>{priceLabel}</span>}
           </div>
           </>
             );
@@ -1634,15 +1671,15 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             {/* 주가 */}
             <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-md"
               style={{
-                background: (marketStatus === 'open' || isExtended)
-                  ? `${isExtended ? extendedColor : t.green}10`
+                background: (marketStatus === 'open' || isExtended || isDayMarket)
+                  ? `${isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green}10`
                   : (t.name==='dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
-                color: (marketStatus === 'open' || isExtended)
-                  ? (isExtended ? extendedColor : t.green)
+                color: (marketStatus === 'open' || isExtended || isDayMarket)
+                  ? (isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green)
                   : t.textMuted,
-                border: `1px solid ${(marketStatus === 'open' || isExtended) ? `${isExtended ? extendedColor : t.green}25` : (t.name==='dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')}`,
+                border: `1px solid ${(marketStatus === 'open' || isExtended || isDayMarket) ? `${isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green}25` : (t.name==='dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')}`,
               }}>
-              {(marketStatus === 'open' || isExtended) && <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{background: isExtended ? extendedColor : t.green}} />}
+              {(marketStatus === 'open' || isExtended || isDayMarket) && <span className={`w-1.5 h-1.5 rounded-full ${isDayMarket ? '' : 'animate-pulse'}`} style={{background: isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green}} />}
               {L.locale === 'ko' ? '주가' : 'Prices'}
               <span style={{opacity:0.7}}>·</span>
               {priceLabel || (L.locale === 'ko' ? '15분 지연' : '15-min delayed')}
@@ -1709,7 +1746,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>
               <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', color: t.textMuted }}>{L.t('dashboard.returnLabel') || '수익률'}</span>
             </div>
-            {priceLabel && <span className="text-xs" style={{ color: (marketStatus === 'open' || isExtended) ? (isExtended ? extendedColor : t.green) : t.textMuted }}>{priceLabel}</span>}
+            {priceLabel && <span className="text-xs" style={{ color: (marketStatus === 'open' || isExtended || isDayMarket) ? (isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green) : t.textMuted }}>{priceLabel}</span>}
           </div>
           <GlassCard>
             <div className="p-4 space-y-3">

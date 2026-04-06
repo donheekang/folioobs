@@ -1315,14 +1315,36 @@ export function DataProvider({ children }) {
         if (data.marketStatus) setMarketStatus(data.marketStatus);
         if (data.lastTradeDate) setLastTradeDate(data.lastTradeDate);
 
-        // 기존 stockPrices에 실시간 가격 머지 (quarterEnd는 유지)
+        // ===== 장 마감 시: daily_snapshots를 primary source로 사용 =====
+        // Polygon은 주말/휴장에 prevDay.c == day.c로 변동률 0% 반환 → 부정확
+        // daily_snapshots에 save-daily-snapshot이 정확한 변동률/AH 저장해둠
+        let snapshotMap = {};
+        if (data.marketStatus === 'closed' && data.lastTradeDate) {
+          try {
+            const { data: snapshots } = await supabase
+              .from('daily_snapshots')
+              .select('ticker, close_price, prev_close, daily_change_pct, volume, vwap, trading_value, after_hours_price, after_hours_change_pct')
+              .eq('date', data.lastTradeDate);
+            if (snapshots?.length > 0) {
+              for (const s of snapshots) {
+                snapshotMap[s.ticker] = s;
+              }
+              console.log(`[DataProvider] 장 마감 → daily_snapshots 우선 사용: ${snapshots.length}개 종목 (${data.lastTradeDate})`);
+            }
+          } catch (e) {
+            console.warn('[DataProvider] daily_snapshots 조회 실패:', e.message);
+          }
+        }
+
+        // 기존 stockPrices에 시세 머지 (quarterEnd는 유지)
         setStockPrices(prev => {
           const merged = { ...prev };
           for (const [ticker, live] of Object.entries(data.prices)) {
             const existing = merged[ticker];
-            const currentPrice = live.c;
+            const snap = snapshotMap[ticker]; // daily_snapshots 데이터 (장 마감 시)
 
-            // 가격이 0이거나 비정상이면 기존 데이터 유지 (주말/공휴일 방어)
+            // 가격 결정: daily_snapshots > Polygon
+            const currentPrice = snap?.close_price || live.c;
             if (!currentPrice || currentPrice <= 0) continue;
 
             const quarterEnd = existing?.quarterEnd || null;
@@ -1330,24 +1352,35 @@ export function DataProvider({ children }) {
               ? Math.round(((currentPrice - quarterEnd) / quarterEnd) * 10000) / 100
               : existing?.sinceFiling || null;
 
+            // 변동률: daily_snapshots의 정확한 값 > Polygon의 부정확한 값
+            const dailyChange = snap ? snap.daily_change_pct : live.ch;
+            const volume = snap?.volume || live.v || 0;
+            const vwap = snap?.vwap || live.vw || 0;
+            const prevClose = snap?.prev_close || live.pc || 0;
+
+            // AH 데이터: 장 마감(데이마켓)일 때는 AH 안 보여줌 (세션 종료됨)
+            // 실제 after-hours/pre-market 활성 시에만 Polygon AH 데이터 사용
+            const afterHoursPrice = data.marketStatus !== 'closed' ? (live.ah || null) : null;
+            const afterHoursChange = data.marketStatus !== 'closed' ? (live.ahCh || null) : null;
+
             merged[ticker] = {
               current: currentPrice,
               date: data.lastTradeDate || existing?.date || null,
               live: data.live || false,
-              source: data.source || 'unknown',
-              dailyChange: live.ch,
-              volume: live.v || 0,
-              vwap: live.vw || 0,
-              prevClose: live.pc || 0,
-              // 애프터마켓 데이터 (있을 때만)
-              afterHoursPrice: live.ah || null,
-              afterHoursChange: live.ahCh || null,
+              source: snap ? 'daily_snapshot' : (data.source || 'unknown'),
+              dailyChange,
+              volume,
+              vwap,
+              prevClose,
+              afterHoursPrice,
+              afterHoursChange,
               quarterEnd: quarterEnd,
               quarterEndDate: existing?.quarterEndDate || null,
               sinceFiling: sinceFiling,
             };
           }
-          console.log(`[DataProvider] 실시간 시세 업데이트: ${Object.keys(data.prices).length}개 종목`);
+          const snapCount = Object.keys(snapshotMap).length;
+          console.log(`[DataProvider] 시세 업데이트: ${Object.keys(data.prices).length}개 종목${snapCount > 0 ? ` (daily_snapshots ${snapCount}개 적용)` : ''}`);
           return merged;
         });
       } catch (e) {
@@ -1358,8 +1391,7 @@ export function DataProvider({ children }) {
     // 초기 로드 (2초 후 — DB 데이터 먼저 표시)
     const initialTimer = setTimeout(fetchLivePrices, 2000);
 
-    // 5분마다 자동 갱신
-    // Polygon Starter: 15분 지연 데이터 → 15분마다 갱신
+    // 장중: 15분마다 갱신 / 장 마감: 한번만 (daily_snapshots 사용하므로 재호출 불필요)
     const interval = setInterval(fetchLivePrices, 15 * 60 * 1000);
 
     return () => {
