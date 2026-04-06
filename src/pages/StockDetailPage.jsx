@@ -1395,6 +1395,24 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
   }, [INVESTORS, HOLDINGS, QUARTERLY_ACTIVITY, ARK_TRADES, ticker]);
 
   // ---- Price info ----
+  // live-prices (대시보드 데이터)에서 priceInfo 빌드
+  const buildFromLivePrices = (sp) => {
+    const price = sp.current || 0;
+    const pc = sp.prevClose || 0;
+    // 변동금액: prevClose가 있으면 직접 계산, 없으면 %에서 역산
+    const change = pc > 0 ? price - pc : (sp.dailyChange && price > 0 ? price * sp.dailyChange / (100 + sp.dailyChange) : 0);
+    const changePerc = sp.dailyChange || (pc > 0 ? (change / pc) * 100 : 0);
+    // 장외: afterHoursPrice=절대가격, afterHoursChange=변동%(금액 아님)
+    const ahPrice = sp.afterHoursPrice || null;
+    const ahChange = ahPrice && price > 0 ? ahPrice - price : null; // 금액 차이
+    const ahChangePerc = ahPrice && price > 0 ? ((ahPrice - price) / price) * 100 : null; // %
+    return {
+      price, change, changePerc,
+      volume: sp.volume || 0, open: 0, high: 0, low: 0, prevClose: pc,
+      ahPrice, ahChange, ahChangePerc,
+    };
+  };
+
   const priceInfo = useMemo(() => {
     // Snapshot 데이터 기반
     if (snapshot) {
@@ -1404,17 +1422,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
 
       // Snapshot이 있지만 가격이 0이면 live-prices fallback 시도
       if (regularClose <= 0 && stockPrices?.[ticker]) {
-        const sp = stockPrices[ticker];
-        return {
-          price: sp.current || 0,
-          change: sp.current && sp.prevClose ? sp.current - sp.prevClose : 0,
-          changePerc: sp.dailyChange || 0,
-          volume: sp.volume || 0, open: 0, high: 0, low: 0, prevClose: sp.prevClose || 0,
-          ahPrice: sp.afterHoursPrice || null,
-          ahChange: sp.afterHoursChange || null,
-          ahChangePerc: sp.afterHoursChange != null && sp.current > 0
-            ? (sp.afterHoursChange / sp.current) * 100 : null,
-        };
+        return buildFromLivePrices(stockPrices[ticker]);
       }
 
       const regularChange = prevDayClose > 0 ? regularClose - prevDayClose : 0;
@@ -1446,17 +1454,7 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
 
     // Snapshot 없으면 live-prices (대시보드 데이터) fallback
     if (stockPrices?.[ticker]) {
-      const sp = stockPrices[ticker];
-      return {
-        price: sp.current || 0,
-        change: sp.current && sp.prevClose ? sp.current - sp.prevClose : 0,
-        changePerc: sp.dailyChange || 0,
-        volume: sp.volume || 0, open: 0, high: 0, low: 0, prevClose: sp.prevClose || 0,
-        ahPrice: sp.afterHoursPrice || null,
-        ahChange: sp.afterHoursChange || null,
-        ahChangePerc: sp.afterHoursChange != null && sp.current > 0
-          ? (sp.afterHoursChange / sp.current) * 100 : null,
-      };
+      return buildFromLivePrices(stockPrices[ticker]);
     }
 
     return null;
