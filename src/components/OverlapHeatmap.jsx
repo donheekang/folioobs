@@ -91,13 +91,14 @@ const OverlapHeatmap = memo(({ onNavigate }) => {
 
   return (
     <div>
-      <div className="overflow-x-auto" role="grid" aria-label={L.t('nav.overlapHeatmap')}>
+      <div className="overflow-x-auto" role="grid" aria-label={L.t('nav.overlapHeatmap')} style={{ WebkitOverflowScrolling: 'touch' }}>
         <div style={{
           display: "grid",
           gridTemplateColumns: `${labelWidth}px repeat(${INVESTORS.length}, ${cellSize}px)`,
           gap: "2px",
-          justifyContent: "center",
+          justifyContent: isMobile ? "flex-start" : "center",
           alignItems: "center",
+          minWidth: isMobile ? `${labelWidth + INVESTORS.length * (cellSize + 2)}px` : 'auto',
         }}>
           {/* Header row: empty corner + investor avatars */}
           <div />
