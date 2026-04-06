@@ -1681,8 +1681,15 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               </button>
             )}
 
-            {/* 실시간/장 마감 라벨 — 필터 줄 오른쪽 끝 */}
-            {priceLabel && <span className="ml-auto text-[11px] whitespace-nowrap" style={{ color: (marketStatus === 'open' || isExtended || isDayMarket) ? (isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green) : t.textMuted }}>{priceLabel}</span>}
+            {/* 장중: 실시간 라벨, 그 외: X/X 종가 기준 */}
+            <span className="ml-auto text-[11px] whitespace-nowrap" style={{ color: marketStatus === 'open' ? t.green : t.textMuted }}>
+              {marketStatus === 'open'
+                ? (priceLabel || (L.locale === 'ko' ? '장중 · 15분 지연' : 'Live · 15-min delayed'))
+                : lastTradeDate
+                  ? (L.locale === 'ko' ? `${lastTradeDate.slice(5).replace('-', '/')} 종가 기준` : `Based on ${lastTradeDate} close`)
+                  : (L.locale === 'ko' ? '전일 종가 기준' : 'Based on prev close')
+              }
+            </span>
           </div>
           </>
             );
@@ -1747,20 +1754,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                         {isPositive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
                         {isPositive ? '+' : ''}{stock.sinceFiling.toFixed(1)}%
                       </span>
-                      {(() => {
-                        const todayChg = (stock.dailyChange || 0) + (stock.afterHoursChange || 0);
-                        const isPM = marketStatus === 'pre-market';
-                        const isAH = marketStatus === 'after-hours';
-                        const label = isPM ? (L.locale === 'ko' ? '프리마켓' : 'Pre-Mkt')
-                          : isAH ? (L.locale === 'ko' ? '애프터' : 'After')
-                          : (L.locale === 'ko' ? '오늘' : 'Today');
-                        if (!isPM && !isAH && todayChg === 0) return null;
-                        return (
-                          <div className="text-[10px] tabular-nums" style={{ color: todayChg >= 0 ? t.green : t.red }}>
-                            {label} {todayChg >= 0 ? '+' : ''}{todayChg.toFixed(1)}%
-                          </div>
-                        );
-                      })()}
+                      {stock.dailyChange !== null && stock.dailyChange !== 0 && (
+                        <div className="text-[10px] tabular-nums" style={{ color: stock.dailyChange >= 0 ? t.green : t.red }}>
+                          {L.locale === 'ko' ? '오늘' : 'Today'} {stock.dailyChange >= 0 ? '+' : ''}{stock.dailyChange.toFixed(1)}%
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -2004,7 +2002,14 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
               <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.accent}15`, color: t.accent }}>{L.quarter(latestQuarter)}</span>
               <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', color: t.textMuted }}>{L.t('dashboard.returnLabel') || '수익률'}</span>
             </div>
-            {priceLabel && <span className="text-xs" style={{ color: (marketStatus === 'open' || isExtended || isDayMarket) ? (isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green) : t.textMuted }}>{priceLabel}</span>}
+            <span className="text-xs" style={{ color: marketStatus === 'open' ? t.green : t.textMuted }}>
+              {marketStatus === 'open'
+                ? (priceLabel || (L.locale === 'ko' ? '장중 · 15분 지연' : 'Live · 15-min delayed'))
+                : lastTradeDate
+                  ? (L.locale === 'ko' ? `${lastTradeDate.slice(5).replace('-', '/')} 종가 기준` : `Based on ${lastTradeDate} close`)
+                  : (L.locale === 'ko' ? '전일 종가 기준' : 'Based on prev close')
+              }
+            </span>
           </div>
           <GlassCard>
             <div className="p-4 space-y-3">

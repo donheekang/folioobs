@@ -443,13 +443,14 @@ Deno.serve(async (req) => {
       }
     }
 
-    // lastTradeDate가 아직 비어있으면 Polygon prev에서 가져오기
-    if (!lastTradeDate) {
-      lastTradeDate = await fetchLastTradeDateFromPrev();
-    }
-
     // 장 상태는 Polygon Market Status API에서 가져오기
     const ms = await fetchMarketStatus();
+
+    // lastTradeDate 보정: 프리마켓/장 마감에서는 snapshot의 updated가 오늘이라 부정확
+    // → Polygon prev close API로 실제 마지막 거래일 가져오기
+    if (!lastTradeDate || ms.status === "pre-market" || ms.status === "closed") {
+      lastTradeDate = await fetchLastTradeDateFromPrev();
+    }
 
     // 3차: Yahoo Finance로 장외 데이터 보충
     if (ms.status === "after-hours") {
