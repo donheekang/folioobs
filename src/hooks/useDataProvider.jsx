@@ -1424,6 +1424,17 @@ export function DataProvider({ children }) {
         // 기존 stockPrices에 시세 머지 (quarterEnd는 유지)
         setStockPrices(prev => {
           const merged = { ...prev };
+
+          // 프리마켓: stock_prices RPC에서 로드된 이전 dailyChange를 0으로 리셋
+          // (live-prices 응답에 없는 종목도 포함 — DB의 이전 정규장 변동률이 남아있으면 안 됨)
+          if (data.marketStatus === 'pre-market') {
+            for (const ticker of Object.keys(merged)) {
+              if (merged[ticker]) {
+                merged[ticker] = { ...merged[ticker], dailyChange: 0 };
+              }
+            }
+          }
+
           for (const [ticker, live] of Object.entries(data.prices)) {
             const existing = merged[ticker];
             const snap = snapshotMap[ticker]; // daily_snapshots 데이터 (장 마감 시)
