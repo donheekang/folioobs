@@ -181,6 +181,14 @@ async function fetchSnapshot(tickers: string[]): Promise<{ prices: Record<string
             entry.ahCh = Math.round(ahChangePct * 100) / 100; // 애프터 변동률(정규장 종가 대비)
           }
 
+          // lastTrade 타임스탬프 저장 (프리마켓 판별용, 최종 응답에서 제거)
+          if (t.lastTrade?.t) {
+            const ltMs = typeof t.lastTrade.t === 'number' && t.lastTrade.t > 1e15
+              ? Math.floor(t.lastTrade.t / 1e6) : t.lastTrade.t;
+            entry._lastTradeTs = ltMs;
+            entry._lastTradeP = t.lastTrade.p || 0;
+          }
+
           priceMap[t.ticker] = entry;
         }
       }
@@ -468,33 +476,80 @@ Deno.serve(async (req) => {
         }
       }
     } else if (ms.status === "pre-market") {
-      // *** 프리마켓 핵심 수정 ***
-      // Polygon의 ah 값은 어제 애프터마켓의 lastTrade 기반이라 stale 데이터임
-      // → 먼저 모든 종목의 Polygon ah를 제거하고, Yahoo에서 진짜 프리마켓 가격만 사용
+      // *** 프리마켓: Polygon lastTrade 타임스탬프 기반 판별 ***
+      // lastTrade.t가 오늘(ET)이면 실제 프리마켓 거래 → ah로 표시
+      // lastTrade.t가 이전 날짜면 stale 데이터 → ah 제거
 
-      // Step 1: Polygon의 stale AH 데이터 모두 제거
-      const allTickers = Object.keys(priceMap);
-      for (const ticker of allTickers) {
-        delete priceMap[ticker].ah;
-        delete priceMap[ticker].ahCh;
-      }
-      console.log(`[PreMarket] ${allTickers.length}개 종목 Polygon stale AH 제거, Yahoo에서 진짜 PM 조회`);
+      // 오늘 날짜(ET) 계산
+      const nowET = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+      const todayET = `${nowET.getFullYear()}-${String(nowET.getMonth() + 1).padStart(2, '0')}-${String(nowET.getDate()).padStart(2, '0')}`;
 
-      // Step 2: 모든 종목에 대해 Yahoo에서 프리마켓 데이터 조회
-      try {
-        const yahooData = await fetchYahooExtendedHours(allTickers);
-        let filled = 0;
-        for (const [ticker, yData] of Object.entries(yahooData)) {
-          if (priceMap[ticker] && yData.pm) {
-            priceMap[ticker].ah = yData.pm;
-            priceMap[ticker].ahCh = yData.pmCh || 0;
-            filled++;
+      let polygonPM = 0;
+      let staleClear = 0;
+      const tickersNeedYahoo: string[] = [];
+
+      for (const [ticker, entry] of Object.entries(priceMap)) {
+        // 기존 ah 값 일단 제거 (stale 가능성)
+        delete entry.ah;
+        delete entry.ahCh;
+
+        if (entry._lastTradeTs && entry._lastTradeP > 0) {
+          // lastTrade 타임스탬프를 ET 날짜로 변환
+          const ltDate = new Date(entry._lastTradeTs);
+          const ltET = new Date(ltDate.toLocaleString("en-US", { timeZone: "America/New_York" }));
+          const ltDateStr = `${ltET.getFullYear()}-${String(ltET.getMonth() + 1).padStart(2, '0')}-${String(ltET.getDate()).padStart(2, '0')}`;
+
+          if (ltDateStr === todayET) {
+            // 오늘 거래 발생 → 진짜 프리마켓 데이터
+            const prevClose = entry.pc || 0;
+            if (prevClose > 0) {
+              const pmPrice = entry._lastTradeP;
+              const pmChangePct = ((pmPrice - prevClose) / prevClose) * 100;
+              entry.ah = Math.round(pmPrice * 100) / 100;
+              entry.ahCh = Math.round(pmChangePct * 100) / 100;
+              polygonPM++;
+            }
+          } else {
+            // 이전 날짜 거래 → stale, Yahoo로 보충 시도
+            staleClear++;
+            tickersNeedYahoo.push(ticker);
           }
+        } else {
+          tickersNeedYahoo.push(ticker);
         }
-        console.log(`[Yahoo] ${filled}개 종목 pre-market 데이터 설정 완료 (총 ${allTickers.length}개 중)`);
-      } catch (e) {
-        console.warn("[Yahoo] pre-market 조회 실패:", e);
       }
+
+      // 프리마켓: 정규장 변동률(ch)을 0으로 리셋 — 오늘 정규장이 아직 안 열렸으므로
+      // 프론트엔드에서 ch(정규장) + ahCh(프리마켓) = 프리마켓 변동률만 표시
+      for (const entry of Object.values(priceMap)) {
+        entry.ch = 0;
+      }
+
+      console.log(`[PreMarket] Polygon 기반: ${polygonPM}개 종목 프리마켓 감지, ${staleClear}개 stale 제거 (today=${todayET})`);
+
+      // Yahoo로 나머지 종목 보충 (Polygon에서 오늘 거래 없는 종목)
+      if (tickersNeedYahoo.length > 0) {
+        try {
+          const yahooData = await fetchYahooExtendedHours(tickersNeedYahoo);
+          let yahooFilled = 0;
+          for (const [ticker, yData] of Object.entries(yahooData)) {
+            if (priceMap[ticker] && yData.pm) {
+              priceMap[ticker].ah = yData.pm;
+              priceMap[ticker].ahCh = yData.pmCh || 0;
+              yahooFilled++;
+            }
+          }
+          console.log(`[Yahoo] ${yahooFilled}개 종목 pre-market 보충 (${tickersNeedYahoo.length}개 중)`);
+        } catch (e) {
+          console.warn("[Yahoo] pre-market 보충 실패:", e);
+        }
+      }
+    }
+
+    // 임시 필드 제거 (프리마켓 판별용 내부 데이터)
+    for (const entry of Object.values(priceMap)) {
+      delete entry._lastTradeTs;
+      delete entry._lastTradeP;
     }
 
     // 캐시 업데이트
