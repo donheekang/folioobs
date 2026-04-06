@@ -446,15 +446,17 @@ Deno.serve(async (req) => {
     // 3차: Yahoo Finance로 장외 데이터 보충
     // 애프터마켓/프리마켓에서만 Yahoo 데이터 가져옴 (데이마켓은 종가 기준으로 표시)
     if (ms.status === "after-hours" || ms.status === "pre-market") {
-      // Polygon에서 장외 데이터 없는 종목 추출
-      const tickersWithoutExtended = Object.entries(priceMap)
-        .filter(([_, v]) => !v.ah)
-        .map(([k]) => k);
+      // 프리마켓: Polygon의 AH 데이터는 어제 애프터마켓 잔여 데이터일 수 있음
+      // → 프리마켓에서는 전 종목을 Yahoo로 조회하여 진짜 프리마켓 가격으로 덮어씀
+      // 애프터마켓: Polygon에 AH 없는 종목만 Yahoo로 보충
+      const tickersForYahoo = ms.status === "pre-market"
+        ? Object.keys(priceMap) // 프리마켓: 전 종목
+        : Object.entries(priceMap).filter(([_, v]) => !v.ah).map(([k]) => k); // 애프터: AH 없는 종목만
 
-      if (tickersWithoutExtended.length > 0) {
-        console.log(`[Yahoo] ${tickersWithoutExtended.length}개 종목 장외 데이터 보충 시도 (${ms.status})`);
+      if (tickersForYahoo.length > 0) {
+        console.log(`[Yahoo] ${tickersForYahoo.length}개 종목 장외 데이터 조회 (${ms.status})`);
         try {
-          const yahooData = await fetchYahooExtendedHours(tickersWithoutExtended);
+          const yahooData = await fetchYahooExtendedHours(tickersForYahoo);
           let filled = 0;
           for (const [ticker, yData] of Object.entries(yahooData)) {
             if (priceMap[ticker]) {
@@ -466,15 +468,15 @@ Deno.serve(async (req) => {
                   filled++;
                 }
               } else if (ms.status === "pre-market") {
-                // 프리마켓: pm 데이터 우선
+                // 프리마켓: Yahoo pm 데이터로 덮어씀 (Polygon AH 데이터보다 우선)
                 if (yData.pm) {
                   priceMap[ticker].ah = yData.pm;
                   priceMap[ticker].ahCh = yData.pmCh || 0;
                   filled++;
-                } else if (yData.ah && !priceMap[ticker].ah) {
-                  priceMap[ticker].ah = yData.ah;
-                  priceMap[ticker].ahCh = yData.ahCh || 0;
-                  filled++;
+                } else {
+                  // Yahoo에 프리마켓 데이터 없으면 Polygon AH도 제거 (오래된 데이터 방지)
+                  delete priceMap[ticker].ah;
+                  delete priceMap[ticker].ahCh;
                 }
               }
             }
