@@ -1300,7 +1300,7 @@ function DailyPriceTable({ ticker, theme, locale }) {
 const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
   const t = useTheme();
   const L = useLocale();
-  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades: ARK_TRADES, marketStatus } = useData();
+  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades: ARK_TRADES, marketStatus, stockPrices } = useData();
 
   const ticker = initialTicker?.toUpperCase();
 
@@ -1396,40 +1396,71 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
 
   // ---- Price info ----
   const priceInfo = useMemo(() => {
-    if (!snapshot) return null;
-    const prevDayClose = snapshot.prevDay?.c || 0;
-    // 정규장 종가 (day.c 우선)
-    const regularClose = snapshot.day?.c || prevDayClose || 0;
-    const regularChange = prevDayClose > 0 ? regularClose - prevDayClose : 0;
-    const regularChangePerc = prevDayClose > 0 ? (regularChange / prevDayClose) * 100 : 0;
+    // Snapshot 데이터 기반
+    if (snapshot) {
+      const prevDayClose = snapshot.prevDay?.c || 0;
+      // 정규장 종가 (day.c 우선)
+      const regularClose = snapshot.day?.c || prevDayClose || 0;
 
-    // 애프터마켓 감지 (이중 체크 — 더 큰 차이를 사용)
-    // 방법1: todaysChange(전체) vs regularChange(정규장)
-    const totalChange = snapshot.todaysChange || 0;
-    const ahDiff1 = totalChange - regularChange;
-    // 방법2: lastTrade.p vs day.c (직접 비교)
-    const lastTradeP = snapshot.lastTrade?.p || snapshot.min?.p || 0;
-    const ahDiff2 = lastTradeP > 0 ? lastTradeP - regularClose : 0;
-    // 둘 중 절대값이 큰 쪽 사용 (더 정확한 데이터)
-    const ahDiff = Math.abs(ahDiff1) >= Math.abs(ahDiff2) ? ahDiff1 : ahDiff2;
-    const hasAfterHours = Math.abs(ahDiff) > 0.005;
-    const ahPrice = hasAfterHours ? regularClose + ahDiff : null;
-    const ahChange = hasAfterHours ? ahDiff : null;
-    const ahChangePerc = hasAfterHours && regularClose > 0 ? (ahDiff / regularClose) * 100 : null;
+      // Snapshot이 있지만 가격이 0이면 live-prices fallback 시도
+      if (regularClose <= 0 && stockPrices?.[ticker]) {
+        const sp = stockPrices[ticker];
+        return {
+          price: sp.current || 0,
+          change: sp.current && sp.prevClose ? sp.current - sp.prevClose : 0,
+          changePerc: sp.dailyChange || 0,
+          volume: sp.volume || 0, open: 0, high: 0, low: 0, prevClose: sp.prevClose || 0,
+          ahPrice: sp.afterHoursPrice || null,
+          ahChange: sp.afterHoursChange || null,
+          ahChangePerc: sp.afterHoursChange != null && sp.current > 0
+            ? (sp.afterHoursChange / sp.current) * 100 : null,
+        };
+      }
 
-    const dayVolume = snapshot.day?.v || 0;
-    const dayOpen = snapshot.day?.o || 0;
-    const dayHigh = snapshot.day?.h || 0;
-    const dayLow = snapshot.day?.l || 0;
-    return {
-      price: regularClose,
-      change: regularChange,
-      changePerc: regularChangePerc,
-      volume: dayVolume, open: dayOpen, high: dayHigh, low: dayLow, prevClose: prevDayClose,
-      // 애프터마켓
-      ahPrice, ahChange, ahChangePerc,
-    };
-  }, [snapshot]);
+      const regularChange = prevDayClose > 0 ? regularClose - prevDayClose : 0;
+      const regularChangePerc = prevDayClose > 0 ? (regularChange / prevDayClose) * 100 : 0;
+
+      // 애프터마켓 감지 (이중 체크 — 더 큰 차이를 사용)
+      const totalChange = snapshot.todaysChange || 0;
+      const ahDiff1 = totalChange - regularChange;
+      const lastTradeP = snapshot.lastTrade?.p || snapshot.min?.p || 0;
+      const ahDiff2 = lastTradeP > 0 ? lastTradeP - regularClose : 0;
+      const ahDiff = Math.abs(ahDiff1) >= Math.abs(ahDiff2) ? ahDiff1 : ahDiff2;
+      const hasAfterHours = Math.abs(ahDiff) > 0.005;
+      const ahPrice = hasAfterHours ? regularClose + ahDiff : null;
+      const ahChange = hasAfterHours ? ahDiff : null;
+      const ahChangePerc = hasAfterHours && regularClose > 0 ? (ahDiff / regularClose) * 100 : null;
+
+      const dayVolume = snapshot.day?.v || 0;
+      const dayOpen = snapshot.day?.o || 0;
+      const dayHigh = snapshot.day?.h || 0;
+      const dayLow = snapshot.day?.l || 0;
+      return {
+        price: regularClose,
+        change: regularChange,
+        changePerc: regularChangePerc,
+        volume: dayVolume, open: dayOpen, high: dayHigh, low: dayLow, prevClose: prevDayClose,
+        ahPrice, ahChange, ahChangePerc,
+      };
+    }
+
+    // Snapshot 없으면 live-prices (대시보드 데이터) fallback
+    if (stockPrices?.[ticker]) {
+      const sp = stockPrices[ticker];
+      return {
+        price: sp.current || 0,
+        change: sp.current && sp.prevClose ? sp.current - sp.prevClose : 0,
+        changePerc: sp.dailyChange || 0,
+        volume: sp.volume || 0, open: 0, high: 0, low: 0, prevClose: sp.prevClose || 0,
+        ahPrice: sp.afterHoursPrice || null,
+        ahChange: sp.afterHoursChange || null,
+        ahChangePerc: sp.afterHoursChange != null && sp.current > 0
+          ? (sp.afterHoursChange / sp.current) * 100 : null,
+      };
+    }
+
+    return null;
+  }, [snapshot, stockPrices, ticker]);
 
   // ---- Company details ----
   const companyInfo = useMemo(() => {
