@@ -476,74 +476,49 @@ Deno.serve(async (req) => {
         }
       }
     } else if (ms.status === "pre-market") {
-      // *** 프리마켓: Polygon lastTrade 타임스탬프 기반 판별 ***
-      // lastTrade.t가 오늘(ET)이면 실제 프리마켓 거래 → ah로 표시
-      // lastTrade.t가 이전 날짜면 stale 데이터 → ah 제거
+      // *** 프리마켓: fetchSnapshot이 이미 계산한 ah/ahCh를 그대로 활용 ***
+      // fetchSnapshot의 ah = lastTrade.p (마지막 거래가), ahCh = (lastTrade.p - day.c) / day.c
+      // 프리마켓에서 day.c = 직전 정규장 종가이므로, ahCh는 "종가 대비 현재가 변동률"
+      // 날짜 체크 없이 가격 차이만으로 프리마켓 데이터 판별
+      //
+      // 추가로 lastTrade.p vs prevDay.c (전전일 종가 아닌 직전 종가=day.c)로 재계산
+      // → 프리마켓 변동률 = (lastTrade.p - day.c) / day.c * 100
 
-      // 오늘 날짜(ET) 계산
-      const nowET = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
-      const todayET = `${nowET.getFullYear()}-${String(nowET.getMonth() + 1).padStart(2, '0')}-${String(nowET.getDate()).padStart(2, '0')}`;
-
-      let polygonPM = 0;
-      let staleClear = 0;
-      const tickersNeedYahoo: string[] = [];
+      let withPM = 0;
+      let noPM = 0;
 
       for (const [ticker, entry] of Object.entries(priceMap)) {
-        // 기존 ah 값 일단 제거 (stale 가능성)
-        delete entry.ah;
-        delete entry.ahCh;
+        // lastTrade.p가 있고, day.c(직전 정규장 종가)와 차이가 있으면 프리마켓 데이터
+        const lastP = entry._lastTradeP || 0;
+        const dayClose = entry.c || 0; // c = day.c = 직전 정규장 종가
 
-        if (entry._lastTradeTs && entry._lastTradeP > 0) {
-          // lastTrade 타임스탬프를 ET 날짜로 변환
-          const ltDate = new Date(entry._lastTradeTs);
-          const ltET = new Date(ltDate.toLocaleString("en-US", { timeZone: "America/New_York" }));
-          const ltDateStr = `${ltET.getFullYear()}-${String(ltET.getMonth() + 1).padStart(2, '0')}-${String(ltET.getDate()).padStart(2, '0')}`;
-
-          if (ltDateStr === todayET) {
-            // 오늘 거래 발생 → 진짜 프리마켓 데이터
-            const prevClose = entry.pc || 0;
-            if (prevClose > 0) {
-              const pmPrice = entry._lastTradeP;
-              const pmChangePct = ((pmPrice - prevClose) / prevClose) * 100;
-              entry.ah = Math.round(pmPrice * 100) / 100;
-              entry.ahCh = Math.round(pmChangePct * 100) / 100;
-              polygonPM++;
-            }
+        if (lastP > 0 && dayClose > 0) {
+          const diff = lastP - dayClose;
+          if (Math.abs(diff) > 0.005) {
+            // 프리마켓 가격 변동 있음
+            entry.ah = Math.round(lastP * 100) / 100;
+            entry.ahCh = Math.round((diff / dayClose) * 10000) / 100;
+            withPM++;
           } else {
-            // 이전 날짜 거래 → stale, Yahoo로 보충 시도
-            staleClear++;
-            tickersNeedYahoo.push(ticker);
+            // 변동 없음 → ah 제거
+            delete entry.ah;
+            delete entry.ahCh;
+            noPM++;
           }
+        } else if (entry.ah) {
+          // fetchSnapshot에서 이미 계산된 ah가 있으면 유지
+          withPM++;
         } else {
-          tickersNeedYahoo.push(ticker);
+          noPM++;
         }
       }
 
       // 프리마켓: 정규장 변동률(ch)을 0으로 리셋 — 오늘 정규장이 아직 안 열렸으므로
-      // 프론트엔드에서 ch(정규장) + ahCh(프리마켓) = 프리마켓 변동률만 표시
       for (const entry of Object.values(priceMap)) {
         entry.ch = 0;
       }
 
-      console.log(`[PreMarket] Polygon 기반: ${polygonPM}개 종목 프리마켓 감지, ${staleClear}개 stale 제거 (today=${todayET})`);
-
-      // Yahoo로 나머지 종목 보충 (Polygon에서 오늘 거래 없는 종목)
-      if (tickersNeedYahoo.length > 0) {
-        try {
-          const yahooData = await fetchYahooExtendedHours(tickersNeedYahoo);
-          let yahooFilled = 0;
-          for (const [ticker, yData] of Object.entries(yahooData)) {
-            if (priceMap[ticker] && yData.pm) {
-              priceMap[ticker].ah = yData.pm;
-              priceMap[ticker].ahCh = yData.pmCh || 0;
-              yahooFilled++;
-            }
-          }
-          console.log(`[Yahoo] ${yahooFilled}개 종목 pre-market 보충 (${tickersNeedYahoo.length}개 중)`);
-        } catch (e) {
-          console.warn("[Yahoo] pre-market 보충 실패:", e);
-        }
-      }
+      console.log(`[PreMarket] ${withPM}개 프리마켓 변동 감지, ${noPM}개 변동 없음`);
     }
 
     // 임시 필드 제거 (프리마켓 판별용 내부 데이터)

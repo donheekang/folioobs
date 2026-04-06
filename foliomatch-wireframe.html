@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FolioMatch — Wireframe Prototype</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #12121a;
+    --bg3: #1a1a26;
+    --border: rgba(255,255,255,0.06);
+    --text: #f5f5f7;
+    --text2: #a1a1aa;
+    --text3: #6b6b76;
+    --accent: #8b5cf6;
+    --accent2: #a78bfa;
+    --green: #22c55e;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --orange: #f59e0b;
+    --glass: rgba(255,255,255,0.03);
+    --glass-border: rgba(255,255,255,0.08);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height:100vh; }
+
+  /* Tab navigation */
+  .tab-nav { position: sticky; top: 0; z-index: 100; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 4px; }
+  .tab-nav .logo { font-size: 15px; font-weight: 700; color: var(--accent); margin-right: 24px; padding: 16px 0; letter-spacing: -0.5px; }
+  .tab-nav .logo span { opacity: 0.5; font-weight: 400; }
+  .tab-btn { padding: 14px 16px; font-size: 13px; font-weight: 500; color: var(--text3); border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; }
+  .tab-btn:hover { color: var(--text2); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .screen { display: none; max-width: 800px; margin: 0 auto; padding: 32px 20px; }
+  .screen.active { display: block; }
+
+  /* Cards */
+  .card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-size: 16px; font-weight: 600; }
+  .card-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* Badge */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-accent { background: rgba(139,92,246,0.15); color: var(--accent2); }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .badge-orange { background: rgba(245,158,11,0.15); color: var(--orange); }
+
+  /* Buttons */
+  .btn { padding: 10px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #6d28d9); color: white; }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(139,92,246,0.3); }
+  .btn-outline { background: transparent; border: 1px solid var(--glass-border); color: var(--text2); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+
+  /* Input */
+  .input-group { position: relative; margin-bottom: 12px; }
+  .input-group input { width: 100%; padding: 12px 16px 12px 40px; background: var(--bg3); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text); font-size: 14px; outline: none; transition: border-color .2s; }
+  .input-group input:focus { border-color: var(--accent); }
+  .input-group input::placeholder { color: var(--text3); }
+  .input-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 16px; }
+
+  /* Tag chips */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; background: var(--bg3); border: 1px solid var(--glass-border); color: var(--text); }
+  .chip .remove { cursor: pointer; color: var(--text3); font-size: 14px; }
+  .chip .remove:hover { color: var(--red); }
+
+  /* Method cards */
+  .method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+  .method-card { padding: 20px 16px; border-radius: 14px; border: 1px solid var(--glass-border); background: var(--glass); text-align: center; cursor: pointer; transition: all .2s; }
+  .method-card:hover { border-color: var(--accent); background: rgba(139,92,246,0.05); }
+  .method-card.selected { border-color: var(--accent); background: rgba(139,92,246,0.1); }
+  .method-icon { font-size: 28px; margin-bottom: 8px; }
+  .method-label { font-size: 13px; font-weight: 600; }
+  .method-desc { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  /* Progress steps */
+  .steps { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
+  .step { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border: 2px solid var(--glass-border); color: var(--text3); }
+  .step.active { border-color: var(--accent); color: var(--accent); background: rgba(139,92,246,0.1); }
+  .step.done { border-color: var(--green); color: var(--green); background: rgba(34,197,94,0.1); }
+  .step-line { flex: 1; height: 2px; background: var(--glass-border); }
+  .step-line.done { background: var(--green); }
+
+  /* Overlap Ring */
+  .overlap-ring { width: 120px; height: 120px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 16px; position: relative; }
+  .overlap-ring::before { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 4px solid var(--glass-border); }
+  .overlap-ring::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 4px solid transparent; border-top-color: var(--accent); transform: rotate(-30deg); }
+  .overlap-pct { font-size: 32px; font-weight: 700; color: var(--accent); }
+  .overlap-label { font-size: 11px; color: var(--text3); }
+
+  /* Investor match row */
+  .match-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .match-row:last-child { border-bottom: none; }
+  .match-avatar { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: white; flex-shrink: 0; }
+  .match-info { flex: 1; }
+  .match-name { font-size: 14px; font-weight: 600; }
+  .match-detail { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .match-bar { width: 100px; height: 6px; border-radius: 3px; background: var(--bg3); overflow: hidden; }
+  .match-bar-fill { height: 100%; border-radius: 3px; }
+  .match-pct { font-size: 14px; font-weight: 700; width: 45px; text-align: right; }
+
+  /* Shared stocks */
+  .shared-stock { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg3); margin-bottom: 8px; }
+  .stock-ticker { font-size: 14px; font-weight: 700; width: 50px; }
+  .stock-name { font-size: 12px; color: var(--text2); flex: 1; }
+  .stock-avatars { display: flex; gap: -4px; }
+  .mini-avatar { width: 22px; height: 22px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: white; margin-left: -4px; border: 2px solid var(--bg3); }
+
+  /* Alert feed */
+  .alert-item { padding: 16px; border-radius: 14px; background: var(--glass); border: 1px solid var(--glass-border); margin-bottom: 12px; transition: all .2s; }
+  .alert-item:hover { border-color: rgba(139,92,246,0.2); }
+  .alert-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .alert-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .alert-meta { flex: 1; }
+  .alert-title { font-size: 14px; font-weight: 600; }
+  .alert-time { font-size: 11px; color: var(--text3); }
+  .alert-body { font-size: 13px; color: var(--text2); line-height: 1.6; padding: 12px; border-radius: 10px; background: var(--bg3); }
+  .alert-body .highlight { color: var(--accent2); font-weight: 600; }
+  .alert-tickers { display: flex; gap: 6px; margin-top: 10px; }
+  .alert-ticker { padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+
+  /* Filter bar */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
+  .filter-chip { padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid var(--glass-border); background: transparent; color: var(--text2); cursor: pointer; white-space: nowrap; transition: all .2s; }
+  .filter-chip.active { background: rgba(139,92,246,0.15); border-color: var(--accent); color: var(--accent2); }
+
+  /* Weekly digest preview */
+  .digest-card { background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(59,130,246,0.05)); border: 1px solid rgba(139,92,246,0.15); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+  .digest-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+  .digest-num { font-size: 20px; font-weight: 700; color: var(--accent); width: 30px; }
+
+  /* Section title */
+  .section-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .section-desc { font-size: 13px; color: var(--text3); margin-bottom: 20px; }
+
+  /* Hover effects */
+  .hover-lift { transition: transform .2s, box-shadow .2s; }
+  .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .method-grid { grid-template-columns: 1fr; }
+    .screen { padding: 20px 16px; }
+  }
+
+  /* Scroll indicator */
+  .scroll-hint { text-align: center; color: var(--text3); font-size: 12px; padding: 20px 0; animation: bounce 2s infinite; }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+
+  /* Annotation */
+  .annotation { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--orange); background: rgba(245,158,11,0.1); border: 1px dashed rgba(245,158,11,0.3); margin-bottom: 12px; }
+
+  /* Toggle */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .toggle-label { font-size: 13px; font-weight: 500; }
+  .toggle-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .toggle { width: 40px; height: 22px; border-radius: 11px; background: var(--bg3); position: relative; cursor: pointer; transition: background .2s; }
+  .toggle.on { background: var(--accent); }
+  .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: white; transition: transform .2s; }
+  .toggle.on::after { transform: translateX(18px); }
+</style>
+</head>
+<body>
+
+<!-- Tab Navigation -->
+<nav class="tab-nav">
+  <div class="logo">FolioMatch <span>wireframe</span></div>
+  <button class="tab-btn active" onclick="showScreen('onboarding')">① 온보딩</button>
+  <button class="tab-btn" onclick="showScreen('dashboard')">② 대시보드</button>
+  <button class="tab-btn" onclick="showScreen('alerts')">③ 알림 피드</button>
+</nav>
+
+<!-- ============ SCREEN 1: Onboarding ============ -->
+<div id="onboarding" class="screen active">
+  <div class="annotation">WIREFRAME · 온보딩 플로우</div>
+
+  <!-- Progress Steps -->
+  <div class="steps">
+    <div class="step active">1</div>
+    <div class="step-line"></div>
+    <div class="step">2</div>
+    <div class="step-line"></div>
+    <div class="step">3</div>
+  </div>
+
+  <!-- Hero -->
+  <div style="text-align:center; margin-bottom:32px;">
+    <h1 style="font-size:24px; font-weight:700; margin-bottom:8px;">내 포트폴리오를 등록하세요</h1>
+    <p style="font-size:14px; color:var(--text3);">보유 종목을 입력하면 월가 레전드와의 겹침을 분석합니다</p>
+  </div>
+
+  <!-- Method Selection -->
+  <div class="card">
+    <div class="card-title" style="margin-bottom:4px;">입력 방식 선택</div>
+    <div class="card-subtitle">가장 편한 방법을 선택하세요</div>
+    <div class="method-grid">
+      <div class="method-card selected" onclick="selectMethod(this)">
+        <div class="method-icon">🔍</div>
+        <div class="method-label">종목 검색</div>
+        <div class="method-desc">직접 검색해서 추가</div>
+      </div>
+      <div class="method-card" onclick="selectMethod(this)">
+        <div class="method-icon">📄</div>
+        <div class="method-label">CSV 업로드</div>
+        <div class="method-desc">증권사 내역 가져오기</div>
+      </div>
+      <div class="method-card" onclick="selectMethod(this)">
+        <div class="method-icon">⭐</div>
+        <div class="method-label">Watchlist 연동</div>
+        <div class="method-desc">기존 워치리스트 불러오기</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual Input -->
+  <div class="card">
+    <div class="card-title">종목 추가</div>
+    <div class="input-group" style="margin-top:12px;">
+      <span class="input-icon">🔍</span>
+      <input type="text" placeholder="종목명 또는 티커 검색 (예: AAPL, 테슬라)" id="ticker-input">
+    </div>
+
+    <!-- Search results preview -->
+    <div style="border:1px solid var(--glass-border); border-radius:10px; overflow:hidden; margin-bottom:12px;">
+      <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; cursor:pointer; transition:background .15s;" onmouseover="this.style.background='rgba(139,92,246,0.05)'" onmouseout="this.style.background='transparent'" onclick="addTicker('NVDA')">
+        <div style="width:32px;height:32px;border-radius:8px;background:rgba(34,197,94,0.15);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--green);">NV</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;">NVDA</div><div style="font-size:11px;color:var(--text3);">NVIDIA Corporation</div></div>
+        <div style="font-size:12px;color:var(--green);">$131.28</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; cursor:pointer; border-top:1px solid var(--border);" onmouseover="this.style.background='rgba(139,92,246,0.05)'" onmouseout="this.style.background='transparent'">
+        <div style="width:32px;height:32px;border-radius:8px;background:rgba(59,130,246,0.15);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);">NV</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;">NVAX</div><div style="font-size:11px;color:var(--text3);">Novavax Inc</div></div>
+        <div style="font-size:12px;color:var(--red);">$7.42</div>
+      </div>
+    </div>
+
+    <!-- Added tickers -->
+    <div class="chip-row" id="ticker-chips">
+      <div class="chip">AAPL <span class="remove" onclick="this.parentElement.remove()">✕</span></div>
+      <div class="chip">MSFT <span class="remove" onclick="this.parentElement.remove()">✕</span></div>
+      <div class="chip">NVDA <span class="remove" onclick="this.parentElement.remove()">✕</span></div>
+      <div class="chip">GOOGL <span class="remove" onclick="this.parentElement.remove()">✕</span></div>
+      <div class="chip">AMZN <span class="remove" onclick="this.parentElement.remove()">✕</span></div>
+      <div class="chip">TSM <span class="remove" onclick="this.parentElement.remove()">✕</span></div>
+      <div class="chip">META <span class="remove" onclick="this.parentElement.remove()">✕</span></div>
+    </div>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px;">
+      <span style="font-size:12px; color:var(--text3);">7개 종목 추가됨</span>
+      <span style="font-size:12px; color:var(--accent); cursor:pointer;">전체 삭제</span>
+    </div>
+  </div>
+
+  <!-- Investor selection -->
+  <div class="card">
+    <div class="card-title">비교할 투자자 선택</div>
+    <div class="card-subtitle">겹침을 분석할 레전드 투자자를 선택하세요 (복수 선택 가능)</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:16px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--accent);background:rgba(139,92,246,0.08);cursor:pointer;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#e8b62d;display:flex;align-items:center;justify-content:center;font-size:14px;">🏛️</div>
+        <div><div style="font-size:13px;font-weight:600;">Warren Buffett</div><div style="font-size:11px;color:var(--text3);">Berkshire Hathaway</div></div>
+        <div style="margin-left:auto;color:var(--accent);">✓</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--accent);background:rgba(139,92,246,0.08);cursor:pointer;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#f472b6;display:flex;align-items:center;justify-content:center;font-size:14px;">🚀</div>
+        <div><div style="font-size:13px;font-weight:600;">Cathie Wood</div><div style="font-size:11px;color:var(--text3);">ARK Invest</div></div>
+        <div style="margin-left:auto;color:var(--accent);">✓</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);cursor:pointer;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#60a5fa;display:flex;align-items:center;justify-content:center;font-size:14px;">🌊</div>
+        <div><div style="font-size:13px;font-weight:600;">Ray Dalio</div><div style="font-size:11px;color:var(--text3);">Bridgewater</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--accent);background:rgba(139,92,246,0.08);cursor:pointer;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#4ade80;display:flex;align-items:center;justify-content:center;font-size:14px;">🇰🇷</div>
+        <div><div style="font-size:13px;font-weight:600;">국민연금 (NPS)</div><div style="font-size:11px;color:var(--text3);">National Pension</div></div>
+        <div style="margin-left:auto;color:var(--accent);">✓</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);cursor:pointer;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#a78bfa;display:flex;align-items:center;justify-content:center;font-size:14px;">💎</div>
+        <div><div style="font-size:13px;font-weight:600;">Stan Druckenmiller</div><div style="font-size:11px;color:var(--text3);">Duquesne Family</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);cursor:pointer;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fb923c;display:flex;align-items:center;justify-content:center;font-size:14px;">🦅</div>
+        <div><div style="font-size:13px;font-weight:600;">Bill Ackman</div><div style="font-size:11px;color:var(--text3);">Pershing Square</div></div>
+      </div>
+    </div>
+
+    <p style="font-size:11px; color:var(--text3); margin-top:12px; text-align:center;">3명 선택됨 · Pro 플랜은 전체 투자자 비교 가능</p>
+  </div>
+
+  <!-- CTA -->
+  <div style="display:flex; gap:12px; justify-content:center; margin-top:24px;">
+    <button class="btn btn-primary" onclick="showScreen('dashboard')">겹침 분석 시작 →</button>
+    <button class="btn btn-outline">나중에 하기</button>
+  </div>
+</div>
+
+<!-- ============ SCREEN 2: Dashboard ============ -->
+<div id="dashboard" class="screen">
+  <div class="annotation">WIREFRAME · 매칭 대시보드</div>
+
+  <!-- Overall match -->
+  <div class="card" style="text-align:center;">
+    <div class="badge badge-accent" style="margin-bottom:16px;">내 포트폴리오 분석 완료</div>
+    <div class="overlap-ring">
+      <div class="overlap-pct">42%</div>
+      <div class="overlap-label">전체 겹침률</div>
+    </div>
+    <p style="font-size:13px; color:var(--text2); max-width:400px; margin:0 auto; line-height:1.6;">
+      내 <strong>7개 종목</strong> 중 <strong style="color:var(--accent);">3개</strong>가 추적 중인 레전드 투자자와 겹칩니다
+    </p>
+  </div>
+
+  <!-- Investor match ranking -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">투자자별 매칭률</div>
+        <div class="card-subtitle">내 포트폴리오와 겹치는 비율</div>
+      </div>
+      <span class="badge badge-accent">3명 추적 중</span>
+    </div>
+
+    <div class="match-row">
+      <div class="match-avatar" style="background:linear-gradient(135deg,#e8b62d,#d4a017);">WB</div>
+      <div class="match-info">
+        <div class="match-name">Warren Buffett</div>
+        <div class="match-detail">AAPL 겹침 · 포트 71%의 #1 보유종목</div>
+      </div>
+      <div class="match-bar"><div class="match-bar-fill" style="width:57%;background:var(--green);"></div></div>
+      <div class="match-pct" style="color:var(--green);">57%</div>
+    </div>
+
+    <div class="match-row">
+      <div class="match-avatar" style="background:linear-gradient(135deg,#4ade80,#16a34a);">NP</div>
+      <div class="match-info">
+        <div class="match-name">국민연금 (NPS)</div>
+        <div class="match-detail">MSFT, AAPL, AMZN 겹침 · 대형 성장주 중심</div>
+      </div>
+      <div class="match-bar"><div class="match-bar-fill" style="width:43%;background:var(--blue);"></div></div>
+      <div class="match-pct" style="color:var(--blue);">43%</div>
+    </div>
+
+    <div class="match-row">
+      <div class="match-avatar" style="background:linear-gradient(135deg,#f472b6,#db2777);">CW</div>
+      <div class="match-info">
+        <div class="match-name">Cathie Wood</div>
+        <div class="match-detail">TSLA 겹침 · ARK 일별 매매 추적 중</div>
+      </div>
+      <div class="match-bar"><div class="match-bar-fill" style="width:14%;background:var(--accent);"></div></div>
+      <div class="match-pct" style="color:var(--accent);">14%</div>
+    </div>
+  </div>
+
+  <!-- Shared stocks detail -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">🔗 겹치는 종목 상세</div>
+        <div class="card-subtitle">레전드와 함께 보유 중인 종목</div>
+      </div>
+    </div>
+
+    <div class="shared-stock hover-lift">
+      <div class="stock-ticker" style="color:var(--green);">AAPL</div>
+      <div class="stock-name">Apple Inc.</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="mini-avatar" style="background:#e8b62d;">WB</div>
+        <div class="mini-avatar" style="background:#4ade80;">NP</div>
+      </div>
+      <span class="badge badge-green" style="font-size:10px;">2명 보유</span>
+    </div>
+
+    <div class="shared-stock hover-lift">
+      <div class="stock-ticker" style="color:var(--blue);">MSFT</div>
+      <div class="stock-name">Microsoft Corp.</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="mini-avatar" style="background:#4ade80;">NP</div>
+      </div>
+      <span class="badge badge-blue" style="font-size:10px;">1명 보유</span>
+    </div>
+
+    <div class="shared-stock hover-lift">
+      <div class="stock-ticker" style="color:var(--blue);">AMZN</div>
+      <div class="stock-name">Amazon.com Inc.</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="mini-avatar" style="background:#4ade80;">NP</div>
+      </div>
+      <span class="badge badge-blue" style="font-size:10px;">1명 보유</span>
+    </div>
+  </div>
+
+  <!-- Not matched / Discovery -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">💡 발견: 레전드만 보유한 종목</div>
+        <div class="card-subtitle">당신은 없지만 레전드들이 주목하는 종목</div>
+      </div>
+    </div>
+
+    <div class="shared-stock hover-lift" style="border-left:3px solid var(--accent); padding-left:14px;">
+      <div class="stock-ticker" style="color:var(--accent);">OXY</div>
+      <div class="stock-name">Occidental Petroleum</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="mini-avatar" style="background:#e8b62d;">WB</div>
+      </div>
+      <span class="badge badge-accent" style="font-size:10px;">버핏 28% 비중</span>
+    </div>
+
+    <div class="shared-stock hover-lift" style="border-left:3px solid var(--accent); padding-left:14px;">
+      <div class="stock-ticker" style="color:var(--accent);">COIN</div>
+      <div class="stock-name">Coinbase Global</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="mini-avatar" style="background:#f472b6;">CW</div>
+      </div>
+      <span class="badge badge-accent" style="font-size:10px;">ARK #1 보유</span>
+    </div>
+
+    <div class="shared-stock hover-lift" style="border-left:3px solid var(--accent); padding-left:14px;">
+      <div class="stock-ticker" style="color:var(--accent);">CRH</div>
+      <div class="stock-name">CRH plc</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="mini-avatar" style="background:#4ade80;">NP</div>
+      </div>
+      <span class="badge badge-accent" style="font-size:10px;">5명 공통 신규</span>
+    </div>
+  </div>
+
+  <!-- Share card preview -->
+  <div class="card" style="background:linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08)); border-color:rgba(139,92,246,0.2);">
+    <div style="text-align:center;">
+      <div style="font-size:13px; color:var(--text3); margin-bottom:8px;">📤 공유 카드 미리보기</div>
+      <div style="background:var(--bg2); border-radius:12px; padding:20px; display:inline-block; text-align:left; min-width:300px;">
+        <div style="font-size:11px; color:var(--accent); font-weight:600; margin-bottom:8px;">FOLIOMATCH</div>
+        <div style="font-size:18px; font-weight:700; margin-bottom:4px;">내 포트폴리오 × 버핏</div>
+        <div style="font-size:28px; font-weight:800; color:var(--accent); margin-bottom:8px;">57% 겹침</div>
+        <div style="font-size:12px; color:var(--text3);">겹치는 종목: AAPL · 함께 확인해보세요 →</div>
+      </div>
+      <div style="margin-top:12px;">
+        <button class="btn btn-sm btn-outline">카드 공유하기</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; justify-content:center; margin-top:16px;">
+    <button class="btn btn-primary" onclick="showScreen('alerts')">알림 설정하기 →</button>
+  </div>
+</div>
+
+<!-- ============ SCREEN 3: Alert Feed ============ -->
+<div id="alerts" class="screen">
+  <div class="annotation">WIREFRAME · 알림 피드</div>
+
+  <div class="section-title">FolioMatch 알림</div>
+  <div class="section-desc">내 포트폴리오와 연결된 레전드 투자자 변화를 실시간 추적합니다</div>
+
+  <!-- Weekly Digest Card -->
+  <div class="digest-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:15px;font-weight:700;">📬 주간 다이제스트</div>
+        <div style="font-size:12px;color:var(--text3);">3월 14일 ~ 3월 20일</div>
+      </div>
+      <span class="badge badge-accent">이번 주</span>
+    </div>
+    <div class="digest-row">
+      <div class="digest-num">3</div>
+      <div><div style="font-size:13px;font-weight:500;">겹치는 종목 변동</div><div style="font-size:11px;color:var(--text3);">AAPL 비중 축소, AMZN 추가 매수, MSFT 유지</div></div>
+    </div>
+    <div class="digest-row">
+      <div class="digest-num">2</div>
+      <div><div style="font-size:13px;font-weight:500;">신규 주목 종목</div><div style="font-size:11px;color:var(--text3);">Cathie Wood가 ARCT 매수, NPS가 CRH 신규 진입</div></div>
+    </div>
+    <div class="digest-row">
+      <div class="digest-num">1</div>
+      <div><div style="font-size:13px;font-weight:500;">위험 신호</div><div style="font-size:11px;color:var(--text3);">META: 4명 레전드 동시 전량 매도</div></div>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <div class="filter-chip active">전체</div>
+    <div class="filter-chip" onclick="this.classList.toggle('active')">🟢 신규 진입</div>
+    <div class="filter-chip" onclick="this.classList.toggle('active')">📈 추가 매수</div>
+    <div class="filter-chip" onclick="this.classList.toggle('active')">📉 비중 축소</div>
+    <div class="filter-chip" onclick="this.classList.toggle('active')">🔴 전량 매도</div>
+    <div class="filter-chip" onclick="this.classList.toggle('active')">⚡ 내 종목</div>
+  </div>
+
+  <!-- Alert Items -->
+  <div class="alert-item hover-lift">
+    <div class="alert-header">
+      <div class="alert-icon" style="background:rgba(239,68,68,0.15);">🔴</div>
+      <div class="alert-meta">
+        <div class="alert-title">META — 4명 레전드 전량 매도 <span class="badge badge-red" style="font-size:10px;margin-left:6px;">EXIT</span></div>
+        <div class="alert-time">3시간 전 · 13F 공시 기준</div>
+      </div>
+    </div>
+    <div class="alert-body">
+      <span class="highlight">⚠️ 내 포트폴리오 종목!</span><br>
+      버핏, 드러켄밀러, 아크만, 게이츠가 동시에 META를 전량 매도했습니다. 4명 이상 동시 청산은 최근 2년간 3번째로, 역사적으로 <span class="highlight">향후 6개월 하락 확률 72%</span>에 해당합니다.
+    </div>
+    <div class="alert-tickers">
+      <span class="alert-ticker" style="background:rgba(239,68,68,0.15);color:var(--red);">META -100%</span>
+    </div>
+  </div>
+
+  <div class="alert-item hover-lift">
+    <div class="alert-header">
+      <div class="alert-icon" style="background:rgba(34,197,94,0.15);">🟢</div>
+      <div class="alert-meta">
+        <div class="alert-title">AAPL — 버핏 비중 축소 <span class="badge badge-orange" style="font-size:10px;margin-left:6px;">REDUCE</span></div>
+        <div class="alert-time">1일 전 · 13F 공시 기준</div>
+      </div>
+    </div>
+    <div class="alert-body">
+      <span class="highlight">📌 내 포트폴리오 종목!</span><br>
+      버핏이 AAPL 비중을 <span class="highlight">71.5% → 68.2%</span>로 줄였습니다. 3분기 연속 축소 추세이나, 여전히 포트폴리오 #1 비중으로 핵심 보유 의지는 유지 중입니다.
+    </div>
+    <div class="alert-tickers">
+      <span class="alert-ticker" style="background:rgba(245,158,11,0.15);color:var(--orange);">AAPL -3.3%p</span>
+    </div>
+  </div>
+
+  <div class="alert-item hover-lift">
+    <div class="alert-header">
+      <div class="alert-icon" style="background:rgba(139,92,246,0.15);">🟣</div>
+      <div class="alert-meta">
+        <div class="alert-title">CRH — 5명 레전드 신규 매수 <span class="badge badge-green" style="font-size:10px;margin-left:6px;">NEW</span></div>
+        <div class="alert-time">2일 전 · 13F 공시 기준</div>
+      </div>
+    </div>
+    <div class="alert-body">
+      국민연금, Ray Dalio, Goldman Sachs 등 5명이 동시에 CRH를 신규 매수했습니다. 인프라 투자 테마 관련 <span class="highlight">공통 신호</span>로 판단됩니다. 아직 내 포트폴리오에 없는 종목입니다.
+    </div>
+    <div class="alert-tickers">
+      <span class="alert-ticker" style="background:rgba(34,197,94,0.15);color:var(--green);">CRH 신규</span>
+      <span class="alert-ticker" style="background:rgba(139,92,246,0.15);color:var(--accent);">5명 공통</span>
+    </div>
+  </div>
+
+  <div class="alert-item hover-lift">
+    <div class="alert-header">
+      <div class="alert-icon" style="background:rgba(34,197,94,0.15);">📈</div>
+      <div class="alert-meta">
+        <div class="alert-title">ARCT — Cathie Wood 매수 <span class="badge badge-green" style="font-size:10px;margin-left:6px;">ADD</span></div>
+        <div class="alert-time">3월 18일 · ARK 일별 매매</div>
+      </div>
+    </div>
+    <div class="alert-body">
+      Cathie Wood가 ARKG에서 ARCT 33,864주를 매수했습니다. mRNA 유전자치료 플랫폼 기업으로, <span class="highlight">ARK의 유전자치료 테마 베팅</span> 강화 신호입니다.
+    </div>
+    <div class="alert-tickers">
+      <span class="alert-ticker" style="background:rgba(34,197,94,0.15);color:var(--green);">ARCT +0.02%p</span>
+    </div>
+  </div>
+
+  <!-- Notification Settings -->
+  <div class="card" style="margin-top:24px;">
+    <div class="card-header">
+      <div>
+        <div class="card-title">🔔 알림 설정</div>
+        <div class="card-subtitle">어떤 변화를 받아볼지 선택하세요</div>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">내 종목 변동 알림</div>
+        <div class="toggle-desc">레전드가 내 보유 종목을 매수/매도할 때</div>
+      </div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">신규 진입 알림 (NEW)</div>
+        <div class="toggle-desc">추적 중인 투자자가 새 종목을 매수할 때</div>
+      </div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">전량 매도 알림 (EXIT)</div>
+        <div class="toggle-desc">추적 중인 투자자가 종목을 완전히 청산할 때</div>
+      </div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">주간 다이제스트</div>
+        <div class="toggle-desc">매주 월요일 아침 요약 리포트</div>
+      </div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="toggle-row" style="border-bottom:none;">
+      <div>
+        <div class="toggle-label">공통 신호 알림</div>
+        <div class="toggle-desc">3명 이상 동시 매수/매도 시</div>
+      </div>
+      <div class="toggle" onclick="this.classList.toggle('on')"></div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:20px;">
+    <button class="btn btn-primary">알림 저장하기 ✓</button>
+  </div>
+</div>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function selectMethod(el) {
+  document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function addTicker(ticker) {
+  const chips = document.getElementById('ticker-chips');
+  const chip = document.createElement('div');
+  chip.className = 'chip';
+  chip.innerHTML = `${ticker} <span class="remove" onclick="this.parentElement.remove()">✕</span>`;
+  chips.appendChild(chip);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FolioObs | Institutional Intelligence Terminal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#10b981", // Brand Obs Green
+                        "on-primary": "#ffffff",
+                        "surface": "#fcfcfd",
+                        "background": "#ffffff",
+                        "on-surface": "#111827",
+                        "on-surface-variant": "#4b5563",
+                        "outline-variant": "#e5e7eb",
+                        "surface-container": "#f9fafb",
+                        "surface-container-low": "#f3f4f6",
+                        "error": "#ef4444",
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.375rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter", "sans-serif"],
+                        "serif": ["Newsreader", "serif"],
+                        "body": ["Inter", "sans-serif"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+        }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .font-serif { font-family: 'Newsreader', serif; }
+        .sidebar-active { background-color: #ffffff; border-right: 3px solid #10b981; color: #111827; }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopNavBar -->
+<nav class="sticky top-0 z-50 bg-white border-b border-outline-variant flex justify-between items-center w-full px-6 py-3">
+<div class="flex items-center gap-10">
+<div class="flex items-center text-xl font-bold tracking-tight">
+<span class="text-slate-900">Folio</span><span class="text-primary">Obs</span>
+</div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="text-sm font-semibold text-slate-900 border-b-2 border-primary py-4 -mb-[17px]" href="#">Terminal</a>
+<a class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors" href="#">Markets</a>
+<a class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors" href="#">13F Filings</a>
+<a class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors" href="#">Analysis</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-sm font-semibold text-slate-600 hover:text-slate-900">Login</button>
+<button class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded font-semibold text-sm transition-all">Get Started</button>
+</div>
+</nav>
+<div class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col w-64 border-r border-outline-variant bg-surface-container py-6 sticky top-[61px] h-[calc(100vh-61px)]">
+<div class="px-6 mb-8">
+<p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Institutional Terminal</p>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2.5 sidebar-active rounded-sm group transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 text-slate-500 hover:bg-white hover:text-slate-900 rounded-sm transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+<span class="text-sm font-medium">Portfolios</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 text-slate-500 hover:bg-white hover:text-slate-900 rounded-sm transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">description</span>
+<span class="text-sm font-medium">13F Filings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 text-slate-500 hover:bg-white hover:text-slate-900 rounded-sm transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">auto_graph</span>
+<span class="text-sm font-medium">Alpha Signals</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 text-slate-500 hover:bg-white hover:text-slate-900 rounded-sm transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">filter_alt</span>
+<span class="text-sm font-medium">Screener</span>
+</a>
+</nav>
+<div class="px-4 mt-auto pt-6 border-t border-outline-variant">
+<button class="w-full bg-slate-900 text-white text-[11px] font-bold uppercase tracking-wider py-2.5 rounded hover:bg-slate-800 transition-all mb-6">Upgrade to Pro</button>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 text-sm font-medium hover:text-slate-900" href="#">
+<span class="material-symbols-outlined text-[18px]">settings</span> Settings
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 text-sm font-medium hover:text-slate-900" href="#">
+<span class="material-symbols-outlined text-[18px]">help</span> Support
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 min-w-0 bg-white">
+<!-- Hero Section -->
+<section class="px-10 pt-16 pb-12 max-w-7xl">
+<div class="flex items-center gap-2 mb-4">
+<span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Live Data Stream</span>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-start gap-12">
+<div class="max-w-3xl">
+<h1 class="text-5xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
+                        Track Legendary 13F Portfolios <span class="text-slate-400 italic font-serif font-medium">in Real Time.</span>
+</h1>
+<p class="text-lg text-slate-600 font-medium leading-relaxed max-w-2xl">
+                        FolioObs provides professional-grade intelligence on institutional power moves. We monitor SEC filings from the world's most successful funds, delivering conviction signals to your terminal.
+                    </p>
+</div>
+<div class="flex gap-10 mt-4">
+<div class="text-left">
+<p class="text-3xl font-bold text-slate-900 tracking-tight">4,128</p>
+<p class="text-[10px] uppercase tracking-widest font-bold text-slate-400">Active Portfolios</p>
+</div>
+<div class="text-left">
+<p class="text-3xl font-bold text-slate-900 tracking-tight">$12.4T</p>
+<p class="text-[10px] uppercase tracking-widest font-bold text-slate-400">AUM Tracked</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Insight Ribbon -->
+<div class="w-full bg-slate-50 py-3 px-10 border-y border-outline-variant">
+<div class="flex justify-between items-center text-[11px] font-bold uppercase tracking-wider">
+<div class="flex items-center gap-8">
+<span class="text-slate-400">Hot Tickers</span>
+<div class="flex gap-6">
+<span class="text-slate-900">NVDA <span class="text-primary ml-1">+4.2%</span></span>
+<span class="text-slate-900">AAPL <span class="text-error ml-1">-1.1%</span></span>
+<span class="text-slate-900">TSLA <span class="text-primary ml-1">+0.8%</span></span>
+<span class="text-slate-900">PLTR <span class="text-primary ml-1">+12.4%</span></span>
+</div>
+</div>
+<div class="text-slate-400">Next Cycle: <span class="text-slate-900">Q4 2024 Filing Period</span></div>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<section class="p-10 max-w-7xl">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Main Feed Card -->
+<div class="lg:col-span-2 border border-outline-variant rounded-lg p-8 shadow-sm">
+<div class="flex justify-between items-start mb-10">
+<div>
+<h3 class="text-xl font-bold text-slate-900">Market Conviction Today</h3>
+<p class="text-sm text-slate-500 mt-1">Summary of aggregate institutional shifts in last 24h</p>
+</div>
+<button class="text-xs font-bold text-primary hover:underline uppercase tracking-wider">Historical Analytics</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+<div>
+<h4 class="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-6">Net Inflows by Ticker</h4>
+<div class="space-y-6">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 bg-slate-100 flex items-center justify-center font-bold text-xs rounded">M</div>
+<div>
+<p class="text-sm font-bold">META</p>
+<p class="text-[10px] text-slate-400">Meta Platforms</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-primary">+$1.2B</p>
+<p class="text-[10px] text-slate-400">8 Funds</p>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 bg-slate-100 flex items-center justify-center font-bold text-xs rounded">A</div>
+<div>
+<p class="text-sm font-bold">AMZN</p>
+<p class="text-[10px] text-slate-400">Amazon.com</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-primary">+$840M</p>
+<p class="text-[10px] text-slate-400">5 Funds</p>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 bg-slate-100 flex items-center justify-center font-bold text-xs rounded">U</div>
+<div>
+<p class="text-sm font-bold">UNH</p>
+<p class="text-[10px] text-slate-400">UnitedHealth</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-primary">+$612M</p>
+<p class="text-[10px] text-slate-400">3 Funds</p>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col">
+<h4 class="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-6">Aggregate Sentiment</h4>
+<div class="mb-auto">
+<div class="flex items-end gap-2 mb-3">
+<span class="text-3xl font-bold text-slate-900">Bullish</span>
+<span class="material-symbols-outlined text-primary mb-1">trending_up</span>
+</div>
+<p class="text-xs leading-relaxed text-slate-600 font-medium">Large-cap rotation observed across 14 hedge fund updates. Focus shifting toward healthcare and cybersecurity infra.</p>
+</div>
+<div class="mt-10 p-5 bg-slate-50 border border-outline-variant rounded">
+<p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Institution Conviction Index</p>
+<div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[78%]"></div>
+</div>
+<div class="flex justify-between mt-2.5">
+<span class="text-[10px] font-medium text-slate-400">Cautious</span>
+<span class="text-[10px] font-bold text-primary">Strong Conviction</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Timeline Sidebar -->
+<div class="border border-outline-variant rounded-lg p-6 bg-slate-50 shadow-sm">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-900 mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">history</span> Terminal Feed
+                    </h3>
+<div class="space-y-8">
+<div class="relative pl-6 border-l border-slate-200 pb-1">
+<div class="absolute -left-[4.5px] top-0 w-2 h-2 rounded-full bg-primary ring-4 ring-white"></div>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">14:02 PM</p>
+<p class="text-xs font-bold text-slate-900 leading-snug">Scion Asset Management</p>
+<p class="text-[11px] text-slate-500 mt-1">Exited 12 positions, increased stake in BABA.</p>
+</div>
+<div class="relative pl-6 border-l border-slate-200 pb-1">
+<div class="absolute -left-[4.5px] top-0 w-2 h-2 rounded-full bg-slate-300 ring-4 ring-white"></div>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">13:45 PM</p>
+<p class="text-xs font-bold text-slate-900 leading-snug">Appaloosa Management</p>
+<p class="text-[11px] text-slate-500 mt-1">Increased NVDA position by 20%.</p>
+</div>
+<div class="relative pl-6 border-l border-slate-200 pb-1">
+<div class="absolute -left-[4.5px] top-0 w-2 h-2 rounded-full bg-slate-300 ring-4 ring-white"></div>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">11:20 AM</p>
+<p class="text-xs font-bold text-slate-900 leading-snug">Bridgewater Associates</p>
+<p class="text-[11px] text-slate-500 mt-1">Major reshuffle in emerging markets exposure.</p>
+</div>
+</div>
+<button class="w-full mt-10 py-2.5 text-[10px] font-bold uppercase tracking-widest text-slate-600 border border-slate-300 rounded hover:bg-slate-100 transition-colors">Expand Full Feed</button>
+</div>
+</div>
+</section>
+<!-- Tracked Investors Grid -->
+<section class="px-10 pb-20 max-w-7xl mx-auto">
+<div class="flex justify-between items-center mb-8 border-b border-outline-variant pb-6">
+<div>
+<h3 class="text-2xl font-bold text-slate-900">Strategic Portfolio Monitors</h3>
+<p class="text-sm text-slate-500 mt-1">Daily tracking of high-conviction institutional portfolios</p>
+</div>
+<div class="flex gap-1">
+<button class="px-3 py-1.5 border border-outline-variant rounded-l text-xs font-bold bg-slate-900 text-white">Grid</button>
+<button class="px-3 py-1.5 border border-outline-variant rounded-r text-xs font-bold text-slate-500 hover:bg-slate-50">List</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Investor Card -->
+<div class="bg-white p-6 border border-outline-variant rounded shadow-sm hover:ring-1 hover:ring-primary transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[9px] font-extrabold uppercase tracking-widest text-primary px-2 py-0.5 bg-primary/5 rounded-full">Legendary Value</span>
+<span class="material-symbols-outlined text-slate-300 text-lg">star</span>
+</div>
+<h4 class="text-base font-bold text-slate-900 mb-6">Warren Buffett</h4>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between border-b border-slate-50 pb-2">
+<span class="text-[10px] text-slate-400 uppercase font-bold">Portfolio Value</span>
+<span class="text-xs font-bold text-slate-900">$342.1B</span>
+</div>
+<div class="flex justify-between border-b border-slate-50 pb-2">
+<span class="text-[10px] text-slate-400 uppercase font-bold">Top Position</span>
+<span class="text-xs font-bold text-slate-900">AAPL (42%)</span>
+</div>
+<div class="flex justify-between border-b border-slate-50 pb-2">
+<span class="text-[10px] text-slate-400 uppercase font-bold">Latest Pulse</span>
+<span class="text-[10px] font-bold text-error uppercase">Reducing Exposure</span>
+</div>
+</div>
+<div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex">
+<div class="h-full bg-primary/20 w-[60%] border-r border-white"></div>
+<div class="h-full bg-primary/20 w-[10%] border-r border-white"></div>
+<div class="h-full bg-primary w-[30%]"></div>
+</div>
+</div>
+<!-- Investor Card -->
+<div class="bg-white p-6 border border-outline-variant rounded shadow-sm hover:ring-1 hover:ring-primary transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[9px] font-extrabold uppercase tracking-widest text-primary px-2 py-0.5 bg-primary/5 rounded-full">Growth Macro</span>
+<span class="material-symbols-outlined text-slate-300 text-lg">star</span>
+</div>
+<h4 class="text-base font-bold text-slate-900 mb-6">Stan Druckenmiller</h4>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between border-b border-slate-50 pb-2">
+<span class="text-[10px] text-slate-400 uppercase font-bold">Portfolio Value</span>
+<span class="text-xs font-bold text-slate-900">$2.8B</span>
+</div>
+<div class="flex justify-between border-b border-slate-50 pb-2">
+<span class="text-[10px] text-slate-400 uppercase font-bold">Top Position</span>
+<span class="text-xs font-bold text-slate-900">NVDA (18%)</span>
+</div>
+<div class="flex justify-between border-b border-slate-50 pb-2">
+<span class="text-[10px] text-slate-400 uppercase font-bold">Latest Pulse</span>
+<span class="text-[10px] font-bold text-primary uppercase">Aggressive Buy</span>
+</div>
+</div>
+<div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex">
+<div class="h-full bg-primary w-[45%] border-r border-white"></div>
+<div class="h-full bg-primary/20 w-[55%]"></div>
+</div>
+</div>
+<!-- Investor Card -->
+<div class="bg-white p-6 border border-outline-variant rounded shadow-sm hover:ring-1 hover:ring-primary transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[9px] font-extrabold uppercase tracking-widest text-primary px-2 py-0.5 bg-primary/5 rounded-full">Quant System</span>
+<span class="material-symbols-outlined text-slate-300 text-lg">star</span>
+</div>
+<h4 class="text-base font-bold text-slate-900 mb-6">Jim Simons (RenTech)</h4>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between border-b border-slate-50 pb-2">
+<span class="text-[10px] text-slate-400 uppercase font-bold">Portfolio Value</span>
+<span class="text-xs font-bold text-slate-900">$84.6B</span>
+</div>
+<div class="flex justify-between border-b border-slate-50 pb-2">
+<span class="text-[10px] text-slate-400 uppercase font-bold">Top Position</span>
+<span class="text-xs font-bold text-slate-900">Diverse Quant</span>
+</div>
+<div class="flex justify-between border-b border-slate-50 pb-2">
+<span class="text-[10px] text-slate-400 uppercase font-bold">Latest Pulse</span>
+<span class="text-[10px] font-bold text-slate-900 uppercase">High Turnover</span>
+</div>
+</div>
+<div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex">
+<div class="h-full bg-primary w-[90%] border-r border-white"></div>
+<div class="h-full bg-primary/20 w-[10%]"></div>
+</div>
+</div>
+<!-- Investor Card -->
+<div class="bg-white p-6 border border-outline-variant rounded shadow-sm hover:ring-1 hover:ring-primary transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[9px] font-extrabold uppercase tracking-widest text-primary px-2 py-0.5 bg-primary/5 rounded-full">Concentrated Alpha</span>
+<span class="material-symbols-outlined text-slate-300 text-lg">star</span>
+</div>
+<h4 class="text-base font-bold text-slate-900 mb-6">Chris Hohn (TCI)</h4>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between border-b border-slate-50 pb-2">
+<span class="text-[10px] text-slate-400 uppercase font-bold">Portfolio Value</span>
+<span class="text-xs font-bold text-slate-900">$32.1B</span>
+</div>
+<div class="flex justify-between border-b border-slate-50 pb-2">
+<span class="text-[10px] text-slate-400 uppercase font-bold">Top Position</span>
+<span class="text-xs font-bold text-slate-900">GOOGL (24%)</span>
+</div>
+<div class="flex justify-between border-b border-slate-50 pb-2">
+<span class="text-[10px] text-slate-400 uppercase font-bold">Latest Pulse</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase">Steady Hold</span>
+</div>
+</div>
+<div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex">
+<div class="h-full bg-primary w-[25%] border-r border-white"></div>
+<div class="h-full bg-primary/20 w-[75%]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Comparison Module -->
+<section class="bg-slate-50 py-20 px-10 border-t border-outline-variant">
+<div class="max-w-7xl mx-auto">
+<div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm flex flex-col md:flex-row">
+<div class="p-10 flex-1 border-r border-outline-variant">
+<h3 class="text-2xl font-bold text-slate-900 mb-2">Portfolio Overlap Matrix</h3>
+<p class="text-sm text-slate-500 mb-10">Identify high-conviction "Super-Stocks" held across multiple legends.</p>
+<div class="space-y-8">
+<div>
+<div class="flex justify-between items-center mb-2.5">
+<span class="text-xs font-bold text-slate-900">NVIDIA (NVDA)</span>
+<span class="text-[10px] font-bold text-slate-400">42 INSTITUTIONS</span>
+</div>
+<div class="w-full h-2 bg-slate-100 rounded-full">
+<div class="h-full bg-primary w-[92%] rounded-full"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2.5">
+<span class="text-xs font-bold text-slate-900">MICROSOFT (MSFT)</span>
+<span class="text-[10px] font-bold text-slate-400">38 INSTITUTIONS</span>
+</div>
+<div class="w-full h-2 bg-slate-100 rounded-full">
+<div class="h-full bg-primary w-[84%] rounded-full"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2.5">
+<span class="text-xs font-bold text-slate-900">ALPHABET (GOOGL)</span>
+<span class="text-[10px] font-bold text-slate-400">31 INSTITUTIONS</span>
+</div>
+<div class="w-full h-2 bg-slate-100 rounded-full">
+<div class="h-full bg-primary w-[68%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-10 bg-slate-50/50 w-full md:w-96 flex flex-col items-center justify-center text-center">
+<div class="w-16 h-16 rounded-lg bg-white border border-outline-variant shadow-sm flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">compare_arrows</span>
+</div>
+<h4 class="text-lg font-bold text-slate-900 mb-2">Analyze Correlation</h4>
+<p class="text-xs text-slate-500 max-w-[200px] mb-8 font-medium">Compare up to 5 investor strategies to find shared alpha signals.</p>
+<button class="bg-slate-900 text-white text-xs font-bold uppercase tracking-widest px-8 py-3 rounded hover:bg-slate-800 transition-all">Start Visualizer</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-white border-t border-outline-variant py-16 px-10">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-16">
+<div class="max-w-xs">
+<div class="flex items-center text-xl font-bold tracking-tight mb-4">
+<span class="text-slate-900">Folio</span><span class="text-primary">Obs</span>
+</div>
+<p class="text-xs text-slate-500 leading-relaxed font-medium">
+                Premium financial intelligence for professional investors. Direct monitoring of SEC EDGAR institutional filings. All data is for informational purposes only.
+            </p>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-16">
+<div>
+<h5 class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-slate-400 mb-6">Analysis</h5>
+<ul class="space-y-3 text-[12px] font-semibold text-slate-600">
+<li><a class="hover:text-primary transition-colors" href="#">Growth Funds</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Value Legends</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Hedge Pulse</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-slate-400 mb-6">Platform</h5>
+<ul class="space-y-3 text-[12px] font-semibold text-slate-600">
+<li><a class="hover:text-primary transition-colors" href="#">API Access</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">13F Guide</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Status</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-slate-400 mb-6">Company</h5>
+<ul class="space-y-3 text-[12px] font-semibold text-slate-600">
+<li><a class="hover:text-primary transition-colors" href="#">Terms</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Privacy</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Contact</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="max-w-7xl mx-auto mt-16 pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">© 2024 FolioObs Intelligence. Data sourced from SEC.</p>
+<div class="flex gap-6 items-center">
+<span class="text-[10px] font-bold text-slate-400 uppercase">English (US)</span>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-slate-300 text-lg cursor-pointer hover:text-slate-600">public</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>
