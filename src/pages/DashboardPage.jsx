@@ -962,27 +962,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 )}
               </div>
 
-              {/* 휴장일 안내 배너 */}
-              {isHolidayData && (
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded mb-3" style={{
-                  background: t.name === 'dark' ? 'rgba(245,158,11,0.06)' : 'rgba(245,158,11,0.05)',
-                  border: `1px dashed ${t.name === 'dark' ? 'rgba(245,158,11,0.20)' : 'rgba(245,158,11,0.25)'}`,
-                }}>
-                  <span className="text-[11px] leading-tight" style={{ color: t.name === 'dark' ? '#fbbf24' : '#d97706' }}>
-                    {(() => {
-                      const ltdLabel = lastTradeDate ? (() => {
-                        const d = new Date(lastTradeDate + 'T00:00:00');
-                        return L.locale === 'ko'
-                          ? `${d.getMonth() + 1}/${d.getDate()}일`
-                          : `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-                      })() : '';
-                      return L.locale === 'ko'
-                        ? `오늘은 미국 시장 휴장일${todayHoliday ? ` (${todayHoliday.ko})` : ''}이에요. 마지막 거래일 종가 기준으로 보여드립니다.${ltdLabel ? ` (${ltdLabel})` : ''}`
-                        : `US markets are closed today${todayHoliday ? ` (${todayHoliday.en})` : ''}. Showing last trading day's closing prices.${ltdLabel ? ` (${ltdLabel})` : ''}`;
-                    })()}
-                  </span>
-                </div>
-              )}
+              {/* 휴장일 안내 배너 — 제거됨 (불필요한 UX) */}
 
               {/* 탭 — 언더라인 스타일 */}
               <div className="flex items-center gap-0 mb-5 ml-[2px]" style={{
