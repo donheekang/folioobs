@@ -1351,6 +1351,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                 </h2>
                 <p className="text-[10px] mt-0.5" style={{ color: t.textMuted }}>
                   {L.locale === 'ko'
+                    ? '월가 투자자 보유 종목의 상승·하락·거래액을 매일 추적합니다'
+                    : 'Tracks daily gains, losses & volume of Wall St. investor holdings'}
+                </p>
+                <p className="text-[10px] mt-0.5" style={{ color: t.textMuted, opacity: 0.7 }}>
+                  {L.locale === 'ko'
                     ? `${datesLabel} 종가 기준 · ${w.tradingDays}거래일 누적 데이터`
                     : `Based on ${datesLabel} closing prices · ${w.tradingDays}-day cumulative`}
                 </p>
