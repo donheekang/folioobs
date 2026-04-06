@@ -444,43 +444,56 @@ Deno.serve(async (req) => {
     const ms = await fetchMarketStatus();
 
     // 3차: Yahoo Finance로 장외 데이터 보충
-    // 애프터마켓/프리마켓에서만 Yahoo 데이터 가져옴 (데이마켓은 종가 기준으로 표시)
-    if (ms.status === "after-hours" || ms.status === "pre-market") {
-      // Polygon에서 장외 데이터 없는 종목만 Yahoo로 보충
-      // Polygon Snapshot은 프리마켓에서도 lastTrade.p/todaysChange로 프리마켓 가격 제공
+    if (ms.status === "after-hours") {
+      // 애프터마켓: Polygon에 AH 없는 종목만 Yahoo로 보충
       const tickersForYahoo = Object.entries(priceMap)
         .filter(([_, v]) => !v.ah)
         .map(([k]) => k);
 
       if (tickersForYahoo.length > 0) {
-        console.log(`[Yahoo] ${tickersForYahoo.length}개 종목 장외 데이터 조회 (${ms.status})`);
+        console.log(`[Yahoo] ${tickersForYahoo.length}개 종목 after-hours 데이터 조회`);
         try {
           const yahooData = await fetchYahooExtendedHours(tickersForYahoo);
           let filled = 0;
           for (const [ticker, yData] of Object.entries(yahooData)) {
-            if (priceMap[ticker]) {
-              if (ms.status === "after-hours") {
-                // 애프터마켓: ah 데이터 사용
-                if (yData.ah) {
-                  priceMap[ticker].ah = yData.ah;
-                  priceMap[ticker].ahCh = yData.ahCh || 0;
-                  filled++;
-                }
-              } else if (ms.status === "pre-market") {
-                // 프리마켓: Yahoo pm 데이터가 있으면 덮어씀, 없으면 Polygon 데이터 유지
-                if (yData.pm) {
-                  priceMap[ticker].ah = yData.pm;
-                  priceMap[ticker].ahCh = yData.pmCh || 0;
-                  filled++;
-                }
-                // Yahoo에 pm 없어도 Polygon의 lastTrade 기반 데이터는 유지 (실제 프리마켓 거래)
-              }
+            if (priceMap[ticker] && yData.ah) {
+              priceMap[ticker].ah = yData.ah;
+              priceMap[ticker].ahCh = yData.ahCh || 0;
+              filled++;
             }
           }
-          console.log(`[Yahoo] ${filled}개 종목 ${ms.status} 데이터 보충 완료`);
+          console.log(`[Yahoo] ${filled}개 종목 after-hours 데이터 보충 완료`);
         } catch (e) {
-          console.warn("[Yahoo] 보충 실패 (Polygon 데이터만 사용):", e);
+          console.warn("[Yahoo] after-hours 보충 실패:", e);
         }
+      }
+    } else if (ms.status === "pre-market") {
+      // *** 프리마켓 핵심 수정 ***
+      // Polygon의 ah 값은 어제 애프터마켓의 lastTrade 기반이라 stale 데이터임
+      // → 먼저 모든 종목의 Polygon ah를 제거하고, Yahoo에서 진짜 프리마켓 가격만 사용
+
+      // Step 1: Polygon의 stale AH 데이터 모두 제거
+      const allTickers = Object.keys(priceMap);
+      for (const ticker of allTickers) {
+        delete priceMap[ticker].ah;
+        delete priceMap[ticker].ahCh;
+      }
+      console.log(`[PreMarket] ${allTickers.length}개 종목 Polygon stale AH 제거, Yahoo에서 진짜 PM 조회`);
+
+      // Step 2: 모든 종목에 대해 Yahoo에서 프리마켓 데이터 조회
+      try {
+        const yahooData = await fetchYahooExtendedHours(allTickers);
+        let filled = 0;
+        for (const [ticker, yData] of Object.entries(yahooData)) {
+          if (priceMap[ticker] && yData.pm) {
+            priceMap[ticker].ah = yData.pm;
+            priceMap[ticker].ahCh = yData.pmCh || 0;
+            filled++;
+          }
+        }
+        console.log(`[Yahoo] ${filled}개 종목 pre-market 데이터 설정 완료 (총 ${allTickers.length}개 중)`);
+      } catch (e) {
+        console.warn("[Yahoo] pre-market 조회 실패:", e);
       }
     }
 
