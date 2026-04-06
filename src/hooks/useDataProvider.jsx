@@ -713,6 +713,7 @@ export function DataProvider({ children }) {
   const [stockPrices, setStockPrices] = useState({});  // { ticker: { current, quarterEnd, changePct } }
   const [marketStatus, setMarketStatus] = useState('unknown'); // 'open' | 'closed' | 'pre-market' | 'after-hours' | 'unknown'
   const [lastTradeDate, setLastTradeDate] = useState(null); // 'YYYY-MM-DD'
+  const [weeklyHotStocks, setWeeklyHotStocks] = useState(null); // 주간 핫 종목
   const [loading, setLoading] = useState(true);        // Phase A: 코어 데이터 로딩
   const [detailLoading, setDetailLoading] = useState(true); // Phase B: 디테일 데이터 로딩
   const [error, setError] = useState(null);
@@ -1264,6 +1265,90 @@ export function DataProvider({ children }) {
         setDetailLoading(false);
         console.log('[DataProvider] Phase B 완료 — 전체 로드 완료');
 
+        // ========== 핫 종목 트래커 (백그라운드, 비차단) ==========
+        try {
+          // Supabase Free tier는 기본 1000행 제한 → 페이지네이션으로 전부 가져오기
+          let weeklyData = [];
+          let from = 0;
+          const PAGE = 1000;
+          while (true) {
+            const { data: batch, error: batchErr } = await supabase
+              .from('daily_snapshots')
+              .select('date, ticker, close_price, daily_change_pct, trading_value, tracked_by_investors, investor_count')
+              .order('date', { ascending: false })
+              .range(from, from + PAGE - 1);
+            if (batchErr || !batch || batch.length === 0) break;
+            weeklyData = weeklyData.concat(batch);
+            if (batch.length < PAGE) break; // 마지막 페이지
+            from += PAGE;
+          }
+
+          if (weeklyData.length > 0 && !cancelled) {
+            // 날짜별 그룹
+            const dates = [...new Set(weeklyData.map(r => r.date))].sort().reverse();
+            const tradingDays = dates.length; // 실제 거래일 수
+
+            // 종목별 집계
+            const tickerMap = {};
+            for (const row of weeklyData) {
+              if (!tickerMap[row.ticker]) {
+                tickerMap[row.ticker] = {
+                  ticker: row.ticker,
+                  changes: [],
+                  totalTradingValue: 0,
+                  trackedBy: row.tracked_by_investors,
+                  investorCount: row.investor_count || 0,
+                  latestPrice: null,
+                };
+              }
+              const t = tickerMap[row.ticker];
+              t.changes.push(row.daily_change_pct || 0);
+              t.totalTradingValue += row.trading_value || 0;
+              if (!t.latestPrice && row.close_price) t.latestPrice = row.close_price;
+            }
+
+            // 누적 수익률 계산 (복리)
+            const entries = Object.values(tickerMap).map(t => {
+              const cumReturn = t.changes.reduce((acc, ch) => acc * (1 + ch / 100), 1) - 1;
+              return {
+                ...t,
+                cumReturn: Math.round(cumReturn * 10000) / 100, // %
+                avgDailyVolume: t.totalTradingValue / t.changes.length,
+                daysTracked: t.changes.length,
+              };
+            });
+
+            const tracked = entries.filter(e => e.investorCount > 0);
+
+            // 상승률 Top 100
+            const topGainers = [...tracked]
+              .sort((a, b) => b.cumReturn - a.cumReturn)
+              .slice(0, 100);
+
+            // 하락률 Top 100
+            const topLosers = [...tracked]
+              .sort((a, b) => a.cumReturn - b.cumReturn)
+              .slice(0, 100);
+
+            // 거래액 Top 100 (일평균 거래액 기준)
+            const topVolume = [...tracked]
+              .sort((a, b) => b.avgDailyVolume - a.avgDailyVolume)
+              .slice(0, 100);
+
+            setWeeklyHotStocks({
+              tradingDays,
+              dates, // 모든 거래일 (최신순)
+              dateRange: { from: dates[dates.length - 1], to: dates[0] },
+              topGainers,
+              topLosers,
+              topVolume,
+            });
+            console.log(`[DataProvider] 주간 핫 종목 로드: ${tradingDays}일, ${Object.keys(tickerMap).length}개 종목`);
+          }
+        } catch (e) {
+          console.warn('[DataProvider] 주간 핫 종목 로드 실패:', e.message);
+        }
+
       } catch (err) {
         if (cancelled) return;
         console.error('Supabase 로드 실패, mock 데이터로 전환:', err.message);
@@ -1358,10 +1443,12 @@ export function DataProvider({ children }) {
             const vwap = snap?.vwap || live.vw || 0;
             const prevClose = snap?.prev_close || live.pc || 0;
 
-            // AH 데이터: 장 마감(데이마켓)일 때는 AH 안 보여줌 (세션 종료됨)
-            // 실제 after-hours/pre-market 활성 시에만 Polygon AH 데이터 사용
-            const afterHoursPrice = data.marketStatus !== 'closed' ? (live.ah || null) : null;
-            const afterHoursChange = data.marketStatus !== 'closed' ? (live.ahCh || null) : null;
+            // 장외 데이터: 프리마켓/애프터마켓에서만 표시
+            // - 데이마켓(closed): 종가 기준으로만 표시 (장외 가격 미표시)
+            // - 장중(open): 장외 가격 무의미 → null
+            const isExtendedSession = data.marketStatus === 'after-hours' || data.marketStatus === 'pre-market';
+            const afterHoursPrice = isExtendedSession && live.ah ? live.ah : null;
+            const afterHoursChange = isExtendedSession && live.ah ? (live.ahCh || 0) : null;
 
             merged[ticker] = {
               current: currentPrice,
@@ -1411,6 +1498,7 @@ export function DataProvider({ children }) {
     stockPrices,
     marketStatus,
     lastTradeDate,
+    weeklyHotStocks,
     latestQuarter,
     lastUpdatedAt,
     loading,
@@ -1418,7 +1506,7 @@ export function DataProvider({ children }) {
     error,
     usingMock,
     getDbId: (slug) => SLUG_TO_DBID[slug] || null,
-  }), [investors, holdings, quarterlyHistory, quarterlyActivity, arkDailyTrades, aiInsights, stockPrices, marketStatus, lastTradeDate, latestQuarter, lastUpdatedAt, loading, detailLoading, error, usingMock]);
+  }), [investors, holdings, quarterlyHistory, quarterlyActivity, arkDailyTrades, aiInsights, stockPrices, marketStatus, lastTradeDate, weeklyHotStocks, latestQuarter, lastUpdatedAt, loading, detailLoading, error, usingMock]);
 
   return (
     <DataContext.Provider value={value}>

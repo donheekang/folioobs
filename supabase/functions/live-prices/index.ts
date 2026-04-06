@@ -9,9 +9,9 @@ const POLYGON_API_KEY = Deno.env.get("POLYGON_API_KEY")!;
 let cache: { data: Record<string, any>; timestamp: number; source: string; lastTradeDate: string; marketStatus: string } | null = null;
 const CACHE_TTL = 60 * 1000;
 
-// 장 상태 캐시 (5분 — 자주 안 바뀌니까)
+// 장 상태 캐시 (2분 — 장 전환 시점에 빠르게 반영)
 let marketStatusCache: { status: string; serverTime: string; lastTradeDate: string; timestamp: number } | null = null;
-const MARKET_STATUS_TTL = 5 * 60 * 1000;
+const MARKET_STATUS_TTL = 2 * 60 * 1000;
 
 // ===== Polygon Market Status API =====
 // 직접 시간 계산 대신 Polygon이 알려주는 장 상태를 사용
@@ -32,11 +32,39 @@ async function fetchMarketStatus(): Promise<{ status: string; serverTime: string
       let status = "closed";
       if (data.market === "open") {
         status = "open";
-      } else if (data.market === "extended-hours" || data.earlyHours === true || data.afterHours === true) {
-        // 프리마켓 vs 애프터마켓 구분
-        status = data.earlyHours === true ? "pre-market" : "after-hours";
+      } else if (data.earlyHours === true) {
+        // 프리마켓: 4AM~9:30AM ET (한국 17:00~22:30)
+        status = "pre-market";
+      } else if (data.afterHours === true) {
+        // 애프터마켓: 4PM~8PM ET (한국 05:00~09:00)
+        status = "after-hours";
+      } else if (data.market === "extended-hours") {
+        // extended-hours인데 earlyHours/afterHours 둘 다 false인 경계 케이스
+        // serverTime에서 ET 시간 추출하여 직접 판별
+        const st = data.serverTime || new Date().toISOString();
+        try {
+          // serverTime 형식: "2026-03-23T16:30:00-04:00"
+          // Date 파싱 후 ET 기준 시간 추출
+          const utcMs = new Date(st).getTime();
+          // EDT(UTC-4) vs EST(UTC-5) 판별: 서머타임 여부
+          const isDST = st.includes('-04:');
+          const etOffsetMs = (isDST ? 4 : 5) * 60 * 60 * 1000;
+          const etHour = new Date(utcMs - etOffsetMs).getUTCHours();
+          // 프리마켓: 4AM~9:30AM ET / 애프터마켓: 4PM~8PM ET
+          status = etHour < 12 ? "pre-market" : "after-hours";
+        } catch {
+          // 파싱 실패 시 안전하게 after-hours
+          status = "after-hours";
+        }
       }
+      // else: data.market === "closed" → 데이마켓 (장 완전 마감)
       const serverTime = data.serverTime || new Date().toISOString();
+
+      // 장 전환 시점 감지: 이전 캐시와 상태가 다르면 캐시 즉시 갱신
+      if (marketStatusCache && marketStatusCache.status !== status) {
+        console.log(`[MarketStatus] 장 전환 감지: ${marketStatusCache.status} → ${status}`);
+      }
+
       marketStatusCache = { status, serverTime, lastTradeDate: "", timestamp: Date.now() };
       return { status, serverTime };
     }
@@ -407,36 +435,43 @@ Deno.serve(async (req) => {
     // 장 상태는 Polygon Market Status API에서 가져오기
     const ms = await fetchMarketStatus();
 
-    // 3차: Yahoo Finance로 AH/PM 데이터 보충 (장외 시간일 때만)
+    // 3차: Yahoo Finance로 장외 데이터 보충
+    // 애프터마켓/프리마켓에서만 Yahoo 데이터 가져옴 (데이마켓은 종가 기준으로 표시)
     if (ms.status === "after-hours" || ms.status === "pre-market") {
-      // Polygon에서 AH 데이터 없는 종목 추출
-      const tickersWithoutAH = Object.entries(priceMap)
+      // Polygon에서 장외 데이터 없는 종목 추출
+      const tickersWithoutExtended = Object.entries(priceMap)
         .filter(([_, v]) => !v.ah)
         .map(([k]) => k);
 
-      if (tickersWithoutAH.length > 0) {
-        console.log(`[Yahoo] AH 데이터 없는 ${tickersWithoutAH.length}개 종목 Yahoo에서 보충 시도`);
+      if (tickersWithoutExtended.length > 0) {
+        console.log(`[Yahoo] ${tickersWithoutExtended.length}개 종목 장외 데이터 보충 시도 (${ms.status})`);
         try {
-          const yahooData = await fetchYahooExtendedHours(tickersWithoutAH);
+          const yahooData = await fetchYahooExtendedHours(tickersWithoutExtended);
           let filled = 0;
           for (const [ticker, yData] of Object.entries(yahooData)) {
             if (priceMap[ticker]) {
-              // 애프터마켓
-              if (yData.ah && !priceMap[ticker].ah) {
-                priceMap[ticker].ah = yData.ah;
-                priceMap[ticker].ahCh = yData.ahCh || 0;
-                filled++;
-              }
-              // 프리마켓
-              if (yData.pm && !priceMap[ticker].ah) {
-                // PM 시간에는 pm 데이터를 ah 필드에 넣어서 프론트엔드 호환
-                priceMap[ticker].ah = yData.pm;
-                priceMap[ticker].ahCh = yData.pmCh || 0;
-                filled++;
+              if (ms.status === "after-hours") {
+                // 애프터마켓: ah 데이터 사용
+                if (yData.ah) {
+                  priceMap[ticker].ah = yData.ah;
+                  priceMap[ticker].ahCh = yData.ahCh || 0;
+                  filled++;
+                }
+              } else if (ms.status === "pre-market") {
+                // 프리마켓: pm 데이터 우선
+                if (yData.pm) {
+                  priceMap[ticker].ah = yData.pm;
+                  priceMap[ticker].ahCh = yData.pmCh || 0;
+                  filled++;
+                } else if (yData.ah && !priceMap[ticker].ah) {
+                  priceMap[ticker].ah = yData.ah;
+                  priceMap[ticker].ahCh = yData.ahCh || 0;
+                  filled++;
+                }
               }
             }
           }
-          console.log(`[Yahoo] ${filled}개 종목 AH/PM 데이터 보충 완료`);
+          console.log(`[Yahoo] ${filled}개 종목 ${ms.status} 데이터 보충 완료`);
         } catch (e) {
           console.warn("[Yahoo] 보충 실패 (Polygon 데이터만 사용):", e);
         }

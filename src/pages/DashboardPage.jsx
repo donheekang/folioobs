@@ -38,7 +38,7 @@ const SkeletonCard = () => (
 const DashboardPage = memo(({ onNavigate, watchlist }) => {
   const t = useTheme();
   const L = useLocale();
-  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyHistory: QUARTERLY_HISTORY, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades, stockPrices, marketStatus, lastTradeDate, latestQuarter, lastUpdatedAt, loading: dataLoading } = useData();
+  const { investors: INVESTORS, holdings: HOLDINGS, quarterlyHistory: QUARTERLY_HISTORY, quarterlyActivity: QUARTERLY_ACTIVITY, arkDailyTrades, stockPrices, marketStatus, lastTradeDate, weeklyHotStocks, latestQuarter, lastUpdatedAt, loading: dataLoading } = useData();
   const { toggleInvestor, isWatchedInv } = watchlist;
   const totalAUM = useMemo(() => INVESTORS.reduce((s,i) => s+i.aum, 0), [INVESTORS]);
   const avgH = useMemo(() => {
@@ -63,6 +63,10 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
   const [showCountNew, setShowCountNew] = useState(COLLAPSE_LIMIT);
   const [showCountBuy, setShowCountBuy] = useState(COLLAPSE_LIMIT);
   const [showCountSell, setShowCountSell] = useState(COLLAPSE_LIMIT);
+  const [weeklyTab, setWeeklyTab] = useState('gainers');
+  const WEEKLY_INITIAL = 5;
+  const WEEKLY_PAGE = 20;
+  const [weeklyShowCount, setWeeklyShowCount] = useState(WEEKLY_INITIAL);
 
   // ===== 공시 후 포트폴리오 성과 계산 (캐시 우드 제외 — ARK는 일별 매매 공개) =====
   const portfolioPerformance = useMemo(() => {
@@ -87,10 +91,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     }).filter(Boolean).sort((a, b) => b.performance - a.performance);
   }, [INVESTORS, HOLDINGS, stockPrices]);
 
-  // 장 상태 4단계: 장중 / 애프터마켓 / 데이마켓 / 프리마켓
+  // 장 상태 4단계: 장중 / 프리마켓 / 애프터마켓 / 데이마켓
   const isExtended = marketStatus === 'pre-market' || marketStatus === 'after-hours';
-  const isDayMarket = marketStatus === 'closed' && !isExtended;
-  const extendedColor = marketStatus === 'pre-market' ? '#8b5cf6' : '#f59e0b'; // 프리: 보라, 애프터: 앰버
+  const isDayMarket = marketStatus === 'closed';
+
+  const extendedColor = marketStatus === 'pre-market' ? '#8b5cf6' : '#f59e0b';
   const dayMarketColor = '#3b82f6'; // 데이마켓: 블루
   const extendedLabel = marketStatus === 'pre-market'
     ? { ko: '프리마켓', en: 'Pre-Mkt' }
@@ -111,11 +116,14 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
     })();
     if (!dateStr) return null;
 
-    // 날짜 포맷
-    const d = new Date(dateStr + 'T00:00:00');
-    const formatted = L.locale === 'ko'
-      ? `${d.getMonth()+1}/${d.getDate()}`
-      : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    // 날짜 포맷 함수
+    const fmtDate = (str) => {
+      const d = new Date(str + 'T00:00:00');
+      return L.locale === 'ko'
+        ? `${d.getMonth()+1}/${d.getDate()}`
+        : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    };
+    const formatted = fmtDate(dateStr);
 
     if (marketStatus === 'open') {
       return L.locale === 'ko' ? `장중 · ${formatted} · 15분 지연` : `Live · ${formatted} · 15-min delayed`;
@@ -127,8 +135,8 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
       const holidayName = L.locale === 'ko' ? todayHoliday.ko : todayHoliday.en;
       return L.locale === 'ko' ? `휴장 · ${holidayName} · ${formatted} 종가` : `Closed · ${holidayName} · ${formatted}`;
     } else {
-      // 데이마켓: 장 마감 상태 (한국 낮 시간)
-      return L.locale === 'ko' ? `데이마켓 · ${formatted} 종가` : `Day Market · ${formatted}`;
+      // 장 마감 상태 (한국 낮 시간)
+      return L.locale === 'ko' ? `장 마감 · ${formatted} 종가` : `Closed · ${formatted}`;
     }
   }, [stockPrices, marketStatus, lastTradeDate, L, todayHoliday]);
 
@@ -882,12 +890,12 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             return marketStatus === 'closed' && zeroCount / withChange.length > 0.8;
           }, [liveStocks, marketStatus]);
 
-          // 장외 데이터 있으면: 총 변동률(정규장 + AH) 기준 정렬
+          // 변동률 계산: 마켓 상태에 따라 다른 기준
           const getTotalChange = (s) => {
             const base = s.dailyChange || 0;
             if (!isExtended || s.afterHoursChange == null) return base;
-            const ahPct = s.afterHoursChange || 0;
-            return base + ahPct;
+            // 프리마켓/애프터마켓: 정규장 변동 + 장외 변동
+            return base + (s.afterHoursChange || 0);
           };
 
           const rankedAll = useMemo(() => {
@@ -948,7 +956,9 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                   </p>
                 </div>
                 {priceLabel && (() => {
-                  const badgeColor = isExtended ? extendedColor : isDayMarket ? dayMarketColor : marketStatus === 'open' ? activeColor : t.textMuted;
+                  const badgeColor = isExtended ? extendedColor
+                    : isDayMarket ? dayMarketColor
+                    : marketStatus === 'open' ? activeColor : t.textMuted;
                   const isActive = marketStatus === 'open' || isExtended || isDayMarket;
                   return (
                     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{
@@ -1108,10 +1118,10 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                               <div className="font-bold" style={{ color: t.text, fontSize: i === 0 ? 15 : 13 }}>
                                 ${(isExtended && stock.afterHoursPrice != null ? stock.afterHoursPrice : stock.current).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </div>
-                              {/* 장외 시간: 프리마켓/애프터마켓 라벨 */}
+                              {/* 장외 가격 표시 */}
                               {isExtended && stock.afterHoursPrice != null ? (
                                 <>
-                                  {/* 전일 대비 총 변동률 (메인) */}
+                                  {/* 프리마켓/애프터마켓: 정규장+장외 합산 변동률 */}
                                   {(() => {
                                     const totalChgPct = (stock.dailyChange || 0) + (stock.afterHoursChange || 0);
                                     const ahChgColor = totalChgPct > 0 ? '#22c55e' : totalChgPct < 0 ? '#ef4444' : t.textMuted;
@@ -1220,6 +1230,7 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                         </div>
                         {isExtended && stock.afterHoursPrice != null ? (
                           <>
+                            {/* 프리마켓/애프터마켓: 합산 변동률 + 장외 라벨 */}
                             {(() => {
                               const totalChgPct = (stock.dailyChange || 0) + (stock.afterHoursChange || 0);
                               const chgColor = totalChgPct > 0 ? '#22c55e' : totalChgPct < 0 ? '#ef4444' : t.textMuted;
@@ -1276,6 +1287,204 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         };
 
         return <TopRankingSection />;
+      })()}
+
+      {/* ===== 주간 핫 종목 ===== */}
+      {weeklyHotStocks && weeklyHotStocks.tradingDays >= 1 && (() => {
+        const w = weeklyHotStocks;
+        const fmtDateShort = (str) => {
+          const d = new Date(str + 'T00:00:00');
+          return L.locale === 'ko'
+            ? `${d.getMonth()+1}/${d.getDate()}`
+            : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        };
+        // 개별 거래일 나열: "4/1, 4/2" (최대 5개, 초과시 "4/1 외 4일")
+        const allDates = (w.dates || []).slice().reverse(); // 오래된 순
+        const datesLabel = allDates.length <= 5
+          ? allDates.map(fmtDateShort).join(', ')
+          : `${fmtDateShort(allDates[0])} ~ ${fmtDateShort(allDates[allDates.length - 1])}`;
+        const fmtVol = (v) => {
+          if (v >= 1e12) return `$${(v / 1e12).toFixed(1)}T`;
+          if (v >= 1e9) return `$${(v / 1e9).toFixed(1)}B`;
+          if (v >= 1e6) return `$${(v / 1e6).toFixed(0)}M`;
+          if (v >= 1e3) return `$${(v / 1e3).toFixed(0)}K`;
+          return `$${v.toFixed(0)}`;
+        };
+
+        // 투자자 이름 → 투자자 객체 매핑 (로고 뱃지용)
+        const investorByName = {};
+        INVESTORS.forEach(inv => {
+          if (inv.nameKo) investorByName[inv.nameKo] = inv;
+          if (inv.name) investorByName[inv.name] = inv;
+        });
+        const resolveInvestors = (trackedBy) => {
+          if (!trackedBy) return [];
+          return trackedBy.split(', ').map(name => investorByName[name]).filter(Boolean);
+        };
+
+        const tabs = [
+          { key: 'gainers', label: L.locale === 'ko' ? '상승' : 'Gainers', color: '#22c55e', data: w.topGainers },
+          { key: 'volume', label: L.locale === 'ko' ? '일평균 거래액' : 'Avg Volume', color: t.accent, data: w.topVolume },
+          { key: 'losers', label: L.locale === 'ko' ? '하락' : 'Losers', color: '#ef4444', data: w.topLosers },
+        ];
+
+        const currentTab = tabs.find(tab => tab.key === weeklyTab) || tabs[0];
+
+        return (
+          <section className="hero-enter hero-enter-5 relative overflow-hidden" style={{
+            background: t.name === 'dark'
+              ? 'linear-gradient(160deg, rgba(20,20,20,0.95), rgba(12,12,12,0.98))'
+              : 'linear-gradient(160deg, rgba(255,255,255,0.98), rgba(248,248,252,1))',
+            border: `1px solid ${t.name === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+            borderRadius: '20px',
+            padding: '24px',
+          }}>
+            {/* 배경 글로우 */}
+            <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full opacity-20 blur-3xl pointer-events-none"
+              style={{ background: `radial-gradient(circle, ${currentTab.color}25, transparent 70%)` }} />
+
+            {/* 헤더 */}
+            <div className="flex items-center justify-between mb-4">
+              <div style={{ borderLeft: `3px solid ${t.accent}`, paddingLeft: '12px' }}>
+                <h2 className="text-[17px] font-bold tracking-tight" style={{ color: t.text, fontFamily: "'Newsreader', Georgia, serif" }}>
+                  {L.locale === 'ko' ? '핫 종목 트래커' : 'Hot Stock Tracker'}
+                </h2>
+                <p className="text-[10px] mt-0.5" style={{ color: t.textMuted }}>
+                  {L.locale === 'ko'
+                    ? `${datesLabel} 종가 기준 · ${w.tradingDays}거래일 누적 데이터`
+                    : `Based on ${datesLabel} closing prices · ${w.tradingDays}-day cumulative`}
+                </p>
+              </div>
+            </div>
+
+            {/* 탭 */}
+            <div className="flex gap-1 mb-4 p-1 rounded-xl" style={{
+              background: t.name === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+            }}>
+              {tabs.map(tab => (
+                <button key={tab.key}
+                  onClick={() => { setWeeklyTab(tab.key); setWeeklyShowCount(WEEKLY_INITIAL); }}
+                  className="flex-1 py-1.5 rounded-lg text-[11px] font-bold transition-all"
+                  style={{
+                    color: weeklyTab === tab.key ? tab.color : t.textMuted,
+                    background: weeklyTab === tab.key
+                      ? (t.name === 'dark' ? 'rgba(255,255,255,0.1)' : '#fff')
+                      : 'transparent',
+                    boxShadow: weeklyTab === tab.key
+                      ? (t.name === 'dark' ? '0 1px 4px rgba(0,0,0,0.3)' : '0 1px 4px rgba(0,0,0,0.08)')
+                      : 'none',
+                  }}>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* 리스트 */}
+            <div className="space-y-[2px]">
+              {currentTab.data.slice(0, weeklyShowCount).map((stock, i) => {
+                const isUp = stock.cumReturn > 0;
+                const changeColor = isUp ? '#22c55e' : stock.cumReturn < 0 ? '#ef4444' : t.textMuted;
+                const matchedInvestors = resolveInvestors(stock.trackedBy);
+                return (
+                  <div key={stock.ticker}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
+                    onClick={() => onNavigate && onNavigate('stock', stock.ticker)}
+                    style={{
+                      background: i === 0
+                        ? (t.name === 'dark' ? `${currentTab.color}08` : `${currentTab.color}06`)
+                        : 'transparent',
+                      border: i === 0 ? `1px solid ${currentTab.color}15` : '1px solid transparent',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = t.name === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = i === 0 ? (t.name === 'dark' ? `${currentTab.color}08` : `${currentTab.color}06`) : 'transparent'; }}
+                  >
+                    {/* 순위 */}
+                    <span className="text-[12px] font-bold w-5 text-center" style={{
+                      color: i < 3 ? currentTab.color : t.textMuted,
+                    }}>{i + 1}</span>
+
+                    {/* 투자자 뱃지 */}
+                    {matchedInvestors.length > 0 && (
+                      <div className="flex -space-x-1 flex-shrink-0">
+                        {matchedInvestors.slice(0, 4).map((inv, j) => (
+                          <div key={inv.id} className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[8px] font-bold ring-1"
+                            style={{ background: inv.gradient, zIndex: 4 - j, '--tw-ring-color': t.name === 'dark' ? 'rgba(20,20,20,0.8)' : 'rgba(255,255,255,0.8)' }}
+                            title={L.investorName(inv)}>
+                            {inv.avatar}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* 종목 정보 */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] font-bold" style={{ color: t.text }}>{stock.ticker}</span>
+                        {stock.investorCount > 0 && (
+                          <span className="text-[9px] px-1.5 py-[1px] rounded-full" style={{ color: t.textMuted, background: `${t.textMuted}12` }}>
+                            {stock.investorCount}{L.locale === 'ko' ? '명 보유' : ' holders'}
+                          </span>
+                        )}
+                      </div>
+                      {matchedInvestors.length > 0 && (
+                        <p className="text-[9px] truncate mt-0.5" style={{ color: t.textMuted }}>
+                          {matchedInvestors.map(inv => L.investorName(inv)).join(', ')}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* 가격 & 변동률 */}
+                    <div className="text-right flex-shrink-0">
+                      {stock.latestPrice && (
+                        <div className="text-[12px] font-semibold" style={{ color: t.text }}>
+                          ${stock.latestPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                      )}
+                      {weeklyTab === 'volume' ? (
+                        <div className="text-[11px] font-bold" style={{ color: currentTab.color }}>
+                          {fmtVol(stock.avgDailyVolume)}{L.locale === 'ko' ? '/일' : '/d'}
+                        </div>
+                      ) : (
+                        <div className="text-[11px] font-bold" style={{ color: changeColor }}>
+                          {isUp ? '+' : ''}{stock.cumReturn.toFixed(2)}%
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {currentTab.data.length > weeklyShowCount && (
+              <button
+                onClick={() => setWeeklyShowCount(prev => Math.min(prev + WEEKLY_PAGE, currentTab.data.length))}
+                className="w-full mt-3 py-2 rounded-xl text-[11px] font-semibold transition-all"
+                style={{
+                  color: currentTab.color,
+                  background: `${currentTab.color}08`,
+                  border: `1px solid ${currentTab.color}15`,
+                }}>
+                {L.locale === 'ko'
+                  ? `더보기 (${currentTab.data.length - weeklyShowCount}개)`
+                  : `Show more (${currentTab.data.length - weeklyShowCount})`}
+              </button>
+            )}
+            {weeklyShowCount > WEEKLY_INITIAL && (
+              <button
+                onClick={() => setWeeklyShowCount(WEEKLY_INITIAL)}
+                className="w-full mt-1 py-1.5 rounded-xl text-[10px] font-medium transition-all"
+                style={{ color: t.textMuted }}>
+                {L.locale === 'ko' ? '접기' : 'Collapse'}
+              </button>
+            )}
+
+            {currentTab.data.length === 0 && (
+              <div className="text-center py-6 text-[12px]" style={{ color: t.textMuted }}>
+                {L.locale === 'ko' ? '데이터 수집 중...' : 'Collecting data...'}
+              </div>
+            )}
+          </section>
+        );
       })()}
 
       {/* ===== 보유종목 수익률 랭킹 (실시간) ===== */}
@@ -1669,21 +1878,23 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
             </span>
 
             {/* 주가 */}
+            {(() => {
+              const statusColor = isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green;
+              const isAnyActive = marketStatus === 'open' || isExtended || isDayMarket;
+              return (
             <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-md"
               style={{
-                background: (marketStatus === 'open' || isExtended || isDayMarket)
-                  ? `${isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green}10`
-                  : (t.name==='dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
-                color: (marketStatus === 'open' || isExtended || isDayMarket)
-                  ? (isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green)
-                  : t.textMuted,
-                border: `1px solid ${(marketStatus === 'open' || isExtended || isDayMarket) ? `${isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green}25` : (t.name==='dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')}`,
+                background: isAnyActive ? `${statusColor}10` : (t.name==='dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                color: isAnyActive ? statusColor : t.textMuted,
+                border: `1px solid ${isAnyActive ? `${statusColor}25` : (t.name==='dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')}`,
               }}>
-              {(marketStatus === 'open' || isExtended || isDayMarket) && <span className={`w-1.5 h-1.5 rounded-full ${isDayMarket ? '' : 'animate-pulse'}`} style={{background: isExtended ? extendedColor : isDayMarket ? dayMarketColor : t.green}} />}
+              {isAnyActive && <span className={`w-1.5 h-1.5 rounded-full ${isDayMarket ? '' : 'animate-pulse'}`} style={{background: statusColor}} />}
               {L.locale === 'ko' ? '주가' : 'Prices'}
               <span style={{opacity:0.7}}>·</span>
               {priceLabel || (L.locale === 'ko' ? '15분 지연' : '15-min delayed')}
             </span>
+              );
+            })()}
           </div>
         </section>
       )}
