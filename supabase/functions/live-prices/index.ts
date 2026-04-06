@@ -200,69 +200,77 @@ async function fetchYahooExtendedHours(tickers: string[]): Promise<Record<string
   if (tickers.length === 0) return {};
   const result: Record<string, { ah?: number; ahCh?: number; pm?: number; pmCh?: number }> = {};
 
-  try {
-    // Yahoo Finance v8 quote API — 한번에 여러 종목 조회 가능
-    const symbols = tickers.join(",");
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbols}?range=1d&interval=1d&includePrePost=true`;
+  // Yahoo v7 API는 URL 길이 제한이 있으므로 200개씩 배치 처리
+  const YAHOO_BATCH = 200;
+  for (let i = 0; i < tickers.length; i += YAHOO_BATCH) {
+    const batch = tickers.slice(i, i + YAHOO_BATCH);
+    try {
+      const symbols = batch.join(",");
+      const quoteUrl = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&fields=regularMarketPrice,regularMarketPreviousClose,postMarketPrice,postMarketChange,postMarketChangePercent,preMarketPrice,preMarketChange,preMarketChangePercent`;
+      const res = await fetch(quoteUrl, {
+        headers: { "User-Agent": "Mozilla/5.0" },
+      });
 
-    // 개별 조회 방식 (v8 chart는 단일 종목만) → v7 quote 사용
-    const quoteUrl = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&fields=regularMarketPrice,regularMarketPreviousClose,postMarketPrice,postMarketChange,postMarketChangePercent,preMarketPrice,preMarketChange,preMarketChangePercent`;
-    const res = await fetch(quoteUrl, {
-      headers: { "User-Agent": "Mozilla/5.0" },
-    });
+      if (!res.ok) {
+        console.warn(`Yahoo Finance API ${res.status} for batch ${i}`);
+        // 이 배치만 개별 fallback
+        const fallback = await fetchYahooIndividual(batch);
+        Object.assign(result, fallback);
+        continue;
+      }
 
-    if (!res.ok) {
-      console.warn(`Yahoo Finance API ${res.status}`);
-      // v7 실패 시 개별 v8 chart로 fallback
-      return await fetchYahooIndividual(tickers);
+      const data = await res.json();
+      const quotes = data?.quoteResponse?.result || [];
+
+      for (const q of quotes) {
+        const ticker = q.symbol;
+        if (!ticker) continue;
+
+        const regularClose = q.regularMarketPrice || 0;
+        if (regularClose <= 0) continue;
+
+        const entry: { ah?: number; ahCh?: number; pm?: number; pmCh?: number } = {};
+
+        // After-hours
+        if (q.postMarketPrice && q.postMarketPrice > 0) {
+          entry.ah = Math.round(q.postMarketPrice * 100) / 100;
+          entry.ahCh = q.postMarketChangePercent != null
+            ? Math.round(q.postMarketChangePercent * 100) / 100
+            : Math.round(((q.postMarketPrice - regularClose) / regularClose) * 10000) / 100;
+        }
+
+        // Pre-market
+        if (q.preMarketPrice && q.preMarketPrice > 0) {
+          entry.pm = Math.round(q.preMarketPrice * 100) / 100;
+          entry.pmCh = q.preMarketChangePercent != null
+            ? Math.round(q.preMarketChangePercent * 100) / 100
+            : Math.round(((q.preMarketPrice - regularClose) / regularClose) * 10000) / 100;
+        }
+
+        if (entry.ah || entry.pm) {
+          result[ticker] = entry;
+        }
+      }
+      console.log(`[Yahoo] batch ${i}: ${quotes.length} quotes, ${Object.keys(result).length} with extended data`);
+    } catch (e) {
+      console.warn(`Yahoo Finance batch ${i} failed:`, e);
+      // 이 배치만 개별 fallback
+      const fallback = await fetchYahooIndividual(batch);
+      Object.assign(result, fallback);
     }
-
-    const data = await res.json();
-    const quotes = data?.quoteResponse?.result || [];
-
-    for (const q of quotes) {
-      const ticker = q.symbol;
-      if (!ticker) continue;
-
-      const regularClose = q.regularMarketPrice || 0;
-      if (regularClose <= 0) continue;
-
-      const entry: { ah?: number; ahCh?: number; pm?: number; pmCh?: number } = {};
-
-      // After-hours
-      if (q.postMarketPrice && q.postMarketPrice > 0) {
-        entry.ah = Math.round(q.postMarketPrice * 100) / 100;
-        entry.ahCh = q.postMarketChangePercent != null
-          ? Math.round(q.postMarketChangePercent * 100) / 100
-          : Math.round(((q.postMarketPrice - regularClose) / regularClose) * 10000) / 100;
-      }
-
-      // Pre-market
-      if (q.preMarketPrice && q.preMarketPrice > 0) {
-        entry.pm = Math.round(q.preMarketPrice * 100) / 100;
-        entry.pmCh = q.preMarketChangePercent != null
-          ? Math.round(q.preMarketChangePercent * 100) / 100
-          : Math.round(((q.preMarketPrice - regularClose) / regularClose) * 10000) / 100;
-      }
-
-      if (entry.ah || entry.pm) {
-        result[ticker] = entry;
-      }
-    }
-  } catch (e) {
-    console.warn("Yahoo Finance quote failed:", e);
-    return await fetchYahooIndividual(tickers);
   }
 
   return result;
 }
 
-// Yahoo v8 chart 개별 조회 (v7 실패 시 fallback)
+// Yahoo v8 chart 개별 조회 (v7 실패 시 fallback, 최대 50개)
 async function fetchYahooIndividual(tickers: string[]): Promise<Record<string, { ah?: number; ahCh?: number; pm?: number; pmCh?: number }>> {
   const result: Record<string, { ah?: number; ahCh?: number; pm?: number; pmCh?: number }> = {};
+  // 타임아웃 방지: 최대 50개만 개별 조회
+  const limited = tickers.slice(0, 50);
   // 병렬 처리 (최대 10개씩)
   const BATCH = 10;
-  for (let i = 0; i < tickers.length; i += BATCH) {
+  for (let i = 0; i < limited.length; i += BATCH) {
     const batch = tickers.slice(i, i + BATCH);
     const promises = batch.map(async (ticker) => {
       try {
