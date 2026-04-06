@@ -1420,9 +1420,18 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
       // 정규장 종가 (day.c 우선)
       const regularClose = snapshot.day?.c || prevDayClose || 0;
 
-      // Snapshot이 있지만 가격이 0이면 live-prices fallback 시도
-      if (regularClose <= 0 && stockPrices?.[ticker]) {
-        return buildFromLivePrices(stockPrices[ticker]);
+      // Snapshot이 있지만 가격이 0이면 fallback 시도
+      if (regularClose <= 0) {
+        if (stockPrices?.[ticker]) return buildFromLivePrices(stockPrices[ticker]);
+        // prevClose API fallback
+        if (prevClose?.c > 0) {
+          return { price: prevClose.c, change: 0, changePerc: 0, volume: prevClose.v || 0, open: prevClose.o || 0, high: prevClose.h || 0, low: prevClose.l || 0, prevClose: prevClose.c, ahPrice: null, ahChange: null, ahChangePerc: null };
+        }
+        // yearlyBars 마지막 봉 fallback
+        if (yearlyBars.length > 0) {
+          const last = yearlyBars[yearlyBars.length - 1];
+          return { price: last.c || 0, change: 0, changePerc: 0, volume: last.v || 0, open: last.o || 0, high: last.h || 0, low: last.l || 0, prevClose: last.c || 0, ahPrice: null, ahChange: null, ahChangePerc: null };
+        }
       }
 
       const regularChange = prevDayClose > 0 ? regularClose - prevDayClose : 0;
@@ -1457,8 +1466,33 @@ const StockDetailPage = ({ ticker: initialTicker, onBack, onNavigate }) => {
       return buildFromLivePrices(stockPrices[ticker]);
     }
 
+    // 최후 fallback: prevClose (getPreviousClose API) + yearlyBars 마지막 봉
+    if (prevClose?.c > 0) {
+      return {
+        price: prevClose.c,
+        change: 0, changePerc: 0,
+        volume: prevClose.v || 0,
+        open: prevClose.o || 0, high: prevClose.h || 0, low: prevClose.l || 0,
+        prevClose: prevClose.c,
+        ahPrice: null, ahChange: null, ahChangePerc: null,
+      };
+    }
+
+    // yearlyBars 마지막 봉 fallback
+    if (yearlyBars.length > 0) {
+      const last = yearlyBars[yearlyBars.length - 1];
+      return {
+        price: last.c || 0,
+        change: 0, changePerc: 0,
+        volume: last.v || 0,
+        open: last.o || 0, high: last.h || 0, low: last.l || 0,
+        prevClose: last.c || 0,
+        ahPrice: null, ahChange: null, ahChangePerc: null,
+      };
+    }
+
     return null;
-  }, [snapshot, stockPrices, ticker]);
+  }, [snapshot, stockPrices, ticker, prevClose, yearlyBars]);
 
   // ---- Company details ----
   const companyInfo = useMemo(() => {

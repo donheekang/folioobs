@@ -1126,29 +1126,34 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                               {/* 장외 가격 표시 */}
                               {isExtended && stock.afterHoursPrice != null ? (
                                 <>
-                                  {/* 프리마켓/애프터마켓: 정규장+장외 합산 변동률 */}
+                                  {/* 프리마켓/애프터마켓: 장외 변동률 + 라벨 */}
                                   {(() => {
                                     const totalChgPct = (stock.dailyChange || 0) + (stock.afterHoursChange || 0);
                                     const ahChgColor = totalChgPct > 0 ? '#22c55e' : totalChgPct < 0 ? '#ef4444' : t.textMuted;
+                                    const isPM = marketStatus === 'pre-market';
                                     return (
-                                      <div className="font-extrabold" style={{ color: ahChgColor, fontSize: i === 0 ? 14 : 12 }}>
-                                        {totalChgPct > 0 ? '+' : ''}{totalChgPct.toFixed(2)}%
-                                      </div>
+                                      <>
+                                        {/* 프리마켓: 라벨+변동률 한 줄로, 애프터마켓: 합산 큰 글씨 + 라벨 */}
+                                        {!isPM && (
+                                          <div className="font-extrabold" style={{ color: ahChgColor, fontSize: i === 0 ? 14 : 12 }}>
+                                            {totalChgPct > 0 ? '+' : ''}{totalChgPct.toFixed(2)}%
+                                          </div>
+                                        )}
+                                        <div className="flex items-center justify-end gap-1 mt-0.5">
+                                          <span className="text-[9px] font-bold px-1 py-[1px] rounded"
+                                            style={{
+                                              color: extendedColor,
+                                              background: `${extendedColor}15`,
+                                            }}>
+                                            {L.locale === 'ko' ? extendedLabel.ko : extendedLabel.en}
+                                          </span>
+                                          <span className={isPM ? "text-[12px] font-extrabold" : "text-[9px] font-semibold"} style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444', fontSize: isPM ? (i === 0 ? 14 : 12) : undefined }}>
+                                            {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
+                                          </span>
+                                        </div>
+                                      </>
                                     );
                                   })()}
-                                  {/* 프리마켓/애프터마켓 라벨 + 장외 변동분 */}
-                                  <div className="flex items-center justify-end gap-1 mt-0.5">
-                                    <span className="text-[9px] font-bold px-1 py-[1px] rounded"
-                                      style={{
-                                        color: extendedColor,
-                                        background: `${extendedColor}15`,
-                                      }}>
-                                      {L.locale === 'ko' ? extendedLabel.ko : extendedLabel.en}
-                                    </span>
-                                    <span className="text-[9px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
-                                      {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
-                                    </span>
-                                  </div>
                                 </>
                               ) : (
                                 /* 정규장 변동률 */
@@ -1240,25 +1245,30 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                         </div>
                         {isExtended && stock.afterHoursPrice != null ? (
                           <>
-                            {/* 프리마켓/애프터마켓: 합산 변동률 + 장외 라벨 */}
+                            {/* 프리마켓/애프터마켓: 변동률 + 장외 라벨 */}
                             {(() => {
                               const totalChgPct = (stock.dailyChange || 0) + (stock.afterHoursChange || 0);
                               const chgColor = totalChgPct > 0 ? '#22c55e' : totalChgPct < 0 ? '#ef4444' : t.textMuted;
+                              const isPM = marketStatus === 'pre-market';
                               return (
-                                <div className="text-[11px] font-bold" style={{ color: chgColor }}>
-                                  {totalChgPct > 0 ? '+' : ''}{totalChgPct.toFixed(2)}%
-                                </div>
+                                <>
+                                  {!isPM && (
+                                    <div className="text-[11px] font-bold" style={{ color: chgColor }}>
+                                      {totalChgPct > 0 ? '+' : ''}{totalChgPct.toFixed(2)}%
+                                    </div>
+                                  )}
+                                  <div className="flex items-center justify-end gap-1 mt-0.5">
+                                    <span className="text-[8px] font-bold px-1 py-[1px] rounded"
+                                      style={{ color: extendedColor, background: `${extendedColor}15` }}>
+                                      {L.locale === 'ko' ? extendedLabel.ko : extendedLabel.en}
+                                    </span>
+                                    <span className={isPM ? "text-[11px] font-bold" : "text-[9px] font-semibold"} style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
+                                      {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
+                                    </span>
+                                  </div>
+                                </>
                               );
                             })()}
-                            <div className="flex items-center justify-end gap-1 mt-0.5">
-                              <span className="text-[8px] font-bold px-1 py-[1px] rounded"
-                                style={{ color: extendedColor, background: `${extendedColor}15` }}>
-                                {L.locale === 'ko' ? extendedLabel.ko : extendedLabel.en}
-                              </span>
-                              <span className="text-[9px] font-semibold" style={{ color: stock.afterHoursChange >= 0 ? '#22c55e' : '#ef4444' }}>
-                                {stock.afterHoursChange >= 0 ? '+' : ''}{stock.afterHoursChange?.toFixed(2)}%
-                              </span>
-                            </div>
                           </>
                         ) : (
                           <div className="text-[11px] font-bold" style={{ color: stock.dailyChange > 0 ? '#22c55e' : stock.dailyChange < 0 ? '#ef4444' : t.textMuted }}>
