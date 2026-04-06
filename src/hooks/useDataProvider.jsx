@@ -1439,10 +1439,8 @@ export function DataProvider({ children }) {
             const existing = merged[ticker];
             const snap = snapshotMap[ticker]; // daily_snapshots 데이터 (장 마감 시)
 
-            // 가격 결정: 장외시간엔 프리마켓/애프터 가격 우선, 아니면 daily_snapshots > Polygon
-            const isExtended = data.marketStatus === 'after-hours' || data.marketStatus === 'pre-market';
-            const extendedPrice = isExtended && live.ah ? live.ah : null;
-            const currentPrice = extendedPrice || snap?.close_price || live.c;
+            // 가격 결정: daily_snapshots > Polygon (정규장 종가 기준)
+            const currentPrice = snap?.close_price || live.c;
             if (!currentPrice || currentPrice <= 0) continue;
 
             const quarterEnd = existing?.quarterEnd || null;

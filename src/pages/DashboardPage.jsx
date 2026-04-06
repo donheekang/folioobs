@@ -1747,11 +1747,20 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                         {isPositive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
                         {isPositive ? '+' : ''}{stock.sinceFiling.toFixed(1)}%
                       </span>
-                      {stock.dailyChange !== null && (
-                        <div className="text-[10px] tabular-nums" style={{ color: stock.dailyChange >= 0 ? t.green : t.red }}>
-                          {L.locale === 'ko' ? '오늘' : 'Today'} {stock.dailyChange >= 0 ? '+' : ''}{stock.dailyChange.toFixed(1)}%
-                        </div>
-                      )}
+                      {(() => {
+                        const todayChg = (stock.dailyChange || 0) + (stock.afterHoursChange || 0);
+                        const isPM = marketStatus === 'pre-market';
+                        const isAH = marketStatus === 'after-hours';
+                        const label = isPM ? (L.locale === 'ko' ? '프리마켓' : 'Pre-Mkt')
+                          : isAH ? (L.locale === 'ko' ? '애프터' : 'After')
+                          : (L.locale === 'ko' ? '오늘' : 'Today');
+                        if (!isPM && !isAH && todayChg === 0) return null;
+                        return (
+                          <div className="text-[10px] tabular-nums" style={{ color: todayChg >= 0 ? t.green : t.red }}>
+                            {label} {todayChg >= 0 ? '+' : ''}{todayChg.toFixed(1)}%
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 );
