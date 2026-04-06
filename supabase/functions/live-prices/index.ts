@@ -446,12 +446,11 @@ Deno.serve(async (req) => {
     // 3차: Yahoo Finance로 장외 데이터 보충
     // 애프터마켓/프리마켓에서만 Yahoo 데이터 가져옴 (데이마켓은 종가 기준으로 표시)
     if (ms.status === "after-hours" || ms.status === "pre-market") {
-      // 프리마켓: Polygon의 AH 데이터는 어제 애프터마켓 잔여 데이터일 수 있음
-      // → 프리마켓에서는 전 종목을 Yahoo로 조회하여 진짜 프리마켓 가격으로 덮어씀
-      // 애프터마켓: Polygon에 AH 없는 종목만 Yahoo로 보충
-      const tickersForYahoo = ms.status === "pre-market"
-        ? Object.keys(priceMap) // 프리마켓: 전 종목
-        : Object.entries(priceMap).filter(([_, v]) => !v.ah).map(([k]) => k); // 애프터: AH 없는 종목만
+      // Polygon에서 장외 데이터 없는 종목만 Yahoo로 보충
+      // Polygon Snapshot은 프리마켓에서도 lastTrade.p/todaysChange로 프리마켓 가격 제공
+      const tickersForYahoo = Object.entries(priceMap)
+        .filter(([_, v]) => !v.ah)
+        .map(([k]) => k);
 
       if (tickersForYahoo.length > 0) {
         console.log(`[Yahoo] ${tickersForYahoo.length}개 종목 장외 데이터 조회 (${ms.status})`);
@@ -468,16 +467,13 @@ Deno.serve(async (req) => {
                   filled++;
                 }
               } else if (ms.status === "pre-market") {
-                // 프리마켓: Yahoo pm 데이터로 덮어씀 (Polygon AH 데이터보다 우선)
+                // 프리마켓: Yahoo pm 데이터가 있으면 덮어씀, 없으면 Polygon 데이터 유지
                 if (yData.pm) {
                   priceMap[ticker].ah = yData.pm;
                   priceMap[ticker].ahCh = yData.pmCh || 0;
                   filled++;
-                } else {
-                  // Yahoo에 프리마켓 데이터 없으면 Polygon AH도 제거 (오래된 데이터 방지)
-                  delete priceMap[ticker].ah;
-                  delete priceMap[ticker].ahCh;
                 }
+                // Yahoo에 pm 없어도 Polygon의 lastTrade 기반 데이터는 유지 (실제 프리마켓 거래)
               }
             }
           }
