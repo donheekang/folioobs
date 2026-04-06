@@ -1099,6 +1099,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                                     : L.investorName(stock.investors[0])}
                                 </span>
                               </div>
+                              {L.stockName(stock) && (
+                                <div className="text-[10px] truncate mt-0.5" style={{ color: t.textMuted, opacity: 0.7 }}>
+                                  {L.stockName(stock)}
+                                </div>
+                              )}
                             </div>
 
                             {/* 거래액 (volume 탭) */}
@@ -1209,6 +1214,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                               : L.investorName(stock.investors[0])}
                           </span>
                         </div>
+                        {L.stockName(stock) && (
+                          <div className="text-[10px] truncate" style={{ color: t.textMuted, opacity: 0.6 }}>
+                            {L.stockName(stock)}
+                          </div>
+                        )}
                       </div>
 
                       {/* 거래액 (volume 탭일 때만, 값이 있을 때) */}
@@ -1316,6 +1326,14 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
         INVESTORS.forEach(inv => {
           if (inv.nameKo) investorByName[inv.nameKo] = inv;
           if (inv.name) investorByName[inv.name] = inv;
+        });
+
+        // ticker → 종목명 매핑 (핫 종목에 회사명 표시용)
+        const tickerNameMap = {};
+        INVESTORS.forEach(inv => {
+          (HOLDINGS[inv.id] || []).forEach(h => {
+            if (!tickerNameMap[h.ticker]) tickerNameMap[h.ticker] = { name: h.name, nameEn: h.nameEn };
+          });
         });
         const resolveInvestors = (trackedBy) => {
           if (!trackedBy) return [];
@@ -1431,6 +1449,11 @@ const DashboardPage = memo(({ onNavigate, watchlist }) => {
                           </span>
                         )}
                       </div>
+                      {tickerNameMap[stock.ticker] && (
+                        <p className="text-[10px] truncate mt-0.5" style={{ color: t.textMuted, opacity: 0.6 }}>
+                          {L.stockName(tickerNameMap[stock.ticker])}
+                        </p>
+                      )}
                       {matchedInvestors.length > 0 && (
                         <p className="text-[9px] truncate mt-0.5" style={{ color: t.textMuted }}>
                           {matchedInvestors.map(inv => L.investorName(inv)).join(', ')}
